@@ -168,8 +168,10 @@ export async function checkApplicationStatus(applicationId: string): Promise<App
     if (processStatus === 'running' || processStatus === 'unknown') {
         // If app has network access (ports), try to curl the first port
         // Default check strategy: HTTP GET on localhost:<port>
-        if (app.networkAccess && app.networkAccess.length > 0) {
-            const port = app.networkAccess[0];
+        const uniquePorts = app.networkAccess?.map(Number).filter((p: number) => !isNaN(p) && p > 0) || [];
+
+        if (uniquePorts.length > 0) {
+            const port = uniquePorts[0];
             // Simple curl check - returns HTTP status code
             // -s silent, -o dev/null (ignore body), -w display http code
             // 5 second timeout

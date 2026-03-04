@@ -70,9 +70,10 @@ echo "Selected Port: $CHOSEN_PORT"
             status: 'published',
             type: 'normal',
             command: {
+                preCommand: portFinderScript,
                 mainCommand: `cd ${context.appLocation} && 
-                go mod tidy && 
-                go build -o ${binaryName} ${entryFile}`
+                PORT=$CHOSEN_PORT go mod tidy && 
+                PORT=$CHOSEN_PORT go build -o ${binaryName} ${entryFile}`
             }
         },
 

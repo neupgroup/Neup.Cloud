@@ -57,6 +57,22 @@ echo "Selected Port: $CHOSEN_PORT"
 ` : '';
 
     return [
+        // Build/Install Command
+        {
+            title: 'Build',
+            description: 'Install dependencies for the Python application',
+            icon: 'Hammer',
+            status: 'published',
+            type: 'normal',
+            command: {
+                preCommand: portFinderScript,
+                mainCommand: `cd ${context.appLocation} && 
+                if [ -f requirements.txt ]; then 
+                    PORT=$CHOSEN_PORT pip3 install -r requirements.txt; 
+                fi`
+            }
+        },
+
         // Start Command (Production)
         {
             title: 'Start',

@@ -68,8 +68,10 @@ export function SystemSection({ application }: SystemSectionProps) {
         );
     };
 
-    const portsDescription = application.networkAccess && application.networkAccess.length > 0
-        ? application.networkAccess.join(', ')
+    const uniquePorts = application.networkAccess?.map(String).filter((p: string) => p && p !== "NaN") || [];
+
+    const portsDescription = uniquePorts.length > 0
+        ? uniquePorts.join(', ')
         : "No ports exposed";
 
     const createdDate = application.createdAt ? new Date(application.createdAt).toLocaleString() : 'Unknown';

@@ -174,7 +174,7 @@ export default function CreateApplicationPage() {
 
     const networkInfo = {
       required: requiresNetwork,
-      preferredPort: preferredPorts,
+      preferredPort: requiresNetwork ? preferredPorts : [],
     };
 
     const formattedCommands = commands.map(cmd => {
@@ -213,7 +213,7 @@ export default function CreateApplicationPage() {
         location: appLocation,
         language: selectedFramework,
         repository: repoLocation,
-        networkAccess: preferredPorts.map(p => p.toString()),
+        networkAccess: requiresNetwork ? preferredPorts.map(p => p.toString()) : undefined,
         commands: simpleCommands,
         information: {
           repoInfo,

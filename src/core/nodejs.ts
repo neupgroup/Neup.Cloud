@@ -65,9 +65,10 @@ echo "Selected Port: $CHOSEN_PORT"
             status: 'published',
             type: 'normal',
             command: {
+                preCommand: portFinderScript,
                 mainCommand: `cd ${context.appLocation} && 
-                npm install && 
-                if grep -q "\\"build\\":" "package.json"; then npm run build; fi`
+                PORT=$CHOSEN_PORT npm install && 
+                if grep -q "\\"build\\":" "package.json"; then PORT=$CHOSEN_PORT npm run build; fi`
             }
         },
 

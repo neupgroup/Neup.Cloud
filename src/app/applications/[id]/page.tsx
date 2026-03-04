@@ -47,10 +47,12 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
     }
 
     // Build context for command generation
+    const uniquePorts = application.networkAccess?.map(Number).filter((p: number) => !isNaN(p) && p > 0) || [];
+
     const context = {
         appName: application.name,
         appLocation: application.location,
-        preferredPorts: application.networkAccess?.map(Number) || [],
+        preferredPorts: uniquePorts,
         entryFile: application.information?.entryFile,
     };
 

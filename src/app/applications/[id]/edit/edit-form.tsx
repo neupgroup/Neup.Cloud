@@ -82,8 +82,9 @@ export default function EditApplicationForm({ application }: EditApplicationForm
     const [selectedFramework, setSelectedFramework] = useState(application.language || '');
 
     // Network Info
-    const existingPorts = application.networkAccess?.map((p: string) => parseInt(p)) || [];
-    const [requiresNetwork, setRequiresNetwork] = useState(existingPorts.length > 0);
+    const existingPorts = application.networkAccess?.map((p: string) => parseInt(p)).filter((p: number) => !isNaN(p) && p > 0) || [];
+
+    const [requiresNetwork, setRequiresNetwork] = useState(existingPorts.length > 0 || application.information?.networkInfo?.required === true);
     const [preferredPorts, setPreferredPorts] = useState<number[]>(existingPorts);
     const [portInput, setPortInput] = useState('');
 
@@ -207,7 +208,7 @@ export default function EditApplicationForm({ application }: EditApplicationForm
 
         const networkInfo = {
             required: requiresNetwork,
-            preferredPort: preferredPorts,
+            preferredPort: requiresNetwork ? preferredPorts : [],
         };
 
         const formattedCommands = commands.map(cmd => {
@@ -240,7 +241,7 @@ export default function EditApplicationForm({ application }: EditApplicationForm
             location: appLocation,
             language: selectedFramework,
             repository: repoLocation,
-            networkAccess: preferredPorts.map(p => p.toString()),
+            networkAccess: requiresNetwork ? preferredPorts.map(p => p.toString()) : undefined,
             commands: simpleCommands,
             information: {
                 ...application.information,
