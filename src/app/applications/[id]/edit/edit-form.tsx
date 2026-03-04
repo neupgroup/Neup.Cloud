@@ -1,4 +1,3 @@
-
 'use client';
 
 import { createApplication, generateRepositoryKeys, updateApplication } from '@/app/applications/actions';
