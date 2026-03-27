@@ -29,15 +29,18 @@ import {
   Package,
   Users,
   Key,
+  KeyRound,
   Command,
   FileKey,
   LayoutGrid,
   ListChecks,
   Monitor,
   Shield,
+  ScrollText,
   Activity,
   Rocket,
-  Play
+  Play,
+  Bot
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -124,6 +127,15 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
     { href: "/", label: "Dashboard", icon: Home },
   ];
 
+  const intelligenceLinks = [
+    { href: "/intelligence", label: "Home", icon: Lightbulb },
+    { href: "/intelligence/access", label: "Access", icon: KeyRound },
+    { href: "/intelligence/models", label: "Models", icon: Bot },
+    { href: "/intelligence/tokens", label: "Tokens", icon: Key },
+    { href: "/intelligence/logs", label: "Logs", icon: ScrollText },
+    { href: "/intelligence/billing", label: "Billing", icon: CreditCard },
+  ];
+
   const domainLinks = [
     { href: "/domains", label: "Domains", icon: Globe },
     { href: "/domains/add", label: "Add Domain", icon: Plus },
@@ -206,6 +218,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
   // Collect all paths for longest match calculation
   const allPaths = [
     ...navLinks.map(l => l.href),
+    ...intelligenceLinks.map(l => l.href),
     ...domainLinks.map(l => l.href),
     ...accountLinks.map(l => l.href),
     ...(isServerSelected ? serverLinks.map(l => l.href) : []),
@@ -223,6 +236,18 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
     <nav className="flex flex-col gap-4">
       <div className="space-y-2">
         {navLinks.map(({ href, label, icon: Icon }) => (
+          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} onClick={onLinkClick}>
+            <Icon className="h-4 w-4" />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+      </div>
+
+      <div className="space-y-2">
+        <div className="px-3 text-xs font-semibold uppercase text-muted-foreground pt-4">
+          Intelligence
+        </div>
+        {intelligenceLinks.map(({ href, label, icon: Icon }) => (
           <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} onClick={onLinkClick}>
             <Icon className="h-4 w-4" />
             <span>{label}</span>
