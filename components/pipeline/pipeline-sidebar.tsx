@@ -55,7 +55,8 @@ type PipelineSidebarProps = {
   nodeCategories: SidebarCategory[];
   filteredTemplatesByCategory: Map<PipelineNodeType, SidebarTemplate[]>;
   matchingTemplateCount: number;
-  parentNodeLabel: string;
+  libraryMode: 'child' | 'canvas';
+  parentNodeLabel: string | null;
   onAddNode: (kind: PipelineNodeKind) => void;
   selectedNode: SidebarSelectedNode | null;
   selectedNodeInspectorInfo: SidebarInspectorInfo | null;
@@ -79,6 +80,7 @@ export function PipelineSidebar({
   nodeCategories,
   filteredTemplatesByCategory,
   matchingTemplateCount,
+  libraryMode,
   parentNodeLabel,
   onAddNode,
   selectedNode,
@@ -118,9 +120,11 @@ export function PipelineSidebar({
                   />
                 </div>
 
-                <div className="rounded-[1.4rem] border border-primary/15 bg-primary/5 px-4 py-3 text-sm text-slate-700">
-                  Adding a child after <span className="font-semibold">{parentNodeLabel}</span>.
-                </div>
+                {libraryMode === 'child' ? (
+                  <div className="rounded-[1.4rem] border border-primary/15 bg-primary/5 px-4 py-3 text-sm text-slate-700">
+                    Adding a child after <span className="font-semibold">{parentNodeLabel ?? 'selected node'}</span>.
+                  </div>
+                ) : null}
               </div>
 
               <div className="space-y-2">
@@ -252,7 +256,6 @@ export function PipelineSidebar({
                     onChange={(event) => onUpdateBasicsName(event.target.value)}
                     className="rounded-2xl border-slate-200 bg-slate-50"
                   />
-                  <p className="text-sm text-slate-500">{PIPELINE_SHARED_NODE_INFO.name.description}</p>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -263,7 +266,6 @@ export function PipelineSidebar({
                     onChange={(event) => onUpdateBasicsDescription(event.target.value)}
                     className="min-h-[110px] rounded-2xl border-slate-200 bg-slate-50"
                   />
-                  <p className="text-sm text-slate-500">{PIPELINE_SHARED_NODE_INFO.description.description}</p>
                 </div>
               </section>
 

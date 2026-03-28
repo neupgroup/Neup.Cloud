@@ -138,6 +138,8 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
 
   const pipelineLinks = [
     { href: "/pipeline", label: "Home", icon: Workflow },
+    { href: "/pipeline/editor", label: "Editor", icon: Play },
+    { href: "/pipeline/instance", label: "Instances", icon: ListChecks },
   ];
 
   const domainLinks = [

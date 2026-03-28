@@ -213,3 +213,14 @@ model IntelligenceLog {
 
   @@map("intelligenceLog")
 }
+
+model Pipeline {
+  id          String  @id @db.Text
+  accountId   String  @map("account_id") @db.Text
+  title       String  @db.Text
+  description String? @db.Text
+  flowJson    Json    @map("flow_json")
+
+  @@index([accountId], map: "pipelines_account_id_idx")
+  @@map("pipelines")
+}

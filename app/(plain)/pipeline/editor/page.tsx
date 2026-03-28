@@ -7,6 +7,7 @@ import {
   getIntelligenceAccesses,
   getIntelligenceModels,
 } from '@/lib/intelligence/store';
+import { getPipelineById } from '@/services/pipelines/data';
 
 export const metadata: Metadata = {
   title: 'Pipeline Editor | Neup.Cloud',
@@ -30,16 +31,39 @@ function findMatchingModelId(
   return match?.id ?? null;
 }
 
-export default async function PipelineEditorPage() {
+export default async function PipelineEditorPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ id?: string | string[] }>;
+}) {
   const accountId = await getCurrentIntelligenceAccountId();
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const pipelineId =
+    typeof resolvedSearchParams.id === 'string'
+      ? resolvedSearchParams.id
+      : Array.isArray(resolvedSearchParams.id)
+        ? resolvedSearchParams.id[0]
+        : undefined;
+
   const [models, prompts, tokens] = await Promise.all([
     getIntelligenceModels(),
     getIntelligenceAccesses(accountId),
     getAccessTokens(accountId),
   ]);
+  const pipeline = pipelineId ? await getPipelineById(pipelineId, accountId) : null;
 
   return (
     <PipelineEditor
+      initialPipeline={
+        pipeline
+          ? {
+              id: pipeline.id,
+              title: pipeline.title,
+              description: pipeline.description ?? null,
+              flowJson: pipeline.flowJson,
+            }
+          : null
+      }
       intelligenceModels={models.map((model) => ({
         id: model.id,
         title: model.title,

@@ -1,5 +1,6 @@
 'use server';
 
+import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 import { getCurrentIntelligenceAccountId } from '@/lib/intelligence/account';
@@ -16,6 +17,11 @@ import {
   type IntelligenceAccessRecord,
   type StoredModelConfig,
 } from '@/lib/intelligence/store';
+import {
+  createPipeline,
+  getPipelineById,
+  updatePipeline,
+} from '@/services/pipelines/data';
 
 export interface PipelineAiAgentExecutionInput {
   promptMode: 'existing' | 'new';
@@ -37,6 +43,22 @@ export interface PipelineAiAgentExecutionResult {
   usedModel: string;
   remainingBalance: number;
   createdPrompt: boolean;
+}
+
+export interface SavePipelineFlowInput {
+  pipelineId?: string | null;
+  title?: string | null;
+  description?: string | null;
+  flowJson: {
+    nodes: unknown[];
+    edges: unknown[];
+  };
+}
+
+export interface SavePipelineFlowResult {
+  id: string;
+  title: string;
+  description: string | null;
 }
 
 interface BuiltPrompt {
@@ -586,4 +608,65 @@ export async function executePipelineAiAgentAction(
 
   revalidatePath('/intelligence/logs');
   throw new Error(lastErrorMessage);
+}
+
+export async function savePipelineFlowAction(
+  input: SavePipelineFlowInput
+): Promise<SavePipelineFlowResult> {
+  const accountId = await getCurrentIntelligenceAccountId();
+  const title = input.title?.trim() || 'Untitled Pipeline';
+  const description = input.description?.trim() || null;
+  const flowJson = {
+    nodes: Array.isArray(input.flowJson?.nodes) ? input.flowJson.nodes : [],
+    edges: Array.isArray(input.flowJson?.edges) ? input.flowJson.edges : [],
+  } as Prisma.InputJsonValue;
+
+  const flowNodeCount = Array.isArray(input.flowJson?.nodes) ? input.flowJson.nodes.length : 0;
+
+  if (flowNodeCount === 0) {
+    throw new Error('Add at least one node before saving the pipeline.');
+  }
+
+  const existingPipelineId = input.pipelineId?.trim() || null;
+
+  if (existingPipelineId) {
+    const existingPipeline = await getPipelineById(existingPipelineId, accountId);
+
+    if (!existingPipeline) {
+      throw new Error('The selected pipeline could not be found for this account.');
+    }
+
+    const updatedPipeline = await updatePipeline(existingPipelineId, {
+      title,
+      description,
+      flowJson,
+    });
+
+    revalidatePath('/pipeline');
+    revalidatePath('/pipeline/instance');
+    revalidatePath(`/pipeline/editor?id=${updatedPipeline.id}`);
+
+    return {
+      id: updatedPipeline.id,
+      title: updatedPipeline.title,
+      description: updatedPipeline.description ?? null,
+    };
+  }
+
+  const createdPipeline = await createPipeline({
+    accountId,
+    title,
+    description,
+    flowJson,
+  });
+
+  revalidatePath('/pipeline');
+  revalidatePath('/pipeline/instance');
+  revalidatePath(`/pipeline/editor?id=${createdPipeline.id}`);
+
+  return {
+    id: createdPipeline.id,
+    title: createdPipeline.title,
+    description: createdPipeline.description ?? null,
+  };
 }

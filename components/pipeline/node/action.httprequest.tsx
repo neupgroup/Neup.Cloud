@@ -92,9 +92,6 @@ function HttpNodeOptions({ node, updateNode, normalizeKeyValueEntries, addCollec
           placeholder="https://api.example.com/resource"
           className="rounded-2xl border-slate-200 bg-slate-50"
         />
-        <p className="text-sm text-slate-500">
-          Use <code className="font-mono text-[0.95em] text-slate-700">{'{{node_ref.field}}'}</code> values here to build dynamic endpoints.
-        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -135,7 +132,7 @@ function HttpNodeOptions({ node, updateNode, normalizeKeyValueEntries, addCollec
 
       <KeyValueListEditor
         title="Query params"
-        description="Attach query string values like `page=1` or `leadId={{manualstart_1201.id}}`."
+        description=""
         entries={normalizeKeyValueEntries(node.data.httpQueryParams)}
         addLabel="Add param"
         keyPlaceholder="Param name"
@@ -147,7 +144,7 @@ function HttpNodeOptions({ node, updateNode, normalizeKeyValueEntries, addCollec
 
       <KeyValueListEditor
         title="Headers"
-        description="Set request headers like authorization, content type, or custom app headers."
+        description=""
         entries={normalizeKeyValueEntries(node.data.httpHeaders)}
         addLabel="Add header"
         keyPlaceholder="Header name"
@@ -159,7 +156,7 @@ function HttpNodeOptions({ node, updateNode, normalizeKeyValueEntries, addCollec
 
       <KeyValueListEditor
         title="Cookies"
-        description="Pass cookie values when the upstream service expects session or browser state."
+        description=""
         entries={normalizeKeyValueEntries(node.data.httpCookies)}
         addLabel="Add cookie"
         keyPlaceholder="Cookie name"

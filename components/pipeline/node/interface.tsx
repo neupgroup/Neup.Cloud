@@ -290,7 +290,7 @@ export function KeyValueListEditor({
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <h4 className="text-sm font-medium text-slate-950">{title}</h4>
-          <p className="text-sm leading-6 text-slate-500">{description}</p>
+          {description ? <p className="text-sm leading-6 text-slate-500">{description}</p> : null}
         </div>
         <Button type="button" variant="outline" className="rounded-2xl border-slate-200 bg-slate-50" onClick={onAdd}>
           <Plus className="mr-2 h-4 w-4" />

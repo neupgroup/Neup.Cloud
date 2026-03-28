@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -35,6 +36,7 @@ import {
 
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
+import { savePipelineFlowAction } from '@/app/pipeline/actions';
 import {
   executeAiAgentNodeAction,
   getAiAgentValidationError,
@@ -70,6 +72,7 @@ import {
 } from '@/components/pipeline/node/intelligence.shared';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { PipelineContextMenu } from '@/components/pipeline/pipeline-context-menu';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -114,10 +117,34 @@ type PendingConnectionDraft = {
   position: { x: number; y: number };
 };
 
+type PendingCanvasNodeDraft = {
+  position: { x: number; y: number };
+};
+
+type PipelineContextMenuState =
+  | {
+      x: number;
+      y: number;
+      target: 'pane';
+      flowPosition: { x: number; y: number };
+    }
+  | {
+      x: number;
+      y: number;
+      target: 'node';
+      nodeId: string;
+    };
+
 type PipelineEditorProps = {
   intelligenceModels: PipelineIntelligenceModel[];
   intelligencePrompts: PipelineIntelligencePrompt[];
   intelligenceTokens: PipelineIntelligenceToken[];
+  initialPipeline?: {
+    id: string;
+    title: string;
+    description: string | null;
+    flowJson: unknown;
+  } | null;
 };
 
 const STORAGE_KEY = 'neup-cloud-pipeline-editor-v2';
@@ -447,6 +474,61 @@ const initialEdges: Edge[] = [
   createEdge('score-ai', 'calendar-follow-up'),
 ];
 
+function parseStoredFlow(flowJson: unknown): { nodes: PipelineFlowNode[]; edges: Edge[] } | null {
+  if (!flowJson || typeof flowJson !== 'object') {
+    return null;
+  }
+
+  const candidate = flowJson as {
+    nodes?: PipelineFlowNode[];
+    edges?: Edge[];
+  };
+
+  if (!Array.isArray(candidate.nodes) || !Array.isArray(candidate.edges) || candidate.nodes.length === 0) {
+    return null;
+  }
+
+  return {
+    nodes: ensureReferenceIds(candidate.nodes),
+    edges: candidate.edges,
+  };
+}
+
+function derivePipelineTitle(
+  nodes: PipelineFlowNode[],
+  existingTitle: string | null | undefined
+): string {
+  const trimmedTitle = existingTitle?.trim();
+
+  if (trimmedTitle) {
+    return trimmedTitle;
+  }
+
+  const preferredNode =
+    nodes.find((node) => !node.data.pending && node.data.kind !== 'manualStart') ??
+    nodes.find((node) => !node.data.pending) ??
+    null;
+
+  return preferredNode?.data.label?.trim()
+    ? `${preferredNode.data.label.trim()} Pipeline`
+    : 'Untitled Pipeline';
+}
+
+function derivePipelineDescription(
+  nodes: PipelineFlowNode[],
+  existingDescription: string | null | undefined
+): string | null {
+  const trimmedDescription = existingDescription?.trim();
+
+  if (trimmedDescription) {
+    return trimmedDescription;
+  }
+
+  const describedNode = nodes.find((node) => !node.data.pending && node.data.description?.trim()) ?? null;
+
+  return describedNode?.data.description?.trim() || null;
+}
+
 function createEdge(source: string, target: string): Edge {
   return {
     id: `edge-${source}-${target}`,
@@ -629,18 +711,41 @@ function PipelineEditorCanvas({
   intelligenceModels,
   intelligencePrompts,
   intelligenceTokens,
+  initialPipeline,
 }: PipelineEditorProps) {
+  const router = useRouter();
   const { screenToFlowPosition } = useReactFlow<PipelineNodeData>();
-  const [nodes, setNodes, onNodesChange] = useNodesState<PipelineNodeData>(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [selectedId, setSelectedId] = useState<string | null>('http-fetch');
+  const initialFlow = useMemo(
+    () => parseStoredFlow(initialPipeline?.flowJson) ?? { nodes: initialNodes, edges: initialEdges },
+    [initialPipeline]
+  );
+  const [nodes, setNodes, onNodesChange] = useNodesState<PipelineNodeData>(initialFlow.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialFlow.edges);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    initialFlow.nodes.find((node) => !node.data.pending)?.id ?? null
+  );
   const [activeCategory, setActiveCategory] = useState(nodeCategories[0].id);
   const [search, setSearch] = useState('');
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [persistedPipeline, setPersistedPipeline] = useState<{
+    id: string;
+    title: string;
+    description: string | null;
+  } | null>(
+    initialPipeline
+      ? {
+          id: initialPipeline.id,
+          title: initialPipeline.title,
+          description: initialPipeline.description,
+        }
+      : null
+  );
   const [isRunning, setIsRunning] = useState(false);
   const [pendingParentId, setPendingParentId] = useState<string | null>(null);
   const [pendingConnection, setPendingConnection] = useState<PendingConnectionDraft | null>(null);
+  const [pendingCanvasNode, setPendingCanvasNode] = useState<PendingCanvasNodeDraft | null>(null);
   const [referenceSaveNotice, setReferenceSaveNotice] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<PipelineContextMenuState | null>(null);
   const [showDebugger, setShowDebugger] = useState(true);
   const [consoleLines, setConsoleLines] = useState<string[]>([
     'Editor ready. Build on the canvas or add a child from any node.',
@@ -653,6 +758,21 @@ function PipelineEditorCanvas({
   const ignoreNextPaneClickRef = useRef(false);
 
   useEffect(() => {
+    if (initialPipeline) {
+      setPersistedPipeline({
+        id: initialPipeline.id,
+        title: initialPipeline.title,
+        description: initialPipeline.description,
+      });
+    }
+  }, [initialPipeline]);
+
+  useEffect(() => {
+    if (initialPipeline) {
+      setConsoleLines((current) => [...current, `Loaded "${initialPipeline.title}" from the database.`]);
+      return;
+    }
+
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (!stored) {
       return;
@@ -672,19 +792,30 @@ function PipelineEditorCanvas({
     } catch (error) {
       console.error('Failed to restore pipeline editor state', error);
     }
-  }, [setEdges, setNodes]);
+  }, [initialPipeline, setEdges, setNodes]);
 
   useEffect(() => {
-    const handleAddChild = (event: Event) => {
-      const detail = (event as CustomEvent<{ nodeId: string }>).detail;
-      setPendingParentId(detail.nodeId);
-      setSelectedId(detail.nodeId);
-      setConsoleLines((current) => [...current, 'Select a node from the library to attach a child step.']);
+    if (!contextMenu) {
+      return;
+    }
+
+    const handlePointerDown = () => {
+      setContextMenu(null);
+    };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setContextMenu(null);
+      }
     };
 
-    window.addEventListener('pipeline:add-child', handleAddChild);
-    return () => window.removeEventListener('pipeline:add-child', handleAddChild);
-  }, []);
+    window.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('keydown', handleEscape);
+
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [contextMenu]);
 
   const selectedNode = useMemo(
     () => nodes.find((node) => node.id === selectedId && !node.data.pending) ?? null,
@@ -809,6 +940,47 @@ function PipelineEditorCanvas({
     [appendConsole, pendingConnection, setEdges, setNodes]
   );
 
+  const closeContextMenu = useCallback(() => {
+    setContextMenu(null);
+  }, []);
+
+  const openCanvasNodeLibrary = useCallback(
+    (position: { x: number; y: number }) => {
+      clearPendingConnection();
+      setPendingCanvasNode({ position });
+      setPendingParentId(null);
+      setSelectedId(null);
+      setActiveCategory('actions');
+      setSearch('');
+      appendConsole('Choose a node from the sidebar to place it on the canvas.');
+    },
+    [appendConsole, clearPendingConnection]
+  );
+
+  const openChildNodeLibrary = useCallback(
+    (nodeId: string) => {
+      clearPendingConnection();
+      setPendingCanvasNode(null);
+      setPendingParentId(nodeId);
+      setSelectedId(nodeId);
+      setActiveCategory('actions');
+      setSearch('');
+      const nodeLabel = nodes.find((node) => node.id === nodeId)?.data.label ?? 'selected node';
+      appendConsole(`Choose a node to place after ${nodeLabel}.`);
+    },
+    [appendConsole, clearPendingConnection, nodes]
+  );
+
+  useEffect(() => {
+    const handleAddChild = (event: Event) => {
+      const detail = (event as CustomEvent<{ nodeId: string }>).detail;
+      openChildNodeLibrary(detail.nodeId);
+    };
+
+    window.addEventListener('pipeline:add-child', handleAddChild);
+    return () => window.removeEventListener('pipeline:add-child', handleAddChild);
+  }, [openChildNodeLibrary]);
+
   const startPendingConnection = useCallback(
     (parentId: string, position: { x: number; y: number }) => {
       const placeholderId = `pending-anchor-${Math.random().toString(36).slice(2, 8)}`;
@@ -874,36 +1046,70 @@ function PipelineEditorCanvas({
     [appendConsole, clearPendingConnection, setEdges]
   );
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
+    const cleanNodes = nodes.filter((node) => !node.data.pending);
+    const cleanEdges = edges.filter(
+      (edge) => !edge.source.startsWith('pending-anchor-') && !edge.target.startsWith('pending-anchor-')
+    );
+
     setSaveState('saving');
     window.localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
-        nodes: nodes.filter((node) => !node.data.pending),
-        edges: edges.filter(
-          (edge) => !edge.source.startsWith('pending-anchor-') && !edge.target.startsWith('pending-anchor-')
-        ),
+        nodes: cleanNodes,
+        edges: cleanEdges,
       })
     );
-    appendConsole('Saved the local pipeline draft.');
-    setReferenceSaveNotice(null);
 
-    window.setTimeout(() => {
+    const title = derivePipelineTitle(
+      cleanNodes,
+      persistedPipeline?.title ?? initialPipeline?.title ?? null
+    );
+    const description = derivePipelineDescription(
+      cleanNodes,
+      persistedPipeline?.description ?? initialPipeline?.description ?? null
+    );
+
+    try {
+      const savedPipeline = await savePipelineFlowAction({
+        pipelineId: persistedPipeline?.id ?? initialPipeline?.id ?? null,
+        title,
+        description,
+        flowJson: {
+          nodes: cleanNodes,
+          edges: cleanEdges,
+        },
+      });
+
+      setPersistedPipeline(savedPipeline);
+      appendConsole(`Saved "${savedPipeline.title}" to the database.`);
+      setReferenceSaveNotice(null);
       setSaveState('saved');
+
+      if ((persistedPipeline?.id ?? initialPipeline?.id ?? null) !== savedPipeline.id) {
+        router.replace(`/pipeline/editor?id=${savedPipeline.id}`);
+      }
+
       window.setTimeout(() => setSaveState('idle'), 1400);
-    }, 260);
-  }, [appendConsole, edges, nodes]);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save the pipeline.';
+      appendConsole(`Pipeline save failed: ${message}`);
+      setSaveState('idle');
+    }
+  }, [appendConsole, edges, initialPipeline?.description, initialPipeline?.id, initialPipeline?.title, nodes, persistedPipeline, router]);
 
   const handleReset = useCallback(() => {
-    setNodes(initialNodes);
-    setEdges(initialEdges);
-    setSelectedId('http-fetch');
+    setNodes(initialFlow.nodes);
+    setEdges(initialFlow.edges);
+    setSelectedId(initialFlow.nodes.find((node) => !node.data.pending)?.id ?? null);
     setPendingParentId(null);
     setPendingConnection(null);
+    setPendingCanvasNode(null);
+    setContextMenu(null);
     setReferenceSaveNotice(null);
     window.localStorage.removeItem(STORAGE_KEY);
-    appendConsole('Reset the editor back to the starter flow.');
-  }, [appendConsole, setEdges, setNodes]);
+    appendConsole(initialPipeline ? 'Reset the editor back to the loaded pipeline.' : 'Reset the editor back to the starter flow.');
+  }, [appendConsole, initialFlow.edges, initialFlow.nodes, initialPipeline, setEdges, setNodes]);
 
   const handleAddNode = useCallback(
     (kind: PipelineNodeKind) => {
@@ -911,6 +1117,8 @@ function PipelineEditorCanvas({
       const parentNode = parentId ? nodes.find((node) => node.id === parentId) ?? null : null;
       const nextPosition = pendingConnection
         ? pendingConnection.position
+        : pendingCanvasNode
+          ? pendingCanvasNode.position
         : parentNode
           ? {
               x: parentNode.position.x + 320,
@@ -943,8 +1151,10 @@ function PipelineEditorCanvas({
       setSelectedId(newNode.id);
       setPendingParentId(null);
       setPendingConnection(null);
+      setPendingCanvasNode(null);
+      setContextMenu(null);
     },
-    [appendConsole, edges, nodes, pendingConnection, pendingParentId, selectedId, setEdges, setNodes]
+    [appendConsole, edges, nodes, pendingCanvasNode, pendingConnection, pendingParentId, selectedId, setEdges, setNodes]
   );
 
   const handleDuplicate = useCallback(() => {
@@ -982,7 +1192,9 @@ function PipelineEditorCanvas({
       clearPendingConnection();
     }
     setPendingParentId((current) => (current === selectedId ? null : current));
+    setPendingCanvasNode(null);
     setSelectedId(null);
+    setContextMenu(null);
     appendConsole('Removed the selected node from the flow.');
   }, [appendConsole, clearPendingConnection, pendingConnection?.parentId, selectedId, setEdges, setNodes]);
 
@@ -1306,7 +1518,7 @@ function PipelineEditorCanvas({
     }
   }, [appendConsole, executeAiAgentNode, flowNodes, isRunning, setNodes]);
 
-  const isLibraryMode = Boolean(pendingParentId || pendingConnection);
+  const isLibraryMode = Boolean(pendingParentId || pendingConnection || pendingCanvasNode);
   const shouldShowSidebar = Boolean(selectedNode || isLibraryMode);
   const selectedNodeInspectorArgs = useMemo(
     () =>
@@ -1431,18 +1643,47 @@ function PipelineEditorCanvas({
                 connectStartRef.current = { nodeId: null, handleType: null };
               }}
               onNodeClick={(_, node) => {
+                closeContextMenu();
                 clearPendingConnection();
+                setPendingCanvasNode(null);
                 setSelectedId(node.id);
                 setPendingParentId(null);
+              }}
+              onNodeContextMenu={(event, node) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setSelectedId(node.id);
+                setContextMenu({
+                  x: event.clientX,
+                  y: event.clientY,
+                  target: 'node',
+                  nodeId: node.id,
+                });
               }}
               onPaneClick={() => {
                 if (ignoreNextPaneClickRef.current) {
                   return;
                 }
 
+                closeContextMenu();
                 clearPendingConnection();
+                setPendingCanvasNode(null);
                 setSelectedId(null);
                 setPendingParentId(null);
+              }}
+              onPaneContextMenu={(event) => {
+                event.preventDefault();
+                const pointerPosition = { x: event.clientX, y: event.clientY };
+                clearPendingConnection();
+                setPendingCanvasNode(null);
+                setPendingParentId(null);
+                setSelectedId(null);
+                setContextMenu({
+                  x: event.clientX,
+                  y: event.clientY,
+                  target: 'pane',
+                  flowPosition: screenToFlowPosition(pointerPosition),
+                });
               }}
               className="pipeline-editor-flow bg-transparent"
               proOptions={{ hideAttribution: true }}
@@ -1462,9 +1703,12 @@ function PipelineEditorCanvas({
               nodeCategories={nodeCategories}
               filteredTemplatesByCategory={filteredTemplatesByCategory}
               matchingTemplateCount={matchingTemplateCount}
+              libraryMode={pendingParentId || pendingConnection ? 'child' : 'canvas'}
               parentNodeLabel={
-                nodes.find((node) => node.id === (pendingConnection?.parentId ?? pendingParentId))?.data.label ??
-                'selected node'
+                pendingParentId || pendingConnection
+                  ? nodes.find((node) => node.id === (pendingConnection?.parentId ?? pendingParentId))?.data.label ??
+                    'selected node'
+                  : null
               }
               onAddNode={handleAddNode}
               selectedNode={selectedNode ? ({ id: selectedNode.id, data: selectedNode.data } as const) : null}
@@ -1502,6 +1746,38 @@ function PipelineEditorCanvas({
             />
           ) : null}
         </div>
+
+        {contextMenu ? (
+          <PipelineContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            items={
+              contextMenu.target === 'node'
+                ? [
+                    {
+                      id: 'add-child-node',
+                      label: 'Add child node',
+                      icon: 'branch',
+                      onSelect: () => {
+                        openChildNodeLibrary(contextMenu.nodeId);
+                        closeContextMenu();
+                      },
+                    },
+                  ]
+                : [
+                    {
+                      id: 'add-node',
+                      label: 'Add a node',
+                      icon: 'add',
+                      onSelect: () => {
+                        openCanvasNodeLibrary(contextMenu.flowPosition);
+                        closeContextMenu();
+                      },
+                    },
+                  ]
+            }
+          />
+        ) : null}
 
         {showDebugger ? (
           <div className="border-t border-white/70 bg-white/88 shadow-[0_-20px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
