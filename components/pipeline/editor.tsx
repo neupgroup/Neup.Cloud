@@ -8,10 +8,8 @@ import {
   addEdge,
   Background,
   Controls,
-  Handle,
   MarkerType,
   PanOnScrollMode,
-  Position,
   useEdgesState,
   useNodesState,
   type Connection,
@@ -24,64 +22,54 @@ import {
 import 'reactflow/dist/style.css';
 import {
   ArrowLeft,
-  Bot,
-  Calendar,
   Check,
   CircleSlash,
-  Clock3,
-  Copy,
-  GitBranch,
-  Globe,
-  LayoutGrid,
   Loader2,
   Play,
-  Plus,
   RefreshCcw,
   Save,
-  Search,
-  ShieldCheck,
-  Sparkles,
   Square,
-  SquareTerminal,
   TerminalSquare,
-  Timer,
-  Trash2,
-  TriangleAlert,
-  Webhook,
   Workflow,
-  Zap,
-  type LucideIcon,
 } from 'lucide-react';
 
-import {
-  executePipelineAiAgentAction,
-  type PipelineAiAgentExecutionInput,
-} from '@/app/pipeline/actions';
 import { Logo } from '@/components/logo';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import {
+  executeAiAgentNodeAction,
+  getAiAgentValidationError,
+} from '@/components/pipeline/node/intelligence.aiagent';
+import {
+  buildSharedNodeReferenceValue,
+  createNodeReferenceId,
+  getNodeType,
+  getNodeTypeLabel,
+  getSharedNodeInspectorInfo,
+  PendingBranchAnchor,
+  PipelineNodeCard,
+  type PipelineNodeKind,
+  type PipelineNodeKeyValueEntry,
+  type PipelineNodeStatus,
+  type PipelineNodeModule,
+  type PipelineNodeRecord,
+  type PipelineSharedNodeData,
+  createKeyValueEntry,
+  normalizePipelineKeyValueEntries,
+  rebuildReferenceIdFromLabel,
+} from '@/components/pipeline/node/interface';
+import { PipelineSidebar } from '@/components/pipeline/pipeline-sidebar';
+import {
+  pipelineNodeCategories,
+  pipelineNodeModuleMap,
+} from '@/components/pipeline/node/registry';
+import {
+  createPipelineIntelligenceContext,
+  type PipelineIntelligenceModel,
+  type PipelineIntelligencePrompt,
+  type PipelineIntelligenceToken,
+} from '@/components/pipeline/node/intelligence.shared';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-
-type PipelineNodeKind =
-  | 'manualStart'
-  | 'webhookTrigger'
-  | 'scheduleTrigger'
-  | 'http'
-  | 'browser'
-  | 'aiAgent'
-  | 'transform'
-  | 'condition'
-  | 'delay'
-  | 'googleCalendar'
-  | 'database'
-  | 'end';
-
-type PipelineNodeStatus = 'idle' | 'running' | 'success' | 'error';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -89,33 +77,18 @@ type HttpBodyType = 'none' | 'json' | 'form' | 'raw';
 
 type HttpResponseType = 'json' | 'text' | 'html';
 
-type PipelineKeyValueEntry = {
-  id: string;
-  key: string;
-  value: string;
-};
-
-type PipelineNodeData = {
-  referenceId: string;
-  label: string;
-  kind: PipelineNodeKind;
-  category: string;
-  description: string;
-  summary: string;
-  subtitle: string;
-  status: PipelineNodeStatus;
-  activity: string;
+type PipelineNodeData = PipelineSharedNodeData & {
   httpMethod?: HttpMethod;
   httpUrl?: string;
-  httpQueryParams?: PipelineKeyValueEntry[];
-  httpHeaders?: PipelineKeyValueEntry[];
-  httpCookies?: PipelineKeyValueEntry[];
+  httpQueryParams?: PipelineNodeKeyValueEntry[];
+  httpHeaders?: PipelineNodeKeyValueEntry[];
+  httpCookies?: PipelineNodeKeyValueEntry[];
   httpBodyType?: HttpBodyType;
   httpBody?: string;
   httpTimeoutMs?: number | null;
   httpResponseType?: HttpResponseType;
   httpLastResponseStatus?: number | null;
-  httpLastResponseHeaders?: PipelineKeyValueEntry[];
+  httpLastResponseHeaders?: PipelineNodeKeyValueEntry[];
   httpLastResponseBody?: string;
   intelligencePromptMode?: 'existing' | 'new';
   intelligencePromptId?: string;
@@ -131,12 +104,9 @@ type PipelineNodeData = {
   intelligenceLastModel?: string;
   intelligenceLastRenderedPrompt?: string;
   intelligenceWarning?: string;
-  pending?: boolean;
 };
 
 type PipelineFlowNode = Node<PipelineNodeData>;
-
-type EditableHttpCollectionField = 'httpQueryParams' | 'httpHeaders' | 'httpCookies';
 
 type PendingConnectionDraft = {
   parentId: string;
@@ -144,305 +114,19 @@ type PendingConnectionDraft = {
   position: { x: number; y: number };
 };
 
-type NodeTemplate = {
-  kind: PipelineNodeKind;
-  label: string;
-  subtitle: string;
-  category: string;
-  description: string;
-  summary: string;
-  icon: LucideIcon;
-};
-
-type NodeCategory = {
-  id: string;
-  label: string;
-  description: string;
-  icon: LucideIcon;
-  templates: NodeTemplate[];
-};
-
-type IntelligenceModelOption = {
-  id: number;
-  title: string;
-  provider: string;
-  model: string;
-};
-
-type IntelligencePromptOption = {
-  id: number;
-  promptId: string;
-  primaryModelId: number | null;
-  fallbackModelId: number | null;
-  primaryAccessKey: number | null;
-  fallbackAccessKey: number | null;
-  maxTokens: number | null;
-  defPrompt: string | null;
-};
-
-type IntelligenceTokenOption = {
-  id: number;
-  name: string;
-};
-
 type PipelineEditorProps = {
-  intelligenceModels: IntelligenceModelOption[];
-  intelligencePrompts: IntelligencePromptOption[];
-  intelligenceTokens: IntelligenceTokenOption[];
+  intelligenceModels: PipelineIntelligenceModel[];
+  intelligencePrompts: PipelineIntelligencePrompt[];
+  intelligenceTokens: PipelineIntelligenceToken[];
 };
 
 const STORAGE_KEY = 'neup-cloud-pipeline-editor-v2';
-
-const nodeCategories: NodeCategory[] = [
-  {
-    id: 'triggers',
-    label: 'Triggers',
-    description: 'Start a flow manually, on schedule, or from incoming events.',
-    icon: Play,
-    templates: [
-      {
-        kind: 'manualStart',
-        label: 'Manual Start',
-        subtitle: 'Run from dashboard',
-        category: 'Triggers',
-        description: 'Launch the pipeline on demand from the editor or a control surface.',
-        summary: 'Good for draft flows and operator-driven actions.',
-        icon: Play,
-      },
-      {
-        kind: 'webhookTrigger',
-        label: 'Webhook',
-        subtitle: 'HTTP event',
-        category: 'Triggers',
-        description: 'Receive data from external services over an incoming HTTP request.',
-        summary: 'Useful for lead capture, Git events, and custom automations.',
-        icon: Webhook,
-      },
-      {
-        kind: 'scheduleTrigger',
-        label: 'Schedule',
-        subtitle: 'Time-based',
-        category: 'Triggers',
-        description: 'Run this workflow on a recurring schedule.',
-        summary: 'Great for daily digests, sync jobs, and periodic checks.',
-        icon: Clock3,
-      },
-    ],
-  },
-  {
-    id: 'actions',
-    label: 'Actions',
-    description: 'Execute API calls, browser work, AI tasks, and storage steps.',
-    icon: Zap,
-    templates: [
-      {
-        kind: 'http',
-        label: 'HTTP Request',
-        subtitle: 'External API',
-        category: 'Actions',
-        description: 'Call a service, webhook, or private API endpoint.',
-        summary: 'Use it to fetch data, post payloads, or trigger downstream systems.',
-        icon: Globe,
-      },
-      {
-        kind: 'browser',
-        label: 'Browser',
-        subtitle: 'Visual automation',
-        category: 'Actions',
-        description: 'Automate a browser task such as loading a page or submitting a form.',
-        summary: 'Helpful for scraping, QA flows, and portal interactions.',
-        icon: LayoutGrid,
-      },
-      {
-        kind: 'aiAgent',
-        label: 'AI Agent',
-        subtitle: 'Reasoning step',
-        category: 'Actions',
-        description: 'Run a prompt-driven task for summarization, routing, or generation.',
-        summary: 'Use AI for scoring, drafting, and language-heavy decision points.',
-        icon: Bot,
-      },
-      {
-        kind: 'database',
-        label: 'Database',
-        subtitle: 'Read and write',
-        category: 'Actions',
-        description: 'Store outputs or hydrate the flow with context from a database.',
-        summary: 'Useful for stateful workflows and audit-friendly persistence.',
-        icon: SquareTerminal,
-      },
-    ],
-  },
-  {
-    id: 'logic',
-    label: 'Logic',
-    description: 'Control how data moves and when the flow branches.',
-    icon: GitBranch,
-    templates: [
-      {
-        kind: 'transform',
-        label: 'Transform',
-        subtitle: 'Shape payload',
-        category: 'Logic',
-        description: 'Normalize, map, or enrich incoming data before the next step.',
-        summary: 'Keep downstream nodes small by reshaping data early.',
-        icon: Sparkles,
-      },
-      {
-        kind: 'condition',
-        label: 'Condition',
-        subtitle: 'If / else',
-        category: 'Logic',
-        description: 'Branch based on filters or rule checks.',
-        summary: 'Send data to different paths depending on its contents.',
-        icon: GitBranch,
-      },
-      {
-        kind: 'delay',
-        label: 'Delay',
-        subtitle: 'Wait state',
-        category: 'Logic',
-        description: 'Pause the execution before continuing.',
-        summary: 'Useful for rate limits, follow-up windows, or retries.',
-        icon: Timer,
-      },
-    ],
-  },
-  {
-    id: 'integrations',
-    label: 'Integrations',
-    description: 'Connect the flow to concrete tools and endpoints.',
-    icon: Calendar,
-    templates: [
-      {
-        kind: 'googleCalendar',
-        label: 'Google Calendar',
-        subtitle: 'Event automation',
-        category: 'Integrations',
-        description: 'Create, update, or inspect events from the workflow.',
-        summary: 'Coordinate scheduling directly from the automation canvas.',
-        icon: Calendar,
-      },
-      {
-        kind: 'end',
-        label: 'End',
-        subtitle: 'Stop flow',
-        category: 'Output',
-        description: 'Mark the clean finish of the pipeline.',
-        summary: 'Use it to make flow endings explicit and readable.',
-        icon: ShieldCheck,
-      },
-    ],
-  },
-];
-
-const templateMap = new Map(
-  nodeCategories.flatMap((category) => category.templates.map((template) => [template.kind, template] as const))
-);
-
-const HTTP_METHOD_OPTIONS: HttpMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
-
-const HTTP_BODY_TYPE_OPTIONS: { value: HttpBodyType; label: string }[] = [
-  { value: 'none', label: 'No body' },
-  { value: 'json', label: 'JSON' },
-  { value: 'form', label: 'Form data' },
-  { value: 'raw', label: 'Raw text' },
-];
-
-const HTTP_RESPONSE_TYPE_OPTIONS: { value: HttpResponseType; label: string }[] = [
-  { value: 'json', label: 'JSON' },
-  { value: 'text', label: 'Plain text' },
-  { value: 'html', label: 'HTML' },
-];
-
-function createReferenceBase(label: string): string {
-  const normalized = label
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-
-  return normalized || 'node';
-}
-
-function createNodeReferenceId(label: string, used = new Set<string>()): string {
-  const base = createReferenceBase(label);
-  let candidate = `${base}_${Math.floor(1000 + Math.random() * 9000)}`;
-
-  while (used.has(candidate)) {
-    candidate = `${base}_${Math.floor(1000 + Math.random() * 9000)}`;
-  }
-
-  used.add(candidate);
-  return candidate;
-}
-
-function createKeyValueEntry(key = '', value = ''): PipelineKeyValueEntry {
-  return {
-    id: Math.random().toString(36).slice(2, 10),
-    key,
-    value,
-  };
-}
-
-function normalizeKeyValueEntries(entries?: PipelineKeyValueEntry[]): PipelineKeyValueEntry[] {
-  return (entries ?? []).map((entry) => ({
-    id: entry.id || Math.random().toString(36).slice(2, 10),
-    key: entry.key ?? '',
-    value: entry.value ?? '',
-  }));
-}
-
-function buildKeyValueCollection(entries?: PipelineKeyValueEntry[]) {
-  return normalizeKeyValueEntries(entries)
-    .filter((entry) => entry.key.trim() || entry.value.trim())
-    .map((entry) => ({
-      key: entry.key,
-      value: entry.value,
-    }));
-}
-
-function buildKeyValueObject(entries?: PipelineKeyValueEntry[]) {
-  return Object.fromEntries(
-    normalizeKeyValueEntries(entries)
-      .filter((entry) => entry.key.trim())
-      .map((entry) => [entry.key, entry.value])
-  );
-}
-
-function buildHttpBodyValue(node: PipelineFlowNode): unknown {
-  if ((node.data.httpBodyType ?? 'none') === 'json') {
-    return coerceStructuredValue(node.data.httpBody ?? '');
-  }
-
-  return node.data.httpBody ?? '';
-}
-
-function getHttpDataDefaults(): Partial<PipelineNodeData> {
-  return {
-    httpMethod: 'GET',
-    httpUrl: '',
-    httpQueryParams: [],
-    httpHeaders: [],
-    httpCookies: [],
-    httpBodyType: 'none',
-    httpBody: '',
-    httpTimeoutMs: 30000,
-    httpResponseType: 'json',
-    httpLastResponseStatus: null,
-    httpLastResponseHeaders: [],
-    httpLastResponseBody: '',
-  };
-}
-
-function extractReferenceSuffix(referenceId: string): string {
-  const match = referenceId.match(/_(\d+)$/);
-  return match?.[1] ?? `${Math.floor(1000 + Math.random() * 9000)}`;
-}
-
-function rebuildReferenceIdFromLabel(referenceId: string, label: string): string {
-  return `${createReferenceBase(label)}_${extractReferenceSuffix(referenceId)}`;
-}
+const nodeCategories = pipelineNodeCategories.map((category) => ({
+  ...category,
+  templates: Array.from(pipelineNodeModuleMap.values())
+    .map((module) => module.definition)
+    .filter((definition) => definition.type === category.id),
+}));
 
 function replaceReferenceInString(value: string, oldReferenceId: string, newReferenceId: string): string {
   if (!value.includes('{{') || oldReferenceId === newReferenceId) {
@@ -523,76 +207,12 @@ function coerceStructuredValue(value: unknown): unknown {
 }
 
 function buildNodeReferenceValue(node: PipelineFlowNode) {
-  const baseValue = {
-    id: node.data.referenceId,
-    nodeId: node.id,
-    title: node.data.label,
-    subtitle: node.data.subtitle,
-    description: node.data.description,
-    summary: node.data.summary,
-    category: node.data.category,
-    kind: node.data.kind,
-    type: getNodeTypeLabel(node.data.kind),
-    status: node.data.status,
-    activity: node.data.activity,
-  };
-
-  if (node.data.kind === 'http') {
-    return {
-      ...baseValue,
-      method: node.data.httpMethod ?? 'GET',
-      url: node.data.httpUrl ?? '',
-      queryParams: buildKeyValueCollection(node.data.httpQueryParams),
-      headers: buildKeyValueCollection(node.data.httpHeaders),
-      cookies: buildKeyValueCollection(node.data.httpCookies),
-      bodyType: node.data.httpBodyType ?? 'none',
-      body: buildHttpBodyValue(node),
-      timeoutMs: node.data.httpTimeoutMs ?? null,
-      responseType: node.data.httpResponseType ?? 'json',
-      request: {
-        method: node.data.httpMethod ?? 'GET',
-        url: node.data.httpUrl ?? '',
-        queryParams: buildKeyValueObject(node.data.httpQueryParams),
-        headers: buildKeyValueObject(node.data.httpHeaders),
-        cookies: buildKeyValueObject(node.data.httpCookies),
-        bodyType: node.data.httpBodyType ?? 'none',
-        body: buildHttpBodyValue(node),
-        timeoutMs: node.data.httpTimeoutMs ?? null,
-        responseType: node.data.httpResponseType ?? 'json',
-      },
-      response: {
-        status: node.data.httpLastResponseStatus ?? null,
-        headers: buildKeyValueObject(node.data.httpLastResponseHeaders),
-        body: coerceStructuredValue(node.data.httpLastResponseBody ?? ''),
-      },
-      responseStatus: node.data.httpLastResponseStatus ?? null,
-      responseHeaders: buildKeyValueCollection(node.data.httpLastResponseHeaders),
-      responseBody: coerceStructuredValue(node.data.httpLastResponseBody ?? ''),
-    };
-  }
-
-  if (node.data.kind === 'aiAgent') {
-    return {
-      ...baseValue,
-      promptMode: node.data.intelligencePromptMode ?? '',
-      promptId: node.data.intelligencePromptId ?? '',
-      query: node.data.intelligencePrompt ?? '',
-      masterPrompt: node.data.intelligenceMasterPrompt ?? '',
-      context: coerceStructuredValue(node.data.intelligenceContext ?? ''),
-      response: coerceStructuredValue(node.data.intelligenceLastResponse ?? ''),
-      renderedPrompt: node.data.intelligenceLastRenderedPrompt ?? '',
-      usedModel: node.data.intelligenceLastModel ?? '',
-      primaryModelId: node.data.intelligencePrimaryModelId ?? null,
-      fallbackModelId: node.data.intelligenceFallbackModelId ?? null,
-      primaryAccessKey: node.data.intelligencePrimaryAccessKey ?? null,
-      fallbackAccessKey: node.data.intelligenceFallbackAccessKey ?? null,
-      maxTokens: node.data.intelligenceMaxTokens ?? null,
-      warning: node.data.intelligenceWarning ?? '',
-    };
-  }
+  const baseValue = buildSharedNodeReferenceValue(node.data, node.id);
+  const module = pipelineNodeModuleMap.get(node.data.kind) as PipelineNodeModule<PipelineNodeRecord> | undefined;
 
   return {
     ...baseValue,
+    ...(module?.buildReferenceValue?.(node as unknown as { id: string; data: PipelineNodeRecord }) ?? {}),
   };
 }
 
@@ -673,47 +293,25 @@ function resolveNodeTemplate(value: string, nodes: PipelineFlowNode[]): string {
 }
 
 function getReferenceFieldIds(node: PipelineFlowNode): string[] {
-  const fields = ['id', 'nodeId', 'title', 'subtitle', 'description', 'summary', 'category', 'kind', 'type', 'status', 'activity'];
+  const fields = [
+    'id',
+    'nodeId',
+    'title',
+    'subtitle',
+    'description',
+    'summary',
+    'category',
+    'kind',
+    'type',
+    'nodeType',
+    'nodeName',
+    'kindLabel',
+    'status',
+    'activity',
+  ];
+  const module = pipelineNodeModuleMap.get(node.data.kind);
 
-  if (node.data.kind === 'http') {
-    fields.push(
-      'method',
-      'url',
-      'queryParams',
-      'headers',
-      'cookies',
-      'bodyType',
-      'body',
-      'timeoutMs',
-      'responseType',
-      'request',
-      'response',
-      'responseStatus',
-      'responseHeaders',
-      'responseBody'
-    );
-  }
-
-  if (node.data.kind === 'aiAgent') {
-    fields.push(
-      'promptMode',
-      'promptId',
-      'query',
-      'masterPrompt',
-      'context',
-      'response',
-      'renderedPrompt',
-      'usedModel',
-      'primaryModelId',
-      'fallbackModelId',
-      'primaryAccessKey',
-      'fallbackAccessKey',
-      'maxTokens',
-      'warning'
-    );
-  }
-
-  return fields;
+  return [...fields, ...(module?.getReferenceFields?.() ?? [])];
 }
 
 function ensureReferenceIds(nodes: PipelineFlowNode[]): PipelineFlowNode[] {
@@ -730,14 +328,15 @@ function ensureReferenceIds(nodes: PipelineFlowNode[]): PipelineFlowNode[] {
     return {
       ...node,
       data: {
-        ...(node.data.kind === 'http' ? getHttpDataDefaults() : {}),
+        ...((pipelineNodeModuleMap.get(node.data.kind)?.getInitialData?.() as Partial<PipelineNodeData> | undefined) ?? {}),
         ...node.data,
+        nodeType: node.data.nodeType ?? getNodeType(node.data.kind),
         ...(node.data.kind === 'http'
           ? {
-              httpQueryParams: normalizeKeyValueEntries(node.data.httpQueryParams),
-              httpHeaders: normalizeKeyValueEntries(node.data.httpHeaders),
-              httpCookies: normalizeKeyValueEntries(node.data.httpCookies),
-              httpLastResponseHeaders: normalizeKeyValueEntries(node.data.httpLastResponseHeaders),
+              httpQueryParams: normalizePipelineKeyValueEntries(node.data.httpQueryParams),
+              httpHeaders: normalizePipelineKeyValueEntries(node.data.httpHeaders),
+              httpCookies: normalizePipelineKeyValueEntries(node.data.httpCookies),
+              httpLastResponseHeaders: normalizePipelineKeyValueEntries(node.data.httpLastResponseHeaders),
             }
           : {}),
         referenceId,
@@ -755,6 +354,7 @@ const initialNodes: PipelineFlowNode[] = [
       referenceId: 'manualstart_1201',
       label: 'Manual Start',
       kind: 'manualStart',
+      nodeType: 'triggers',
       category: 'Triggers',
       description: 'Kick off the workflow from Neup.Cloud.',
       summary: 'A great entry point while the pipeline is still evolving.',
@@ -771,6 +371,7 @@ const initialNodes: PipelineFlowNode[] = [
       referenceId: 'fetchlead_1202',
       label: 'Fetch Lead',
       kind: 'http',
+      nodeType: 'actions',
       category: 'Actions',
       description: 'Pull lead metadata from the upstream CRM endpoint.',
       summary: 'The flow enriches the raw trigger payload before scoring it.',
@@ -799,7 +400,8 @@ const initialNodes: PipelineFlowNode[] = [
       referenceId: 'scorewithai_1203',
       label: 'Score with AI',
       kind: 'aiAgent',
-      category: 'Actions',
+      nodeType: 'intelligence',
+      category: 'Intelligence',
       description: 'Classify urgency, estimate fit, and draft a response outline.',
       summary: 'AI turns raw lead info into something the team can act on quickly.',
       subtitle: 'Reasoning step',
@@ -828,7 +430,8 @@ const initialNodes: PipelineFlowNode[] = [
       referenceId: 'schedulefollowup_1204',
       label: 'Schedule Follow-up',
       kind: 'googleCalendar',
-      category: 'Integrations',
+      nodeType: 'integration',
+      category: 'Integration',
       description: 'Create a follow-up slot for qualified leads.',
       summary: 'Calendar placement happens only after the flow has enough confidence.',
       subtitle: 'Event automation',
@@ -942,43 +545,13 @@ function getStatusAppearance(status: PipelineNodeStatus) {
   }
 }
 
-function getNodeTypeLabel(kind: PipelineNodeKind) {
-  switch (kind) {
-    case 'manualStart':
-      return 'Manual Trigger';
-    case 'webhookTrigger':
-      return 'Webhook Trigger';
-    case 'scheduleTrigger':
-      return 'Schedule Trigger';
-    case 'http':
-      return 'HTTP Request';
-    case 'browser':
-      return 'Browser';
-    case 'aiAgent':
-      return 'AI Agent';
-    case 'transform':
-      return 'Transform';
-    case 'condition':
-      return 'Condition';
-    case 'delay':
-      return 'Delay';
-    case 'googleCalendar':
-      return 'Google Calendar';
-    case 'database':
-      return 'Database';
-    case 'end':
-      return 'End';
-    default:
-      return 'Node';
-  }
-}
-
 function createNode(
   kind: PipelineNodeKind,
   position: { x: number; y: number },
   overrides?: Partial<PipelineNodeData>
 ): PipelineFlowNode {
-  const template = templateMap.get(kind);
+  const module = pipelineNodeModuleMap.get(kind);
+  const template = module?.definition;
   const id = `${kind}-${Math.random().toString(36).slice(2, 8)}`;
   const { referenceId: _referenceId, ...restOverrides } = overrides ?? {};
 
@@ -990,195 +563,44 @@ function createNode(
       referenceId: createNodeReferenceId(restOverrides.label ?? template?.label ?? 'Node'),
       label: template?.label ?? 'Node',
       kind,
+      nodeType: template?.type ?? getNodeType(kind),
       category: template?.category ?? 'Custom',
       description: template?.description ?? 'Configure this step.',
       summary: template?.summary ?? 'Workflow node.',
       subtitle: template?.subtitle ?? 'Automation step',
       status: 'idle',
       activity: `Ready to run ${template?.label?.toLowerCase() ?? 'node'}.`,
-      ...(kind === 'http' ? getHttpDataDefaults() : {}),
-      ...(kind === 'aiAgent'
-        ? {
-            intelligencePromptMode: 'existing' as const,
-            intelligencePromptId: '',
-            intelligencePrimaryModelId: null,
-            intelligenceFallbackModelId: null,
-            intelligencePrimaryAccessKey: null,
-            intelligenceFallbackAccessKey: null,
-            intelligenceMaxTokens: 500,
-            intelligenceMasterPrompt: '',
-            intelligencePrompt: '',
-            intelligenceContext: '',
-            intelligenceLastResponse: '',
-            intelligenceLastModel: '',
-            intelligenceLastRenderedPrompt: '',
-            intelligenceWarning: '',
-          }
-        : {}),
+      ...((module?.getInitialData?.() as Partial<PipelineNodeData> | undefined) ?? {}),
       ...restOverrides,
       ...(kind === 'http'
         ? {
-            httpQueryParams: normalizeKeyValueEntries(restOverrides.httpQueryParams),
-            httpHeaders: normalizeKeyValueEntries(restOverrides.httpHeaders),
-            httpCookies: normalizeKeyValueEntries(restOverrides.httpCookies),
-            httpLastResponseHeaders: normalizeKeyValueEntries(restOverrides.httpLastResponseHeaders),
+            httpQueryParams: normalizePipelineKeyValueEntries(restOverrides.httpQueryParams),
+            httpHeaders: normalizePipelineKeyValueEntries(restOverrides.httpHeaders),
+            httpCookies: normalizePipelineKeyValueEntries(restOverrides.httpCookies),
+            httpLastResponseHeaders: normalizePipelineKeyValueEntries(restOverrides.httpLastResponseHeaders),
           }
         : {}),
     },
   };
 }
 
-type KeyValueListEditorProps = {
-  title: string;
-  description: string;
-  entries: PipelineKeyValueEntry[];
-  addLabel: string;
-  keyPlaceholder: string;
-  valuePlaceholder: string;
-  onAdd: () => void;
-  onChange: (entryId: string, patch: Partial<PipelineKeyValueEntry>) => void;
-  onRemove: (entryId: string) => void;
-};
-
-function KeyValueListEditor({
-  title,
-  description,
-  entries,
-  addLabel,
-  keyPlaceholder,
-  valuePlaceholder,
-  onAdd,
-  onChange,
-  onRemove,
-}: KeyValueListEditorProps) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1">
-          <h4 className="text-sm font-medium text-slate-950">{title}</h4>
-          <p className="text-sm leading-6 text-slate-500">{description}</p>
-        </div>
-        <Button type="button" variant="outline" className="rounded-2xl border-slate-200 bg-slate-50" onClick={onAdd}>
-          <Plus className="mr-2 h-4 w-4" />
-          {addLabel}
-        </Button>
-      </div>
-
-      {entries.length === 0 ? (
-        <p className="text-sm text-slate-500">Nothing added yet.</p>
-      ) : (
-        <div className="space-y-2">
-          {entries.map((entry) => (
-            <div key={entry.id} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_44px] gap-2">
-              <Input
-                value={entry.key}
-                onChange={(event) => onChange(entry.id, { key: event.target.value })}
-                placeholder={keyPlaceholder}
-                className="rounded-2xl border-slate-200 bg-slate-50"
-              />
-              <Input
-                value={entry.value}
-                onChange={(event) => onChange(entry.id, { value: event.target.value })}
-                placeholder={valuePlaceholder}
-                className="rounded-2xl border-slate-200 bg-slate-50"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-2xl border-slate-200 bg-slate-50 px-0"
-                onClick={() => onRemove(entry.id)}
-                aria-label={`Remove ${title.toLowerCase()} entry`}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function PipelineCanvasNode({ id, data, selected }: NodeProps<PipelineNodeData>) {
-  const template = templateMap.get(data.kind);
+function PipelineCanvasNode({ data, selected }: NodeProps<PipelineNodeData>) {
+  const template = pipelineNodeModuleMap.get(data.kind)?.definition;
   const Icon = template?.icon ?? Workflow;
   const status = getStatusAppearance(data.status);
   const typeLabel = getNodeTypeLabel(data.kind);
-  const StatusIcon = status.Icon;
 
   return (
-    <div
-      className={cn(
-        'group relative w-[256px] rounded-[1.35rem] bg-white shadow-[0_16px_36px_rgba(15,23,42,0.08)] transition-all duration-200',
-        selected
-          ? 'shadow-[0_18px_40px_rgba(15,23,42,0.12)] ring-2 ring-slate-200/70'
-          : status.frame
-      )}
-    >
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="!left-[-7px] !h-3.5 !w-3.5 !border-[3px] !border-white !bg-slate-900"
-      />
-
-      <div
-        className={cn(
-          'overflow-hidden rounded-[1.15rem] border border-slate-300 bg-white',
-          selected && 'border-slate-400'
-        )}
-      >
-        <div className={cn('h-1.5 w-full bg-gradient-to-r', getNodeTone(data.kind).header)} />
-
-        <div className="bg-white">
-          <div className="flex items-start gap-3 px-3.5 py-3">
-            <div
-              className={cn(
-                'flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.95rem] bg-gradient-to-br text-white shadow-[0_10px_22px_rgba(15,23,42,0.12)]',
-                getNodeTone(data.kind).header,
-                selected && 'shadow-[0_14px_26px_rgba(15,23,42,0.16)]'
-              )}
-            >
-              <Icon className="h-[18px] w-[18px]" />
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                {typeLabel}
-              </p>
-              <h3 className="truncate pt-0.5 text-[15px] font-semibold tracking-[-0.02em] text-slate-950">
-                {data.label}
-              </h3>
-              <p className="pt-0.5 text-sm text-slate-500">{data.subtitle}</p>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-100 bg-slate-50/70 px-3.5 py-2.5">
-            <div
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[10px] font-medium text-slate-600',
-                status.pill
-              )}
-            >
-              <span className={cn('h-2 w-2 rounded-full', status.dot)} />
-              Live
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!right-[-7px] !h-3.5 !w-3.5 !border-[3px] !border-white !bg-slate-900"
-      />
-
-    </div>
-  );
-}
-
-function PendingBranchAnchor() {
-  return (
-    <div className="h-4 w-4 rounded-full border-2 border-dashed border-slate-300 bg-white shadow-[0_0_0_6px_rgba(255,255,255,0.92)]" />
+    <PipelineNodeCard
+      selected={selected}
+      title={data.label}
+      subtitle={data.subtitle}
+      typeLabel={typeLabel}
+      icon={Icon}
+      toneClassName={getNodeTone(data.kind).header}
+      frameClassName={status.frame}
+      statusClassName={status.pill}
+    />
   );
 }
 
@@ -1201,10 +623,6 @@ function getPointerPosition(event: MouseEvent | TouchEvent) {
   }
 
   return { x: 0, y: 0 };
-}
-
-function buildModelLabel(model: IntelligenceModelOption): string {
-  return `${model.title} (${model.provider}:${model.model})`;
 }
 
 function PipelineEditorCanvas({
@@ -1272,17 +690,14 @@ function PipelineEditorCanvas({
     () => nodes.find((node) => node.id === selectedId && !node.data.pending) ?? null,
     [nodes, selectedId]
   );
-  const promptOptionMap = useMemo(
-    () => new Map(intelligencePrompts.map((prompt) => [prompt.promptId, prompt])),
-    [intelligencePrompts]
-  );
-  const modelOptionMap = useMemo(
-    () => new Map(intelligenceModels.map((model) => [model.id, model])),
-    [intelligenceModels]
-  );
-  const tokenOptionMap = useMemo(
-    () => new Map(intelligenceTokens.map((token) => [token.id, token])),
-    [intelligenceTokens]
+  const intelligence = useMemo(
+    () =>
+      createPipelineIntelligenceContext({
+        models: intelligenceModels,
+        prompts: intelligencePrompts,
+        tokens: intelligenceTokens,
+      }),
+    [intelligenceModels, intelligencePrompts, intelligenceTokens]
   );
 
   const filteredTemplatesByCategory = useMemo(() => {
@@ -1318,12 +733,13 @@ function PipelineEditorCanvas({
       });
   }, [nodes]);
 
-  const selectedPromptOption = useMemo(
-    () =>
-      selectedNode?.data.kind === 'aiAgent' && selectedNode.data.intelligencePromptId
-        ? promptOptionMap.get(selectedNode.data.intelligencePromptId) ?? null
-        : null,
-    [promptOptionMap, selectedNode]
+  const selectedNodeModule = useMemo(
+    () => (selectedNode ? pipelineNodeModuleMap.get(selectedNode.data.kind) ?? null : null),
+    [selectedNode]
+  );
+  const selectedNodeInspectorInfo = useMemo(
+    () => (selectedNode ? getSharedNodeInspectorInfo(selectedNode.data) : null),
+    [selectedNode]
   );
 
   const appendConsole = useCallback((line: string) => {
@@ -1371,46 +787,6 @@ function PipelineEditorCanvas({
     [setNodes]
   );
 
-  const getAiAgentValidationError = useCallback(
-    (node: PipelineFlowNode): string | null => {
-      if (node.data.kind !== 'aiAgent') {
-        return null;
-      }
-
-      if (intelligenceModels.length === 0 || intelligenceTokens.length === 0) {
-        return 'Configure at least one model and one access token for the AI Agent.';
-      }
-
-      const hasConfiguredPrimary =
-        node.data.intelligencePrimaryModelId !== null &&
-        node.data.intelligencePrimaryModelId !== undefined &&
-        node.data.intelligencePrimaryAccessKey !== null &&
-        node.data.intelligencePrimaryAccessKey !== undefined;
-      const hasConfiguredFallback =
-        node.data.intelligenceFallbackModelId !== null &&
-        node.data.intelligenceFallbackModelId !== undefined &&
-        node.data.intelligenceFallbackAccessKey !== null &&
-        node.data.intelligenceFallbackAccessKey !== undefined;
-
-      if (!hasConfiguredPrimary && !hasConfiguredFallback) {
-        return 'Configure at least one model and one access token for the AI Agent.';
-      }
-
-      const hasPromptContent = [
-        node.data.intelligencePrompt,
-        node.data.intelligenceMasterPrompt,
-        node.data.intelligenceContext,
-      ].some((value) => Boolean(value?.trim()));
-
-      if (!hasPromptContent) {
-        return 'Provide a prompt, a master prompt, or some context for the AI Agent.';
-      }
-
-      return null;
-    },
-    [intelligenceModels.length, intelligenceTokens.length]
-  );
-
   const clearPendingConnection = useCallback(
     (logLine?: string) => {
       if (!pendingConnection) {
@@ -1451,6 +827,7 @@ function PipelineEditorCanvas({
             referenceId: placeholderId,
             label: '',
             kind: 'end',
+            nodeType: 'logic',
             category: '',
             description: '',
             summary: '',
@@ -1626,8 +1003,8 @@ function PipelineEditorCanvas({
     [selectedId, setNodes]
   );
 
-  const addSelectedHttpEntry = useCallback(
-    (field: EditableHttpCollectionField) => {
+  const addSelectedCollectionEntry = useCallback(
+    (field: string) => {
       if (!selectedId) {
         return;
       }
@@ -1638,7 +1015,9 @@ function PipelineEditorCanvas({
             return node;
           }
 
-          const currentEntries = normalizeKeyValueEntries(node.data[field]);
+          const currentEntries = normalizePipelineKeyValueEntries(
+            (node.data as Record<string, unknown>)[field] as PipelineNodeKeyValueEntry[] | undefined
+          );
 
           return {
             ...node,
@@ -1653,8 +1032,8 @@ function PipelineEditorCanvas({
     [selectedId, setNodes]
   );
 
-  const updateSelectedHttpEntry = useCallback(
-    (field: EditableHttpCollectionField, entryId: string, patch: Partial<PipelineKeyValueEntry>) => {
+  const updateSelectedCollectionEntry = useCallback(
+    (field: string, entryId: string, patch: Partial<PipelineNodeKeyValueEntry>) => {
       if (!selectedId) {
         return;
       }
@@ -1665,7 +1044,9 @@ function PipelineEditorCanvas({
             return node;
           }
 
-          const nextEntries = normalizeKeyValueEntries(node.data[field]).map((entry) =>
+          const nextEntries = normalizePipelineKeyValueEntries(
+            (node.data as Record<string, unknown>)[field] as PipelineNodeKeyValueEntry[] | undefined
+          ).map((entry) =>
             entry.id === entryId ? { ...entry, ...patch } : entry
           );
 
@@ -1682,8 +1063,8 @@ function PipelineEditorCanvas({
     [selectedId, setNodes]
   );
 
-  const removeSelectedHttpEntry = useCallback(
-    (field: EditableHttpCollectionField, entryId: string) => {
+  const removeSelectedCollectionEntry = useCallback(
+    (field: string, entryId: string) => {
       if (!selectedId) {
         return;
       }
@@ -1694,7 +1075,9 @@ function PipelineEditorCanvas({
             return node;
           }
 
-          const nextEntries = normalizeKeyValueEntries(node.data[field]).filter((entry) => entry.id !== entryId);
+          const nextEntries = normalizePipelineKeyValueEntries(
+            (node.data as Record<string, unknown>)[field] as PipelineNodeKeyValueEntry[] | undefined
+          ).filter((entry) => entry.id !== entryId);
 
           return {
             ...node,
@@ -1770,7 +1153,10 @@ function PipelineEditorCanvas({
         return false;
       }
 
-      const validationError = getAiAgentValidationError(node);
+      const validationError = getAiAgentValidationError(
+        node.data as PipelineNodeRecord,
+        intelligence
+      );
 
       if (validationError) {
         setNodeWarning(node.id, validationError);
@@ -1778,7 +1164,7 @@ function PipelineEditorCanvas({
         return false;
       }
 
-      const actionInput: PipelineAiAgentExecutionInput = {
+      const actionInput = {
         promptMode: node.data.intelligencePromptMode ?? 'new',
         promptId: node.data.intelligencePromptId?.trim() || null,
         primaryModelId: node.data.intelligencePrimaryModelId ?? null,
@@ -1810,7 +1196,7 @@ function PipelineEditorCanvas({
       appendConsole(`AI Agent "${node.data.label}" is preparing a prompt record.`);
 
       try {
-        const result = await executePipelineAiAgentAction(actionInput);
+        const result = await executeAiAgentNodeAction(actionInput);
         const compactResponse =
           result.responseText.length > 220
             ? `${result.responseText.slice(0, 220).trim()}...`
@@ -1850,7 +1236,7 @@ function PipelineEditorCanvas({
         return false;
       }
     },
-    [appendConsole, getAiAgentValidationError, nodes, setNodeWarning, setNodes]
+    [appendConsole, intelligence, nodes, setNodeWarning, setNodes]
   );
 
   const handleRun = useCallback(async () => {
@@ -1922,6 +1308,44 @@ function PipelineEditorCanvas({
 
   const isLibraryMode = Boolean(pendingParentId || pendingConnection);
   const shouldShowSidebar = Boolean(selectedNode || isLibraryMode);
+  const selectedNodeInspectorArgs = useMemo(
+    () =>
+      selectedNode
+        ? {
+            node: selectedNode as unknown as { id: string; data: PipelineNodeRecord },
+            updateNode: (patch: Partial<PipelineNodeRecord>) => {
+              updateSelectedNode(patch as Partial<PipelineNodeData>);
+            },
+            updateNodeLabel: (label: string) => {
+              updateSelectedNodeLabel(label);
+            },
+            clearWarning: () => {
+              clearNodeWarning(selectedNode.id);
+            },
+            executeNode: async () => {
+              if (selectedNode.data.kind === 'aiAgent') {
+                await executeAiAgentNode(selectedNode);
+              }
+            },
+            normalizeKeyValueEntries: normalizePipelineKeyValueEntries,
+            addCollectionEntry: addSelectedCollectionEntry,
+            updateCollectionEntry: updateSelectedCollectionEntry,
+            removeCollectionEntry: removeSelectedCollectionEntry,
+            intelligence,
+          }
+        : null,
+    [
+      addSelectedCollectionEntry,
+      clearNodeWarning,
+      executeAiAgentNode,
+      intelligence,
+      removeSelectedCollectionEntry,
+      selectedNode,
+      updateSelectedCollectionEntry,
+      updateSelectedNode,
+      updateSelectedNodeLabel,
+    ]
+  );
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(15,23,42,0.08),transparent_26%),linear-gradient(180deg,#f8fafc_0%,#eef2f5_100%)] text-foreground">
@@ -2029,742 +1453,53 @@ function PipelineEditorCanvas({
           </main>
 
           {shouldShowSidebar ? (
-          <aside className="border-l border-white/60 bg-white/60">
-            <ScrollArea className="h-[calc(100vh-81px)]">
-              <div className="space-y-5 p-5">
-                {isLibraryMode ? (
-                  <>
-                    <div className="space-y-3 rounded-[1.7rem] border border-white/80 bg-white/90 p-4 shadow-sm">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Node Library</p>
-                        <h2 className="mt-1 text-lg font-semibold text-slate-950">Add the next step</h2>
-                        <p className="mt-1 text-sm leading-6 text-slate-600">
-                          Choose a category first, then pick a node from the second level.
-                        </p>
-                      </div>
+            <PipelineSidebar
+              isLibraryMode={isLibraryMode}
+              search={search}
+              onSearchChange={setSearch}
+              activeCategory={activeCategory}
+              onActiveCategoryChange={setActiveCategory}
+              nodeCategories={nodeCategories}
+              filteredTemplatesByCategory={filteredTemplatesByCategory}
+              matchingTemplateCount={matchingTemplateCount}
+              parentNodeLabel={
+                nodes.find((node) => node.id === (pendingConnection?.parentId ?? pendingParentId))?.data.label ??
+                'selected node'
+              }
+              onAddNode={handleAddNode}
+              selectedNode={selectedNode ? ({ id: selectedNode.id, data: selectedNode.data } as const) : null}
+              selectedNodeInspectorInfo={selectedNodeInspectorInfo}
+              referenceSaveNotice={referenceSaveNotice}
+              selectedNodeModule={selectedNodeModule}
+              selectedNodeInspectorArgs={selectedNodeInspectorArgs}
+              onUpdateBasicsName={(value) => {
+                if (!selectedNode) {
+                  return;
+                }
 
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                        <Input
-                          value={search}
-                          onChange={(event) => setSearch(event.target.value)}
-                          placeholder="Search nodes"
-                          className="rounded-2xl border-slate-200 bg-slate-50 pl-9"
-                        />
-                      </div>
+                clearNodeWarning(selectedNode.id);
+                updateSelectedNodeLabel(value);
+              }}
+              onUpdateBasicsDescription={(value) => {
+                if (!selectedNode) {
+                  return;
+                }
 
-                      <div className="rounded-[1.4rem] border border-primary/15 bg-primary/5 px-4 py-3 text-sm text-slate-700">
-                        Adding a child after{' '}
-                        <span className="font-semibold">
-                          {nodes.find((node) => node.id === (pendingConnection?.parentId ?? pendingParentId))?.data.label ?? 'selected node'}
-                        </span>
-                        .
-                      </div>
-                    </div>
+                clearNodeWarning(selectedNode.id);
+                updateSelectedNode({ description: value });
+              }}
+              onAddChild={() => {
+                if (!selectedNode) {
+                  return;
+                }
 
-                    <div className="space-y-2">
-                      {nodeCategories.map((category) => {
-                        const Icon = category.icon;
-                        const isActive = activeCategory === category.id;
-                        const templates = filteredTemplatesByCategory.get(category.id) ?? [];
-
-                        return (
-                          <div key={category.id} className="rounded-[1.5rem] border border-white/80 bg-white/90 shadow-sm">
-                            <button
-                              type="button"
-                              onClick={() => setActiveCategory(category.id)}
-                              className={cn(
-                                'flex w-full items-start gap-3 rounded-[1.5rem] px-4 py-3 text-left transition-all',
-                                isActive ? 'bg-slate-900 text-white' : 'hover:bg-slate-50'
-                              )}
-                            >
-                              <div
-                                className={cn(
-                                  'mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl',
-                                  isActive ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-700'
-                                )}
-                              >
-                                <Icon className="h-5 w-5" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className={cn('font-semibold', isActive ? 'text-white' : 'text-slate-950')}>
-                                  {category.label}
-                                </div>
-                                <p className={cn('mt-1 text-sm leading-6', isActive ? 'text-slate-300' : 'text-slate-600')}>
-                                  {category.description}
-                                </p>
-                              </div>
-                            </button>
-
-                            {isActive ? (
-                              <div className="space-y-2 border-t border-slate-100 px-3 py-3">
-                                {templates.length > 0 ? (
-                                  templates.map((template) => {
-                                    const TemplateIcon = template.icon;
-                                    const tone = getNodeTone(template.kind);
-
-                                    return (
-                                      <button
-                                        key={template.kind}
-                                        type="button"
-                                        onClick={() => handleAddNode(template.kind)}
-                                        className="w-full rounded-[1.15rem] border border-slate-200 bg-slate-50 px-3 py-3 text-left transition-all hover:border-slate-300 hover:bg-white"
-                                      >
-                                        <div className="flex items-start gap-3">
-                                          <div className={cn('flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-r text-white', tone.header)}>
-                                            <TemplateIcon className="h-4 w-4" />
-                                          </div>
-                                          <div className="min-w-0 flex-1">
-                                            <p className="font-medium text-slate-950">{template.label}</p>
-                                            <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                                              {template.subtitle}
-                                            </p>
-                                          </div>
-                                        </div>
-                                      </button>
-                                    );
-                                  })
-                                ) : (
-                                  <div className="rounded-[1.15rem] border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-sm text-slate-500">
-                                    No matching nodes in this category.
-                                  </div>
-                                )}
-                              </div>
-                            ) : null}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {matchingTemplateCount === 0 ? (
-                      <Card className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white/70 shadow-none">
-                        <CardContent className="p-6 text-sm text-slate-500">
-                          Nothing matched that search. Try another term.
-                        </CardContent>
-                      </Card>
-                    ) : null}
-                  </>
-                ) : selectedNode ? (
-                  <>
-                    <div className="space-y-1 px-1">
-                      <h2 className="text-xl font-semibold text-slate-950">{selectedNode.data.label}</h2>
-                      <p className="font-mono text-sm text-slate-500">{selectedNode.data.referenceId}</p>
-                    </div>
-
-                    {referenceSaveNotice ? (
-                      <Alert className="rounded-[1.25rem] border border-amber-200 bg-amber-50 text-amber-900 [&>svg]:text-amber-700">
-                        <TriangleAlert className="h-4 w-4" />
-                        <AlertTitle>Save changes</AlertTitle>
-                        <AlertDescription>{referenceSaveNotice}</AlertDescription>
-                      </Alert>
-                    ) : null}
-
-                    {selectedNode.data.kind === 'http' ? (
-                      <section className="space-y-5 px-1">
-                        <h3 className="text-lg font-semibold text-slate-950">Node options</h3>
-
-                        <div className="space-y-2">
-                          <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                            Request URL
-                          </label>
-                          <Input
-                            value={selectedNode.data.httpUrl ?? ''}
-                            onChange={(event) => updateSelectedNode({ httpUrl: event.target.value })}
-                            placeholder="https://api.example.com/resource"
-                            className="rounded-2xl border-slate-200 bg-slate-50"
-                          />
-                          <p className="text-sm text-slate-500">
-                            Use <code className="font-mono text-[0.95em] text-slate-700">{'{{node_ref.field}}'}</code>{' '}
-                            values here to build dynamic endpoints.
-                          </p>
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Request type
-                            </label>
-                            <select
-                              value={selectedNode.data.httpMethod ?? 'GET'}
-                              onChange={(event) =>
-                                updateSelectedNode({ httpMethod: event.target.value as HttpMethod })
-                              }
-                              className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
-                            >
-                              {HTTP_METHOD_OPTIONS.map((method) => (
-                                <option key={method} value={method}>
-                                  {method}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Response type
-                            </label>
-                            <select
-                              value={selectedNode.data.httpResponseType ?? 'json'}
-                              onChange={(event) =>
-                                updateSelectedNode({
-                                  httpResponseType: event.target.value as HttpResponseType,
-                                })
-                              }
-                              className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
-                            >
-                              {HTTP_RESPONSE_TYPE_OPTIONS.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-
-                        <KeyValueListEditor
-                          title="Query params"
-                          description="Attach query string values like `page=1` or `leadId={{manualstart_1201.id}}`."
-                          entries={normalizeKeyValueEntries(selectedNode.data.httpQueryParams)}
-                          addLabel="Add param"
-                          keyPlaceholder="Param name"
-                          valuePlaceholder="Value"
-                          onAdd={() => addSelectedHttpEntry('httpQueryParams')}
-                          onChange={(entryId, patch) =>
-                            updateSelectedHttpEntry('httpQueryParams', entryId, patch)
-                          }
-                          onRemove={(entryId) => removeSelectedHttpEntry('httpQueryParams', entryId)}
-                        />
-
-                        <KeyValueListEditor
-                          title="Headers"
-                          description="Set request headers like authorization, content type, or custom app headers."
-                          entries={normalizeKeyValueEntries(selectedNode.data.httpHeaders)}
-                          addLabel="Add header"
-                          keyPlaceholder="Header name"
-                          valuePlaceholder="Header value"
-                          onAdd={() => addSelectedHttpEntry('httpHeaders')}
-                          onChange={(entryId, patch) =>
-                            updateSelectedHttpEntry('httpHeaders', entryId, patch)
-                          }
-                          onRemove={(entryId) => removeSelectedHttpEntry('httpHeaders', entryId)}
-                        />
-
-                        <KeyValueListEditor
-                          title="Cookies"
-                          description="Pass cookie values when the upstream service expects session or browser state."
-                          entries={normalizeKeyValueEntries(selectedNode.data.httpCookies)}
-                          addLabel="Add cookie"
-                          keyPlaceholder="Cookie name"
-                          valuePlaceholder="Cookie value"
-                          onAdd={() => addSelectedHttpEntry('httpCookies')}
-                          onChange={(entryId, patch) =>
-                            updateSelectedHttpEntry('httpCookies', entryId, patch)
-                          }
-                          onRemove={(entryId) => removeSelectedHttpEntry('httpCookies', entryId)}
-                        />
-
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Body type
-                            </label>
-                            <select
-                              value={selectedNode.data.httpBodyType ?? 'none'}
-                              onChange={(event) =>
-                                updateSelectedNode({
-                                  httpBodyType: event.target.value as HttpBodyType,
-                                })
-                              }
-                              className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
-                            >
-                              {HTTP_BODY_TYPE_OPTIONS.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Timeout
-                            </label>
-                            <Input
-                              type="number"
-                              min={0}
-                              value={selectedNode.data.httpTimeoutMs ?? ''}
-                              onChange={(event) =>
-                                updateSelectedNode({
-                                  httpTimeoutMs: event.target.value ? Number(event.target.value) : null,
-                                })
-                              }
-                              placeholder="30000"
-                              className="rounded-2xl border-slate-200 bg-slate-50"
-                            />
-                          </div>
-                        </div>
-
-                        {selectedNode.data.httpBodyType !== 'none' ? (
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Request body
-                            </label>
-                            <Textarea
-                              value={selectedNode.data.httpBody ?? ''}
-                              onChange={(event) => updateSelectedNode({ httpBody: event.target.value })}
-                              placeholder={
-                                selectedNode.data.httpBodyType === 'json'
-                                  ? '{\n  "leadId": "{{manualstart_1201.id}}"\n}'
-                                  : selectedNode.data.httpBodyType === 'form'
-                                    ? 'name=Acme&status=qualified'
-                                    : 'Raw request payload'
-                              }
-                              className="min-h-[130px] rounded-2xl border-slate-200 bg-slate-50 font-mono text-sm"
-                            />
-                          </div>
-                        ) : null}
-                      </section>
-                    ) : null}
-
-                    {selectedNode.data.kind === 'aiAgent' ? (
-                      <section className="space-y-4 px-1">
-                        <h3 className="text-lg font-semibold text-slate-950">Node options</h3>
-                          <div className="grid grid-cols-2 gap-2">
-                            <Button
-                              variant={selectedNode.data.intelligencePromptMode === 'existing' ? 'default' : 'outline'}
-                              className="rounded-2xl"
-                              onClick={() => updateSelectedNode({ intelligencePromptMode: 'existing' })}
-                            >
-                              Existing prompt
-                            </Button>
-                            <Button
-                              variant={selectedNode.data.intelligencePromptMode === 'new' ? 'default' : 'outline'}
-                              className="rounded-2xl"
-                              onClick={() => updateSelectedNode({ intelligencePromptMode: 'new' })}
-                            >
-                              New prompt
-                            </Button>
-                          </div>
-
-                          {selectedNode.data.intelligencePromptMode === 'existing' ? (
-                            <div className="space-y-2">
-                              <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                Prompt ID
-                              </label>
-                              <select
-                                value={selectedNode.data.intelligencePromptId ?? ''}
-                                onChange={(event) => {
-                                  clearNodeWarning(selectedNode.id);
-                                  const prompt = promptOptionMap.get(event.target.value);
-
-                                  updateSelectedNode({
-                                    intelligencePromptId: event.target.value,
-                                    intelligencePrimaryModelId: prompt?.primaryModelId ?? null,
-                                    intelligenceFallbackModelId: prompt?.fallbackModelId ?? null,
-                                    intelligencePrimaryAccessKey: prompt?.primaryAccessKey ?? null,
-                                    intelligenceFallbackAccessKey: prompt?.fallbackAccessKey ?? null,
-                                    intelligenceMaxTokens: prompt?.maxTokens ?? null,
-                                    intelligenceMasterPrompt: prompt?.defPrompt ?? '',
-                                  });
-                                }}
-                                className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
-                              >
-                                <option value="">Select a saved prompt</option>
-                                {intelligencePrompts.map((prompt) => (
-                                  <option key={prompt.id} value={prompt.promptId}>
-                                    {prompt.promptId}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                Prompt ID
-                              </label>
-                              <Input
-                                value={selectedNode.data.intelligencePromptId ?? ''}
-                                onChange={(event) => {
-                                  clearNodeWarning(selectedNode.id);
-                                  updateSelectedNode({ intelligencePromptId: event.target.value });
-                                }}
-                                placeholder="Leave blank to auto-generate"
-                                className="rounded-2xl border-slate-200 bg-slate-50"
-                              />
-                            </div>
-                          )}
-
-                          {selectedNode.data.intelligencePromptMode === 'existing' && selectedPromptOption ? (
-                            <div className="space-y-3 rounded-[1.25rem] border border-slate-200 bg-slate-50/80 p-4">
-                              <div className="space-y-1">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Primary model</p>
-                                <p className="text-sm text-slate-900">
-                                  {selectedNode.data.intelligencePrimaryModelId
-                                    ? buildModelLabel(modelOptionMap.get(selectedNode.data.intelligencePrimaryModelId) ?? {
-                                        id: selectedNode.data.intelligencePrimaryModelId,
-                                        title: 'Unknown model',
-                                        provider: 'unknown',
-                                        model: 'unknown',
-                                      })
-                                    : 'Not configured'}
-                                </p>
-                              </div>
-
-                              <div className="space-y-1">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Fallback model</p>
-                                <p className="text-sm text-slate-900">
-                                  {selectedNode.data.intelligenceFallbackModelId
-                                    ? buildModelLabel(modelOptionMap.get(selectedNode.data.intelligenceFallbackModelId) ?? {
-                                        id: selectedNode.data.intelligenceFallbackModelId,
-                                        title: 'Unknown model',
-                                        provider: 'unknown',
-                                        model: 'unknown',
-                                      })
-                                    : 'None'}
-                                </p>
-                              </div>
-
-                              <div className="space-y-1">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Primary token</p>
-                                <p className="text-sm text-slate-900">
-                                  {selectedNode.data.intelligencePrimaryAccessKey
-                                    ? tokenOptionMap.get(selectedNode.data.intelligencePrimaryAccessKey)?.name ?? 'Unknown token'
-                                    : 'Not configured'}
-                                </p>
-                              </div>
-
-                              <div className="space-y-1">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Fallback token</p>
-                                <p className="text-sm text-slate-900">
-                                  {selectedNode.data.intelligenceFallbackAccessKey
-                                    ? tokenOptionMap.get(selectedNode.data.intelligenceFallbackAccessKey)?.name ?? 'Unknown token'
-                                    : 'None'}
-                                </p>
-                              </div>
-
-                              <div className="space-y-1">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Max tokens</p>
-                                <p className="text-sm text-slate-900">{selectedNode.data.intelligenceMaxTokens ?? 'Default'}</p>
-                              </div>
-
-                              <div className="space-y-1">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Master prompt</p>
-                                <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
-                                  {selectedNode.data.intelligenceMasterPrompt?.trim() || 'No master prompt set for this saved prompt.'}
-                                </p>
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="space-y-2">
-                                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                  Primary model
-                                </label>
-                                <select
-                                  value={selectedNode.data.intelligencePrimaryModelId ? String(selectedNode.data.intelligencePrimaryModelId) : ''}
-                                  onChange={(event) => {
-                                    clearNodeWarning(selectedNode.id);
-                                    updateSelectedNode({
-                                      intelligencePrimaryModelId: event.target.value ? Number(event.target.value) : null,
-                                    });
-                                  }}
-                                  className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
-                                >
-                                  <option value="">Select primary model</option>
-                                  {intelligenceModels.map((model) => (
-                                    <option key={model.id} value={String(model.id)}>
-                                      {buildModelLabel(model)}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              <div className="space-y-2">
-                                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                  Fallback model
-                                </label>
-                                <select
-                                  value={selectedNode.data.intelligenceFallbackModelId ? String(selectedNode.data.intelligenceFallbackModelId) : ''}
-                                  onChange={(event) => {
-                                    clearNodeWarning(selectedNode.id);
-                                    updateSelectedNode({
-                                      intelligenceFallbackModelId: event.target.value ? Number(event.target.value) : null,
-                                    });
-                                  }}
-                                  className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
-                                >
-                                  <option value="">No fallback model</option>
-                                  {intelligenceModels.map((model) => (
-                                    <option key={model.id} value={String(model.id)}>
-                                      {buildModelLabel(model)}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              <div className="space-y-2">
-                                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                  Primary token
-                                </label>
-                                <select
-                                  value={selectedNode.data.intelligencePrimaryAccessKey ? String(selectedNode.data.intelligencePrimaryAccessKey) : ''}
-                                  onChange={(event) => {
-                                    clearNodeWarning(selectedNode.id);
-                                    updateSelectedNode({
-                                      intelligencePrimaryAccessKey: event.target.value ? Number(event.target.value) : null,
-                                    });
-                                  }}
-                                  className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
-                                >
-                                  <option value="">Select primary token</option>
-                                  {intelligenceTokens.map((token) => (
-                                    <option key={token.id} value={String(token.id)}>
-                                      {token.name}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              <div className="space-y-2">
-                                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                  Fallback token
-                                </label>
-                                <select
-                                  value={selectedNode.data.intelligenceFallbackAccessKey ? String(selectedNode.data.intelligenceFallbackAccessKey) : ''}
-                                  onChange={(event) => {
-                                    clearNodeWarning(selectedNode.id);
-                                    updateSelectedNode({
-                                      intelligenceFallbackAccessKey: event.target.value ? Number(event.target.value) : null,
-                                    });
-                                  }}
-                                  className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
-                                >
-                                  <option value="">No fallback token</option>
-                                  {intelligenceTokens.map((token) => (
-                                    <option key={token.id} value={String(token.id)}>
-                                      {token.name}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              <div className="space-y-2">
-                                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                  Max tokens
-                                </label>
-                                <Input
-                                  type="number"
-                                  min={1}
-                                  value={selectedNode.data.intelligenceMaxTokens ?? ''}
-                                  onChange={(event) => {
-                                    clearNodeWarning(selectedNode.id);
-                                    updateSelectedNode({
-                                      intelligenceMaxTokens: event.target.value ? Number(event.target.value) : null,
-                                    });
-                                  }}
-                                  className="rounded-2xl border-slate-200 bg-slate-50"
-                                />
-                              </div>
-
-                              <div className="space-y-2">
-                                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                  Master prompt
-                                </label>
-                                <Textarea
-                                  value={selectedNode.data.intelligenceMasterPrompt ?? ''}
-                                  onChange={(event) => {
-                                    clearNodeWarning(selectedNode.id);
-                                    updateSelectedNode({ intelligenceMasterPrompt: event.target.value });
-                                  }}
-                                  className="min-h-[110px] rounded-2xl border-slate-200 bg-slate-50"
-                                />
-                              </div>
-                            </>
-                          )}
-
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Prompt
-                            </label>
-                            <Textarea
-                              value={selectedNode.data.intelligencePrompt ?? ''}
-                              onChange={(event) => {
-                                clearNodeWarning(selectedNode.id);
-                                updateSelectedNode({ intelligencePrompt: event.target.value });
-                              }}
-                              className="min-h-[100px] rounded-2xl border-slate-200 bg-slate-50"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Context
-                            </label>
-                            <Textarea
-                              value={selectedNode.data.intelligenceContext ?? ''}
-                              onChange={(event) => {
-                                clearNodeWarning(selectedNode.id);
-                                updateSelectedNode({ intelligenceContext: event.target.value });
-                              }}
-                              className="min-h-[110px] rounded-2xl border-slate-200 bg-slate-50"
-                            />
-                          </div>
-
-                          <Button
-                            className="w-full rounded-2xl"
-                            onClick={async () => {
-                              try {
-                                await executeAiAgentNode(selectedNode);
-                              } catch {
-                                // Node state and debugger logs already capture the failure.
-                              }
-                            }}
-                          >
-                            <Bot className="mr-2 h-4 w-4" />
-                            Generate response
-                          </Button>
-
-                          {selectedNode.data.intelligenceWarning ? (
-                            <Alert variant="destructive" className="rounded-[1.25rem] border border-rose-200 bg-rose-50 text-rose-700 [&>svg]:text-rose-600">
-                              <TriangleAlert className="h-4 w-4" />
-                              <AlertTitle>Pipeline warning</AlertTitle>
-                              <AlertDescription>{selectedNode.data.intelligenceWarning}</AlertDescription>
-                            </Alert>
-                          ) : null}
-                      </section>
-                    ) : null}
-
-                    {selectedNode.data.kind === 'aiAgent' && selectedNode.data.intelligenceLastResponse ? (
-                      <section className="space-y-4 px-1">
-                        <h3 className="text-lg font-semibold text-slate-950">Response</h3>
-                        <div className="space-y-3 rounded-[1.4rem] border border-slate-200 bg-slate-50/80 p-4">
-                          <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-medium text-slate-900">AI response</p>
-                            {selectedNode.data.intelligenceLastModel ? (
-                              <Badge className="rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-white">
-                                {selectedNode.data.intelligenceLastModel}
-                              </Badge>
-                            ) : null}
-                          </div>
-                          <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
-                            {selectedNode.data.intelligenceLastResponse}
-                          </p>
-                          {selectedNode.data.intelligenceLastRenderedPrompt ? (
-                            <div className="rounded-2xl border border-slate-200 bg-white p-3">
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                Rendered prompt
-                              </p>
-                              <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-slate-600">
-                                {selectedNode.data.intelligenceLastRenderedPrompt}
-                              </p>
-                            </div>
-                          ) : null}
-                        </div>
-                      </section>
-                    ) : null}
-
-                    {selectedNode.data.kind === 'http' &&
-                    (selectedNode.data.httpLastResponseStatus || selectedNode.data.httpLastResponseBody?.trim()) ? (
-                      <section className="space-y-4 px-1">
-                        <h3 className="text-lg font-semibold text-slate-950">Response</h3>
-                        <div className="space-y-3 rounded-[1.4rem] border border-slate-200 bg-slate-50/80 p-4">
-                          <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-medium text-slate-900">HTTP response</p>
-                            {selectedNode.data.httpLastResponseStatus ? (
-                              <Badge className="rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-white">
-                                Status {selectedNode.data.httpLastResponseStatus}
-                              </Badge>
-                            ) : null}
-                          </div>
-
-                          {normalizeKeyValueEntries(selectedNode.data.httpLastResponseHeaders).length > 0 ? (
-                            <div className="space-y-2">
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                Response headers
-                              </p>
-                              <div className="space-y-1 text-sm text-slate-700">
-                                {normalizeKeyValueEntries(selectedNode.data.httpLastResponseHeaders).map((entry) => (
-                                  <p key={entry.id}>
-                                    <span className="font-medium text-slate-900">{entry.key}</span>: {entry.value}
-                                  </p>
-                                ))}
-                              </div>
-                            </div>
-                          ) : null}
-
-                          {selectedNode.data.httpLastResponseBody?.trim() ? (
-                            <div className="rounded-2xl border border-slate-200 bg-white p-3">
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                Response body
-                              </p>
-                              <p className="mt-2 whitespace-pre-wrap font-mono text-xs leading-5 text-slate-600">
-                                {selectedNode.data.httpLastResponseBody}
-                              </p>
-                            </div>
-                          ) : null}
-                        </div>
-                      </section>
-                    ) : null}
-
-                    <section className="space-y-4 px-1">
-                        <h3 className="text-lg font-semibold text-slate-950">Node basics</h3>
-                        <div className="space-y-2">
-                          <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                            Label
-                          </label>
-                          <Input
-                            value={selectedNode.data.label}
-                            onChange={(event) => {
-                              clearNodeWarning(selectedNode.id);
-                              updateSelectedNodeLabel(event.target.value);
-                            }}
-                            className="rounded-2xl border-slate-200 bg-slate-50"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                            Description
-                          </label>
-                          <Textarea
-                            value={selectedNode.data.description}
-                            onChange={(event) => {
-                              clearNodeWarning(selectedNode.id);
-                              updateSelectedNode({ description: event.target.value });
-                            }}
-                            className="min-h-[110px] rounded-2xl border-slate-200 bg-slate-50"
-                          />
-                        </div>
-                    </section>
-
-                    <section className="space-y-3 px-1">
-                      <h3 className="text-lg font-semibold text-slate-950">Quick actions</h3>
-                      <div className="grid gap-2">
-                        <Button variant="outline" className="justify-start rounded-2xl border-slate-200 bg-slate-50" onClick={handleDuplicate}>
-                          <Copy className="mr-2 h-4 w-4" />
-                          Duplicate node
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="justify-start rounded-2xl border-slate-200 bg-slate-50"
-                          onClick={() => {
-                            setPendingParentId(selectedNode.id);
-                            appendConsole(`Choose a node to place after ${selectedNode.data.label}.`);
-                          }}
-                        >
-                          <Plus className="mr-2 h-4 w-4" />
-                          Add child node
-                        </Button>
-                        <Button variant="destructive" className="justify-start rounded-2xl" onClick={handleDelete}>
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Remove node
-                        </Button>
-                      </div>
-                    </section>
-                  </>
-                ) : null}
-              </div>
-            </ScrollArea>
-          </aside>
+                setPendingParentId(selectedNode.id);
+                appendConsole(`Choose a node to place after ${selectedNode.data.label}.`);
+              }}
+              onDuplicate={handleDuplicate}
+              onDelete={handleDelete}
+              getNodeTone={getNodeTone}
+            />
           ) : null}
         </div>
 
