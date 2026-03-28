@@ -85,6 +85,7 @@ type PipelineNodeKind =
 type PipelineNodeStatus = 'idle' | 'running' | 'success' | 'error';
 
 type PipelineNodeData = {
+  referenceId: string;
   label: string;
   kind: PipelineNodeKind;
   category: string;
@@ -314,12 +315,274 @@ const templateMap = new Map(
   nodeCategories.flatMap((category) => category.templates.map((template) => [template.kind, template] as const))
 );
 
+function createReferenceBase(label: string): string {
+  const normalized = label
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+  return normalized || 'node';
+}
+
+function createNodeReferenceId(label: string, used = new Set<string>()): string {
+  const base = createReferenceBase(label);
+  let candidate = `${base}_${Math.floor(1000 + Math.random() * 9000)}`;
+
+  while (used.has(candidate)) {
+    candidate = `${base}_${Math.floor(1000 + Math.random() * 9000)}`;
+  }
+
+  used.add(candidate);
+  return candidate;
+}
+
+function extractReferenceSuffix(referenceId: string): string {
+  const match = referenceId.match(/_(\d+)$/);
+  return match?.[1] ?? `${Math.floor(1000 + Math.random() * 9000)}`;
+}
+
+function rebuildReferenceIdFromLabel(referenceId: string, label: string): string {
+  return `${createReferenceBase(label)}_${extractReferenceSuffix(referenceId)}`;
+}
+
+function replaceReferenceInString(value: string, oldReferenceId: string, newReferenceId: string): string {
+  if (!value.includes('{{') || oldReferenceId === newReferenceId) {
+    return value;
+  }
+
+  return value.replace(/{{\s*([^{}]+?)\s*}}/g, (match, expression) => {
+    const parts = String(expression)
+      .split('.')
+      .map((segment) => segment.trim())
+      .filter(Boolean);
+
+    if (parts[0] !== oldReferenceId) {
+      return match;
+    }
+
+    return `{{${[newReferenceId, ...parts.slice(1)].join('.')}}}`;
+  });
+}
+
+function replaceReferenceUsages<T>(value: T, oldReferenceId: string, newReferenceId: string): T {
+  if (typeof value === 'string') {
+    return replaceReferenceInString(value, oldReferenceId, newReferenceId) as T;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => replaceReferenceUsages(item, oldReferenceId, newReferenceId)) as T;
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entryValue]) => [
+        key,
+        replaceReferenceUsages(entryValue, oldReferenceId, newReferenceId),
+      ])
+    ) as T;
+  }
+
+  return value;
+}
+
+function replaceReferenceUsagesInNodeData(
+  data: PipelineNodeData,
+  oldReferenceId: string,
+  newReferenceId: string
+): PipelineNodeData {
+  const { referenceId, ...rest } = data;
+
+  return {
+    referenceId,
+    ...replaceReferenceUsages(rest, oldReferenceId, newReferenceId),
+  };
+}
+
+function coerceStructuredValue(value: unknown): unknown {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return '';
+  }
+
+  if (
+    (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+    (trimmed.startsWith('[') && trimmed.endsWith(']'))
+  ) {
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      return value;
+    }
+  }
+
+  return value;
+}
+
+function buildNodeReferenceValue(node: PipelineFlowNode) {
+  return {
+    id: node.data.referenceId,
+    nodeId: node.id,
+    title: node.data.label,
+    subtitle: node.data.subtitle,
+    description: node.data.description,
+    summary: node.data.summary,
+    category: node.data.category,
+    kind: node.data.kind,
+    type: getNodeTypeLabel(node.data.kind),
+    status: node.data.status,
+    activity: node.data.activity,
+    promptMode: node.data.intelligencePromptMode ?? '',
+    promptId: node.data.intelligencePromptId ?? '',
+    query: node.data.intelligencePrompt ?? '',
+    masterPrompt: node.data.intelligenceMasterPrompt ?? '',
+    context: coerceStructuredValue(node.data.intelligenceContext ?? ''),
+    response: coerceStructuredValue(node.data.intelligenceLastResponse ?? ''),
+    renderedPrompt: node.data.intelligenceLastRenderedPrompt ?? '',
+    usedModel: node.data.intelligenceLastModel ?? '',
+    primaryModelId: node.data.intelligencePrimaryModelId ?? null,
+    fallbackModelId: node.data.intelligenceFallbackModelId ?? null,
+    primaryAccessKey: node.data.intelligencePrimaryAccessKey ?? null,
+    fallbackAccessKey: node.data.intelligenceFallbackAccessKey ?? null,
+    maxTokens: node.data.intelligenceMaxTokens ?? null,
+    warning: node.data.intelligenceWarning ?? '',
+  };
+}
+
+function getValueAtPath(source: unknown, path: string[]): unknown {
+  let current = source;
+
+  for (const segment of path) {
+    if (current === null || current === undefined) {
+      return undefined;
+    }
+
+    if (Array.isArray(current) && /^\d+$/.test(segment)) {
+      current = current[Number(segment)];
+      continue;
+    }
+
+    if (typeof current === 'object' && segment in (current as Record<string, unknown>)) {
+      current = (current as Record<string, unknown>)[segment];
+      continue;
+    }
+
+    return undefined;
+  }
+
+  return current;
+}
+
+function formatTemplateValue(value: unknown, pretty = false): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+
+  return JSON.stringify(value, null, pretty ? 2 : 0);
+}
+
+function resolveNodeTemplate(value: string, nodes: PipelineFlowNode[]): string {
+  if (!value.includes('{{')) {
+    return value;
+  }
+
+  const nodeMap = new Map(nodes.filter((node) => !node.data.pending).map((node) => [node.data.referenceId, node]));
+  const fullMatch = value.trim().match(/^{{\s*([^{}]+?)\s*}}$/);
+
+  if (fullMatch) {
+    const [referenceKey, ...path] = fullMatch[1].split('.').map((segment) => segment.trim()).filter(Boolean);
+    const node = nodeMap.get(referenceKey);
+
+    if (!node) {
+      return value;
+    }
+
+    const resolved = path.length === 0 ? buildNodeReferenceValue(node) : getValueAtPath(buildNodeReferenceValue(node), path);
+    return formatTemplateValue(resolved, true);
+  }
+
+  return value.replace(/{{\s*([^{}]+?)\s*}}/g, (match, expression) => {
+    const [referenceKey, ...path] = String(expression)
+      .split('.')
+      .map((segment) => segment.trim())
+      .filter(Boolean);
+    const node = nodeMap.get(referenceKey);
+
+    if (!node) {
+      return match;
+    }
+
+    const resolved = path.length === 0 ? buildNodeReferenceValue(node) : getValueAtPath(buildNodeReferenceValue(node), path);
+    return formatTemplateValue(resolved);
+  });
+}
+
+function getReferenceFieldIds(node: PipelineFlowNode): string[] {
+  const fields = ['id', 'nodeId', 'title', 'subtitle', 'description', 'summary', 'category', 'kind', 'type', 'status', 'activity'];
+
+  if (node.data.kind === 'aiAgent') {
+    fields.push(
+      'promptMode',
+      'promptId',
+      'query',
+      'masterPrompt',
+      'context',
+      'response',
+      'renderedPrompt',
+      'usedModel',
+      'primaryModelId',
+      'fallbackModelId',
+      'primaryAccessKey',
+      'fallbackAccessKey',
+      'maxTokens',
+      'warning'
+    );
+  }
+
+  return fields;
+}
+
+function ensureReferenceIds(nodes: PipelineFlowNode[]): PipelineFlowNode[] {
+  const used = new Set<string>();
+
+  return nodes.map((node) => {
+    const existing = node.data.referenceId?.trim();
+    const referenceId = existing && !used.has(existing) ? existing : createNodeReferenceId(node.data.label, used);
+
+    if (existing && !used.has(existing)) {
+      used.add(existing);
+    }
+
+    return {
+      ...node,
+      data: {
+        ...node.data,
+        referenceId,
+      },
+    };
+  });
+}
+
 const initialNodes: PipelineFlowNode[] = [
   {
     id: 'manual-start',
     type: 'pipelineNode',
     position: { x: 100, y: 180 },
     data: {
+      referenceId: 'manualstart_1201',
       label: 'Manual Start',
       kind: 'manualStart',
       category: 'Triggers',
@@ -335,6 +598,7 @@ const initialNodes: PipelineFlowNode[] = [
     type: 'pipelineNode',
     position: { x: 430, y: 180 },
     data: {
+      referenceId: 'fetchlead_1202',
       label: 'Fetch Lead',
       kind: 'http',
       category: 'Actions',
@@ -350,6 +614,7 @@ const initialNodes: PipelineFlowNode[] = [
     type: 'pipelineNode',
     position: { x: 760, y: 180 },
     data: {
+      referenceId: 'scorewithai_1203',
       label: 'Score with AI',
       kind: 'aiAgent',
       category: 'Actions',
@@ -378,6 +643,7 @@ const initialNodes: PipelineFlowNode[] = [
     type: 'pipelineNode',
     position: { x: 1090, y: 180 },
     data: {
+      referenceId: 'schedulefollowup_1204',
       label: 'Schedule Follow-up',
       kind: 'googleCalendar',
       category: 'Integrations',
@@ -532,12 +798,14 @@ function createNode(
 ): PipelineFlowNode {
   const template = templateMap.get(kind);
   const id = `${kind}-${Math.random().toString(36).slice(2, 8)}`;
+  const { referenceId: _referenceId, ...restOverrides } = overrides ?? {};
 
   return {
     id,
     type: 'pipelineNode',
     position,
     data: {
+      referenceId: createNodeReferenceId(restOverrides.label ?? template?.label ?? 'Node'),
       label: template?.label ?? 'Node',
       kind,
       category: template?.category ?? 'Custom',
@@ -564,7 +832,7 @@ function createNode(
             intelligenceWarning: '',
           }
         : {}),
-      ...overrides,
+      ...restOverrides,
     },
   };
 }
@@ -692,6 +960,7 @@ function PipelineEditorCanvas({
   const [isRunning, setIsRunning] = useState(false);
   const [pendingParentId, setPendingParentId] = useState<string | null>(null);
   const [pendingConnection, setPendingConnection] = useState<PendingConnectionDraft | null>(null);
+  const [referenceSaveNotice, setReferenceSaveNotice] = useState<string | null>(null);
   const [showDebugger, setShowDebugger] = useState(true);
   const [consoleLines, setConsoleLines] = useState<string[]>([
     'Editor ready. Build on the canvas or add a child from any node.',
@@ -712,8 +981,9 @@ function PipelineEditorCanvas({
     try {
       const parsed = JSON.parse(stored) as { nodes?: PipelineFlowNode[]; edges?: Edge[] };
       if (Array.isArray(parsed.nodes) && parsed.nodes.length > 0) {
-        setNodes(parsed.nodes);
-        setSelectedId(parsed.nodes[0]?.id ?? null);
+        const hydratedNodes = ensureReferenceIds(parsed.nodes);
+        setNodes(hydratedNodes);
+        setSelectedId(hydratedNodes[0]?.id ?? null);
       }
       if (Array.isArray(parsed.edges)) {
         setEdges(parsed.edges);
@@ -893,6 +1163,7 @@ function PipelineEditorCanvas({
           connectable: false,
           deletable: false,
           data: {
+            referenceId: placeholderId,
             label: '',
             kind: 'end',
             category: '',
@@ -953,6 +1224,7 @@ function PipelineEditorCanvas({
       })
     );
     appendConsole('Saved the local pipeline draft.');
+    setReferenceSaveNotice(null);
 
     window.setTimeout(() => {
       setSaveState('saved');
@@ -966,6 +1238,7 @@ function PipelineEditorCanvas({
     setSelectedId('http-fetch');
     setPendingParentId(null);
     setPendingConnection(null);
+    setReferenceSaveNotice(null);
     window.localStorage.removeItem(STORAGE_KEY);
     appendConsole('Reset the editor back to the starter flow.');
   }, [appendConsole, setEdges, setNodes]);
@@ -1068,6 +1341,61 @@ function PipelineEditorCanvas({
     [selectedId, setNodes]
   );
 
+  const updateSelectedNodeLabel = useCallback(
+    (label: string) => {
+      if (!selectedId) {
+        return;
+      }
+
+      let renamedReferenceId: string | null = null;
+
+      setNodes((currentNodes) => {
+        const currentNode = currentNodes.find((node) => node.id === selectedId) ?? null;
+
+        if (!currentNode) {
+          return currentNodes;
+        }
+
+        const previousReferenceId = currentNode.data.referenceId;
+        const nextReferenceId = rebuildReferenceIdFromLabel(previousReferenceId, label);
+        renamedReferenceId = nextReferenceId;
+
+        const renamedNodes = currentNodes.map((node) =>
+          node.id === selectedId
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  label,
+                  referenceId: nextReferenceId,
+                },
+              }
+            : node
+        );
+
+        if (previousReferenceId === nextReferenceId) {
+          return renamedNodes;
+        }
+
+        return renamedNodes.map((node) =>
+          node.id === selectedId || node.data.pending
+            ? node
+            : {
+                ...node,
+                data: replaceReferenceUsagesInNodeData(node.data, previousReferenceId, nextReferenceId),
+              }
+        );
+      });
+
+      setReferenceSaveNotice(
+        renamedReferenceId
+          ? `Save to persist the updated node title and refreshed references (${renamedReferenceId}).`
+          : 'Save to persist the updated node title and refreshed references.'
+      );
+    },
+    [selectedId, setNodes]
+  );
+
   const executeAiAgentNode = useCallback(
     async (node: PipelineFlowNode) => {
       if (node.data.kind !== 'aiAgent') {
@@ -1090,9 +1418,9 @@ function PipelineEditorCanvas({
         primaryAccessKey: node.data.intelligencePrimaryAccessKey ?? null,
         fallbackAccessKey: node.data.intelligenceFallbackAccessKey ?? null,
         maxTokens: node.data.intelligenceMaxTokens ?? null,
-        masterPrompt: node.data.intelligenceMasterPrompt?.trim() || null,
-        prompt: node.data.intelligencePrompt?.trim() || '',
-        context: node.data.intelligenceContext?.trim() || null,
+        masterPrompt: resolveNodeTemplate(node.data.intelligenceMasterPrompt?.trim() || '', nodes).trim() || null,
+        prompt: resolveNodeTemplate(node.data.intelligencePrompt?.trim() || '', nodes).trim(),
+        context: resolveNodeTemplate(node.data.intelligenceContext?.trim() || '', nodes).trim() || null,
       };
 
       setNodes((currentNodes) =>
@@ -1154,7 +1482,7 @@ function PipelineEditorCanvas({
         return false;
       }
     },
-    [appendConsole, getAiAgentValidationError, setNodeWarning, setNodes]
+    [appendConsole, getAiAgentValidationError, nodes, setNodeWarning, setNodes]
   );
 
   const handleRun = useCallback(async () => {
@@ -1348,6 +1676,56 @@ function PipelineEditorCanvas({
                         </Badge>
                       </div>
                     </div>
+
+                    <Card className="rounded-[1.7rem] border-white/80 bg-white/92 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="text-base text-slate-950">References</CardTitle>
+                        <CardDescription>Use this node's identifier and field IDs from other nodes.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                            Node identifier
+                          </label>
+                          <Input value={selectedNode.data.referenceId} readOnly className="rounded-2xl border-slate-200 bg-slate-50 font-mono text-sm" />
+                          <p className="text-xs leading-5 text-slate-500">
+                            Changing the title updates the readable part automatically and keeps this node&apos;s numeric suffix unchanged.
+                          </p>
+                        </div>
+
+                        {referenceSaveNotice ? (
+                          <Alert className="rounded-[1.25rem] border border-amber-200 bg-amber-50 text-amber-900 [&>svg]:text-amber-700">
+                            <TriangleAlert className="h-4 w-4" />
+                            <AlertTitle>Save changes</AlertTitle>
+                            <AlertDescription>{referenceSaveNotice}</AlertDescription>
+                          </Alert>
+                        ) : null}
+
+                        <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50/80 p-4 text-sm text-slate-700">
+                          <p className="font-medium text-slate-900">{`{{${selectedNode.data.referenceId}}}`}</p>
+                          <p className="mt-1 text-xs leading-5 text-slate-500">Returns the full node JSON payload.</p>
+                          <p className="mt-3 font-medium text-slate-900">{`{{${selectedNode.data.referenceId}.title}}`}</p>
+                          <p className="mt-1 text-xs leading-5 text-slate-500">Accesses a specific field by its ID.</p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                            Available field ids
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {getReferenceFieldIds(selectedNode).map((fieldId) => (
+                              <Badge
+                                key={fieldId}
+                                variant="outline"
+                                className="rounded-full border-slate-200 bg-white font-mono text-[11px] text-slate-700"
+                              >
+                                {fieldId}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
                     {selectedNode.data.kind === 'aiAgent' ? (
                       <Card className="rounded-[1.7rem] border-white/80 bg-white/92 shadow-sm">
@@ -1638,7 +2016,7 @@ function PipelineEditorCanvas({
                             value={selectedNode.data.label}
                             onChange={(event) => {
                               clearNodeWarning(selectedNode.id);
-                              updateSelectedNode({ label: event.target.value });
+                              updateSelectedNodeLabel(event.target.value);
                             }}
                             className="rounded-2xl border-slate-200 bg-slate-50"
                           />
@@ -1827,43 +2205,6 @@ function PipelineEditorCanvas({
                       ) : null}
                     </div>
 
-                    <Separator />
-
-                    <div className="rounded-[1.7rem] border border-white/80 bg-white/92 p-5 shadow-sm">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Overview</p>
-                      <h2 className="mt-1 text-xl font-semibold text-slate-950">Flow outline</h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">
-                        Select a node to edit it, or scan the flow from left to right here.
-                      </p>
-                    </div>
-
-                    <Card className="rounded-[1.7rem] border-white/80 bg-white/92 shadow-sm">
-                      <CardContent className="space-y-3 p-5">
-                        {flowNodes.map((node, index) => (
-                          (() => {
-                            const Icon = templateMap.get(node.data.kind)?.icon ?? Workflow;
-
-                            return (
-                              <button
-                                key={node.id}
-                                type="button"
-                                onClick={() => setSelectedId(node.id)}
-                                className="flex w-full items-center gap-3 rounded-[1.3rem] border border-slate-200 bg-slate-50 px-3 py-3 text-left transition-all hover:border-slate-300 hover:bg-white"
-                              >
-                                <div className={cn('flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-r text-white', getNodeTone(node.data.kind).header)}>
-                                  <Icon className="h-5 w-5" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="font-medium text-slate-950">{node.data.label}</div>
-                                  <div className="text-xs uppercase tracking-[0.18em] text-slate-400">{node.data.subtitle}</div>
-                                </div>
-                                <span className="text-xs text-slate-400">{index + 1}</span>
-                              </button>
-                            );
-                          })()
-                        ))}
-                      </CardContent>
-                    </Card>
                   </>
                 )}
               </div>
