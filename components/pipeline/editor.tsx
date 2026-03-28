@@ -61,7 +61,7 @@ import { Logo } from '@/components/logo';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
@@ -622,7 +622,7 @@ const initialNodes: PipelineFlowNode[] = [
       subtitle: 'Reasoning step',
       status: 'idle',
       activity: 'Prepared to analyze incoming context.',
-      intelligencePromptMode: 'new',
+      intelligencePromptMode: 'existing',
       intelligencePromptId: '',
       intelligencePrimaryModelId: null,
       intelligenceFallbackModelId: null,
@@ -815,7 +815,7 @@ function createNode(
       activity: `Ready to run ${template?.label?.toLowerCase() ?? 'node'}.`,
       ...(kind === 'aiAgent'
         ? {
-            intelligencePromptMode: 'new' as const,
+            intelligencePromptMode: 'existing' as const,
             intelligencePromptId: '',
             intelligencePrimaryModelId: null,
             intelligenceFallbackModelId: null,
@@ -1013,6 +1013,14 @@ function PipelineEditorCanvas({
     () => new Map(intelligencePrompts.map((prompt) => [prompt.promptId, prompt])),
     [intelligencePrompts]
   );
+  const modelOptionMap = useMemo(
+    () => new Map(intelligenceModels.map((model) => [model.id, model])),
+    [intelligenceModels]
+  );
+  const tokenOptionMap = useMemo(
+    () => new Map(intelligenceTokens.map((token) => [token.id, token])),
+    [intelligenceTokens]
+  );
 
   const filteredTemplatesByCategory = useMemo(() => {
     const normalized = search.trim().toLowerCase();
@@ -1046,6 +1054,14 @@ function PipelineEditorCanvas({
       return left.position.x - right.position.x;
       });
   }, [nodes]);
+
+  const selectedPromptOption = useMemo(
+    () =>
+      selectedNode?.data.kind === 'aiAgent' && selectedNode.data.intelligencePromptId
+        ? promptOptionMap.get(selectedNode.data.intelligencePromptId) ?? null
+        : null,
+    [promptOptionMap, selectedNode]
+  );
 
   const appendConsole = useCallback((line: string) => {
     const time = new Date().toLocaleTimeString();
@@ -1784,80 +1800,22 @@ function PipelineEditorCanvas({
                   </>
                 ) : selectedNode ? (
                   <>
-                    <div className="rounded-[1.7rem] border border-white/80 bg-white/92 p-5 shadow-sm">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Inspector</p>
-                          <h2 className="mt-1 text-xl font-semibold text-slate-950">{selectedNode.data.label}</h2>
-                          <p className="mt-2 text-sm leading-6 text-slate-600">
-                            Adjust the selected step without leaving the canvas.
-                          </p>
-                        </div>
-                        <Badge className="rounded-full border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-50">
-                          {selectedNode.data.kind}
-                        </Badge>
-                      </div>
+                    <div className="space-y-1 px-1">
+                      <h2 className="text-xl font-semibold text-slate-950">{selectedNode.data.label}</h2>
+                      <p className="font-mono text-sm text-slate-500">{selectedNode.data.referenceId}</p>
                     </div>
 
-                    <Card className="rounded-[1.7rem] border-white/80 bg-white/92 shadow-sm">
-                      <CardHeader>
-                        <CardTitle className="text-base text-slate-950">References</CardTitle>
-                        <CardDescription>Use this node's identifier and field IDs from other nodes.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                          <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                            Node identifier
-                          </label>
-                          <Input value={selectedNode.data.referenceId} readOnly className="rounded-2xl border-slate-200 bg-slate-50 font-mono text-sm" />
-                          <p className="text-xs leading-5 text-slate-500">
-                            Changing the title updates the readable part automatically and keeps this node&apos;s numeric suffix unchanged.
-                          </p>
-                        </div>
-
-                        {referenceSaveNotice ? (
-                          <Alert className="rounded-[1.25rem] border border-amber-200 bg-amber-50 text-amber-900 [&>svg]:text-amber-700">
-                            <TriangleAlert className="h-4 w-4" />
-                            <AlertTitle>Save changes</AlertTitle>
-                            <AlertDescription>{referenceSaveNotice}</AlertDescription>
-                          </Alert>
-                        ) : null}
-
-                        <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50/80 p-4 text-sm text-slate-700">
-                          <p className="font-medium text-slate-900">{`{{${selectedNode.data.referenceId}}}`}</p>
-                          <p className="mt-1 text-xs leading-5 text-slate-500">Returns the full node JSON payload.</p>
-                          <p className="mt-3 font-medium text-slate-900">{`{{${selectedNode.data.referenceId}.title}}`}</p>
-                          <p className="mt-1 text-xs leading-5 text-slate-500">Accesses a specific field by its ID.</p>
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                            Available field ids
-                          </label>
-                          <div className="flex flex-wrap gap-2">
-                            {getReferenceFieldIds(selectedNode).map((fieldId) => (
-                              <Badge
-                                key={fieldId}
-                                variant="outline"
-                                className="rounded-full border-slate-200 bg-white font-mono text-[11px] text-slate-700"
-                              >
-                                {fieldId}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    {referenceSaveNotice ? (
+                      <Alert className="rounded-[1.25rem] border border-amber-200 bg-amber-50 text-amber-900 [&>svg]:text-amber-700">
+                        <TriangleAlert className="h-4 w-4" />
+                        <AlertTitle>Save changes</AlertTitle>
+                        <AlertDescription>{referenceSaveNotice}</AlertDescription>
+                      </Alert>
+                    ) : null}
 
                     {selectedNode.data.kind === 'aiAgent' ? (
-                      <Card className="rounded-[1.7rem] border-white/80 bg-white/92 shadow-sm">
-                        <CardHeader>
-                          <CardTitle className="text-base text-slate-950">Intelligence Agent</CardTitle>
-                          <CardDescription>
-                            Use the saved intelligence models, prompt records, and token bindings from Neup.Cloud.
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
+                      <section className="space-y-4 px-1">
+                        <h3 className="text-lg font-semibold text-slate-950">Node options</h3>
                           <div className="grid grid-cols-2 gap-2">
                             <Button
                               variant={selectedNode.data.intelligencePromptMode === 'existing' ? 'default' : 'outline'}
@@ -1923,129 +1881,193 @@ function PipelineEditorCanvas({
                             </div>
                           )}
 
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Primary model
-                            </label>
-                            <select
-                              value={selectedNode.data.intelligencePrimaryModelId ? String(selectedNode.data.intelligencePrimaryModelId) : ''}
-                              onChange={(event) => {
-                                clearNodeWarning(selectedNode.id);
-                                updateSelectedNode({
-                                  intelligencePrimaryModelId: event.target.value ? Number(event.target.value) : null,
-                                });
-                              }}
-                              className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
-                            >
-                              <option value="">Select primary model</option>
-                              {intelligenceModels.map((model) => (
-                                <option key={model.id} value={String(model.id)}>
-                                  {buildModelLabel(model)}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+                          {selectedNode.data.intelligencePromptMode === 'existing' && selectedPromptOption ? (
+                            <div className="space-y-3 rounded-[1.25rem] border border-slate-200 bg-slate-50/80 p-4">
+                              <div className="space-y-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Primary model</p>
+                                <p className="text-sm text-slate-900">
+                                  {selectedNode.data.intelligencePrimaryModelId
+                                    ? buildModelLabel(modelOptionMap.get(selectedNode.data.intelligencePrimaryModelId) ?? {
+                                        id: selectedNode.data.intelligencePrimaryModelId,
+                                        title: 'Unknown model',
+                                        provider: 'unknown',
+                                        model: 'unknown',
+                                      })
+                                    : 'Not configured'}
+                                </p>
+                              </div>
 
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Fallback model
-                            </label>
-                            <select
-                              value={selectedNode.data.intelligenceFallbackModelId ? String(selectedNode.data.intelligenceFallbackModelId) : ''}
-                              onChange={(event) => {
-                                clearNodeWarning(selectedNode.id);
-                                updateSelectedNode({
-                                  intelligenceFallbackModelId: event.target.value ? Number(event.target.value) : null,
-                                });
-                              }}
-                              className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
-                            >
-                              <option value="">No fallback model</option>
-                              {intelligenceModels.map((model) => (
-                                <option key={model.id} value={String(model.id)}>
-                                  {buildModelLabel(model)}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+                              <div className="space-y-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Fallback model</p>
+                                <p className="text-sm text-slate-900">
+                                  {selectedNode.data.intelligenceFallbackModelId
+                                    ? buildModelLabel(modelOptionMap.get(selectedNode.data.intelligenceFallbackModelId) ?? {
+                                        id: selectedNode.data.intelligenceFallbackModelId,
+                                        title: 'Unknown model',
+                                        provider: 'unknown',
+                                        model: 'unknown',
+                                      })
+                                    : 'None'}
+                                </p>
+                              </div>
 
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Primary token
-                            </label>
-                            <select
-                              value={selectedNode.data.intelligencePrimaryAccessKey ? String(selectedNode.data.intelligencePrimaryAccessKey) : ''}
-                              onChange={(event) => {
-                                clearNodeWarning(selectedNode.id);
-                                updateSelectedNode({
-                                  intelligencePrimaryAccessKey: event.target.value ? Number(event.target.value) : null,
-                                });
-                              }}
-                              className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
-                            >
-                              <option value="">Select primary token</option>
-                              {intelligenceTokens.map((token) => (
-                                <option key={token.id} value={String(token.id)}>
-                                  {token.name}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+                              <div className="space-y-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Primary token</p>
+                                <p className="text-sm text-slate-900">
+                                  {selectedNode.data.intelligencePrimaryAccessKey
+                                    ? tokenOptionMap.get(selectedNode.data.intelligencePrimaryAccessKey)?.name ?? 'Unknown token'
+                                    : 'Not configured'}
+                                </p>
+                              </div>
 
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Fallback token
-                            </label>
-                            <select
-                              value={selectedNode.data.intelligenceFallbackAccessKey ? String(selectedNode.data.intelligenceFallbackAccessKey) : ''}
-                              onChange={(event) => {
-                                clearNodeWarning(selectedNode.id);
-                                updateSelectedNode({
-                                  intelligenceFallbackAccessKey: event.target.value ? Number(event.target.value) : null,
-                                });
-                              }}
-                              className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
-                            >
-                              <option value="">No fallback token</option>
-                              {intelligenceTokens.map((token) => (
-                                <option key={token.id} value={String(token.id)}>
-                                  {token.name}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+                              <div className="space-y-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Fallback token</p>
+                                <p className="text-sm text-slate-900">
+                                  {selectedNode.data.intelligenceFallbackAccessKey
+                                    ? tokenOptionMap.get(selectedNode.data.intelligenceFallbackAccessKey)?.name ?? 'Unknown token'
+                                    : 'None'}
+                                </p>
+                              </div>
 
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Max tokens
-                            </label>
-                            <Input
-                              type="number"
-                              min={1}
-                              value={selectedNode.data.intelligenceMaxTokens ?? ''}
-                              onChange={(event) => {
-                                clearNodeWarning(selectedNode.id);
-                                updateSelectedNode({
-                                  intelligenceMaxTokens: event.target.value ? Number(event.target.value) : null,
-                                });
-                              }}
-                              className="rounded-2xl border-slate-200 bg-slate-50"
-                            />
-                          </div>
+                              <div className="space-y-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Max tokens</p>
+                                <p className="text-sm text-slate-900">{selectedNode.data.intelligenceMaxTokens ?? 'Default'}</p>
+                              </div>
 
-                          <div className="space-y-2">
-                            <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Master prompt
-                            </label>
-                            <Textarea
-                              value={selectedNode.data.intelligenceMasterPrompt ?? ''}
-                              onChange={(event) => {
-                                clearNodeWarning(selectedNode.id);
-                                updateSelectedNode({ intelligenceMasterPrompt: event.target.value });
-                              }}
-                              className="min-h-[110px] rounded-2xl border-slate-200 bg-slate-50"
-                            />
-                          </div>
+                              <div className="space-y-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Master prompt</p>
+                                <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                                  {selectedNode.data.intelligenceMasterPrompt?.trim() || 'No master prompt set for this saved prompt.'}
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="space-y-2">
+                                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                  Primary model
+                                </label>
+                                <select
+                                  value={selectedNode.data.intelligencePrimaryModelId ? String(selectedNode.data.intelligencePrimaryModelId) : ''}
+                                  onChange={(event) => {
+                                    clearNodeWarning(selectedNode.id);
+                                    updateSelectedNode({
+                                      intelligencePrimaryModelId: event.target.value ? Number(event.target.value) : null,
+                                    });
+                                  }}
+                                  className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
+                                >
+                                  <option value="">Select primary model</option>
+                                  {intelligenceModels.map((model) => (
+                                    <option key={model.id} value={String(model.id)}>
+                                      {buildModelLabel(model)}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div className="space-y-2">
+                                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                  Fallback model
+                                </label>
+                                <select
+                                  value={selectedNode.data.intelligenceFallbackModelId ? String(selectedNode.data.intelligenceFallbackModelId) : ''}
+                                  onChange={(event) => {
+                                    clearNodeWarning(selectedNode.id);
+                                    updateSelectedNode({
+                                      intelligenceFallbackModelId: event.target.value ? Number(event.target.value) : null,
+                                    });
+                                  }}
+                                  className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
+                                >
+                                  <option value="">No fallback model</option>
+                                  {intelligenceModels.map((model) => (
+                                    <option key={model.id} value={String(model.id)}>
+                                      {buildModelLabel(model)}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div className="space-y-2">
+                                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                  Primary token
+                                </label>
+                                <select
+                                  value={selectedNode.data.intelligencePrimaryAccessKey ? String(selectedNode.data.intelligencePrimaryAccessKey) : ''}
+                                  onChange={(event) => {
+                                    clearNodeWarning(selectedNode.id);
+                                    updateSelectedNode({
+                                      intelligencePrimaryAccessKey: event.target.value ? Number(event.target.value) : null,
+                                    });
+                                  }}
+                                  className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
+                                >
+                                  <option value="">Select primary token</option>
+                                  {intelligenceTokens.map((token) => (
+                                    <option key={token.id} value={String(token.id)}>
+                                      {token.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div className="space-y-2">
+                                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                  Fallback token
+                                </label>
+                                <select
+                                  value={selectedNode.data.intelligenceFallbackAccessKey ? String(selectedNode.data.intelligenceFallbackAccessKey) : ''}
+                                  onChange={(event) => {
+                                    clearNodeWarning(selectedNode.id);
+                                    updateSelectedNode({
+                                      intelligenceFallbackAccessKey: event.target.value ? Number(event.target.value) : null,
+                                    });
+                                  }}
+                                  className="flex h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none"
+                                >
+                                  <option value="">No fallback token</option>
+                                  {intelligenceTokens.map((token) => (
+                                    <option key={token.id} value={String(token.id)}>
+                                      {token.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div className="space-y-2">
+                                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                  Max tokens
+                                </label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  value={selectedNode.data.intelligenceMaxTokens ?? ''}
+                                  onChange={(event) => {
+                                    clearNodeWarning(selectedNode.id);
+                                    updateSelectedNode({
+                                      intelligenceMaxTokens: event.target.value ? Number(event.target.value) : null,
+                                    });
+                                  }}
+                                  className="rounded-2xl border-slate-200 bg-slate-50"
+                                />
+                              </div>
+
+                              <div className="space-y-2">
+                                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                  Master prompt
+                                </label>
+                                <Textarea
+                                  value={selectedNode.data.intelligenceMasterPrompt ?? ''}
+                                  onChange={(event) => {
+                                    clearNodeWarning(selectedNode.id);
+                                    updateSelectedNode({ intelligenceMasterPrompt: event.target.value });
+                                  }}
+                                  className="min-h-[110px] rounded-2xl border-slate-200 bg-slate-50"
+                                />
+                              </div>
+                            </>
+                          )}
 
                           <div className="space-y-2">
                             <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -2096,40 +2118,40 @@ function PipelineEditorCanvas({
                               <AlertDescription>{selectedNode.data.intelligenceWarning}</AlertDescription>
                             </Alert>
                           ) : null}
-
-                          {selectedNode.data.intelligenceLastResponse ? (
-                            <div className="space-y-3 rounded-[1.4rem] border border-slate-200 bg-slate-50/80 p-4">
-                              <div className="flex items-center justify-between gap-3">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                  Last response
-                                </p>
-                                {selectedNode.data.intelligenceLastModel ? (
-                                  <Badge className="rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-white">
-                                    {selectedNode.data.intelligenceLastModel}
-                                  </Badge>
-                                ) : null}
-                              </div>
-                              <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
-                                {selectedNode.data.intelligenceLastResponse}
-                              </p>
-                              {selectedNode.data.intelligenceLastRenderedPrompt ? (
-                                <div className="rounded-2xl border border-slate-200 bg-white p-3">
-                                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                    Rendered prompt
-                                  </p>
-                                  <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-slate-600">
-                                    {selectedNode.data.intelligenceLastRenderedPrompt}
-                                  </p>
-                                </div>
-                              ) : null}
-                            </div>
-                          ) : null}
-                        </CardContent>
-                      </Card>
+                      </section>
                     ) : null}
 
-                    <Card className="rounded-[1.7rem] border-white/80 bg-white/92 shadow-sm">
-                      <CardContent className="space-y-4 p-5">
+                    {selectedNode.data.kind === 'aiAgent' && selectedNode.data.intelligenceLastResponse ? (
+                      <section className="space-y-4 px-1">
+                        <h3 className="text-lg font-semibold text-slate-950">Response</h3>
+                        <div className="space-y-3 rounded-[1.4rem] border border-slate-200 bg-slate-50/80 p-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-sm font-medium text-slate-900">AI response</p>
+                            {selectedNode.data.intelligenceLastModel ? (
+                              <Badge className="rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-white">
+                                {selectedNode.data.intelligenceLastModel}
+                              </Badge>
+                            ) : null}
+                          </div>
+                          <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                            {selectedNode.data.intelligenceLastResponse}
+                          </p>
+                          {selectedNode.data.intelligenceLastRenderedPrompt ? (
+                            <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                Rendered prompt
+                              </p>
+                              <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-slate-600">
+                                {selectedNode.data.intelligenceLastRenderedPrompt}
+                              </p>
+                            </div>
+                          ) : null}
+                        </div>
+                      </section>
+                    ) : null}
+
+                    <section className="space-y-4 px-1">
+                        <h3 className="text-lg font-semibold text-slate-950">Node basics</h3>
                         <div className="space-y-2">
                           <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                             Label
@@ -2156,41 +2178,11 @@ function PipelineEditorCanvas({
                             className="min-h-[110px] rounded-2xl border-slate-200 bg-slate-50"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                            Summary
-                          </label>
-                          <Textarea
-                            value={selectedNode.data.summary}
-                            onChange={(event) => {
-                              clearNodeWarning(selectedNode.id);
-                              updateSelectedNode({ summary: event.target.value });
-                            }}
-                            className="min-h-[100px] rounded-2xl border-slate-200 bg-slate-50"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                            Activity note
-                          </label>
-                          <Input
-                            value={selectedNode.data.activity}
-                            onChange={(event) => {
-                              clearNodeWarning(selectedNode.id);
-                              updateSelectedNode({ activity: event.target.value });
-                            }}
-                            className="rounded-2xl border-slate-200 bg-slate-50"
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
+                    </section>
 
-                    <Card className="rounded-[1.7rem] border-white/80 bg-white/92 shadow-sm">
-                      <CardHeader>
-                        <CardTitle className="text-base text-slate-950">Quick actions</CardTitle>
-                        <CardDescription>Bridge-like editing shortcuts for fast iteration.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="grid gap-2">
+                    <section className="space-y-3 px-1">
+                      <h3 className="text-lg font-semibold text-slate-950">Quick actions</h3>
+                      <div className="grid gap-2">
                         <Button variant="outline" className="justify-start rounded-2xl border-slate-200 bg-slate-50" onClick={handleDuplicate}>
                           <Copy className="mr-2 h-4 w-4" />
                           Duplicate node
@@ -2210,8 +2202,8 @@ function PipelineEditorCanvas({
                           <Trash2 className="mr-2 h-4 w-4" />
                           Remove node
                         </Button>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </section>
                   </>
                 ) : null}
               </div>
