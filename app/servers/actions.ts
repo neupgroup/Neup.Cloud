@@ -1,14 +1,31 @@
 'use server';
 
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { initializeFirebase } from '../../firebase';
 import { revalidatePath } from 'next/cache';
-import { runCommandOnServer } from '@/services/ssh';
 import { cookies } from 'next/headers';
+import { runCommandOnServer } from '@/services/ssh';
+import { createRecordId, queryAppDb } from '@/lib/app-db';
 
-// This is a temporary solution to get the firestore instance on the server.
-// In a real-world scenario, you would want to use the Firebase Admin SDK for server-side operations.
-const { firestore } = initializeFirebase();
+type ServerRecord = {
+  id: string;
+  name: string;
+  username: string;
+  type: string;
+  provider: string;
+  ram: string | null;
+  storage: string | null;
+  publicIp: string;
+  privateIp: string | null;
+  privateKey: string | null;
+  proxyHandler: string | null;
+  loadBalancer: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+function toPublicServer(server: ServerRecord) {
+  const { privateKey, ...serverData } = server;
+  return serverData;
+}
 
 export async function selectServer(serverId: string, serverName: string) {
   const cookieStore = await cookies();
@@ -19,45 +36,36 @@ export async function selectServer(serverId: string, serverName: string) {
 }
 
 export async function getServers() {
-  const querySnapshot = await getDocs(collection(firestore, "servers"));
-  const serversData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  return serversData;
+  const result = await queryAppDb<ServerRecord>(`
+    SELECT *
+    FROM servers
+    ORDER BY name ASC
+  `);
+
+  return result.rows.map(toPublicServer);
 }
 
 export async function getServer(id: string) {
-  const serverDoc = await getDoc(doc(firestore, "servers", id));
-  if (!serverDoc.exists()) {
-    return null;
-  }
-  const { privateKey, privateIp, ...serverData } = serverDoc.data();
-  return { id: serverDoc.id, ...serverData } as {
-    id: string;
-    name: string;
-    proxyHandler?: string;
-    loadBalancer?: string;
-    [key: string]: any;
-  };
+  const result = await queryAppDb<ServerRecord>(`
+    SELECT *
+    FROM servers
+    WHERE id = $1
+    LIMIT 1
+  `, [id]);
+
+  const server = result.rows[0];
+  return server ? toPublicServer(server) : null;
 }
 
 export async function getServerForRunner(id: string) {
-  const serverDoc = await getDoc(doc(firestore, "servers", id));
-  if (!serverDoc.exists()) {
-    return null;
-  }
-  return { id: serverDoc.id, ...serverDoc.data() } as {
-    id: string;
-    name: string;
-    username: string;
-    type: string;
-    provider: string;
-    ram?: string;
-    storage?: string;
-    publicIp: string;
-    privateIp?: string;
-    privateKey?: string;
-    proxyHandler?: string;
-    loadBalancer?: string;
-  };
+  const result = await queryAppDb<ServerRecord>(`
+    SELECT *
+    FROM servers
+    WHERE id = $1
+    LIMIT 1
+  `, [id]);
+
+  return result.rows[0] ?? null;
 }
 
 export async function getRamUsage(serverId: string) {
@@ -70,7 +78,6 @@ export async function getRamUsage(serverId: string) {
   }
 
   try {
-    // ps -eo rss= lists the resident set size (memory usage) of all processes in kilobytes
     const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, 'ps -eo rss=');
     if (result.code !== 0) {
       return { error: result.stderr || 'Failed to get RAM usage.' };
@@ -82,11 +89,10 @@ export async function getRamUsage(serverId: string) {
       return sum + (isNaN(ram) ? 0 : ram);
     }, 0);
 
-    const usedRam = Math.round(totalRamKb / 1024); // Convert KB to MB
+    const usedRam = Math.round(totalRamKb / 1024);
     return { usedRam };
-
-  } catch (e: any) {
-    return { error: e.message };
+  } catch (error: any) {
+    return { error: error.message };
   }
 }
 
@@ -100,10 +106,6 @@ export async function getSystemStats(serverId: string) {
   }
 
   try {
-    // We get CPU via vmstat (takes 1s) and RAM via free -m
-    // vmstat 1 2 gives 2 lines, we need the last one. Column 15 is 'id' (idle).
-    // free -m gives total and used.
-
     const cmd = `
     vmstat 1 2 | tail -1 | awk '{print 100 - $15}'
     echo "---"
@@ -116,22 +118,19 @@ export async function getSystemStats(serverId: string) {
     }
 
     const [cpuLine, ramLine] = result.stdout.trim().split('---');
-
     const cpuUsage = parseFloat(cpuLine.trim());
     const [totalRam, usedRam] = ramLine.trim().split(' ').map(Number);
-
 
     return {
       cpuUsage: isNaN(cpuUsage) ? 0 : cpuUsage,
       memory: {
         total: totalRam,
         used: usedRam,
-        percentage: totalRam > 0 ? Math.round((usedRam / totalRam) * 100) : 0
-      }
+        percentage: totalRam > 0 ? Math.round((usedRam / totalRam) * 100) : 0,
+      },
     };
-
-  } catch (e: any) {
-    return { error: e.message };
+  } catch (error: any) {
+    return { error: error.message };
   }
 }
 
@@ -151,7 +150,6 @@ export async function getSystemUptime(serverId: string) {
     }
 
     const seconds = parseFloat(result.stdout.trim().split(/\s+/)[0]);
-
     if (isNaN(seconds)) {
       return { error: 'Could not parse uptime data.' };
     }
@@ -159,16 +157,15 @@ export async function getSystemUptime(serverId: string) {
     const d = Math.floor(seconds / (3600 * 24));
     const h = Math.floor((seconds % (3600 * 24)) / 3600);
     const m = Math.floor((seconds % 3600) / 60);
-
     const parts = [];
+
     if (d > 0) parts.push(`${d}d`);
     if (h > 0) parts.push(`${h}h`);
     if (m > 0 || parts.length === 0) parts.push(`${m}m`);
 
     return { uptime: parts.join(' ') };
-
-  } catch (e: any) {
-    return { error: e.message };
+  } catch (error: any) {
+    return { error: error.message };
   }
 }
 
@@ -189,29 +186,30 @@ export async function getServerMemory(serverId: string) {
       "grep -E 'MemTotal|MemAvailable' /proc/meminfo"
     );
 
-    if (result.code !== 0) return { error: `Failed to fetch memory info: ${result.stderr}` };
+    if (result.code !== 0) {
+      return { error: `Failed to fetch memory info: ${result.stderr}` };
+    }
 
     const totalMatch = result.stdout.match(/MemTotal:\s+(\d+)\s+kB/);
     const availMatch = result.stdout.match(/MemAvailable:\s+(\d+)\s+kB/);
 
-    if (!totalMatch) return { error: 'Could not parse MemTotal' };
+    if (!totalMatch) {
+      return { error: 'Could not parse MemTotal' };
+    }
 
-    // MemAvailable might not be present in very old kernels
     const totalKb = parseInt(totalMatch[1], 10);
     const availableKb = availMatch ? parseInt(availMatch[1], 10) : 0;
 
     return {
       totalKb,
       availableKb,
-      // also return simple total/available RAM variable-like structure if user wants simple access
       ram: {
         total: totalKb,
-        available: availableKb
-      }
+        available: availableKb,
+      },
     };
-
-  } catch (e: any) {
-    return { error: e.message };
+  } catch (error: any) {
+    return { error: error.message };
   }
 }
 
@@ -226,42 +224,98 @@ export async function createServer(serverData: {
   privateIp: string;
   privateKey: string;
 }) {
-  await addDoc(collection(firestore, 'servers'), serverData);
+  await queryAppDb(`
+    INSERT INTO servers (
+      id,
+      name,
+      username,
+      type,
+      provider,
+      ram,
+      storage,
+      "publicIp",
+      "privateIp",
+      "privateKey",
+      "createdAt",
+      "updatedAt"
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+  `, [
+    createRecordId(),
+    serverData.name,
+    serverData.username,
+    serverData.type,
+    serverData.provider,
+    serverData.ram ?? null,
+    serverData.storage ?? null,
+    serverData.publicIp,
+    serverData.privateIp,
+    serverData.privateKey,
+  ]);
+
   revalidatePath('/servers');
 }
 
-export async function updateServer(id: string, serverData: Partial<{
-  name: string;
-  username: string;
-  type: string;
-  provider: string;
-  ram: string;
-  storage: string;
-  publicIp: string;
-  privateIp: string;
-  privateKey: string;
-  proxyHandler: string;
-  loadBalancer: string;
-}>) {
-  const updateData: { [key: string]: any } = { ...serverData };
+export async function updateServer(
+  id: string,
+  serverData: Partial<{
+    name: string;
+    username: string;
+    type: string;
+    provider: string;
+    ram: string;
+    storage: string;
+    publicIp: string;
+    privateIp: string;
+    privateKey: string;
+    proxyHandler: string;
+    loadBalancer: string;
+  }>
+) {
+  const fieldMap: Record<string, string> = {
+    name: 'name',
+    username: 'username',
+    type: 'type',
+    provider: 'provider',
+    ram: 'ram',
+    storage: 'storage',
+    publicIp: '"publicIp"',
+    privateIp: '"privateIp"',
+    privateKey: '"privateKey"',
+    proxyHandler: '"proxyHandler"',
+    loadBalancer: '"loadBalancer"',
+  };
 
-  // Only include private IP and private key if they are not empty strings
-  if (serverData.privateIp === '' || serverData.privateIp === undefined) {
-    delete updateData.privateIp;
-  }
-  if (serverData.privateKey === '' || serverData.privateKey === undefined) {
-    delete updateData.privateKey;
+  const entries = Object.entries(serverData).filter(([key, value]) => {
+    if ((key === 'privateIp' || key === 'privateKey') && (value === '' || value === undefined)) {
+      return false;
+    }
+
+    return value !== undefined;
+  });
+
+  if (entries.length === 0) {
+    return;
   }
 
-  if (Object.keys(updateData).length > 0) {
-    await updateDoc(doc(firestore, 'servers', id), updateData);
-    revalidatePath(`/servers/${id}`);
-    revalidatePath('/servers');
-  }
+  const values = entries.map(([, value]) => value);
+  const assignments = entries.map(([key], index) => `${fieldMap[key]} = $${index + 2}`);
+
+  await queryAppDb(`
+    UPDATE servers
+    SET ${assignments.join(', ')}, "updatedAt" = NOW()
+    WHERE id = $1
+  `, [id, ...values]);
+
+  revalidatePath(`/servers/${id}`);
+  revalidatePath('/servers');
 }
 
-
 export async function deleteServer(id: string) {
-  await deleteDoc(doc(firestore, "servers", id));
+  await queryAppDb(`
+    DELETE FROM servers
+    WHERE id = $1
+  `, [id]);
+
   revalidatePath('/servers');
 }

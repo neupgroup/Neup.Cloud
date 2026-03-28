@@ -1034,7 +1034,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
 
         setDeploying(true);
         try {
-            // Save configuration to Firestore first
+            // Save configuration to the database first
             const configToSave: NginxConfiguration = {
                 serverIp: selectedServerIp,
                 configName: configName,

@@ -1,13 +1,10 @@
 'use server';
 
-import { addDoc, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, serverTimestamp, query, where, orderBy } from 'firebase/firestore';
-import { initializeFirebase } from '../../firebase';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { getServerForRunner } from '@/app/servers/actions';
 import { runCommandOnServer } from '@/services/ssh';
-
-const { firestore } = initializeFirebase();
+import { createRecordId, queryAppDb, toIsoString } from '@/lib/app-db';
 
 export type WebServiceType = 'nginx' | 'apache' | 'caddy';
 
@@ -15,7 +12,7 @@ export interface WebServiceConfig {
     id?: string;
     name?: string; // Optional configuration name
     type: WebServiceType;
-    created_on: any; // Firestore Timestamp
+    created_on: any;
     created_by: string;
     value: any; // JSON configuration
     serverId?: string; // Optional server reference
@@ -36,24 +33,35 @@ export async function saveWebServiceConfig(
     name?: string
 ): Promise<{ success: boolean; id?: string; message?: string }> {
     try {
-        const configData: Omit<WebServiceConfig, 'id'> = {
-            type,
+        const id = createRecordId();
+        await queryAppDb(`
+          INSERT INTO webservices (
+            id,
             name,
-            created_on: serverTimestamp(),
-            created_by: createdBy,
+            type,
+            "created_on",
+            "created_by",
             value,
-            serverId,
-            serverName,
-        };
-
-        const docRef = await addDoc(collection(firestore, 'webservices'), configData);
+            "serverId",
+            "serverName"
+          )
+          VALUES ($1, $2, $3, NOW(), $4, $5::jsonb, $6, $7)
+        `, [
+          id,
+          name ?? null,
+          type,
+          createdBy,
+          JSON.stringify(value),
+          serverId ?? null,
+          serverName ?? null,
+        ]);
 
         revalidatePath('/webservices');
         revalidatePath('/webservices/nginx');
 
         return {
             success: true,
-            id: docRef.id,
+            id,
             message: 'Configuration saved successfully'
         };
     } catch (error: any) {
@@ -74,16 +82,14 @@ export async function updateWebServiceConfig(
     name?: string
 ): Promise<{ success: boolean; message?: string }> {
     try {
-        const updateData: any = {
-            value,
-            updated_on: serverTimestamp(),
-        };
-
-        if (name !== undefined) {
-            updateData.name = name;
-        }
-
-        await updateDoc(doc(firestore, 'webservices', id), updateData);
+        await queryAppDb(`
+          UPDATE webservices
+          SET
+            value = $2::jsonb,
+            "updated_on" = NOW(),
+            name = COALESCE($3, name)
+          WHERE id = $1
+        `, [id, JSON.stringify(value), name ?? null]);
 
         revalidatePath('/webservices');
         revalidatePath('/webservices/nginx');
@@ -106,7 +112,10 @@ export async function updateWebServiceConfig(
  */
 export async function deleteWebServiceConfig(id: string): Promise<{ success: boolean; message?: string }> {
     try {
-        await deleteDoc(doc(firestore, 'webservices', id));
+        await queryAppDb(`
+          DELETE FROM webservices
+          WHERE id = $1
+        `, [id]);
 
         revalidatePath('/webservices');
         revalidatePath('/webservices/nginx');
@@ -129,25 +138,27 @@ export async function deleteWebServiceConfig(id: string): Promise<{ success: boo
  */
 export async function getWebServiceConfig(id: string): Promise<WebServiceConfig | null> {
     try {
-        const docSnap = await getDoc(doc(firestore, 'webservices', id));
+        const result = await queryAppDb<any>(`
+          SELECT *
+          FROM webservices
+          WHERE id = $1
+          LIMIT 1
+        `, [id]);
 
-        if (!docSnap.exists()) {
-            return null;
-        }
-
-        return serializeConfig(docSnap.id, docSnap.data());
+        const row = result.rows[0];
+        return row ? serializeConfig(row) : null;
     } catch (error) {
         console.error('Error getting web service config:', error);
         return null;
     }
 }
 
-function serializeConfig(id: string, data: any): WebServiceConfig {
+function serializeConfig(data: any): WebServiceConfig {
     return {
-        id,
+        id: data.id,
         ...data,
-        created_on: data.created_on?.toDate ? data.created_on.toDate().toISOString() : data.created_on,
-        updated_on: data.updated_on?.toDate ? data.updated_on.toDate().toISOString() : data.updated_on,
+        created_on: toIsoString(data.created_on) ?? data.created_on,
+        updated_on: toIsoString(data.updated_on) ?? data.updated_on,
     };
 }
 
@@ -156,14 +167,13 @@ function serializeConfig(id: string, data: any): WebServiceConfig {
  */
 export async function getAllWebServiceConfigs(): Promise<WebServiceConfig[]> {
     try {
-        const querySnapshot = await getDocs(
-            query(
-                collection(firestore, 'webservices'),
-                orderBy('created_on', 'desc')
-            )
-        );
+        const result = await queryAppDb<any>(`
+          SELECT *
+          FROM webservices
+          ORDER BY "created_on" DESC
+        `);
 
-        return querySnapshot.docs.map(doc => serializeConfig(doc.id, doc.data()));
+        return result.rows.map(serializeConfig);
     } catch (error) {
         console.error('Error getting web service configs:', error);
         return [];
@@ -175,22 +185,14 @@ export async function getAllWebServiceConfigs(): Promise<WebServiceConfig[]> {
  */
 export async function getWebServiceConfigsByType(type: WebServiceType): Promise<WebServiceConfig[]> {
     try {
-        const querySnapshot = await getDocs(
-            query(
-                collection(firestore, 'webservices'),
-                where('type', '==', type)
-            )
-        );
+        const result = await queryAppDb<any>(`
+          SELECT *
+          FROM webservices
+          WHERE type = $1
+          ORDER BY "created_on" DESC
+        `, [type]);
 
-        const configs = querySnapshot.docs.map(doc => serializeConfig(doc.id, doc.data()));
-
-        // Sort by created_on desc in memory to avoid needing a composite index
-        // Sort by created_on desc in memory to avoid needing a composite index
-        return configs.sort((a, b) => {
-            const timeA = new Date(a.created_on).getTime();
-            const timeB = new Date(b.created_on).getTime();
-            return timeB - timeA;
-        });
+        return result.rows.map(serializeConfig);
     } catch (error) {
         console.error('Error getting web service configs by type:', error);
         return [];
@@ -202,15 +204,14 @@ export async function getWebServiceConfigsByType(type: WebServiceType): Promise<
  */
 export async function getWebServiceConfigsByServer(serverId: string): Promise<WebServiceConfig[]> {
     try {
-        const querySnapshot = await getDocs(
-            query(
-                collection(firestore, 'webservices'),
-                where('serverId', '==', serverId),
-                orderBy('created_on', 'desc')
-            )
-        );
+        const result = await queryAppDb<any>(`
+          SELECT *
+          FROM webservices
+          WHERE "serverId" = $1
+          ORDER BY "created_on" DESC
+        `, [serverId]);
 
-        return querySnapshot.docs.map(doc => serializeConfig(doc.id, doc.data()));
+        return result.rows.map(serializeConfig);
     } catch (error) {
         console.error('Error getting web service configs by server:', error);
         return [];
@@ -225,25 +226,24 @@ export async function getLatestWebServiceConfig(
     serverId?: string
 ): Promise<WebServiceConfig | null> {
     try {
-        let q = query(
-            collection(firestore, 'webservices'),
-            where('type', '==', type)
-        );
+        const result = serverId
+          ? await queryAppDb<any>(`
+              SELECT *
+              FROM webservices
+              WHERE type = $1 AND "serverId" = $2
+              ORDER BY "created_on" DESC
+              LIMIT 1
+            `, [type, serverId])
+          : await queryAppDb<any>(`
+              SELECT *
+              FROM webservices
+              WHERE type = $1
+              ORDER BY "created_on" DESC
+              LIMIT 1
+            `, [type]);
 
-        if (serverId) {
-            q = query(q, where('serverId', '==', serverId));
-        }
-
-        q = query(q, orderBy('created_on', 'desc'));
-
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            return null;
-        }
-
-        const firstDoc = querySnapshot.docs[0];
-        return serializeConfig(firstDoc.id, firstDoc.data());
+        const row = result.rows[0];
+        return row ? serializeConfig(row) : null;
     } catch (error) {
         console.error('Error getting latest web service config:', error);
         return null;

@@ -60,7 +60,13 @@ export default function ErrorsPage() {
     fetchErrors();
   }, []);
 
-  const getBadgeInfo = (level: string) => {
+  const getBadgeInfo = (
+    level: string
+  ): {
+    variant: 'default' | 'destructive' | 'outline' | 'secondary' | null;
+    className: string;
+    icon: React.ReactNode;
+  } => {
     switch (level) {
       case 'ERROR':
         return {

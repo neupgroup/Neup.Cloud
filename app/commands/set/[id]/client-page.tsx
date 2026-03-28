@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Cookies from 'universal-cookie';
-import { useAuth } from '../../../../firebase/provider';
-import { onAuthStateChanged, User } from 'firebase/auth';
 import { getCommandSet, CommandSet } from '../actions';
 import { executeCommand } from '@/app/commands/actions';
 import { getServers } from '@/app/servers/actions';
@@ -77,9 +75,7 @@ export default function RunCommandSetPage() {
     const params = useParams();
     const router = useRouter();
     const id = params.id as string;
-    const auth = useAuth();
 
-    const [user, setUser] = useState<User | null>(null);
     const [commandSet, setCommandSet] = useState<CommandSet | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -93,11 +89,6 @@ export default function RunCommandSetPage() {
     const [openStepId, setOpenStepId] = useState<string | null>(null);
 
     useEffect(() => {
-        // TEMPORARY: Hardcoded user
-        const tempUid = "tempaccount";
-        const mockUser = { uid: tempUid } as User;
-        setUser(mockUser);
-
         const fetchData = async () => {
             // Fetch Command Set
             const set = await getCommandSet(id);

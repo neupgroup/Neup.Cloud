@@ -9,13 +9,9 @@ import {
   Cpu,
   Globe,
   ShieldAlert,
-  Terminal,
-  AppWindow,
   Plus,
   Search,
   Clock,
-  History,
-  RefreshCw,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
@@ -29,15 +25,12 @@ import { getServerUptime } from "@/app/status/actions";
 import { getRecentActivity, ActivityLog } from "@/app/home/actions";
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useAuth } from "../firebase/provider";
-import { onAuthStateChanged } from "firebase/auth";
 import { SystemHealthCard } from "@/components/system-health-card";
 import { ServerNameLink } from "@/components/server-name-link";
 import { RunningProcessesCard } from "@/components/running-processes-card";
 
 export default function Home() {
   const router = useRouter();
-  const auth = useAuth();
   const [userFirstName, setUserFirstName] = useState<string>("User");
   const [loading, setLoading] = useState(true);
   const [serverId, setServerId] = useState<string | null>(null);
@@ -56,19 +49,13 @@ export default function Home() {
   } | null>(null);
 
   useEffect(() => {
-    if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserFirstName(user.displayName?.split(' ')[0] || "User");
-      }
-    });
-    return () => unsubscribe();
-  }, [auth]);
-
-  useEffect(() => {
     const cookies = new Cookies(null, { path: '/' });
     const id = cookies.get('selected_server');
+    const name = cookies.get('selected_server_name');
     setServerId(id);
+    if (typeof name === 'string' && name.trim()) {
+      setUserFirstName(name.split(' ')[0]);
+    }
 
     const init = async () => {
       try {

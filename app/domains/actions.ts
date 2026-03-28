@@ -1,11 +1,8 @@
 
 'use server';
 
-import { addDoc, collection, getDocs, serverTimestamp, query, where, doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { initializeFirebase } from '../../firebase';
 import { revalidatePath } from 'next/cache';
-
-const { firestore } = initializeFirebase();
+import { createRecordId, queryAppDb, toIsoString } from '@/lib/app-db';
 
 export type DomainStatus = {
     name: string;
@@ -57,7 +54,7 @@ export type DNSRecord = {
 
 export async function getDomainDNSRecords(domainId: string): Promise<DNSRecord[]> {
     try {
-        // First, get the domain name from Firestore
+        // First, get the domain name from Postgres
         const domain = await getDomain(domainId);
         if (!domain) {
             console.error('Domain not found for ID:', domainId);
@@ -84,7 +81,7 @@ export async function getDomainDNSRecords(domainId: string): Promise<DNSRecord[]
 
 export async function getDomainNameservers(domainId: string): Promise<string[]> {
     try {
-        // First, get the domain name from Firestore
+        // First, get the domain name from Postgres
         const domain = await getDomain(domainId);
         if (!domain) {
             console.error('Domain not found for ID:', domainId);
@@ -136,9 +133,14 @@ export async function addDomain(domainName: string) {
     }
 
     // Check if domain already exists
-    const q = query(collection(firestore, 'domains'), where('name', '==', domainName));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
+    const existing = await queryAppDb<{ id: string }>(`
+      SELECT id
+      FROM domains
+      WHERE LOWER(name) = LOWER($1)
+      LIMIT 1
+    `, [domainName]);
+
+    if (existing.rows.length > 0) {
         throw new Error(`Domain "${domainName}" has already been added.`);
     }
 
@@ -149,57 +151,76 @@ export async function addDomain(domainName: string) {
         verificationCode += chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
-    await addDoc(collection(firestore, 'domains'), {
-        name: domainName,
-        status: 'pending',
-        addedAt: serverTimestamp(),
-        verificationCode: verificationCode,
-        verified: false,
-    });
+    await queryAppDb(`
+      INSERT INTO domains (
+        id,
+        name,
+        status,
+        "addedAt",
+        "verificationCode",
+        verified
+      )
+      VALUES ($1, $2, 'pending', NOW(), $3, FALSE)
+    `, [createRecordId(), domainName, verificationCode]);
 
     revalidatePath('/domains');
 }
 
 export async function getDomains(): Promise<ManagedDomain[]> {
-    const querySnapshot = await getDocs(collection(firestore, "domains"));
-    const domains = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-            id: doc.id,
-            name: data.name,
-            status: data.status,
-            addedAt: data.addedAt?.toDate().toISOString() || new Date().toISOString(),
-            verificationCode: data.verificationCode,
-            verified: data.verified || false,
-        }
-    }) as ManagedDomain[];
-    return domains;
+    const result = await queryAppDb<{
+      id: string;
+      name: string;
+      status: 'pending' | 'active' | 'error';
+      addedAt: Date;
+      verificationCode: string | null;
+      verified: boolean;
+    }>(`
+      SELECT id, name, status, "addedAt", "verificationCode", verified
+      FROM domains
+      ORDER BY name ASC
+    `);
+
+    return result.rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      status: row.status,
+      addedAt: toIsoString(row.addedAt) || new Date().toISOString(),
+      verificationCode: row.verificationCode ?? undefined,
+      verified: row.verified,
+    }));
 }
 
 export async function getDomain(id: string): Promise<ManagedDomain | null> {
     if (!id) return null;
 
-    // Check if it's a mock ID (optional, if you have mixed real/mock data, but let's assume real for now based on request)
-    // Actually, looking at getDomains, it fetches from firestore.
-
     try {
-        const docRef = doc(firestore, "domains", id);
-        const docSnap = await getDoc(docRef);
+        const result = await queryAppDb<{
+          id: string;
+          name: string;
+          status: 'pending' | 'active' | 'error';
+          addedAt: Date;
+          verificationCode: string | null;
+          verified: boolean;
+        }>(`
+          SELECT id, name, status, "addedAt", "verificationCode", verified
+          FROM domains
+          WHERE id = $1
+          LIMIT 1
+        `, [id]);
 
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            return {
-                id: docSnap.id,
-                name: data.name,
-                status: data.status,
-                addedAt: data.addedAt?.toDate().toISOString() || new Date().toISOString(),
-                verificationCode: data.verificationCode,
-                verified: data.verified || false,
-            } as ManagedDomain;
-        } else {
-            console.log("No such document!");
+        const row = result.rows[0];
+        if (!row) {
             return null;
         }
+
+        return {
+          id: row.id,
+          name: row.name,
+          status: row.status,
+          addedAt: toIsoString(row.addedAt) || new Date().toISOString(),
+          verificationCode: row.verificationCode ?? undefined,
+          verified: row.verified,
+        };
     } catch (error) {
         console.error("Error getting domain:", error);
         return null;
@@ -226,12 +247,11 @@ export async function verifyDomain(domainId: string): Promise<{ success: boolean
         const data = await response.json();
 
         if (data.verified) {
-            // Update domain status in Firestore
-            const docRef = doc(firestore, 'domains', domainId);
-            await updateDoc(docRef, {
-                verified: true,
-                status: 'active',
-            });
+            await queryAppDb(`
+              UPDATE domains
+              SET verified = TRUE, status = 'active'
+              WHERE id = $1
+            `, [domainId]);
 
             revalidatePath('/domains');
             revalidatePath(`/domains/${domainId}`);
@@ -259,9 +279,10 @@ export async function deleteDomain(domainId: string): Promise<{ success: boolean
             return { success: false, message: 'Domain not found' };
         }
 
-        // Delete the domain from Firestore
-        const docRef = doc(firestore, 'domains', domainId);
-        await deleteDoc(docRef);
+        await queryAppDb(`
+          DELETE FROM domains
+          WHERE id = $1
+        `, [domainId]);
 
         revalidatePath('/domains');
 
@@ -274,4 +295,3 @@ export async function deleteDomain(domainId: string): Promise<{ success: boolean
         };
     }
 }
-

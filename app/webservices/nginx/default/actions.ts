@@ -1,10 +1,7 @@
 'use server';
 
-import { doc, getDoc } from 'firebase/firestore';
-import { initializeFirebase } from '../../../../firebase';
+import { getServerForRunner } from '@/app/servers/actions';
 import { runCommandOnServer } from '@/services/ssh';
-
-const { firestore } = initializeFirebase();
 
 /**
  * Generate a self-signed SSL certificate for the default Nginx configuration
@@ -15,21 +12,21 @@ export async function generateDefaultSSLCertificate(
     keyPath: string = '/etc/nginx/ssl/default.key'
 ) {
     try {
-        // Get server details
-        const serverRef = doc(firestore, 'servers', serverId);
-        const serverDoc = await getDoc(serverRef);
-
-        if (!serverDoc.exists()) {
+        const server = await getServerForRunner(serverId);
+        if (!server) {
             return { success: false, error: 'Server not found' };
         }
-
-        const server = serverDoc.data();
 
         if (!server.username || !server.privateKey) {
             return {
                 success: false,
                 error: 'Server credentials not configured'
             };
+        }
+
+        const host = server.publicIp || server.privateIp;
+        if (!host) {
+            return { success: false, error: 'Server is missing a reachable IP address' };
         }
 
         // Extract directory path (both files should be in the same directory)
@@ -52,7 +49,7 @@ export async function generateDefaultSSLCertificate(
         `;
 
         const result = await runCommandOnServer(
-            server.publicIp || server.privateIp,
+            host,
             server.username,
             server.privateKey,
             generateCommand,
@@ -89,21 +86,21 @@ export async function deployDefaultNginxConfig(
     configContent: string
 ) {
     try {
-        // Get server details
-        const serverRef = doc(firestore, 'servers', serverId);
-        const serverDoc = await getDoc(serverRef);
-
-        if (!serverDoc.exists()) {
+        const server = await getServerForRunner(serverId);
+        if (!server) {
             return { success: false, error: 'Server not found' };
         }
-
-        const server = serverDoc.data();
 
         if (!server.username || !server.privateKey) {
             return {
                 success: false,
                 error: 'Server credentials not configured'
             };
+        }
+
+        const host = server.publicIp || server.privateIp;
+        if (!host) {
+            return { success: false, error: 'Server is missing a reachable IP address' };
         }
 
         const configFileName = `/tmp/nginx-default-${serverId}.conf`;
@@ -130,7 +127,7 @@ export async function deployDefaultNginxConfig(
         `;
 
         const result = await runCommandOnServer(
-            server.publicIp || server.privateIp,
+            host,
             server.username,
             server.privateKey,
             deployCommand,

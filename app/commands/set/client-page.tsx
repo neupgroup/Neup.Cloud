@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useAuth } from '../../../firebase/provider';
-import { onAuthStateChanged, User } from 'firebase/auth';
 import {
     Play,
     Trash2,
@@ -65,10 +63,9 @@ function LoadingSkeleton() {
 }
 
 function CommandSetsContent() {
-    const auth = useAuth();
     const { toast } = useToast();
     const router = useRouter();
-    const [user, setUser] = useState<User | null>(null);
+    const [userId] = useState('tempaccount');
     const [commandSets, setCommandSets] = useState<CommandSet[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -83,26 +80,8 @@ function CommandSetsContent() {
     const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
-        // TEMPORARY: Hardcoded user for development as requested
-        const tempUid = "tempaccount";
-        const mockUser = { uid: tempUid } as User;
-
-        setUser(mockUser);
-        fetchCommandSets(tempUid);
-
-        /*
-        const unsubscribe = onAuthStateChanged(auth, (u) => {
-            setUser(u);
-            if (u) {
-                fetchCommandSets(u.uid);
-            } else {
-                setCommandSets([]);
-                setIsLoading(false);
-            }
-        });
-        return () => unsubscribe();
-        */
-    }, [auth]);
+        fetchCommandSets(userId);
+    }, [userId]);
 
     const fetchCommandSets = async (uid: string) => {
         setIsLoading(true);
@@ -114,11 +93,11 @@ function CommandSetsContent() {
 
     const handleDelete = async (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
-        if (!user || !confirm("Are you sure you want to delete this command set?")) return;
+        if (!confirm("Are you sure you want to delete this command set?")) return;
         const result = await deleteCommandSet(id);
         if (result.success) {
             toast({ title: "Deleted", description: "Command set removed." });
-            fetchCommandSets(user.uid);
+            fetchCommandSets(userId);
         } else {
             toast({ variant: "destructive", title: "Error", description: result.error });
         }

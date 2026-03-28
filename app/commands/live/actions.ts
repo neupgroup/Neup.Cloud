@@ -2,54 +2,75 @@
 
 import { cookies } from 'next/headers';
 import { getServerForRunner } from '@/app/servers/actions';
-import { initializeFirebase } from '../../../firebase';
 import { runCommandOnServer } from '@/services/ssh';
-import { addDoc, collection, doc, getDoc, serverTimestamp, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
+import { createRecordId, queryAppDb } from '@/lib/app-db';
 
-const { firestore } = initializeFirebase();
+type LiveSessionRow = {
+    id: string;
+    cwd: string;
+    status: string;
+    serverLogId: string | null;
+    serverId: string | null;
+};
 
 /**
  * Ensures a live session document exists and initializes a server log for it.
  * Also refreshes the session cookie.
  */
 export async function initLiveSession(sessionId: string, serverId: string | undefined) {
-    // 1. Refresh/Set Cookie immediately
     const cookieStore = await cookies();
     cookieStore.set('live_session_id', sessionId, {
         maxAge: 15 * 60, // 15 minutes
         path: '/',
-        // httpOnly: true, // Optional depending on if client needs to read it, keeping it simple/secure by default
     });
 
-    const sessionRef = doc(firestore, 'liveSessions', sessionId);
-    const sessionDoc = await getDoc(sessionRef);
+    const sessionResult = await queryAppDb<LiveSessionRow>(`
+      SELECT id, cwd, status, "serverLogId", "serverId"
+      FROM live_sessions
+      WHERE id = $1
+      LIMIT 1
+    `, [sessionId]);
 
-    if (!sessionDoc.exists()) {
+    if (sessionResult.rows.length === 0) {
         let serverLogId = null;
 
-        // If a server is connected, create a log entry immediately
         if (serverId) {
-            const logRef = await addDoc(collection(firestore, 'serverLogs'), {
-                serverId: serverId,
-                command: `Live Session ${sessionId}`,
-                commandName: 'Live Session (Active)',
-                output: '', // Will be appended to incrementally
-                status: 'Running', // Indicates active session
-                runAt: serverTimestamp(),
-            });
-            serverLogId = logRef.id;
+            serverLogId = createRecordId();
+            await queryAppDb(`
+              INSERT INTO server_logs (
+                id,
+                "serverId",
+                command,
+                "commandName",
+                output,
+                status,
+                "runAt"
+              )
+              VALUES ($1, $2, $3, $4, $5, $6, NOW())
+            `, [
+              serverLogId,
+              serverId,
+              `Live Session ${sessionId}`,
+              'Live Session (Active)',
+              '',
+              'Running',
+            ]);
             revalidatePath(`/servers/${serverId}`);
         }
 
-        await setDoc(sessionRef, {
-            createdAt: serverTimestamp(),
-            cwd: '~', // Default home directory
-            status: 'active',
-            history: [], // Keep for client state if needed
-            serverLogId: serverLogId,
-            serverId: serverId // Store logic association
-        });
+        await queryAppDb(`
+          INSERT INTO live_sessions (
+            id,
+            "createdAt",
+            cwd,
+            status,
+            history,
+            "serverLogId",
+            "serverId"
+          )
+          VALUES ($1, NOW(), '~', 'active', '[]'::jsonb, $2, $3)
+        `, [sessionId, serverLogId, serverId ?? null]);
     }
 }
 
@@ -57,26 +78,32 @@ export async function initLiveSession(sessionId: string, serverId: string | unde
  * Marks the live session as 'Discontinued' in the server logs.
  */
 export async function endLiveSession(sessionId: string, serverId: string | undefined) {
-    const sessionRef = doc(firestore, 'liveSessions', sessionId);
-    const sessionDoc = await getDoc(sessionRef);
+    const sessionResult = await queryAppDb<LiveSessionRow>(`
+      SELECT id, cwd, status, "serverLogId", "serverId"
+      FROM live_sessions
+      WHERE id = $1
+      LIMIT 1
+    `, [sessionId]);
 
-    if (!sessionDoc.exists()) return;
+    const session = sessionResult.rows[0];
+    if (!session) return;
 
-    const data = sessionDoc.data();
-    const serverLogId = data.serverLogId;
-
-    if (serverLogId) {
-        await updateDoc(doc(firestore, 'serverLogs', serverLogId), {
-            status: 'Discontinued', // Defined final status
-            commandName: 'Live Session (Ended)'
-        });
+    if (session.serverLogId) {
+        await queryAppDb(`
+          UPDATE server_logs
+          SET status = 'Discontinued', "commandName" = 'Live Session (Ended)'
+          WHERE id = $1
+        `, [session.serverLogId]);
         if (serverId) {
             revalidatePath(`/servers/${serverId}`);
         }
     }
 
-    // Mark session ended locally
-    await updateDoc(sessionRef, { status: 'ended' });
+    await queryAppDb(`
+      UPDATE live_sessions
+      SET status = 'ended'
+      WHERE id = $1
+    `, [sessionId]);
 }
 
 /**
@@ -84,25 +111,26 @@ export async function endLiveSession(sessionId: string, serverId: string | undef
  * Appends output to the Server Log immediately.
  */
 export async function executeLiveCommand(sessionId: string, serverId: string | undefined, command: string) {
-    // 1. Get Session State
-    const sessionRef = doc(firestore, 'liveSessions', sessionId);
-    let sessionDoc = await getDoc(sessionRef);
+    let sessionResult = await queryAppDb<LiveSessionRow>(`
+      SELECT id, cwd, status, "serverLogId", "serverId"
+      FROM live_sessions
+      WHERE id = $1
+      LIMIT 1
+    `, [sessionId]);
 
-    // If missing, initialize
-    if (!sessionDoc.exists()) {
+    if (sessionResult.rows.length === 0) {
         await initLiveSession(sessionId, serverId);
-        sessionDoc = await getDoc(sessionRef);
+        sessionResult = await queryAppDb<LiveSessionRow>(`
+          SELECT id, cwd, status, "serverLogId", "serverId"
+          FROM live_sessions
+          WHERE id = $1
+          LIMIT 1
+        `, [sessionId]);
     }
 
-    const sessionData = sessionDoc.data();
-    let currentCwd = sessionData?.cwd || '~';
-    const serverLogId = sessionData?.serverLogId;
-
-    // Fallback if log ID missing but should exist (rare edge case recovery)
-    if (!serverLogId && serverId) {
-        // Just proceed without logging or lazy create? 
-        // For now, assume initialized correctly.
-    }
+    const session = sessionResult.rows[0];
+    let currentCwd = session?.cwd || '~';
+    const serverLogId = session?.serverLogId;
 
     let output = '';
     let newCwd = currentCwd;
@@ -192,39 +220,32 @@ export async function executeLiveCommand(sessionId: string, serverId: string | u
         }
     }
 
-    // 2. Append to Server Log (if exists)
     if (serverLogId) {
-        // We append the new interaction to the existing output block
-        // We need to read the current output to append? Or can we just use arrayUnion if it was an array? 
-        // The implementation uses a string for 'output'. We have to read-modify-write or use a transform if firestore supported string append (it doesn't naturally).
-        // However, for efficiency in a "live" system, usually we might store lines in a subcollection.
-        // But the requirement is "shown as a single command".
-        // We will read the doc and update it. Note: this has race conditions if typing extremely fast, but for a single user terminal it is acceptable.
-
         try {
-            const logRef = doc(firestore, 'serverLogs', serverLogId);
-            const logSnap = await getDoc(logRef);
-            if (logSnap.exists()) {
-                const currentOutput = logSnap.data().output || '';
-                const newEntry = `\n${timestamp} [COMMAND]: ${command}\n${timestamp} [OUTPUT]: ${output}`;
-                await updateDoc(logRef, {
-                    output: currentOutput + newEntry
-                });
-            }
+            const logResult = await queryAppDb<{ output: string | null }>(`
+              SELECT output
+              FROM server_logs
+              WHERE id = $1
+              LIMIT 1
+            `, [serverLogId]);
+
+            const currentOutput = logResult.rows[0]?.output || '';
+            const newEntry = `\n${timestamp} [COMMAND]: ${command}\n${timestamp} [OUTPUT]: ${output}`;
+            await queryAppDb(`
+              UPDATE server_logs
+              SET output = $2
+              WHERE id = $1
+            `, [serverLogId, currentOutput + newEntry]);
         } catch (err) {
             console.error("Failed to append to log:", err);
         }
     }
 
-    // 3. Update Session State (CWD)
-    await updateDoc(sessionRef, {
-        cwd: newCwd,
-        // We don't necessarily need to store heavy history in the session doc anymore if it's in logs, 
-        // but we keep it for client-side hydration if they reload and we want to recover (optional, but user said "if i reload... start a new command").
-        // User said: "if i reload the page, i will see a new command (instance)".
-        // So we don't need to persist history for reload.
-        // But we might want it for the current session view if we used Firestore subscription, but we use local React state for view.
-    });
+    await queryAppDb(`
+      UPDATE live_sessions
+      SET cwd = $2
+      WHERE id = $1
+    `, [sessionId, newCwd]);
 
     return { output, cwd: newCwd };
 }

@@ -1,17 +1,13 @@
 
 'use server';
 
-import { addDoc, collection, getDocs, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
-import { initializeFirebase } from '../../../firebase';
 import { revalidatePath } from 'next/cache';
 import { runCommandOnServer, uploadFileToServer } from '@/services/ssh';
 import { getServerForRunner } from '../actions';
+import { createRecordId, queryAppDb, toIsoString } from '@/lib/app-db';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
-
-
-const { firestore } = initializeFirebase();
 
 export async function runCustomCommandOnServer(serverId: string, command: string) {
   if (!serverId || !command) {
@@ -37,26 +33,20 @@ export async function runCustomCommandOnServer(serverId: string, command: string
       command
     );
   } catch (e: any) {
-    await addDoc(collection(firestore, 'serverLogs'), {
-      serverId: serverId,
-      command: command,
-      output: e.message,
-      status: 'Error',
-      runAt: serverTimestamp(),
-    });
+    await queryAppDb(`
+      INSERT INTO server_logs (id, "serverId", command, output, status, "runAt")
+      VALUES ($1, $2, $3, $4, $5, NOW())
+    `, [createRecordId(), serverId, command, e.message, 'Error']);
     return { error: `Failed to execute command: ${e.message}` };
   }
 
   const output = result.code === 0 ? result.stdout : result.stderr;
   const status = result.code === 0 ? 'Success' : 'Error';
 
-  await addDoc(collection(firestore, 'serverLogs'), {
-    serverId: serverId,
-    command: command,
-    output: output,
-    status: status,
-    runAt: serverTimestamp(),
-  });
+  await queryAppDb(`
+    INSERT INTO server_logs (id, "serverId", command, output, status, "runAt")
+    VALUES ($1, $2, $3, $4, $5, NOW())
+  `, [createRecordId(), serverId, command, output, status]);
 
   revalidatePath(`/servers/${serverId}`);
 
@@ -68,21 +58,27 @@ export async function rebootServer(serverId: string) {
 }
 
 export async function getServerLogs(serverId: string) {
-  const logsQuery = query(
-    collection(firestore, "serverLogs"),
-    where("serverId", "==", serverId),
-    orderBy("runAt", "desc")
-  );
-  const querySnapshot = await getDocs(logsQuery);
-  const logsData = querySnapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      ...data,
-      runAt: data.runAt.toDate().toISOString(),
-    };
-  });
-  return logsData;
+  const result = await queryAppDb<{
+    id: string;
+    serverId: string;
+    command: string;
+    commandName: string | null;
+    output: string | null;
+    status: string;
+    runAt: Date;
+  }>(`
+    SELECT id, "serverId", command, "commandName", output, status, "runAt"
+    FROM server_logs
+    WHERE "serverId" = $1
+    ORDER BY "runAt" DESC
+  `, [serverId]);
+
+  return result.rows.map((row) => ({
+    ...row,
+    commandName: row.commandName ?? undefined,
+    output: row.output ?? undefined,
+    runAt: toIsoString(row.runAt) || new Date().toISOString(),
+  }));
 }
 
 
@@ -417,4 +413,3 @@ export async function downloadFiles(serverId: string, paths: string[], rootMode 
     return { error: `Download failed: ${e.message}` };
   }
 }
-

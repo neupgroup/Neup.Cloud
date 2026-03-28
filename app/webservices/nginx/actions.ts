@@ -1,12 +1,10 @@
 'use server';
 
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { initializeFirebase } from '../../../firebase';
 import { revalidatePath } from 'next/cache';
 import { runCommandOnServer } from '@/services/ssh';
 import { executeCommand, executeQuickCommand } from '@/app/commands/actions';
-
-const { firestore } = initializeFirebase();
+import { getServerForRunner } from '@/app/servers/actions';
+import { queryAppDb, toIsoString } from '@/lib/app-db';
 
 interface SubPath {
     id: string;
@@ -75,12 +73,30 @@ export async function saveNginxConfiguration(
     config: NginxConfiguration
 ) {
     try {
-        const configRef = doc(firestore, 'nginx-configurations', serverId);
-
-        await setDoc(configRef, {
-            ...config,
-            updatedAt: new Date().toISOString(),
-        });
+        await queryAppDb(`
+          INSERT INTO nginx_configurations (
+            "serverId",
+            "serverIp",
+            "configName",
+            blocks,
+            "domainRedirects",
+            "updatedAt"
+          )
+          VALUES ($1, $2, $3, $4::jsonb, $5::jsonb, NOW())
+          ON CONFLICT ("serverId")
+          DO UPDATE SET
+            "serverIp" = EXCLUDED."serverIp",
+            "configName" = EXCLUDED."configName",
+            blocks = EXCLUDED.blocks,
+            "domainRedirects" = EXCLUDED."domainRedirects",
+            "updatedAt" = NOW()
+        `, [
+          serverId,
+          config.serverIp,
+          config.configName,
+          JSON.stringify(config.blocks ?? []),
+          JSON.stringify(config.domainRedirects ?? null),
+        ]);
 
         revalidatePath('/webservices/nginx');
 
@@ -96,14 +112,32 @@ export async function saveNginxConfiguration(
  */
 export async function getNginxConfiguration(serverId: string) {
     try {
-        const configRef = doc(firestore, 'nginx-configurations', serverId);
-        const configDoc = await getDoc(configRef);
+        const result = await queryAppDb<{
+          serverId: string;
+          serverIp: string;
+          configName: string;
+          blocks: DomainBlock[];
+          domainRedirects: DomainRedirect[] | null;
+          updatedAt: Date;
+        }>(`
+          SELECT *
+          FROM nginx_configurations
+          WHERE "serverId" = $1
+          LIMIT 1
+        `, [serverId]);
 
-        if (!configDoc.exists()) {
-            return null;
+        const row = result.rows[0];
+        if (!row) {
+          return null;
         }
 
-        return configDoc.data() as NginxConfiguration;
+        return {
+          serverIp: row.serverIp,
+          configName: row.configName,
+          blocks: row.blocks ?? [],
+          domainRedirects: row.domainRedirects ?? [],
+          updatedAt: toIsoString(row.updatedAt),
+        } as NginxConfiguration;
     } catch (error: any) {
         console.error('Error fetching nginx configuration:', error);
         return null;
@@ -115,15 +149,10 @@ export async function getNginxConfiguration(serverId: string) {
  */
 export async function getServerPublicIp(serverId: string) {
     try {
-        // Get server details
-        const serverRef = doc(firestore, 'servers', serverId);
-        const serverDoc = await getDoc(serverRef);
-
-        if (!serverDoc.exists()) {
+        const server = await getServerForRunner(serverId);
+        if (!server) {
             return { success: false, error: 'Server not found' };
         }
-
-        const server = serverDoc.data();
 
         // Check if we already have the public IP
         if (server.publicIp) {
@@ -148,11 +177,19 @@ export async function getServerPublicIp(serverId: string) {
         ];
 
         let publicIp = '';
+        const host = server.publicIp || server.privateIp;
+
+        if (!host) {
+            return {
+                success: false,
+                error: 'Server is missing a reachable IP address'
+            };
+        }
 
         for (const command of commands) {
             try {
                 const result = await runCommandOnServer(
-                    server.publicIp || server.privateIp,
+                    host,
                     server.username,
                     server.privateKey,
                     command,
@@ -478,21 +515,21 @@ export async function generateNginxConfigFile(serverId: string) {
  */
 export async function deleteNginxConfig(serverId: string, configName: string) {
     try {
-        // Get server details
-        const serverRef = doc(firestore, 'servers', serverId);
-        const serverDoc = await getDoc(serverRef);
-
-        if (!serverDoc.exists()) {
+        const server = await getServerForRunner(serverId);
+        if (!server) {
             return { success: false, error: 'Server not found' };
         }
-
-        const server = serverDoc.data();
 
         if (!server.username || !server.privateKey) {
             return {
                 success: false,
                 error: 'Server credentials not configured'
             };
+        }
+
+        const host = server.publicIp || server.privateIp;
+        if (!host) {
+            return { success: false, error: 'Server is missing a reachable IP address' };
         }
 
         // Prevent deletion of default config
@@ -512,7 +549,7 @@ export async function deleteNginxConfig(serverId: string, configName: string) {
         `;
 
         const result = await runCommandOnServer(
-            server.publicIp || server.privateIp,
+            host,
             server.username,
             server.privateKey,
             deleteCommand,
@@ -558,21 +595,21 @@ export async function deployNginxConfig(serverId: string, configContent?: string
             finalConfig = configResult.config;
         }
 
-        // Get server details
-        const serverRef = doc(firestore, 'servers', serverId);
-        const serverDoc = await getDoc(serverRef);
-
-        if (!serverDoc.exists()) {
+        const server = await getServerForRunner(serverId);
+        if (!server) {
             return { success: false, error: 'Server not found' };
         }
-
-        const server = serverDoc.data();
 
         if (!server.username || !server.privateKey) {
             return {
                 success: false,
                 error: 'Server credentials not configured'
             };
+        }
+
+        const host = server.publicIp || server.privateIp;
+        if (!host) {
+            return { success: false, error: 'Server is missing a reachable IP address' };
         }
 
         // Determine file name (default to 'default' if not provided)
@@ -608,7 +645,7 @@ export async function deployNginxConfig(serverId: string, configContent?: string
         `;
 
         const result = await runCommandOnServer(
-            server.publicIp || server.privateIp,
+            host,
             server.username,
             server.privateKey,
             deployCommand,
@@ -649,15 +686,10 @@ export async function generateSslCertificate(
     step: 'init' | 'finalize-dns' = 'init'
 ) {
     try {
-        // Get server details
-        const serverRef = doc(firestore, 'servers', serverId);
-        const serverDoc = await getDoc(serverRef);
-
-        if (!serverDoc.exists()) {
+        const server = await getServerForRunner(serverId);
+        if (!server) {
             return { success: false, error: 'Server not found' };
         }
-
-        const server = serverDoc.data();
 
         if (!server.username || !server.privateKey) {
             return {
