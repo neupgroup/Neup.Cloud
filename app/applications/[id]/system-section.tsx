@@ -19,6 +19,7 @@ export function SystemSection({ application }: SystemSectionProps) {
         title,
         description,
         href,
+        openInNewTab = false,
         isLast = false,
         onClick
     }: {
@@ -26,6 +27,7 @@ export function SystemSection({ application }: SystemSectionProps) {
         title: string,
         description: string | React.ReactNode,
         href?: string,
+        openInNewTab?: boolean,
         isLast?: boolean,
         onClick?: () => void
     }) => {
@@ -55,7 +57,12 @@ export function SystemSection({ application }: SystemSectionProps) {
 
         if (href) {
             return (
-                <Link href={href} className={className}>
+                <Link
+                    href={href}
+                    className={className}
+                    target={openInNewTab ? '_blank' : undefined}
+                    rel={openInNewTab ? 'noopener noreferrer' : undefined}
+                >
                     <Content />
                 </Link>
             );
@@ -91,6 +98,7 @@ export function SystemSection({ application }: SystemSectionProps) {
                     title="File Manager"
                     description={`Browse files at ${application.location}`}
                     href={`/files?path=${encodeURIComponent(application.location)}`}
+                    openInNewTab
                 />
 
                 {/* Network */}
