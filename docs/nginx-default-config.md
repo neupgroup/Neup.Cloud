@@ -25,7 +25,7 @@ With this default configuration:
 
 ### Method 1: Web Interface (Recommended)
 
-1. Go to: `/webservices/nginx/default`
+1. Go to: `/server/webservices/nginx/default`
 2. Enter your Server ID
 3. Click "Generate SSL Certificate"
 4. Click "Generate Configuration"

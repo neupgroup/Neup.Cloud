@@ -4,7 +4,7 @@
 A comprehensive web interface for configuring Nginx path routing rules. This feature allows users to define which paths should be handled by which servers, with support for complex routing scenarios and automatic configuration generation and deployment.
 
 ## Location
-- **Page**: `/webservices/nginx`
+- **Page**: `/server/webservices/nginx`
 - **Files Created**:
   - `/src/app/webservices/nginx/page.tsx` - Main UI component
   - `/src/app/webservices/nginx/actions.ts` - Server actions for configuration management
@@ -143,8 +143,8 @@ This feature integrates with:
 - **Domain Management**: Fetches user's managed domains from `/domains`
 - **SSH Service**: Leverages the SSH service for remote command execution
 - **Firebase**: Stores configurations in Firestore
-- **Web Services**: Accessible from the main `/webservices` page
+- **Web Services**: Accessible from the main `/server/webservices` page
 
 ## Navigation
-- Access from: `/webservices` → "Configure Path Routing" button (when Nginx is selected as proxy handler)
-- Back button returns to `/webservices`
+- Access from: `/server/webservices` → "Configure Path Routing" button (when Nginx is selected as proxy handler)
+- Back button returns to `/server/webservices`

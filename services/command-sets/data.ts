@@ -1,6 +1,6 @@
 import { prisma } from '@/services/prisma';
 import { createId } from '@/services/shared/create-id';
-import type { CommandSet, CommandSetCommand } from '@/app/commands/set/actions';
+import type { CommandSet, CommandSetCommand } from '@/services/command-sets/types';
 
 function mapCommandSet(record: {
   id: string;

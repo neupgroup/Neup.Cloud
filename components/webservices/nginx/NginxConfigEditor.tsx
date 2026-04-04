@@ -11,9 +11,9 @@ import {
     deleteNginxConfig,
     generateSslCertificate,
     saveNginxConfiguration,
-} from '@/app/webservices/nginx/actions';
-import { getCertificates } from '@/app/webservices/certificates/actions';
-import { getWebOrServerNginxConfig } from '@/app/webservices/actions';
+} from '@/app/server/webservices/nginx/actions';
+import { getCertificates } from '@/app/server/webservices/certificates/actions';
+import { getWebOrServerNginxConfig } from '@/app/server/webservices/actions';
 import { Button } from '@/components/ui/button';
 import { useToast } from '../../../hooks/use-toast';
 import {
@@ -1003,7 +1003,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                     title: 'Success',
                     description: result.message || 'Configuration deleted from server successfully.',
                 });
-                router.push('/webservices/nginx');
+                router.push('/server/webservices/nginx');
             } else {
                 toast({
                     variant: 'destructive',
@@ -1176,7 +1176,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                 <PageTitleBack
                     title="Nginx Configuration"
                     description="Configure your Nginx server step by step"
-                    backHref="/webservices/nginx"
+                    backHref="/server/webservices/nginx"
                 />
             </div>
 
@@ -1467,7 +1467,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <Link href="/webservices/certificates" target="_blank">
+                                                            <Link href="/server/webservices/certificates" target="_blank">
                                                                 <Button
                                                                     variant={block.sslCertificateFile ? "outline" : "default"}
                                                                     size="sm"

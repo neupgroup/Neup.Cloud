@@ -102,7 +102,7 @@ The old `/app/database/actions.ts` file now re-exports from this new structure f
 
 ### Before (deprecated):
 ```typescript
-import { createDatabaseUser } from '@/app/database/actions';
+import { createDatabaseUser } from '@/app/server/database/actions';
 ```
 
 ### After (recommended):

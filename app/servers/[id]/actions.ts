@@ -147,7 +147,7 @@ export async function uploadFile(serverId: string, remotePath: string, formData:
       remoteFilePath
     );
 
-    revalidatePath(`/servers/${serverId}/files`);
+    revalidatePath(`/servers/${serverId}/server/files`);
     return { success: true };
   } catch (error: any) {
     return { error: `Failed to upload file: ${error.message}` };
@@ -168,7 +168,7 @@ export async function renameFile(serverId: string, currentPath: string, newName:
 
     if (result.code !== 0) return { error: result.stderr || 'Rename failed.' };
 
-    revalidatePath('/files');
+    revalidatePath('/server/files');
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -185,7 +185,7 @@ export async function deleteFiles(serverId: string, paths: string[], rootMode = 
     const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, command, undefined, undefined, true);
 
     if (result.code !== 0) return { error: result.stderr || 'Delete failed.' };
-    revalidatePath('/files');
+    revalidatePath('/server/files');
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -202,7 +202,7 @@ export async function moveFiles(serverId: string, sourcePaths: string[], destPat
     const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, command, undefined, undefined, true);
 
     if (result.code !== 0) return { error: result.stderr || 'Move failed.' };
-    revalidatePath('/files');
+    revalidatePath('/server/files');
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -219,7 +219,7 @@ export async function copyFiles(serverId: string, sourcePaths: string[], destPat
     const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, command, undefined, undefined, true);
 
     if (result.code !== 0) return { error: result.stderr || 'Copy failed.' };
-    revalidatePath('/files');
+    revalidatePath('/server/files');
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -234,7 +234,7 @@ export async function createDirectory(serverId: string, targetPath: string, root
     const command = rootMode ? `sudo mkdir -p "${targetPath}"` : `mkdir -p "${targetPath}"`;
     const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, command, undefined, undefined, true);
     if (result.code !== 0) return { error: result.stderr || 'Directory creation failed.' };
-    revalidatePath('/files');
+    revalidatePath('/server/files');
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -249,7 +249,7 @@ export async function createEmptyFile(serverId: string, targetPath: string, root
     const command = rootMode ? `sudo touch "${targetPath}"` : `touch "${targetPath}"`;
     const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, command, undefined, undefined, true);
     if (result.code !== 0) return { error: result.stderr || 'File creation failed.' };
-    revalidatePath('/files');
+    revalidatePath('/server/files');
     return { success: true };
   } catch (error: any) {
     return { error: error.message };

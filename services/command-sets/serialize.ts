@@ -1,4 +1,4 @@
-import type { CommandSetCommand } from '@/app/commands/set/actions';
+import type { CommandSetCommand } from '@/services/command-sets/types';
 
 export function serializeCommandSetCommands(commands: CommandSetCommand[]) {
   return commands.map((step, index) => {

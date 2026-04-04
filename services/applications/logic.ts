@@ -4,7 +4,7 @@ import * as NodeJs from '@/core/nodejs';
 import * as Python from '@/core/python';
 import { getStopMatchingSupervisorServicesScript } from '@/core/supervisor';
 import { sanitizeAppName } from '@/core/universal';
-import type { Application, CreateApplicationData, UpdateApplicationData } from '@/app/applications/types';
+import type { Application, CreateApplicationData, UpdateApplicationData } from '@/app/server/applications/types';
 
 function sanitizeCommandKey(key: string) {
   return key.replace(/[^a-zA-Z0-9-.]/g, '-');

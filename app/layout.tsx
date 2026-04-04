@@ -151,14 +151,14 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
   ]
 
   const serverLinks = [
-    { href: "/status", label: "Status", icon: HeartPulse },
-    { href: "/applications", label: "Applications", icon: Activity },
-    { href: "/database", label: "Databases", icon: Database },
-    { href: "/commands", label: "Commands", icon: Terminal },
-    { href: "/firewall", label: "Firewall", icon: ShieldAlert },
-    { href: "/files", label: "File Manager", icon: FolderKanban },
-    { href: "/webservices", label: "Webservices", icon: Globe },
-    { href: "/system", label: "System", icon: LayoutGrid },
+    { href: "/server/status", label: "Status", icon: HeartPulse },
+    { href: "/server/applications", label: "Applications", icon: Activity },
+    { href: "/server/database", label: "Databases", icon: Database },
+    { href: "/server/commands", label: "Commands", icon: Terminal },
+    { href: "/server/firewall", label: "Firewall", icon: ShieldAlert },
+    { href: "/server/files", label: "File Manager", icon: FolderKanban },
+    { href: "/server/webservices", label: "Webservices", icon: Globe },
+    { href: "/server/system", label: "System", icon: LayoutGrid },
   ]
 
   /* Maintenance Links removed as they are moved to System */

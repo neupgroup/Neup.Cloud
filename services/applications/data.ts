@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import type { Application, CreateApplicationData, UpdateApplicationData } from '@/app/applications/types';
+import type { Application, CreateApplicationData, UpdateApplicationData } from '@/app/server/applications/types';
 import { prisma } from '@/services/prisma';
 import { createId } from '@/services/shared/create-id';
 import { buildSupervisorServiceName, generateSupervisorServiceToken } from './service-name';

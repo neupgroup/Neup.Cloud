@@ -2,7 +2,7 @@
 
 import { Activity, Hash, CircleDot } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getSupervisorProcesses } from "@/app/applications/actions";
+import { getSupervisorProcesses } from "@/app/server/applications/actions";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";

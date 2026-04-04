@@ -14,7 +14,7 @@ The default Nginx configuration is a catch-all server block that:
 
 ### Option 1: Using the Web Interface
 
-1. Navigate to `/webservices/nginx/default` in your application
+1. Navigate to `/server/webservices/nginx/default` in your application
 2. Enter the Server ID
 3. Configure SSL certificate paths (or use defaults)
 4. Click "Generate SSL Certificate"

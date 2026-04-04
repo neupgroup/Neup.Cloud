@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getServers, selectServer, getServer, getSystemStats } from "@/app/servers/actions";
-import { getServerUptime } from "@/app/status/actions";
+import { getServerUptime } from "@/app/server/status/actions";
 import { getRecentActivity, ActivityLog } from "@/app/home/actions";
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';

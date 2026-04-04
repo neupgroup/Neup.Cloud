@@ -171,7 +171,7 @@ export default function ViewerClient({ serverId }: { serverId: string }) {
     };
 
     const parentPath = path.substring(0, path.lastIndexOf('/')) || '/';
-    const backHref = `/files?path=${encodeURIComponent(parentPath)}${rootMode ? '&rootMode=true' : ''}`;
+    const backHref = `/server/files?path=${encodeURIComponent(parentPath)}${rootMode ? '&rootMode=true' : ''}`;
 
     return (
         <div className="space-y-6 pb-24">
@@ -196,7 +196,7 @@ export default function ViewerClient({ serverId }: { serverId: string }) {
                         <Button
                             variant="link"
                             className="p-0 h-auto text-muted-foreground font-normal hover:text-primary"
-                            onClick={() => router.push(`/files?path=/${rootMode ? '&rootMode=true' : ''}`)}
+                            onClick={() => router.push(`/server/files?path=/${rootMode ? '&rootMode=true' : ''}`)}
                         >
                             root
                         </Button>
@@ -213,7 +213,7 @@ export default function ViewerClient({ serverId }: { serverId: string }) {
                                         <Button
                                             variant="link"
                                             className="p-0 h-auto text-muted-foreground font-normal hover:text-primary max-w-[150px] truncate"
-                                            onClick={() => router.push(`/files?path=${encodeURIComponent(segmentPath)}${rootMode ? '&rootMode=true' : ''}`)}
+                                            onClick={() => router.push(`/server/files?path=${encodeURIComponent(segmentPath)}${rootMode ? '&rootMode=true' : ''}`)}
                                         >
                                             {segment}
                                         </Button>

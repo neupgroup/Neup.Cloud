@@ -6,7 +6,7 @@ This implementation provides a complete solution for generating and deploying a 
 
 ## What Was Created
 
-### 1. Web Interface (`/webservices/nginx/default`)
+### 1. Web Interface (`/server/webservices/nginx/default`)
 
 **Files:**
 - `/src/app/webservices/nginx/default/page.tsx` - User interface
@@ -22,7 +22,7 @@ This implementation provides a complete solution for generating and deploying a 
 - ✅ Visual feedback with toast notifications
 - ✅ Step-by-step workflow with validation
 
-**Access:** Navigate to `/webservices/nginx/default` in your application
+**Access:** Navigate to `/server/webservices/nginx/default` in your application
 
 ### 2. Standalone Script
 

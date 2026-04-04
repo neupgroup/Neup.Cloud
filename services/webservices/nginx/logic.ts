@@ -1,4 +1,4 @@
-import type { DomainRedirect, NginxConfiguration, PathRule } from '@/app/webservices/nginx/actions';
+import type { DomainRedirect, NginxConfiguration, PathRule } from '@/app/server/webservices/nginx/actions';
 
 type GenerateNginxConfigResult =
   | { success: true; config: string; error?: undefined }

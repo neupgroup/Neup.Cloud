@@ -98,7 +98,7 @@ export default function DefaultNginxConfigClient({ serverId, serverName }) {
 ## User Experience Flow
 
 1. **Select Server** - User selects server from navigation (sets cookie)
-2. **Navigate to Page** - `/webservices/nginx/default`
+2. **Navigate to Page** - `/server/webservices/nginx/default`
 3. **View Server Info** - Page shows selected server automatically
 4. **Generate Certificate** - Click button to generate SSL cert in `/etc/nginx/ssl/`
 5. **Configure Redirect** - Enter redirect URL (default: `https://neupgroup.com/cloud`)
