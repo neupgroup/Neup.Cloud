@@ -11,9 +11,10 @@ type CommandFormProps = {
     formData: CommandFormData;
     onFormDataChange: (field: keyof Omit<CommandFormData, 'variables'>, value: string) => void;
     onVariableDataChange: (varName: string, field: 'title' | 'description' | 'hint', value: string) => void;
+    showMetaFields?: boolean;
 };
 
-export function CommandForm({ formData, onFormDataChange, onVariableDataChange }: CommandFormProps) {
+export function CommandForm({ formData, onFormDataChange, onVariableDataChange, showMetaFields = true }: CommandFormProps) {
     const detectedVariables = useMemo(() => {
         const matches = formData.command.matchAll(VARIABLE_REGEX);
         return Array.from(matches, m => m[1]);
@@ -21,15 +22,17 @@ export function CommandForm({ formData, onFormDataChange, onVariableDataChange }
 
     return (
         <div className="grid gap-6">
-            <div className="grid gap-2">
-                <Label htmlFor="command-name">Name</Label>
-                <Input
-                    id="command-name"
-                    value={formData.name}
-                    onChange={(e) => onFormDataChange('name', e.target.value)}
-                    placeholder="e.g., 'Restart Web Server'"
-                />
-            </div>
+            {showMetaFields && (
+                <div className="grid gap-2">
+                    <Label htmlFor="command-name">Title</Label>
+                    <Input
+                        id="command-name"
+                        value={formData.name}
+                        onChange={(e) => onFormDataChange('name', e.target.value)}
+                        placeholder="e.g., 'Restart Web Server'"
+                    />
+                </div>
+            )}
 
             <div className="grid gap-2">
                 <Label htmlFor="command-script">Command</Label>
@@ -45,15 +48,17 @@ export function CommandForm({ formData, onFormDataChange, onVariableDataChange }
                 </p>
             </div>
 
-            <div className="grid gap-2">
-                <Label htmlFor="command-desc">Description (Optional)</Label>
-                <Input
-                    id="command-desc"
-                    value={formData.description}
-                    onChange={(e) => onFormDataChange('description', e.target.value)}
-                    placeholder="A short description of what this command does."
-                />
-            </div>
+            {showMetaFields && (
+                <div className="grid gap-2">
+                    <Label htmlFor="command-desc">Description</Label>
+                    <Input
+                        id="command-desc"
+                        value={formData.description}
+                        onChange={(e) => onFormDataChange('description', e.target.value)}
+                        placeholder="A short description of what this command does."
+                    />
+                </div>
+            )}
 
 
 

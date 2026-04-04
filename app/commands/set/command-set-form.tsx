@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { PlusCircle, X, Loader2, Save, ChevronLeft, ChevronDown, GripVertical } from 'lucide-react';
+import { PlusCircle, X, Loader2, ChevronLeft, ChevronDown, GripVertical } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRouter } from 'next/navigation';
 import { useToast } from '../../../hooks/use-toast';
@@ -29,9 +29,27 @@ interface CommandSetFormProps {
     onSubmit: (data: { name: string, description: string, commands: CommandSetCommand[] }) => Promise<{ success: boolean, error?: string }>;
     title: string;
     subtitle: string;
+    showHeader?: boolean;
+    showMetaFields?: boolean;
+    nameValue?: string;
+    descriptionValue?: string;
+    onNameChange?: (value: string) => void;
+    onDescriptionChange?: (value: string) => void;
 }
 
-export function CommandSetForm({ initialData, userId, onSubmit, title, subtitle }: CommandSetFormProps) {
+export function CommandSetForm({
+    initialData,
+    userId,
+    onSubmit,
+    title,
+    subtitle,
+    showHeader = true,
+    showMetaFields = true,
+    nameValue,
+    descriptionValue,
+    onNameChange,
+    onDescriptionChange,
+}: CommandSetFormProps) {
     const router = useRouter();
     const { toast } = useToast();
     const [name, setName] = useState(initialData?.name || '');
@@ -49,6 +67,25 @@ export function CommandSetForm({ initialData, userId, onSubmit, title, subtitle 
         ]
     );
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const effectiveName = nameValue ?? name;
+    const effectiveDescription = descriptionValue ?? description;
+
+    const setEffectiveName = (value: string) => {
+        if (onNameChange) {
+            onNameChange(value);
+            return;
+        }
+        setName(value);
+    };
+
+    const setEffectiveDescription = (value: string) => {
+        if (onDescriptionChange) {
+            onDescriptionChange(value);
+            return;
+        }
+        setDescription(value);
+    };
 
     // Accordion state
     const [openDraftId, setOpenDraftId] = useState<string | null>(commandsDraft[0]?.tempId || null);
@@ -120,7 +157,7 @@ export function CommandSetForm({ initialData, userId, onSubmit, title, subtitle 
     };
 
     const handleSubmit = async () => {
-        if (!name.trim()) {
+        if (!effectiveName.trim()) {
             toast({ variant: "destructive", title: "Name required", description: "Please give your command set a name." });
             return;
         }
@@ -142,8 +179,8 @@ export function CommandSetForm({ initialData, userId, onSubmit, title, subtitle 
         }));
 
         const result = await onSubmit({
-            name,
-            description,
+            name: effectiveName,
+            description: effectiveDescription,
             commands
         });
 
@@ -163,47 +200,50 @@ export function CommandSetForm({ initialData, userId, onSubmit, title, subtitle 
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6 pb-24">
-            {/* Header */}
-            <div className="flex flex-col gap-4 mb-2">
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-fit -ml-2 text-muted-foreground hover:text-foreground"
-                    onClick={() => router.back()}
-                >
-                    <ChevronLeft className="mr-1 h-4 w-4" /> Back to Command Set
-                </Button>
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-                    <p className="text-muted-foreground mt-1">{subtitle}</p>
+        <div className="max-w-4xl mx-auto space-y-6">
+            {showHeader && (
+                <div className="flex flex-col gap-4 mb-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-fit -ml-2 text-muted-foreground hover:text-foreground"
+                        onClick={() => router.back()}
+                    >
+                        <ChevronLeft className="mr-1 h-4 w-4" /> Back to Command Set
+                    </Button>
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+                        <p className="text-muted-foreground mt-1">{subtitle}</p>
+                    </div>
                 </div>
-            </div>
+            )}
 
             <div className="grid gap-6">
                 {/* Meta Information */}
-                <Card className="p-6 space-y-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                            id="name"
-                            placeholder="e.g. Server Setup Script"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            disabled={isSubmitting}
-                        />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="desc">Description</Label>
-                        <Textarea
-                            id="desc"
-                            placeholder="What does this set do?"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            disabled={isSubmitting}
-                        />
-                    </div>
-                </Card>
+                {showMetaFields && (
+                    <Card className="p-6 space-y-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="name">Title</Label>
+                            <Input
+                                id="name"
+                                placeholder="e.g. Server Setup Script"
+                                value={effectiveName}
+                                onChange={(e) => setEffectiveName(e.target.value)}
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="desc">Description</Label>
+                            <Input
+                                id="desc"
+                                placeholder="A short description of what this command set does."
+                                value={effectiveDescription}
+                                onChange={(e) => setEffectiveDescription(e.target.value)}
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                    </Card>
+                )}
 
                 <div className="space-y-4 pt-2">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1">
@@ -353,17 +393,15 @@ export function CommandSetForm({ initialData, userId, onSubmit, title, subtitle 
                 </div>
             </div>
 
-            <div className="fixed bottom-0 left-0 right-0 p-4 border-t bg-background/95 backdrop-blur z-10">
-                <div className="max-w-4xl mx-auto flex justify-end gap-4">
-                    <Button variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
+            <div className="flex gap-3 pt-6 border-t">
+                    <Button variant="outline" onClick={() => router.back()} disabled={isSubmitting} className="flex-1">
                         Cancel
                     </Button>
-                    <Button onClick={handleSubmit} disabled={isSubmitting}>
-                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                        Save Command Set
+                    <Button onClick={handleSubmit} disabled={isSubmitting} className="flex-1">
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        {initialData ? 'Save Changes' : 'Create Command Set'}
                     </Button>
                 </div>
-            </div>
         </div>
     );
 }

@@ -1,10 +1,5 @@
-import { Metadata } from "next";
-import ClientPage from "./client-page";
-
-export const metadata: Metadata = {
-    title: "Create Command Set, Neup.Cloud",
-};
+import { redirect } from 'next/navigation';
 
 export default function Page() {
-    return <ClientPage />;
+    redirect('/commands/create?mode=set');
 }

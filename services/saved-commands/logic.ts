@@ -150,11 +150,7 @@ export async function executeSavedCommand(
   const osBlockRegex = new RegExp(`<<\\{\\{start\\.${os}\\}\\}\\>>([\\s\\S]*?)<<\\{\\{end\\.${os}\\}\\}\\>>`, 'g');
   const match = osBlockRegex.exec(commandTemplate);
 
-  if (!match || !match[1]) {
-    throw new Error(`No command block found for OS "${server.type}" in the saved command.`);
-  }
-
-  let processedCommand = match[1].trim();
+  let processedCommand = match?.[1] ? match[1].trim() : commandTemplate.trim();
 
   for (const key in variables) {
     processedCommand = processedCommand.replace(new RegExp(`\\{\\{\\[\\[${key}\\]\\]\\}\\}`, 'g'), variables[key]);

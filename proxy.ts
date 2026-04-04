@@ -16,9 +16,9 @@ export default function proxy(request: NextRequest) {
 
   // Remove this line of code only during the development.
   // =================>
-  // if (process.env.NODE_ENV === 'development') {
-  //  return NextResponse.next();
-  // }
+  if (process.env.NODE_ENV === 'development') {
+   return NextResponse.next();
+  }
   // =================>
   // Enable these lines of code only during the development.
 

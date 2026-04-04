@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ClientPage from "./client-page";
 
 export const metadata: Metadata = {
-    title: "Create Command, Neup.Cloud",
+    title: "Create Commands, Neup.Cloud",
 };
 
 export default function Page() {
