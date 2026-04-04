@@ -16,7 +16,6 @@ import {
   FileText,
   ShieldAlert,
   FolderKanban,
-  Link2,
   Network,
   Settings,
   Globe,
@@ -149,7 +148,6 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
     { href: "/environments", label: "Environments", icon: Layers },
     { href: "/settings", label: "Settings", icon: Settings },
     { href: "/billing", label: "Billing", icon: CreditCard },
-    { href: "/linked-accounts", label: "Linked Accounts", icon: Link2 },
   ]
 
   const serverLinks = [
