@@ -665,91 +665,31 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                 </CardContent>
                             </Card>
 
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="font-headline">Processes</CardTitle>
-                                    <CardDescription>Running processes on the server</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Search processes by name, PID, or user..."
-                                            value={processesSearch}
-                                            onChange={(e) => setProcessesSearch(e.target.value)}
-                                            className="pl-9"
-                                        />
-                                    </div>
+                            <div className="grid gap-6 md:grid-cols-2">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="font-headline">Processes</CardTitle>
+                                        <CardDescription>View and manage running processes in a dedicated page.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Button asChild className="w-full">
+                                            <Link href="/status/processes">Open Processes</Link>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
 
-                                    {isProcessesLoading ? (
-                                        <ProcessesLoadingSkeleton />
-                                    ) : processes.length === 0 ? (
-                                        <Card className="p-8 text-center">
-                                            <p>No running processes found or unable to fetch them.</p>
-                                        </Card>
-                                    ) : filteredProcesses.length === 0 ? (
-                                        <div className="text-center p-12 border rounded-lg border-dashed text-muted-foreground">
-                                            <p>No processes found matching &quot;{processesSearch}&quot;</p>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <ProcessesList processes={visibleProcesses} onKill={handleKillProcess} />
-                                            {visibleProcessesCount < filteredProcesses.length && (
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() => setVisibleProcessesCount((prev) => prev + 10)}
-                                                >
-                                                    View more
-                                                </Button>
-                                            )}
-                                        </>
-                                    )}
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="font-headline">Network Connections</CardTitle>
-                                    <CardDescription>Active network connections on the server</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Search connections by process, port, protocol..."
-                                            value={networkSearch}
-                                            onChange={(e) => setNetworkSearch(e.target.value)}
-                                            className="pl-9"
-                                        />
-                                    </div>
-
-                                    {isNetworkLoading ? (
-                                        <NetworkLoadingSkeleton />
-                                    ) : connections.length === 0 ? (
-                                        <Card className="p-8 text-center">
-                                            <p>No active network connections found.</p>
-                                        </Card>
-                                    ) : filteredConnections.length === 0 ? (
-                                        <div className="text-center p-12 border rounded-lg border-dashed text-muted-foreground">
-                                            <p>No connections found matching &quot;{networkSearch}&quot;</p>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <NetworkList connections={visibleConnections} />
-                                            {visibleConnectionsCount < filteredConnections.length && (
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() => setVisibleConnectionsCount((prev) => prev + 10)}
-                                                >
-                                                    View more
-                                                </Button>
-                                            )}
-                                        </>
-                                    )}
-                                </CardContent>
-                            </Card>
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="font-headline">Network Connections</CardTitle>
+                                        <CardDescription>Inspect active network sessions and listeners in a dedicated page.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Button asChild className="w-full">
+                                            <Link href="/status/network">Open Network</Link>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </div>
                         </div>
                     )}
                 </div>
