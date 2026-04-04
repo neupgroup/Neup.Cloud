@@ -5,7 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Server, Loader2, Play, Search, ChevronRight } from 'lucide-react';
+import { Server, Loader2, Play, Search, ChevronRight, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import {
   Select,
   SelectContent,
@@ -32,6 +38,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { type SavedCommand } from './types';
 import { cn } from '@/lib/utils';
+import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
 
 type ServerType = {
   id: string;
@@ -56,6 +63,33 @@ type MergedCommandItem = {
 };
 
 const PAGE_SIZE = 10;
+
+const LogStatusBadge = ({ status }: { status: CommandHistoryItem['status'] }) => {
+  if (status === 'Success') {
+    return (
+      <div className="flex items-center gap-1.5 text-white bg-green-600 px-2 py-0.5 rounded-full text-[10px] font-semibold w-fit border border-green-700 shadow-sm">
+        <CheckCircle2 className="w-3 h-3" />
+        Success
+      </div>
+    );
+  }
+
+  if (status === 'Error') {
+    return (
+      <div className="flex items-center gap-1.5 text-white bg-red-600 px-2 py-0.5 rounded-full text-[10px] font-semibold w-fit border border-red-700 shadow-sm">
+        <XCircle className="w-3 h-3" />
+        Failed
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 text-white bg-blue-600 px-2 py-0.5 rounded-full text-[10px] font-semibold w-fit border border-blue-700 shadow-sm">
+      <Clock className="w-3 h-3" />
+      Running
+    </div>
+  );
+};
 
 function LoadingSkeleton() {
   return (
@@ -341,16 +375,38 @@ function CommandsContent() {
     currentHistoryPage * PAGE_SIZE
   );
 
-  const fallbackHistory = [
-    'Command History Log 1',
-    'Command History Log 2',
-    'Command History Log 3',
-  ];
+  const getCommandDisplayName = (script: string, commandName?: string) => {
+    if (commandName) return commandName;
 
-  const formatHistoryTitle = (log: CommandHistoryItem) => {
-    if (log.commandName) return log.commandName;
-    const commandLine = log.command.split('\n')[0] || 'Custom Command';
-    return commandLine.length > 60 ? `${commandLine.slice(0, 57)}...` : commandLine;
+    const match = savedCommands.find((c) => c.command.trim() === script.trim());
+    if (match) return match.name;
+
+    const lines = script.trim().split('\n');
+    if (lines.length > 1) return 'Custom Command';
+    if ((lines[0] || '').length > 60) return 'Custom Command';
+
+    return lines[0] || 'Custom Command';
+  };
+
+  const formatHistoryDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffHours = differenceInHours(now, date);
+    const diffDays = differenceInDays(now, date);
+
+    if (diffHours < 24) {
+      return `${formatDistanceToNow(date, { addSuffix: true })} by User`;
+    }
+
+    if (diffDays < 7) {
+      return `${diffDays} days ago by User`;
+    }
+
+    if (date.getFullYear() === now.getFullYear()) {
+      return `on ${format(date, 'MMMM d')} by User`;
+    }
+
+    return `on ${format(date, 'yyyy MMMM')} by User`;
   };
 
   const selectedServerName = servers.find((s) => s.id === selectedServer)?.name || 'Server';
@@ -493,7 +549,7 @@ function CommandsContent() {
 
           </Card>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-start gap-2">
             {currentCommandPage > 1 && (
               <Button
                 variant="outline"
@@ -517,73 +573,96 @@ function CommandsContent() {
             <p className="text-muted-foreground">Your recent command executions.</p>
           </div>
 
-          <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm">
-            {isHistoryLoading ? (
-              <div className="p-4 space-y-3">
-                {[...Array(3)].map((_, index) => (
-                  <Skeleton key={index} className="h-10 w-full" />
-                ))}
-              </div>
-            ) : searchQuery && filteredHistory.length === 0 ? (
-              <div className="text-center p-8 text-muted-foreground">
-                <p>No history found matching &quot;{searchQuery}&quot;</p>
-              </div>
-            ) : filteredHistory.length === 0 ? (
-              fallbackHistory.map((title, index) => (
-                <div
-                  key={title}
-                  className={cn(
-                    'p-4 min-w-0 w-full transition-colors hover:bg-muted/50 group flex items-start gap-4 cursor-pointer',
-                    index !== fallbackHistory.length - 1 && 'border-b border-border'
-                  )}
-                  onClick={() => router.push('/commands/history')}
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between mb-0 h-8">
-                      <h3 className="font-semibold leading-none tracking-tight truncate pr-4 text-foreground group-hover:underline decoration-muted-foreground/30 underline-offset-4">
-                        {title}
-                      </h3>
-                      <div className="h-8 w-8 flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors">
-                        <ChevronRight className="h-4 w-4" />
+          {isHistoryLoading ? (
+            <div className="space-y-3">
+              {[...Array(3)].map((_, index) => (
+                <div key={index} className="flex flex-col gap-2 rounded-lg border p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-48" />
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-4 w-20 rounded-full" />
+                        <Skeleton className="h-3 w-32" />
                       </div>
                     </div>
+                    <Skeleton className="h-4 w-4 rounded-full" />
                   </div>
                 </div>
-              ))
-            ) : (
-              visibleHistory.map((log, index) => {
-                const isLastVisible = index === visibleHistory.length - 1;
-                const showRowBorder = !isLastVisible || currentHistoryPage < historyTotalPages;
-
-                return (
-                  <div
-                    key={log.id}
+              ))}
+            </div>
+          ) : searchQuery && filteredHistory.length === 0 ? (
+            <div className="text-center p-8 text-muted-foreground">
+              <p>No history found matching &quot;{searchQuery}&quot;</p>
+            </div>
+          ) : filteredHistory.length === 0 ? (
+            <div className="p-12 text-center text-muted-foreground rounded-lg border bg-card">
+              <p className="mb-2 text-base font-medium text-foreground">No History Yet</p>
+              <p className="text-sm">Commands run on this server will appear here.</p>
+            </div>
+          ) : (
+            <Accordion type="single" collapsible className="w-full space-y-4">
+              {visibleHistory.map((log) => (
+                <AccordionItem key={log.id} value={log.id} className="border-0">
+                  <Card
                     className={cn(
-                      'p-4 min-w-0 w-full transition-colors hover:bg-muted/50 group flex items-start gap-4 cursor-pointer',
-                      showRowBorder && 'border-b border-border'
+                      'overflow-hidden bg-card text-card-foreground shadow-sm transition-all duration-200 border border-border group',
+                      log.status === 'Success' && 'hover:border-green-500/50 hover:bg-green-50/5 dark:hover:bg-green-950/20',
+                      log.status === 'Error' && 'hover:border-red-500/50 hover:bg-red-50/5 dark:hover:bg-red-950/20',
+                      log.status === 'pending' && 'hover:border-blue-500/50 hover:bg-blue-50/5 dark:hover:bg-blue-950/20'
                     )}
-                    onClick={() => router.push('/commands/history')}
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="font-semibold leading-none tracking-tight truncate pr-4 text-foreground group-hover:underline decoration-muted-foreground/30 underline-offset-4">
-                          {formatHistoryTitle(log)}
-                        </h3>
-                        <div className="h-8 w-8 flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors">
-                          <ChevronRight className="h-4 w-4" />
+                    <AccordionTrigger className="px-4 py-3 hover:no-underline w-full [&[data-state=open]>div>div>svg]:rotate-90">
+                      <div className="flex items-start justify-between w-full gap-4">
+                        <div className="flex flex-col items-start gap-1 w-full">
+                          <div className="font-semibold text-base text-foreground tracking-tight">
+                            {getCommandDisplayName(log.command, log.commandName)}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <LogStatusBadge status={log.status} />
+                            <span className="text-xs text-muted-foreground">{formatHistoryDate(log.runAt)}</span>
+                          </div>
                         </div>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(log.runAt).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </Card>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-6 pb-6 pt-0 border-t border-border/50 bg-muted/5">
+                      <div className="space-y-6 pt-6 animate-in slide-in-from-top-2 duration-200">
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Command</h4>
+                          </div>
+                          <div className="bg-muted/50 p-4 rounded-lg font-mono text-sm border text-foreground whitespace-pre-wrap break-all shadow-sm">
+                            {log.command}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Output</h4>
+                          </div>
+                          <div className="bg-zinc-950 text-zinc-50 p-4 rounded-lg font-mono text-sm border border-zinc-800/50 whitespace-pre-wrap break-all overflow-wrap-anywhere shadow-inner">
+                            {log.output || <span className="text-zinc-500 italic">No output recorded.</span>}
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              router.push('/commands/history');
+                            }}
+                          >
+                            Open full history
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </Card>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
 
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-start gap-2">
             {currentHistoryPage > 1 && (
               <Button
                 variant="outline"
