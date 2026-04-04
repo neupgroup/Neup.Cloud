@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Metadata } from "next";
 import ClientPage from "./client-page";
 
@@ -6,5 +7,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-    return <ClientPage />;
+    return (
+        <Suspense fallback={null}>
+            <ClientPage />
+        </Suspense>
+    );
 }
