@@ -6,7 +6,6 @@ import {
   Menu,
   X,
   Server,
-  AppWindow,
   Lightbulb,
   CreditCard,
   CircleUser,
@@ -155,18 +154,11 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
 
   const serverLinks = [
     { href: "/status", label: "Status", icon: HeartPulse },
-    // Removed duplicate Applications link as it now has its own section
-    // { href: "/applications", label: "Applications", icon: AppWindow },
+    { href: "/applications", label: "Applications", icon: Activity },
     { href: "/processes", label: "Processes", icon: FileCode },
     { href: "/network", label: "Network", icon: Network },
     { href: "/database", label: "Databases", icon: Database },
     { href: "/commands", label: "Commands", icon: Terminal },
-  ]
-
-  const applicationsLinks = [
-    { href: "/applications", label: "Home", icon: AppWindow },
-    { href: "/applications/running", label: "Running", icon: Activity },
-    { href: "/applications/deploy", label: "Deploy", icon: Rocket },
   ]
 
   /* Maintenance Links removed as they are moved to System */
@@ -219,7 +211,6 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
     ...domainLinks.map(l => l.href),
     ...accountLinks.map(l => l.href),
     ...(isServerSelected ? serverLinks.map(l => l.href) : []),
-    ...(isServerSelected ? applicationsLinks.map(l => l.href) : []),
     // maintenanceLinks removed
     ...(isServerSelected ? firewallLinks.map(l => l.href) : []),
     ...(isServerSelected ? webservicesLinks.map(l => l.href) : []),
@@ -274,20 +265,6 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
           </NavLink>
         ))}
       </div>
-
-      {isServerSelected && (
-        <div className="space-y-2">
-          <div className="px-3 text-xs font-semibold uppercase text-muted-foreground pt-4">
-            Applications
-          </div>
-          {applicationsLinks.map(({ href, label, icon: Icon }) => (
-            <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} onClick={onLinkClick}>
-              <Icon className="h-4 w-4" />
-              <span>{label}</span>
-            </NavLink>
-          ))}
-        </div>
-      )}
 
       {isServerSelected && (
         <div className="space-y-2">
