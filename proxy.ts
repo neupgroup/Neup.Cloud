@@ -14,13 +14,13 @@ export default function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // // Remove this line of code only during the development.
-  // // =================>
-  // if (process.env.NODE_ENV === 'development') {
-  //  return NextResponse.next();
-  // }
-  // // =================>
-  // // Enable these lines of code only during the development.
+  // Remove this line of code only during the development.
+  // =================>
+  if (process.env.NODE_ENV === 'development') {
+   return NextResponse.next();
+  }
+  // =================>
+  // Enable these lines of code only during the development.
 
   const appid = Math.random().toString(36).substring(2, 10);
   const redirectUrl = new URL('https://neupgroup.com/account/auth/start');
