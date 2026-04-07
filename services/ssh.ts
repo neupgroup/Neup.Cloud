@@ -62,7 +62,7 @@ export async function runCommandOnServer(
                 SWAP_FILE="/swapfile_cmd_${uniqueId}";
                 
                 # Try to create swap
-                if sudo fallocate -l 1G "$SWAP_FILE" 2>/dev/null || sudo dd if=/dev/zero of="$SWAP_FILE" bs=1M count=1024 status=none; then
+                if sudo fallocate -l 2G "$SWAP_FILE" 2>/dev/null || sudo dd if=/dev/zero of="$SWAP_FILE" bs=1M count=2048 status=none; then
                     sudo chmod 600 "$SWAP_FILE";
                     if sudo mkswap "$SWAP_FILE" >/dev/null 2>&1; then
                         if sudo swapon "$SWAP_FILE" >/dev/null 2>&1; then
