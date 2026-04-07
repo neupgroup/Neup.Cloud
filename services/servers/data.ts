@@ -25,6 +25,7 @@ export async function createServer(data: {
   provider: string;
   ram?: string;
   storage?: string;
+  moreDetails?: string;
   publicIp: string;
   privateIp: string;
   privateKey: string;
@@ -35,6 +36,7 @@ export async function createServer(data: {
       ...data,
       ram: data.ram ?? null,
       storage: data.storage ?? null,
+      moreDetails: data.moreDetails ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -48,6 +50,7 @@ export async function updateServer(id: string, data: Partial<{
   provider: string;
   ram: string;
   storage: string;
+  moreDetails: string;
   publicIp: string;
   privateIp: string;
   privateKey: string;

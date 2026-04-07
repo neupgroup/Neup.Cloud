@@ -15,6 +15,7 @@ model Server {
   provider     String    @db.Text
   ram          String?   @db.Text
   storage      String?   @db.Text
+  moreDetails   String?   @map("moreDetails") @db.Text
   publicIp     String    @map("publicIp") @db.Text
   privateIp    String?   @map("privateIp") @db.Text
   privateKey   String?   @map("privateKey") @db.Text

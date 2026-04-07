@@ -63,6 +63,7 @@ export async function createServer(serverData: {
   provider: string;
   ram?: string;
   storage?: string;
+  moreDetails?: string;
   publicIp: string;
   privateIp: string;
   privateKey: string;
@@ -80,6 +81,7 @@ export async function updateServer(
     provider: string;
     ram: string;
     storage: string;
+    moreDetails: string;
     publicIp: string;
     privateIp: string;
     privateKey: string;

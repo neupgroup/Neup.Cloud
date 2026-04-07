@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { PageTitle } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { HardDrive, ArrowUpCircle, Package } from 'lucide-react';
+import { HardDrive, ArrowUpCircle, Package, Repeat2 } from 'lucide-react';
 import { useServerName } from '@/hooks/use-server-name';
 
 export default function SystemPage() {
@@ -75,6 +75,26 @@ export default function SystemPage() {
                     <CardFooter className="border-t px-6 py-4">
                         <Button asChild className="w-full">
                             <Link href="/server/system/packages">Open Packages</Link>
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <Repeat2 className="h-5 w-5 text-muted-foreground" />
+                            <CardTitle>Swapper</CardTitle>
+                        </div>
+                        <CardDescription>
+                            Define the shared swap size used by remote command execution.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="text-sm text-muted-foreground">
+                        The configured swap value is stored on the server and reused across command runs.
+                    </CardContent>
+                    <CardFooter className="border-t px-6 py-4">
+                        <Button asChild className="w-full">
+                            <Link href="/server/system/swapper">Open Swapper</Link>
                         </Button>
                     </CardFooter>
                 </Card>
