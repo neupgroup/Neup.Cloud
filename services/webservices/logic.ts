@@ -258,38 +258,57 @@ export async function getWebOrServerNginxConfigById(id: string, serverId?: strin
   }
 }
 
-async function parseNginxConfig(configContent: string, currentServerIp: string) {
-  const value: any = {
-    serverIp: currentServerIp,
-    pathRules: [],
-  };
+function extractNamedBlocks(content: string, blockName: string): string[] {
+  const blocks: string[] = [];
+  let cursor = 0;
 
-  const serverNameMatch = configContent.match(/server_name\s+([^;]+);/);
-  if (serverNameMatch) {
-    const domains = serverNameMatch[1].trim().split(/\s+/);
-    const fullServerName = domains[0];
-
-    if (fullServerName === '_' || fullServerName === 'localhost' || fullServerName === currentServerIp) {
-      value.domainName = fullServerName;
-    } else {
-      const parts = fullServerName.split('.');
-      if (parts.length > 2) {
-        value.domainName = parts.slice(-2).join('.');
-        value.subdomain = parts.slice(0, -2).join('.');
-      } else {
-        value.domainName = fullServerName;
-      }
-      value.domainId = 'manual-domain';
+  while (cursor < content.length) {
+    const keywordIdx = content.indexOf(blockName, cursor);
+    if (keywordIdx === -1) {
+      break;
     }
+
+    const openBraceIdx = content.indexOf('{', keywordIdx + blockName.length);
+    if (openBraceIdx === -1) {
+      break;
+    }
+
+    let depth = 1;
+    let idx = openBraceIdx + 1;
+    while (idx < content.length && depth > 0) {
+      const ch = content[idx];
+      if (ch === '{') depth += 1;
+      if (ch === '}') depth -= 1;
+      idx += 1;
+    }
+
+    if (depth !== 0) {
+      break;
+    }
+
+    blocks.push(content.slice(openBraceIdx + 1, idx - 1));
+    cursor = idx;
   }
 
-  const locationRegex = /location\s+([^{]+)\s*{([^}]+)}/g;
-  const rules = [];
-  let match: RegExpExecArray | null;
+  return blocks;
+}
 
-  while ((match = locationRegex.exec(configContent)) !== null) {
-    const path = match[1].trim();
-    const blockContent = match[2];
+function parsePathRulesFromServerBlock(serverBlockContent: string) {
+  const locationBlocks = extractNamedBlocks(serverBlockContent, 'location');
+  const locationHeaderRegex = /location\s+([^\{]+)\{/g;
+  const headers: string[] = [];
+  let headerMatch: RegExpExecArray | null;
+
+  while ((headerMatch = locationHeaderRegex.exec(serverBlockContent)) !== null) {
+    headers.push(headerMatch[1].trim());
+  }
+
+  const rules: any[] = [];
+
+  for (let i = 0; i < Math.min(headers.length, locationBlocks.length); i += 1) {
+    const path = headers[i];
+    const blockContent = locationBlocks[i];
+
     const rule: any = {
       id: `rule-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
       path,
@@ -344,17 +363,146 @@ async function parseNginxConfig(configContent: string, currentServerIp: string) 
     rules.push(rule);
   }
 
-  value.pathRules = rules.length > 0
-    ? rules
-    : [
-        {
-          id: 'rule-default',
-          path: '/',
-          action: 'proxy',
-          proxyTarget: 'local-port',
-          localPort: '3000',
-        },
-      ];
+  return rules;
+}
+
+function splitDomainAndSubdomain(serverName: string) {
+  if (!serverName || serverName === '_' || serverName === 'localhost') {
+    return {
+      domainName: serverName,
+      subdomain: '',
+      domainId: 'manual-domain',
+    };
+  }
+
+  if (serverName.startsWith('*.')) {
+    return {
+      domainName: serverName.slice(2),
+      subdomain: '#',
+      domainId: 'manual-domain',
+    };
+  }
+
+  const parts = serverName.split('.');
+  if (parts.length > 2) {
+    return {
+      domainName: parts.slice(-2).join('.'),
+      subdomain: parts.slice(0, -2).join('.') || '@',
+      domainId: 'manual-domain',
+    };
+  }
+
+  if (parts.length === 2) {
+    return {
+      domainName: serverName,
+      subdomain: '@',
+      domainId: 'manual-domain',
+    };
+  }
+
+  return {
+    domainName: serverName,
+    subdomain: '@',
+    domainId: 'manual-domain',
+  };
+}
+
+async function parseNginxConfig(configContent: string, currentServerIp: string) {
+  const value: any = {
+    serverIp: currentServerIp,
+    blocks: [],
+    domainRedirects: [],
+  };
+
+  const serverBlocks = extractNamedBlocks(configContent, 'server');
+  const blockMap = new Map<string, any>();
+
+  for (const serverBlock of serverBlocks) {
+    const serverNameMatch = serverBlock.match(/server_name\s+([^;]+);/);
+    if (!serverNameMatch) {
+      continue;
+    }
+
+    const serverName = serverNameMatch[1].trim().split(/\s+/)[0];
+    if (!serverName || serverName === '_' || serverName === 'localhost') {
+      continue;
+    }
+
+    const hasIpv4_80 = /listen\s+80\b/.test(serverBlock);
+    const hasIpv6_80 = /listen\s+\[::\]:80\b/.test(serverBlock);
+    const hasIpv4_443 = /listen\s+443\b/.test(serverBlock);
+    const hasIpv6_443 = /listen\s+\[::\]:443\b/.test(serverBlock);
+    const has443 = hasIpv4_443 || hasIpv6_443;
+    const has80 = hasIpv4_80 || hasIpv6_80;
+
+    const httpsRedirect = /return\s+301\s+https:\/\/\$host\$request_uri;/.test(serverBlock);
+    const sslCertMatch = serverBlock.match(/ssl_certificate\s+([^;]+);/);
+    const sslCertPath = sslCertMatch ? sslCertMatch[1].trim() : '';
+    const sslFileName = sslCertPath ? (sslCertPath.split('/').pop() || sslCertPath) : undefined;
+    const pathRules = parsePathRulesFromServerBlock(serverBlock);
+
+    const existing = blockMap.get(serverName);
+    const base = existing || (() => {
+      const split = splitDomainAndSubdomain(serverName);
+      return {
+        id: `block-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+        domainId: split.domainId,
+        domainName: split.domainName,
+        subdomain: split.subdomain,
+        httpsRedirection: false,
+        sslEnabled: false,
+        sslCertificateFile: undefined,
+        pathRules: [],
+      };
+    })();
+
+    if (has80 && httpsRedirect) {
+      base.httpsRedirection = true;
+    }
+
+    if (has443) {
+      base.sslEnabled = true;
+      if (sslFileName) {
+        base.sslCertificateFile = sslFileName;
+      }
+    }
+
+    if (pathRules.length > 0) {
+      // Prefer HTTPS rules if present, otherwise keep HTTP rules.
+      if (has443 || base.pathRules.length === 0) {
+        base.pathRules = pathRules;
+      }
+    }
+
+    blockMap.set(serverName, base);
+  }
+
+  const blocks = Array.from(blockMap.values()).map((block) => ({
+    ...block,
+    pathRules: block.pathRules.length > 0
+      ? block.pathRules
+      : [
+          {
+            id: 'rule-default',
+            path: '/',
+            action: 'proxy',
+            proxyTarget: 'local-port',
+            localPort: '3000',
+          },
+        ],
+  }));
+
+  value.blocks = blocks;
+
+  if (blocks.length > 0) {
+    value.domainName = blocks[0].domainName;
+    value.domainId = blocks[0].domainId;
+    value.subdomain = blocks[0].subdomain;
+    value.pathRules = blocks[0].pathRules;
+    value.sslEnabled = blocks[0].sslEnabled;
+    value.httpsRedirection = blocks[0].httpsRedirection;
+    value.sslCertificateFile = blocks[0].sslCertificateFile;
+  }
 
   return value;
 }
