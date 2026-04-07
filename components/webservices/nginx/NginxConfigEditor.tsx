@@ -352,10 +352,17 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                     const first = val.blocks[0];
                                     if (first.domainId) {
                                         setDomainMode('domain');
-                                        // Only set selected domain if it's a managed domain (not manual-domain)
+                                        // Set domain name in all cases
+                                        setSelectedDomainName(first.domainName);
+                                        // Try to find matching managed domain
                                         if (first.domainId !== 'manual-domain') {
                                             setSelectedDomainId(first.domainId);
-                                            setSelectedDomainName(first.domainName);
+                                        } else if (servers.length > 0) {
+                                            // For manual-domain configs, search domains list by name
+                                            const matchedDomain = domains.find(d => d.name === first.domainName);
+                                            if (matchedDomain) {
+                                                setSelectedDomainId(matchedDomain.id);
+                                            }
                                         }
                                     } else {
                                         setDomainMode('none');
@@ -367,10 +374,17 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                 // Determine mode
                                 if (val.domainId) {
                                     setDomainMode('domain');
-                                    // Only set selected domain if it's a managed domain (not manual-domain)
+                                    // Set domain name in all cases
+                                    setSelectedDomainName(val.domainName || '');
+                                    // Try to find matching managed domain
                                     if (val.domainId !== 'manual-domain') {
                                         setSelectedDomainId(val.domainId);
-                                        setSelectedDomainName(val.domainName || '');
+                                    } else if (servers.length > 0) {
+                                        // For manual-domain configs, search domains list by name
+                                        const matchedDomain = domains.find(d => d.name === val.domainName);
+                                        if (matchedDomain) {
+                                            setSelectedDomainId(matchedDomain.id);
+                                        }
                                     }
                                 } else {
                                     setDomainMode('none');
@@ -429,7 +443,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
         if (servers.length > 0) {
             loadConfig();
         }
-    }, [configId, servers, toast]);
+    }, [configId, servers, domains, toast]);
 
     // Automatically create the initial '@' block when step 3 conditions are met
     useEffect(() => {
@@ -521,19 +535,35 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
         }));
     };
 
-    const handleDomainSelect = (domainId: string) => {
-        const domain = domains.find(d => d.id === domainId);
-        if (domain) {
-            setSelectedDomainId(domainId);
-            setSelectedDomainName(domain.name);
+    const handleDomainSelect = (value: string) => {
+        if (value.startsWith('unlisted-')) {
+            // Handle unlisted domain
+            const unlistedDomainName = value.replace('unlisted-', '');
+            setSelectedDomainId('');
+            setSelectedDomainName(unlistedDomainName);
             setDomainMode('domain');
 
-            // If we already have blocks, update their domain info
+            // Update blocks with unlisted domain
             setDomainBlocks(domainBlocks.map(b => ({
                 ...b,
-                domainId: domainId,
-                domainName: domain.name
+                domainId: 'manual-domain',
+                domainName: unlistedDomainName
             })));
+        } else {
+            // Handle managed domain
+            const domain = domains.find(d => d.id === value);
+            if (domain) {
+                setSelectedDomainId(value);
+                setSelectedDomainName(domain.name);
+                setDomainMode('domain');
+
+                // If we already have blocks, update their domain info
+                setDomainBlocks(domainBlocks.map(b => ({
+                    ...b,
+                    domainId: value,
+                    domainName: domain.name
+                })));
+            }
         }
     };
 
@@ -1334,11 +1364,16 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                         {domainMode === 'domain' && (
                             <div className="space-y-2 animate-in slide-in-from-top-2 duration-300 max-w-[400px]">
                                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Select Base Domain</Label>
-                                <Select value={selectedDomainId || ''} onValueChange={handleDomainSelect}>
+                                <Select value={selectedDomainId || (selectedDomainName ? `unlisted-${selectedDomainName}` : '')} onValueChange={handleDomainSelect}>
                                     <SelectTrigger className="h-10">
                                         <SelectValue placeholder="Choose a domain..." />
                                     </SelectTrigger>
                                     <SelectContent>
+                                        {selectedDomainName && !domains.find(d => d.name === selectedDomainName) && (
+                                            <SelectItem value={`unlisted-${selectedDomainName}`} className="text-amber-600">
+                                                {selectedDomainName} <span className="text-xs text-amber-600">(unlisted)</span>
+                                            </SelectItem>
+                                        )}
                                         {domains.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
                                     </SelectContent>
                                 </Select>
