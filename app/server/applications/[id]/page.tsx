@@ -183,7 +183,11 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                 <PageTitleBack
                     title={
                         <span className="flex items-center gap-3">
-                            <AppWindow className="h-8 w-8 text-primary" />
+                            {application.appIcon ? (
+                                <img src={application.appIcon} alt={application.name} className="h-12 w-12 rounded-lg object-contain border border-border shadow-sm bg-muted/30 p-1" />
+                            ) : (
+                                <AppWindow className="h-8 w-8 text-primary" />
+                            )}
                             {application.name}
                         </span>
                     }
