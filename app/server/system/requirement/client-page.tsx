@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils';
 import { requirements } from '@/requirements/list';
 import * as Icons from 'lucide-react';
 import { useServerName } from '@/hooks/use-server-name';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 const Icon = ({ name, className }: { name: string, className?: string }) => {
     // @ts-ignore
@@ -35,6 +37,12 @@ export default function RequirementsPage() {
     const serverName = useServerName();
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
+            <Button asChild variant="ghost" size="sm" className="w-fit -ml-2 text-muted-foreground hover:text-foreground">
+                <Link href="/server/system">
+                    <ArrowLeft className="mr-1 h-4 w-4" /> Back to System
+                </Link>
+            </Button>
+
             <PageTitle
                 title="System Requirements"
                 description="Manage core system dependencies and configurations"

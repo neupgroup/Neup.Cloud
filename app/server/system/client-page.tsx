@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { PageTitle } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { HardDrive, ArrowUpCircle, Package, Repeat2 } from 'lucide-react';
+import { HardDrive, ArrowUpCircle, Package, Repeat2, ShieldCheck } from 'lucide-react';
 import { useServerName } from '@/hooks/use-server-name';
 
 export default function SystemPage() {
@@ -14,7 +14,7 @@ export default function SystemPage() {
         <div className="space-y-8">
             <PageTitle
                 title="System Management"
-                description="Manage core server maintenance areas from one place, including storage, updates, and packages."
+                description="Manage core server maintenance areas from one place, including storage, updates, packages, requirements, and swap settings."
                 serverName={serverName}
             />
 
@@ -95,6 +95,26 @@ export default function SystemPage() {
                     <CardFooter className="border-t px-6 py-4">
                         <Button asChild className="w-full">
                             <Link href="/server/system/swapper">Open Swapper</Link>
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck className="h-5 w-5 text-muted-foreground" />
+                            <CardTitle>Requirement</CardTitle>
+                        </div>
+                        <CardDescription>
+                            Review system requirements and validate server readiness for key dependencies.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="text-sm text-muted-foreground">
+                        Open requirement checks and dependency pages for server setup and compatibility.
+                    </CardContent>
+                    <CardFooter className="border-t px-6 py-4">
+                        <Button asChild className="w-full">
+                            <Link href="/server/system/requirement">Open Requirement</Link>
                         </Button>
                     </CardFooter>
                 </Card>

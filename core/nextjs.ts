@@ -75,7 +75,7 @@ echo "Selected Port: $CHOSEN_PORT"
                 rm -rf .next`,
                 mainCommand: `cd ${context.appLocation} &&
                 npm install &&
-                PORT=$CHOSEN_PORT NODE_OPTIONS="--max-old-space-size=600" npm run build`
+                PORT=$CHOSEN_PORT NEXT_PRIVATE_MAX_WORKERS=1 NODE_OPTIONS="--max-old-space-size=2000" npm run build`
             }
         },
 
