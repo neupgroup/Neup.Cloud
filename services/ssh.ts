@@ -55,6 +55,29 @@ async function getSwapSizeForServer(
     return parseSwapSizeMb(server?.moreDetails);
 }
 
+async function forceCleanupSwapFile(
+    host: string,
+    username: string,
+    privateKey: string,
+    swapFile: string
+): Promise<void> {
+    const cleanupSsh = new NodeSSH();
+
+    try {
+        await cleanupSsh.connect({
+            host,
+            username,
+            privateKey,
+        });
+
+        await cleanupSsh.execCommand(`sudo swapoff "${swapFile}" 2>/dev/null || true; sudo rm -f "${swapFile}" 2>/dev/null || true`);
+    } catch {
+        // Best-effort cleanup only: cancellation can also drop connectivity.
+    } finally {
+        cleanupSsh.dispose();
+    }
+}
+
 export async function runCommandOnServer(
     host: string,
     username: string,
@@ -66,6 +89,7 @@ export async function runCommandOnServer(
     variables: Record<string, string | number | boolean> = {}
 ): Promise<{ stdout: string; stderr: string; code: number | null }> {
     const ssh = new NodeSSH();
+    let swapFilePath: string | null = null;
 
     try {
         await ssh.connect({
@@ -106,12 +130,14 @@ export async function runCommandOnServer(
             // Using /var/tmp or just a root file with unique name.
             // We use a timestamp and random suffix.
             const uniqueId = `${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+            swapFilePath = `/swapfile_cmd_${uniqueId}`;
             
             // Wrapper script to manage swap file with sudo
             // We check if fallocate works, otherwise dd (slower but more compatible)
             // We only add swap if we can create it.
             finalCommand = `
-                SWAP_FILE="/swapfile_cmd_${uniqueId}";
+                SWAP_FILE="${swapFilePath}";
+                HAS_SWAP=0
                 
                 # Try to create swap
                 if sudo fallocate -l ${swapSizeInMegabytes}M "$SWAP_FILE" 2>/dev/null || sudo dd if=/dev/zero of="$SWAP_FILE" bs=1M count=${swapSizeInMegabytes} status=none; then
@@ -134,6 +160,7 @@ export async function runCommandOnServer(
                     fi
                 }
                 trap cleanup EXIT
+                trap 'cleanup; exit 130' INT TERM HUP
 
                 ${processedCommand}
             `;
@@ -141,11 +168,21 @@ export async function runCommandOnServer(
 
         const result = await ssh.execCommand(finalCommand, { onStdout, onStderr });
 
+        if (swapFilePath && result.code !== 0) {
+            await forceCleanupSwapFile(host, username, privateKey, swapFilePath);
+        }
+
         return {
             stdout: result.stdout,
             stderr: result.stderr,
             code: result.code,
         };
+
+    } catch (error) {
+        if (swapFilePath) {
+            await forceCleanupSwapFile(host, username, privateKey, swapFilePath);
+        }
+        throw error;
 
     } finally {
         ssh.dispose();
