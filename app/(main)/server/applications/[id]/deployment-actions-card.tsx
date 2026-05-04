@@ -21,12 +21,8 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
     const [isDeploying, setIsDeploying] = useState(false);
 
     const openInline = (view: 'environments' | 'files') => {
-        try {
-            sessionStorage.setItem(`neup:applications:view-intent:${applicationId}`, view);
-        } catch {
-            // ignore
-        }
-        router.push(`/server/applications/${applicationId}`);
+        const route = view === 'environments' ? 'environment' : 'files';
+        router.push(`/server/applications/${applicationId}/${route}`);
     };
 
     const handleDeploy = async () => {
