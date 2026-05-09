@@ -266,3 +266,53 @@ model Permit {
 
   @@map("permit")
 }
+
+model AuthzRole {
+  id          String  @id @default(uuid()) @db.Text
+  name        String  @db.Text
+  description String? @db.Text
+  scope       String? @db.Text
+
+  @@map("authz_role")
+}
+
+model AuthzCapability {
+  id          String  @id @default(uuid()) @db.Text
+  name        String  @db.Text
+  description String? @db.Text
+  scope       String? @db.Text
+
+  @@map("authz_capability")
+}
+
+model AuthzRoleCapability {
+  id                   String  @id @default(uuid()) @db.Text
+  roleId               String  @map("role_id") @db.Text
+  capabilityId         String  @map("capability_id") @db.Text
+  scope                String? @db.Text
+  denormalizedCapability Json? @map("denormalized_capability")
+  roleName             String? @map("role_name") @db.Text
+
+  @@map("authz_role_capability")
+}
+
+model AuthzAccountAccessGrant {
+  id              String  @id @default(uuid()) @db.Text
+  ownerAccountId  String  @map("owner_account_id") @db.Text
+  targetAccountId String  @map("target_account_id") @db.Text
+  roleId          String  @map("role_id") @db.Text
+  portfolioId     String? @map("portfolio_id") @db.Text
+
+  @@map("authz_account_access_grant")
+}
+
+model AuthzAssetsAccessGrant {
+  id          String  @id @default(uuid()) @db.Text
+  assetId     String  @map("asset_id") @db.Text
+  accountId   String  @map("account_id") @db.Text
+  roleId      String  @map("role_id") @db.Text
+  portfolioId String? @map("portfolio_id") @db.Text
+  assetType   String? @map("asset_type") @db.Text
+
+  @@map("authz_assets_access_grant")
+}
