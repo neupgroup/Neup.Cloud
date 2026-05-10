@@ -68,6 +68,9 @@
     "use-debounce": "^10.1.0",
     "zod": "^3.24.2"
   },
+  "prisma": {
+    "seed": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts"
+  },
   "devDependencies": {
     "@types/node": "^20.14.9",
     "@types/nprogress": "^0.2.3",
