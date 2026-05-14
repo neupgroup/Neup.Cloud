@@ -25,9 +25,11 @@ export function ActionsSection({ application, isCommandRunning = false }: Action
         return (
             <div
                 className={cn(
-                    "p-4 min-w-0 w-full transition-colors hover:bg-muted/50 group flex items-start gap-4",
+                    "p-4 min-w-0 w-full transition-colors group flex items-start gap-4",
                     !isLast && "border-b border-border",
-                    isDisabled ? "opacity-50 pointer-events-none cursor-not-allowed" : "cursor-pointer"
+                    isDisabled
+                      ? "opacity-50 cursor-not-allowed select-none"
+                      : "cursor-pointer hover:bg-muted/50"
                 )}
                 onClick={() => !isDisabled && handleExecute(name, command)}
             >

@@ -11,10 +11,10 @@ import { executeApplicationCommand } from "@/services/server/applications/servic
 
 interface LifecycleSectionProps {
   application: any;
-  isCommandRunning?: boolean;
+  runningCommandName?: string | null;
 }
 
-export function LifecycleSection({ application, isCommandRunning = false }: LifecycleSectionProps) {
+export function LifecycleSection({ application, runningCommandName = null }: LifecycleSectionProps) {
   const { toast } = useToast();
   const [executing, setExecuting] = useState<string | null>(null);
 
@@ -109,28 +109,38 @@ export function LifecycleSection({ application, isCommandRunning = false }: Life
           const isLoading = executing === name;
           const isDestructive = type === 'destructive';
 
-          const isDisabled = isLoading || isCommandRunning;
+          // Any running command disables all cards; spinner only on the active one
+          const isAnyRunning = runningCommandName !== null;
+          const isThisRunning = runningCommandName === displayName.toLowerCase() || runningCommandName === name.toLowerCase();
+          const isDisabled = isLoading || isAnyRunning;
 
           return (
             <div
               key={name}
               className={cn(
-                "p-4 min-w-0 w-full transition-colors hover:bg-muted/50 group flex items-start gap-4",
+                "p-4 min-w-0 w-full transition-colors group flex items-start gap-4",
                 index !== availableCommands.length - 1 && "border-b border-border",
-                isDisabled ? "opacity-50 pointer-events-none cursor-not-allowed" : "cursor-pointer"
+                isDisabled
+                  ? "opacity-50 cursor-not-allowed select-none"
+                  : "cursor-pointer hover:bg-muted/50"
               )}
               onClick={() => !isDisabled && handleExecute(name, command, displayCommand)}
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between mb-0 h-8">
-                  <h3
-                    className={cn(
-                      "font-semibold leading-none tracking-tight truncate pr-4 capitalize transition-colors group-hover:underline decoration-muted-foreground/30 underline-offset-4",
-                      isDestructive ? "text-destructive" : "text-foreground"
+                  <div className="flex items-center gap-2 min-w-0">
+                    {isThisRunning && (
+                      <Loader2 className="h-4 w-4 animate-spin shrink-0 text-muted-foreground" />
                     )}
-                  >
-                    {displayName}
-                  </h3>
+                    <h3
+                      className={cn(
+                        "font-semibold leading-none tracking-tight truncate pr-4 capitalize transition-colors group-hover:underline decoration-muted-foreground/30 underline-offset-4",
+                        isDestructive ? "text-destructive" : "text-foreground"
+                      )}
+                    >
+                      {displayName}
+                    </h3>
+                  </div>
 
                   <div className="flex items-center gap-1">
                     <div
@@ -139,7 +149,7 @@ export function LifecycleSection({ application, isCommandRunning = false }: Life
                         isDestructive ? "text-destructive/70 group-hover:text-destructive" : "text-muted-foreground group-hover:text-foreground"
                       )}
                     >
-                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
+                      <Icon className="h-4 w-4" />
                     </div>
                   </div>
                 </div>

@@ -9,30 +9,22 @@ interface ApplicationLifecycleWrapperProps {
   application: any;
 }
 
-/**
- * Client wrapper that shares the "is a command currently running?" state
- * between the command history poller and the lifecycle cards.
- *
- * A command is considered running when there is a pending log entry that was
- * started less than 20 minutes ago. Anything older is treated as timed-out /
- * cancelled and will not block the UI.
- */
 export function ApplicationLifecycleWrapper({
   applicationId,
   application,
 }: ApplicationLifecycleWrapperProps) {
-  const [isCommandRunning, setIsCommandRunning] = useState(false);
+  const [runningCommandName, setRunningCommandName] = useState<string | null>(null);
 
-  const handleRunningStateChange = useCallback((running: boolean) => {
-    setIsCommandRunning(running);
+  const handleRunningCommandChange = useCallback((name: string | null) => {
+    setRunningCommandName(name);
   }, []);
 
   return (
     <>
-      <LifecycleSection application={application} isCommandRunning={isCommandRunning} />
+      <LifecycleSection application={application} runningCommandName={runningCommandName} />
       <ApplicationCommandLogs
         applicationId={applicationId}
-        onRunningStateChange={handleRunningStateChange}
+        onRunningCommandChange={handleRunningCommandChange}
       />
     </>
   );

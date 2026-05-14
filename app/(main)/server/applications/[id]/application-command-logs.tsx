@@ -9,23 +9,30 @@ import { CommandLogList } from '@/app/(main)/server/commands/command-log-card';
  *  less than 20 minutes ago. Anything older is treated as cancelled/timed-out. */
 const RUNNING_TIMEOUT_MS = 20 * 60 * 1000;
 
-export function isCommandRunningNow(logs: CommandLog[]): boolean {
+/**
+ * Returns the name of the currently running command (last word of commandName,
+ * e.g. "MyApp build" → "build"), or null if nothing is running.
+ */
+export function getRunningCommandName(logs: CommandLog[]): string | null {
   const now = Date.now();
-  return logs.some(
+  const running = logs.find(
     (log) =>
       log.status === 'pending' &&
       now - new Date(log.runAt).getTime() < RUNNING_TIMEOUT_MS
   );
+  if (!running) return null;
+  const parts = running.commandName?.trim().split(' ') ?? [];
+  return parts.length > 0 ? parts[parts.length - 1].toLowerCase() : null;
 }
 
 interface ApplicationCommandLogsProps {
   applicationId: string;
-  onRunningStateChange?: (isRunning: boolean) => void;
+  onRunningCommandChange?: (runningCommandName: string | null) => void;
 }
 
 export function ApplicationCommandLogs({
   applicationId,
-  onRunningStateChange,
+  onRunningCommandChange,
 }: ApplicationCommandLogsProps) {
   const [logs, setLogs] = useState<CommandLog[]>([]);
 
@@ -35,8 +42,8 @@ export function ApplicationCommandLogs({
     if (!serverId) return;
     const result = await getCommandLog({ serverId, source: `application:${applicationId}`, limit: 3, offset: 0 });
     setLogs(result);
-    onRunningStateChange?.(isCommandRunningNow(result));
-  }, [applicationId, onRunningStateChange]);
+    onRunningCommandChange?.(getRunningCommandName(result));
+  }, [applicationId, onRunningCommandChange]);
 
   useEffect(() => {
     void fetchLogs();
