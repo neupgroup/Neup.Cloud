@@ -1,6 +1,8 @@
 import { PageTitle } from "@/components/page-header";
 import { ShieldAlert } from "lucide-react";
 import { Metadata } from "next";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 import { cookies } from "next/headers";
 
@@ -31,9 +33,9 @@ export default async function FirewallPage() {
                     <p className="text-sm text-muted-foreground mt-2">
                         View and manage allowed ports and network connections.
                     </p>
-                    <a href="/server/firewall/network" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 mt-4">
-                        Manage Network
-                    </a>
+                    <Button asChild className="mt-4">
+                        <Link href="/server/firewall/network">Manage Network</Link>
+                    </Button>
                 </div>
 
                 <div className="p-4 border rounded-lg bg-card text-card-foreground shadow-sm">
@@ -41,9 +43,9 @@ export default async function FirewallPage() {
                     <p className="text-sm text-muted-foreground mt-2">
                         Manage system accounts and user access for this instance.
                     </p>
-                    <a href="/server/firewall/users" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 mt-4">
-                        Manage Users
-                    </a>
+                    <Button asChild className="mt-4">
+                        <Link href="/server/firewall/users">Manage Users</Link>
+                    </Button>
                 </div>
 
                 <div className="p-4 border rounded-lg bg-card text-card-foreground shadow-sm">
@@ -51,9 +53,9 @@ export default async function FirewallPage() {
                     <p className="text-sm text-muted-foreground mt-2">
                         Manage SSH keys for secure access to your instance.
                     </p>
-                    <a href="/server/firewall/keys" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 mt-4">
-                        Manage Keys
-                    </a>
+                    <Button asChild className="mt-4">
+                        <Link href="/server/firewall/keys">Manage Keys</Link>
+                    </Button>
                 </div>
             </div>
         </div>

@@ -221,43 +221,61 @@ export async function reissueCertificate(fileName: string, domain: string) {
         throw new Error("Domain is required");
     }
 
-    const reissueThresholdDays = 30;
     const cleanDomain = domain.trim();
     const certName = fileName.replace('.pem', '');
-
-    const expiryResult = await executeQuickCommand(
-        serverId,
-        `if [ -f /etc/nginx/ssl/${fileName} ]; then openssl x509 -in /etc/nginx/ssl/${fileName} -noout -enddate; fi`
-    );
-
-    const endDateMatch = (expiryResult.output || '').match(/notAfter=(.*)/);
-    const daysRemaining = endDateMatch
-        ? Math.floor((new Date(endDateMatch[1]).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-        : null;
-
-    const renewalFlag = daysRemaining !== null && daysRemaining > reissueThresholdDays ? '--expand' : '--reinstall';
-
-    const certbotCommand = `sudo certbot certonly --nginx ${renewalFlag} --force-renewal --non-interactive --agree-tos -m encryption.cloud@neupgroup.com -d ${cleanDomain} --cert-name ${certName}`;
+    const sslDir = '/etc/nginx/ssl';
+    const certPath = `${sslDir}/${certName}.pem`;
+    const keyPath = `${sslDir}/${certName}.key`;
 
     /**
      * Reissuance Strategy:
-     * Use the nginx authenticator and choose --expand or --reinstall based on remaining days.
+     * 1. Delete the existing certificate (nginx/ssl files + certbot records)
+     * 2. Issue a brand new certificate via certbot --standalone
+     * 3. Copy the new cert into /etc/nginx/ssl, replacing the old one
      */
+    const certbotCommand = `sudo certbot certonly --standalone --force-renewal --non-interactive --agree-tos -m encryption.cloud@neupgroup.com -d ${cleanDomain} --cert-name ${certName}`;
+
     const command = `
+        # Step 1: Delete existing certificate files and certbot records
+        sudo rm -f ${certPath}
+        sudo rm -f ${keyPath}
+        if sudo certbot certificates 2>/dev/null | grep -q "${certName}"; then
+            sudo certbot delete --cert-name ${certName} --non-interactive
+        else
+            sudo rm -rf /etc/letsencrypt/live/${certName}
+            sudo rm -rf /etc/letsencrypt/archive/${certName}
+            sudo rm -f /etc/letsencrypt/renewal/${certName}.conf
+        fi
+
+        # Step 2: Stop Nginx to free port 80 for standalone certbot
+        sudo systemctl stop nginx
+
+        # Step 3: Issue a fresh certificate
         ${certbotCommand} 2>&1
-        
-        if [ $? -eq 0 ]; then
+        CERTBOT_EXIT=$?
+
+        if [ $CERTBOT_EXIT -eq 0 ]; then
+            # Step 4: Copy new cert into /etc/nginx/ssl
+            sudo cp -L /etc/letsencrypt/live/${certName}/fullchain.pem ${certPath} && \
+            sudo cp -L /etc/letsencrypt/live/${certName}/privkey.pem ${keyPath} && \
+            sudo chmod 644 ${certPath} && \
+            sudo chmod 600 ${keyPath}
             echo "SUCCESS: Certificate reissued successfully for ${cleanDomain}"
         else
-            echo "ERROR: Certbot renewal failed"
+            echo "ERROR: Certbot failed to issue certificate for ${cleanDomain}"
         fi
+
+        # Step 5: Restart Nginx regardless of outcome
+        sudo systemctl start nginx || true
+
+        exit $CERTBOT_EXIT
     `;
 
     try {
         const result = await executeCommand(
             serverId,
             command,
-            `Reissue Certificate: ${cleanDomain}${daysRemaining !== null ? ` (${daysRemaining} days left)` : ''}`,
+            `Reissue Certificate: ${cleanDomain}`,
             certbotCommand,
             `webservices:cert:reinstall`
         );
