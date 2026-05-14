@@ -5,9 +5,9 @@
 import { Card } from "@/components/ui/card";
 import { cn } from "@/core/utils";
 import { Loader2, Terminal, Zap } from "lucide-react";
-import { useActionsSection, ActionsSectionProps } from "@/services/server/applications/service-section";
+import { useActionsSection, ActionsSectionProps } from "@/components/applications/actions-section";
 
-export function ActionsSection({ application }: ActionsSectionProps) {
+export function ActionsSection({ application, isCommandRunning = false }: ActionsSectionProps) {
     const { customCommands, executing, handleExecute } = useActionsSection(application);
     if (!customCommands || customCommands.length === 0) return null;
 
@@ -21,14 +21,15 @@ export function ActionsSection({ application }: ActionsSectionProps) {
         isLast?: boolean
     }) => {
         const isLoading = executing === name;
+        const isDisabled = isLoading || isCommandRunning;
         return (
             <div
                 className={cn(
-                    "p-4 min-w-0 w-full transition-colors hover:bg-muted/50 group flex items-start gap-4 cursor-pointer",
+                    "p-4 min-w-0 w-full transition-colors hover:bg-muted/50 group flex items-start gap-4",
                     !isLast && "border-b border-border",
-                    isLoading && "opacity-50 pointer-events-none"
+                    isDisabled ? "opacity-50 pointer-events-none cursor-not-allowed" : "cursor-pointer"
                 )}
-                onClick={() => !isLoading && handleExecute(name, command)}
+                onClick={() => !isDisabled && handleExecute(name, command)}
             >
                 <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between mb-0 h-8">

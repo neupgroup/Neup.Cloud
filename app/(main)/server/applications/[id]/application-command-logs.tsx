@@ -5,7 +5,28 @@ import Cookies from 'universal-cookie';
 import { getCommandLog, type CommandLog } from '@/services/logs/command-log';
 import { CommandLogList } from '@/app/(main)/server/commands/command-log-card';
 
-export function ApplicationCommandLogs({ applicationId }: { applicationId: string }) {
+/** A command is considered "running" if it has status "pending" and was started
+ *  less than 20 minutes ago. Anything older is treated as cancelled/timed-out. */
+const RUNNING_TIMEOUT_MS = 20 * 60 * 1000;
+
+export function isCommandRunningNow(logs: CommandLog[]): boolean {
+  const now = Date.now();
+  return logs.some(
+    (log) =>
+      log.status === 'pending' &&
+      now - new Date(log.runAt).getTime() < RUNNING_TIMEOUT_MS
+  );
+}
+
+interface ApplicationCommandLogsProps {
+  applicationId: string;
+  onRunningStateChange?: (isRunning: boolean) => void;
+}
+
+export function ApplicationCommandLogs({
+  applicationId,
+  onRunningStateChange,
+}: ApplicationCommandLogsProps) {
   const [logs, setLogs] = useState<CommandLog[]>([]);
 
   const fetchLogs = useCallback(async () => {
@@ -14,7 +35,8 @@ export function ApplicationCommandLogs({ applicationId }: { applicationId: strin
     if (!serverId) return;
     const result = await getCommandLog({ serverId, source: `application:${applicationId}`, limit: 3, offset: 0 });
     setLogs(result);
-  }, [applicationId]);
+    onRunningStateChange?.(isCommandRunningNow(result));
+  }, [applicationId, onRunningStateChange]);
 
   useEffect(() => {
     void fetchLogs();

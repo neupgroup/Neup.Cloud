@@ -93,5 +93,8 @@ fi
 exit $COMMAND_EXIT_CODE
 `;
 
-  return executeCommand(serverId, updateStatusCommand, formattedCommandName, displayCommand || command, `application:${applicationId}`);
+  // Fire-and-forget: kick off the SSH execution without awaiting it so the
+  // log record (created with status "pending") is immediately visible in the
+  // command history poll. The background promise handles its own error logging.
+  void executeCommand(serverId, updateStatusCommand, formattedCommandName, displayCommand || command, `application:${applicationId}`);
 }

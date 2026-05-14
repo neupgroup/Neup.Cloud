@@ -5,6 +5,7 @@ import { executeApplicationCommand } from "@/services/server/applications/servic
 
 export interface ActionsSectionProps {
     application: any;
+    isCommandRunning?: boolean;
 }
 
 export function useActionsSection(application: any) {

@@ -11,9 +11,10 @@ import { executeApplicationCommand } from "@/services/server/applications/servic
 
 interface LifecycleSectionProps {
   application: any;
+  isCommandRunning?: boolean;
 }
 
-export function LifecycleSection({ application }: LifecycleSectionProps) {
+export function LifecycleSection({ application, isCommandRunning = false }: LifecycleSectionProps) {
   const { toast } = useToast();
   const [executing, setExecuting] = useState<string | null>(null);
 
@@ -108,15 +109,17 @@ export function LifecycleSection({ application }: LifecycleSectionProps) {
           const isLoading = executing === name;
           const isDestructive = type === 'destructive';
 
+          const isDisabled = isLoading || isCommandRunning;
+
           return (
             <div
               key={name}
               className={cn(
-                "p-4 min-w-0 w-full transition-colors hover:bg-muted/50 group flex items-start gap-4 cursor-pointer",
+                "p-4 min-w-0 w-full transition-colors hover:bg-muted/50 group flex items-start gap-4",
                 index !== availableCommands.length - 1 && "border-b border-border",
-                isLoading && "opacity-50 pointer-events-none"
+                isDisabled ? "opacity-50 pointer-events-none cursor-not-allowed" : "cursor-pointer"
               )}
-              onClick={() => !isLoading && handleExecute(name, command, displayCommand)}
+              onClick={() => !isDisabled && handleExecute(name, command, displayCommand)}
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between mb-0 h-8">

@@ -8,12 +8,11 @@ import { getApplicationDetailPageData } from '@/services/server/applications/ser
 
 import { SupervisorOnlyActions } from './supervisor-only-actions';
 import { StatusDashboard } from './status-dashboard';
-import { LifecycleSection } from './lifecycle-section';
 import { GitHubSection } from './github-section';
 import { SystemSection } from './system-section';
 import { DeploymentActionsCard } from './deployment-actions-card';
 import { ApplicationActions } from './application-actions';
-import { ApplicationCommandLogs } from './application-command-logs';
+import { ApplicationLifecycleWrapper } from './application-lifecycle-wrapper';
 
 function getSupervisorBadgeClasses(state: string) {
   const normalizedState = state.toUpperCase();
@@ -118,9 +117,8 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
       </div>
 
       <StatusDashboard applicationId={application.id} />
-      <LifecycleSection application={application} />
+      <ApplicationLifecycleWrapper applicationId={application.id} application={application} />
       {application.repository ? <GitHubSection application={application} /> : null}
-      <ApplicationCommandLogs applicationId={application.id} />
       <SystemSection application={application} />
       <DeploymentActionsCard
         applicationId={application.id}
