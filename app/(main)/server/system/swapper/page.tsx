@@ -3,11 +3,12 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PageTitle } from '@/components/page-header';
+import { Card } from '@/components/ui/card';
+import { PageTitleBack } from '@/components/page-header';
 import { getServer } from '@/services/server/server-service';
 import { Server } from 'lucide-react';
 import SwapperClient from './swapper-client';
+import { getRecurringSwapSize, listSwapFiles } from '@/services/server/system-swap';
 
 export const metadata: Metadata = {
     title: 'Swapper, Neup.Cloud',
@@ -19,7 +20,7 @@ function getSwapSizeFromDetails(moreDetails?: string | null) {
     try {
         const parsed = JSON.parse(moreDetails) as { swapSizeMb?: unknown; swapSize?: unknown };
         if (typeof parsed.swapSizeMb === 'number' && Number.isFinite(parsed.swapSizeMb)) {
-            return Math.max(1, Math.floor(parsed.swapSizeMb));
+            return Math.max(0, Math.floor(parsed.swapSizeMb));
         }
 
         if (typeof parsed.swapSize === 'string' && parsed.swapSize.trim()) {
@@ -27,7 +28,6 @@ function getSwapSizeFromDetails(moreDetails?: string | null) {
             if (legacyMatch) {
                 const amount = Number(legacyMatch[1]);
                 const unit = legacyMatch[2];
-
                 if (unit === 'M') return Math.max(1, amount);
                 if (unit === 'G') return Math.max(1, amount * 1024);
                 return Math.max(1, Math.ceil(amount / 1024));
@@ -35,9 +35,7 @@ function getSwapSizeFromDetails(moreDetails?: string | null) {
         }
     } catch {
         const parsed = Number(moreDetails.trim());
-        if (Number.isFinite(parsed) && parsed > 0) {
-            return Math.floor(parsed);
-        }
+        if (Number.isFinite(parsed) && parsed >= 0) return Math.floor(parsed);
     }
 
     return 2048;
@@ -50,10 +48,11 @@ export default async function SwapperPage() {
 
     if (!serverId) {
         return (
-            <div className="space-y-6">
-                <PageTitle
+            <div className="space-y-6 animate-in fade-in duration-500">
+                <PageTitleBack
                     title="Swapper"
-                    description="Manage the shared swap size used for command execution."
+                    description="Manage swap space for this server."
+                    backHref="/server/system"
                 />
                 <Card className="text-center p-8">
                     <Server className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -69,32 +68,29 @@ export default async function SwapperPage() {
         );
     }
 
-    const server = await getServer(serverId);
+    const [server, recurringSwap, swapFiles] = await Promise.all([
+        getServer(serverId),
+        getRecurringSwapSize(serverId),
+        listSwapFiles(serverId),
+    ]);
     const currentSwapSize = getSwapSizeFromDetails(server?.moreDetails);
 
     return (
-        <div className="space-y-6 max-w-3xl">
-            <PageTitle
+        <div className="space-y-8 max-w-5xl animate-in fade-in duration-500 pb-10">
+            <PageTitleBack
                 title="Swapper"
-                description="Define the swap space size that command execution will use for this server."
+                description="Configure swap space for command execution and persistent system swap."
                 serverName={serverName}
+                backHref="/server/system"
             />
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Swap Configuration</CardTitle>
-                    <CardDescription>
-                        The value below is stored in the server record and reused by all remote commands.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <SwapperClient
-                        serverId={serverId}
-                        initialSwapSize={currentSwapSize}
-                        initialMoreDetails={server?.moreDetails || ''}
-                    />
-                </CardContent>
-            </Card>
+            <SwapperClient
+                serverId={serverId}
+                initialSwapSize={currentSwapSize}
+                initialMoreDetails={server?.moreDetails || ''}
+                initialRecurringSwapMb={recurringSwap.sizeMb}
+                initialSwapFiles={swapFiles.files}
+            />
         </div>
     );
 }

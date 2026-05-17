@@ -4,6 +4,7 @@
 import { NodeSSH } from 'node-ssh';
 import { UniversalLinux } from '@/services/core/universal';
 import { prisma } from '@/services/prisma';
+import { SWAP_DIR, dynamicSwapPath } from '@/services/server/swap-paths';
 
 const DEFAULT_SWAP_SIZE_MB = 2048;
 
@@ -15,7 +16,8 @@ function parseSwapSizeMb(moreDetails: string | null | undefined): number {
     try {
         const parsed = JSON.parse(moreDetails) as { swapSizeMb?: unknown; swapSize?: unknown };
         if (typeof parsed.swapSizeMb === 'number' && Number.isFinite(parsed.swapSizeMb)) {
-            return Math.max(1, Math.floor(parsed.swapSizeMb));
+            // 0 is valid — means "skip swap"
+            return Math.max(0, Math.floor(parsed.swapSizeMb));
         }
 
         if (typeof parsed.swapSize === 'string' && parsed.swapSize.trim()) {
@@ -31,7 +33,7 @@ function parseSwapSizeMb(moreDetails: string | null | undefined): number {
         }
     } catch {
         const parsed = Number(moreDetails.trim());
-        if (Number.isFinite(parsed) && parsed > 0) {
+        if (Number.isFinite(parsed) && parsed >= 0) {
             return Math.floor(parsed);
         }
     }
@@ -125,17 +127,20 @@ export async function runCommandOnServer(
         let finalCommand = processedCommand;
         if (!skipSwap) {
             const swapSizeInMegabytes = await getSwapSizeForServer(host, username, privateKey);
-            // Use a unique swap file name to avoid collisions between concurrent commands
-            // Using /tmp is safer for temporary files, but sometimes /tmp is small (tmpfs).
-            // Using /var/tmp or just a root file with unique name.
-            // We use a timestamp and random suffix.
-            const uniqueId = `${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-            swapFilePath = `/swapfile_cmd_${uniqueId}`;
-            
-            // Wrapper script to manage swap file with sudo
-            // We check if fallocate works, otherwise dd (slower but more compatible)
-            // We only add swap if we can create it.
-            finalCommand = `
+
+            // 0 means the user explicitly disabled per-command swap
+            if (swapSizeInMegabytes > 0) {
+                // Unique name under the managed swap directory
+                const uniqueId = `${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+                swapFilePath = dynamicSwapPath(swapSizeInMegabytes, uniqueId);
+
+                // Wrapper script to manage swap file with sudo.
+                // Ensures the swap directory exists, then creates the file.
+                // We check if fallocate works, otherwise dd (slower but more compatible).
+                // We only add swap if we can create it.
+                finalCommand = `
+                sudo mkdir -p "${SWAP_DIR}" 2>/dev/null || true
+                sudo chmod 700 "${SWAP_DIR}" 2>/dev/null || true
                 SWAP_FILE="${swapFilePath}";
                 HAS_SWAP=0
                 
@@ -164,6 +169,7 @@ export async function runCommandOnServer(
 
                 ${processedCommand}
             `;
+            }
         }
 
         const result = await ssh.execCommand(finalCommand, { onStdout, onStderr });
