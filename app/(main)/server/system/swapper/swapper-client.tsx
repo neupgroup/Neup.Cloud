@@ -453,6 +453,11 @@ function SwapFilesCard({
 	                                <div className="flex-1 min-w-0">
 	                                    <h4 className="text-base font-medium mb-0.5">{title}</h4>
 	                                    <p className="text-sm text-muted-foreground">{subtitle}</p>
+	                                    {file.kind === 'unknown' && (
+	                                        <p className="text-xs text-muted-foreground font-mono truncate mt-1">
+	                                            {file.path}
+	                                        </p>
+	                                    )}
 	                                </div>
 
 	                                <button

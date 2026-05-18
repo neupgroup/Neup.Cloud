@@ -91,7 +91,7 @@ exit 0
 
         const out = result.stdout.trim();
         if (out.startsWith('NO_SUDO')) {
-            return { sizeMb: configuredMb, error: 'Passwordless sudo is required to read /swapper; showing configured value.' };
+            return { sizeMb: configuredMb, error: 'Passwordless sudo is required to read /.swapper; showing configured value.' };
         }
 
         const total = parseInt(out || '0', 10);
@@ -156,24 +156,19 @@ list_active_swaps() {
 # Print active swaps first so they always show up
 list_active_swaps
 
-	# Managed directory
-	if [ -n "$SUDO" ]; then
-	    # find is robust even when the directory is 700/root-owned
-	    $SUDO find "${SWAP_DIR}" -maxdepth 1 -type f -print 2>/dev/null | while read -r f; do
-	        list_file "$f"
-	    done
-	else
+# Managed directory
+if [ -n "$SUDO" ]; then
+    # find is robust even when the directory is 700/root-owned
+    $SUDO find "${SWAP_DIR}" -maxdepth 1 -type f -print 2>/dev/null | while read -r f; do
+        list_file "$f"
+    done
+else
     if [ -d "${SWAP_DIR}" ]; then
         for f in "${SWAP_DIR}"/*; do
             list_file "$f"
         done
     fi
 fi
-
-# Legacy root-level files (created before /swapper directory was introduced)
-for f in /swapfile_persistent /swapfile_cmd_[0-9]*; do
-    list_file "$f"
-done
 
 exit 0
 `.trim();
@@ -212,8 +207,9 @@ exit 0
                 const name = path.split('/').pop() ?? path;
 
                 let kind: SwapFileEntry['kind'] = 'unknown';
-                if (name.startsWith(PERSISTENT_SWAP_PREFIX) || name === 'swapfile_persistent') kind = 'persistent';
-                else if (name.startsWith(DYNAMIC_SWAP_PREFIX) || name.startsWith('swapfile_cmd_')) kind = 'dynamic';
+                const isInManagedDir = path.startsWith(`${SWAP_DIR}/`);
+                if (isInManagedDir && name.startsWith(PERSISTENT_SWAP_PREFIX)) kind = 'persistent';
+                else if (isInManagedDir && name.startsWith(DYNAMIC_SWAP_PREFIX)) kind = 'dynamic';
 
                 return { path, name, kind, sizeBytes, active, inFstab };
             })
@@ -403,7 +399,7 @@ ACTIVE=0
 awk 'NR>1 {print $1}' /proc/swaps 2>/dev/null | grep -qxF "$f" && ACTIVE=1
 MANAGED=0
 case "$f" in
-    "${SWAP_DIR}/"*|/swapfile_persistent|/swapfile_cmd_[0-9]*)
+    "${SWAP_DIR}/${PERSISTENT_SWAP_PREFIX}"*|"${SWAP_DIR}/${DYNAMIC_SWAP_PREFIX}"*)
         MANAGED=1
         ;;
 esac
@@ -441,7 +437,7 @@ echo "OK"
         }
 
         const name = filePath.split('/').pop() ?? '';
-        if (name.startsWith(PERSISTENT_SWAP_PREFIX) || name === 'swapfile_persistent') {
+        if (filePath.startsWith(`${SWAP_DIR}/`) && name.startsWith(PERSISTENT_SWAP_PREFIX)) {
             await saveRecurringSwapToDetails(serverId, 0, server.moreDetails);
         }
 

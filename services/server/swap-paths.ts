@@ -1,7 +1,8 @@
 // Shared swap path constants and helpers.
 // Plain module (no 'use server') — safe to import anywhere.
 
-export const SWAP_DIR = '/swapper';
+// Managed swap directory on the server. Hidden to reduce accidental user edits.
+export const SWAP_DIR = '/.swapper';
 
 export const PERSISTENT_SWAP_PREFIX = 'persistent_';
 export const DYNAMIC_SWAP_PREFIX = 'dynamic_';
