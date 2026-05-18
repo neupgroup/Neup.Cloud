@@ -215,7 +215,21 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
 
     const fullPath = `${currentPath.endsWith('/') ? currentPath : currentPath + '/'}${item.name}`;
 
-    const openViewer = () => {
+    const openUrlInNewTab = (url: string) => {
+      const newTab = window.open(url, '_blank');
+      if (newTab) {
+        // Prevent the newly opened tab from controlling the opener.
+        newTab.opener = null;
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Popup blocked',
+          description: 'Your browser blocked opening a new tab. Please allow popups for this site.',
+        });
+      }
+    };
+
+    const viewerUrl = () => {
       const ext = item.name.split('.').pop()?.toLowerCase() || '';
       let type = 'text';
 
@@ -227,27 +241,36 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
       else if (videoExts.includes(ext)) type = 'video';
       else if (codeExts.includes(ext)) type = 'code';
 
-      router.push(`/server/viewer?path=${encodeURIComponent(fullPath)}&type=${type}${rootMode ? '&rootMode=true' : ''}`);
+      return `/server/viewer?path=${encodeURIComponent(fullPath)}&type=${type}${rootMode ? '&rootMode=true' : ''}`;
     };
 
     if (item.type === 'directory') {
       router.push(pathname + '?' + createQueryString('path', fullPath));
     } else if (item.type === 'symlink') {
       setIsProcessing(true);
+      // Open a placeholder tab synchronously (preserves user gesture) so we can safely
+      // navigate it after the async symlink check.
+      const pendingTab = window.open('', '_blank');
+      if (pendingTab) pendingTab.opener = null;
       try {
         const isDir = await isDirectory(serverId, fullPath, rootMode);
         if (isDir) {
+          pendingTab?.close();
           router.push(pathname + '?' + createQueryString('path', fullPath));
         } else {
-          openViewer();
+          const url = viewerUrl();
+          if (pendingTab) pendingTab.location.href = url;
+          else openUrlInNewTab(url);
         }
       } catch (e) {
-        openViewer();
+        const url = viewerUrl();
+        if (pendingTab) pendingTab.location.href = url;
+        else openUrlInNewTab(url);
       } finally {
         setIsProcessing(false);
       }
     } else {
-      openViewer();
+      openUrlInNewTab(viewerUrl());
     }
   };
 
