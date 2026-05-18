@@ -1,10 +1,12 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/core/utils';
 
 export function ServerNameLink({ name, className }: { name: string; className?: string }) {
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     return (
         <span
@@ -13,8 +15,9 @@ export function ServerNameLink({ name, className }: { name: string; className?: 
                 className
             )}
             onClick={() => {
-                const currentPath = window.location.pathname;
-                router.push(`/server/list?redirects=${currentPath}`);
+                const query = searchParams?.toString();
+                const currentPath = query ? `${pathname}?${query}` : pathname;
+                router.push(`/server/list?redirects=${encodeURIComponent(currentPath)}`);
             }}
         >
             {name}

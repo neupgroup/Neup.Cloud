@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Cookies from 'universal-cookie';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +11,7 @@ import { useToast } from '@/core/hooks/use-toast';
 
 export default function ViewerClient() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const path = searchParams.get('path');
   const type = searchParams.get('type');
@@ -100,7 +101,7 @@ export default function ViewerClient() {
     const newRootMode = !rootMode;
     const params = new URLSearchParams(searchParams.toString());
     params.set('rootMode', newRootMode.toString());
-    router.push(window.location.pathname + '?' + params.toString());
+    router.push(pathname + '?' + params.toString());
     toast({
       title: newRootMode ? 'Root Mode Enabled' : 'Root Mode Disabled',
       description: newRootMode ? 'File operations will now use sudo.' : 'File operations will run with normal permissions.',
