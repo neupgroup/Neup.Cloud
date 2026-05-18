@@ -15,6 +15,7 @@ import {
   Terminal,
   FileText,
   ShieldAlert,
+  Search,
   FolderKanban,
   Network,
   Settings,
@@ -149,6 +150,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
     { href: "/server/commands", label: "Commands", icon: Terminal },
     { href: "/server/firewall", label: "Firewall", icon: ShieldAlert },
     { href: "/server/files", label: "File Manager", icon: FolderKanban },
+    { href: "/server/search", label: "Search Files", icon: Search },
     { href: "/server/webservices", label: "Webservices", icon: Globe },
     { href: "/server/system", label: "System", icon: LayoutGrid },
   ]

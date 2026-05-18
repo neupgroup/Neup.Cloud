@@ -6,3 +6,11 @@ export type FileOrFolder = {
   permissions: string;
   linkTarget?: string;
 };
+
+export type FileSearchResult = {
+  path: string;
+  name: string;
+  directory: string;
+  size: number | null;
+  modifiedAtEpochMs: number | null;
+};
