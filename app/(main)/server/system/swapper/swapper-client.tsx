@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation';
 import { updateServer } from '@/services/server/server-service';
 import { createRecurringSwap, deleteRecurringSwap, deleteSwapFile, listSwapFiles } from '@/services/server/system-swap';
 import type { SwapFileEntry } from '@/services/server/system-swap';
-import { SWAP_DIR } from '@/services/server/swap-paths';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/core/hooks/use-toast';
@@ -41,11 +40,10 @@ function buildMoreDetails(existingMoreDetails: string, swapSizeMb: number) {
     }
 }
 
-function formatBytes(bytes: number) {
-    if (!bytes) return null;
-    const mb = bytes / (1024 * 1024);
-    if (mb >= 1) return `${mb % 1 === 0 ? mb : mb.toFixed(0)} MB`;
-    return `${(bytes / 1024).toFixed(0)} KB`;
+function formatMbCompact(bytes: number) {
+    if (!bytes) return '0MB';
+    const mb = Math.max(0, Math.round(bytes / (1024 * 1024)));
+    return `${mb}MB`;
 }
 
 // ─── Dynamic Swap Card ────────────────────────────────────────────────────────
@@ -317,41 +315,43 @@ function SwapFilesCard({
     serverId: string;
     initialSwapFiles: SwapFileEntry[];
 }) {
-    const router = useRouter();
-    const { toast } = useToast();
-    const [swapFiles, setSwapFiles] = useState<SwapFileEntry[]>(initialSwapFiles);
+	    const router = useRouter();
+	    const { toast } = useToast();
+	    const [swapFiles, setSwapFiles] = useState<SwapFileEntry[]>(initialSwapFiles);
 	    const [deletingPath, setDeletingPath] = useState<string | null>(null);
 	    const [isRefreshing, setIsRefreshing] = useState(false);
 
 	    const handleDelete = async (path: string) => {
 	        const file = swapFiles.find((f) => f.path === path);
 	        if (!file) return;
-	        if (file.kind === 'unknown') {
-	            toast({
-	                variant: 'destructive',
-	                title: 'Cannot Delete',
-	                description: 'This swap entry is not managed by Neup.Cloud and can’t be deleted from here.',
-	            });
-	            return;
-	        }
-	        const isPersistent = file?.kind === 'persistent';
-	        const msg = isPersistent
-	            ? 'Remove the persistent swap? It will be deleted and removed from startup.'
-	            : file?.active
-            ? 'This dynamic swap is currently active. Remove it anyway?'
-            : 'Remove this unused dynamic swap file?';
-        if (!confirm(msg)) return;
 
-        setDeletingPath(path);
-        try {
-            const result = await deleteSwapFile(serverId, path);
-            if (result.error) {
-                toast({ variant: 'destructive', title: 'Failed to Delete', description: result.error });
-            } else {
-                toast({ title: 'Swap File Deleted' });
-                setSwapFiles((prev) => prev.filter((f) => f.path !== path));
-                router.refresh();
-            }
+	        const isPersistent = file.kind === 'persistent';
+	        const isDynamic = file.kind === 'dynamic';
+
+	        const msg = isPersistent
+	            ? 'Delete this persistent swap? It will be turned off, removed from startup, and deleted.'
+	            : isDynamic
+	                ? (file.active
+	                    ? 'Delete this dynamic swap? It is active and will be turned off and deleted.'
+	                    : 'Delete this dynamic swap file? It will be deleted.'
+	                )
+	                : (file.active
+	                    ? 'Delete this swap? It is active and will be turned off and deleted.'
+	                    : 'Delete this swap file? It will be deleted.'
+	                );
+
+	        if (!confirm(msg)) return;
+
+	        setDeletingPath(path);
+	        try {
+	            const result = await deleteSwapFile(serverId, path);
+	            if (result.error) {
+	                toast({ variant: 'destructive', title: 'Failed to Delete', description: result.error });
+	            } else {
+	                toast({ title: 'Swap Deleted' });
+	                setSwapFiles((prev) => prev.filter((f) => f.path !== path));
+	                router.refresh();
+	            }
         } catch (e: any) {
             toast({ variant: 'destructive', title: 'Error', description: e.message });
         } finally {
@@ -391,105 +391,89 @@ function SwapFilesCard({
                 </Button>
             </div>
 
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
-                {swapFiles.length === 0 ? (
-                    <div className="flex items-center gap-4 p-4">
-                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-                            <HardDrive className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1">
-                            <h4 className="text-base font-medium mb-1">No swap files</h4>
-                            <p className="text-sm text-muted-foreground">
-                                No swap files have been created on this server yet.
-                            </p>
-                        </div>
-                    </div>
+	            <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
+	                {swapFiles.length === 0 ? (
+	                    <div className="flex items-center gap-4 p-4">
+	                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+	                            <HardDrive className="h-5 w-5 text-muted-foreground" />
+	                        </div>
+	                        <div className="flex-1">
+	                            <h4 className="text-base font-medium mb-1">No swap files</h4>
+	                            <p className="text-sm text-muted-foreground">
+	                                No swap files have been created on this server yet.
+	                            </p>
+	                        </div>
+	                    </div>
 	                ) : (
 	                    swapFiles.map((file, index) => {
 	                        const isPersistent = file.kind === 'persistent';
-	                        const isUnknown = file.kind === 'unknown';
-	                        const size = formatBytes(file.sizeBytes);
+	                        const isDynamic = file.kind === 'dynamic';
+	                        const sizeCompact = formatMbCompact(file.sizeBytes);
 	                        const isDeleting = deletingPath === file.path;
-	                        const baseName = file.path.split('/').pop() ?? '';
-	                        const canDelete = file.path.startsWith(`${SWAP_DIR}/`)
-	                            || file.path === '/swapfile_persistent'
-	                            || baseName.startsWith('swapfile_cmd_');
+
+	                        const title = isPersistent
+	                            ? `${file.active ? 'Active ' : ''}Persistent Swap of ${sizeCompact}`
+	                            : isDynamic
+	                                ? `${file.active ? 'Active ' : ''}Dynamic Swap of ${sizeCompact}`
+	                                : `Static Swap of ${sizeCompact}`;
+
+	                        const subtitle = isPersistent
+	                            ? 'Created by System Swapper'
+	                            : isDynamic
+	                                ? 'Created by Command Processor'
+	                                : 'Created by the User';
+
+	                        const iconWrapClass = isPersistent
+	                            ? 'bg-blue-50 dark:bg-blue-950'
+	                            : isDynamic
+	                                ? 'bg-red-50 dark:bg-red-950'
+	                                : 'bg-muted';
+
+	                        const iconClass = isPersistent
+	                            ? 'text-blue-500'
+	                            : isDynamic
+	                                ? 'text-red-500'
+	                                : 'text-muted-foreground';
 
 	                        return (
 	                            <div
 	                                key={file.path}
-                                className={cn(
-                                    'flex items-center gap-4 p-4 transition-all hover:bg-muted/50',
-                                    index !== swapFiles.length - 1 && 'border-b'
-                                )}
-                            >
-                                <div className={cn(
-                                    'h-10 w-10 rounded-full flex items-center justify-center shrink-0',
-                                    isPersistent ? 'bg-blue-50 dark:bg-blue-950' : 'bg-muted'
-                                )}>
-                                    <HardDrive className={cn(
-                                        'h-5 w-5',
-                                        isPersistent ? 'text-blue-500' : 'text-muted-foreground'
-                                    )} />
-                                </div>
-
-	                                <div className="flex-1 min-w-0">
-	                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-	                                        <span className={cn(
-	                                            'text-xs font-medium px-2 py-0.5 rounded',
-	                                            isUnknown
-	                                                ? 'bg-muted text-muted-foreground'
-	                                                : isPersistent
-	                                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-	                                                    : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-	                                        )}>
-	                                            {isUnknown ? 'other' : isPersistent ? 'persistent' : 'dynamic'}
-	                                        </span>
-	                                        <span className={cn(
-	                                            'text-xs font-medium px-2 py-0.5 rounded',
-	                                            file.active
-                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                                : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                        )}>
-                                            {file.active ? 'active' : 'inactive'}
-                                        </span>
-                                        {size && (
-                                            <span className="text-sm text-muted-foreground">{size}</span>
-                                        )}
-	                                    </div>
-	                                    <p className="text-sm text-muted-foreground">
-	                                        {isUnknown
-	                                            ? 'Swap entry detected from /proc/swaps (may be a partition or non-managed swap file).'
-	                                            : isPersistent
-	                                                ? 'Persistent swap — survives reboots.'
-	                                                : file.active
-	                                                    ? 'Dynamic swap — currently in use by a running command.'
-	                                                    : 'Dynamic swap — command finished, safe to delete.'
-	                                        }
-	                                    </p>
+	                                className={cn(
+	                                    'flex items-center gap-4 p-4 transition-all hover:bg-muted/50',
+	                                    index !== swapFiles.length - 1 && 'border-b'
+	                                )}
+	                            >
+	                                <div className={cn(
+	                                    'h-10 w-10 rounded-full flex items-center justify-center shrink-0',
+	                                    iconWrapClass
+	                                )}>
+	                                    <HardDrive className={cn('h-5 w-5', iconClass)} />
 	                                </div>
 
-	                                {canDelete && (
-	                                    <button
-	                                        disabled={isDeleting}
-	                                        onClick={() => handleDelete(file.path)}
-	                                        className="shrink-0 h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
-	                                        title="Delete"
-	                                    >
-	                                        {isDeleting
-	                                            ? <Loader2 className="h-4 w-4 animate-spin" />
-	                                            : <Trash2 className="h-4 w-4" />
-	                                        }
-	                                    </button>
-	                                )}
+	                                <div className="flex-1 min-w-0">
+	                                    <h4 className="text-base font-medium mb-0.5">{title}</h4>
+	                                    <p className="text-sm text-muted-foreground">{subtitle}</p>
+	                                </div>
+
+	                                <button
+	                                    disabled={isDeleting}
+	                                    onClick={() => handleDelete(file.path)}
+	                                    className="shrink-0 h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+	                                    title="Delete"
+	                                >
+	                                    {isDeleting
+	                                        ? <Loader2 className="h-4 w-4 animate-spin" />
+	                                        : <Trash2 className="h-4 w-4" />
+	                                    }
+	                                </button>
 	                            </div>
 	                        );
 	                    })
 	                )}
-            </div>
-        </div>
-    );
-}
+	            </div>
+	        </div>
+	    );
+	}
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 

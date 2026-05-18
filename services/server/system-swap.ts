@@ -281,15 +281,9 @@ export async function deleteSwapFile(
     serverId: string,
     filePath: string
 ): Promise<{ success?: boolean; error?: string }> {
-    // Safety: only allow known swap file patterns
-    const name = filePath.split('/').pop() ?? '';
-    const isKnownPattern =
-        filePath.startsWith(SWAP_DIR + '/') ||
-        filePath === '/swapfile_persistent' ||
-        name.startsWith('swapfile_cmd_');
-
-    if (!isKnownPattern) {
-        return { error: 'Invalid swap file path.' };
+    // Safety: only allow absolute, whitespace-free paths (matches our list output format).
+    if (!filePath.startsWith('/') || /\s/.test(filePath)) {
+        return { error: 'Invalid swap path.' };
     }
 
     const server = await getServerForRunner(serverId);
@@ -297,15 +291,51 @@ export async function deleteSwapFile(
         return { error: 'Server not found or missing SSH credentials.' };
     }
 
+    const shQuote = (value: string) => `'${value.replace(/'/g, `'\"'\"'`)}'`;
+
     const script = `
-f="${filePath}"
-if [ -f "$f" ]; then
-    sudo swapoff "$f" 2>/dev/null || true
-    sudo sed -i "\\|$f|d" /etc/fstab 2>/dev/null || true
-    sudo rm -f "$f"
+SUDO=""
+if command -v sudo >/dev/null 2>&1; then
+    if sudo -n true >/dev/null 2>&1; then
+        SUDO="sudo -n"
+    fi
 fi
+
+if [ -z "$SUDO" ]; then
+    echo "This action requires passwordless sudo on the server."
+    exit 3
+fi
+
+f=${shQuote(filePath)}
+
+# Only allow deleting swaps that are either:
+# - currently active in /proc/swaps (user-created swap files), OR
+# - known managed locations (swapper directory / legacy files)
+ACTIVE=0
+awk 'NR>1 {print $1}' /proc/swaps 2>/dev/null | grep -qxF "$f" && ACTIVE=1
+MANAGED=0
+case "$f" in
+    "${SWAP_DIR}/"*|/swapfile_persistent|/swapfile_cmd_[0-9]*)
+        MANAGED=1
+        ;;
+esac
+
+if [ "$ACTIVE" != "1" ] && [ "$MANAGED" != "1" ]; then
+    echo "Swap path is not recognized."
+    exit 4
+fi
+
+# Disable swap first (safe even if not active)
+$SUDO swapoff "$f" 2>/dev/null || true
+$SUDO sed -i "\\|$f|d" /etc/fstab 2>/dev/null || true
+
+# Remove only if it is a regular file (devices can't be deleted here)
+if $SUDO test -f "$f" 2>/dev/null; then
+    $SUDO rm -f "$f" 2>/dev/null || true
+fi
+
 echo "OK"
-`.trim();
+	`.trim();
 
     try {
         const result = await runCommandOnServer(
@@ -319,7 +349,7 @@ echo "OK"
         );
 
         if (result.code !== 0) {
-            return { error: result.stderr || `Command failed with exit code ${result.code}` };
+            return { error: result.stderr || result.stdout || `Command failed with exit code ${result.code}` };
         }
 
         const name = filePath.split('/').pop() ?? '';
