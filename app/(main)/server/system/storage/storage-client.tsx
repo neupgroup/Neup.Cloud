@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getStorageInfo } from '@/services/server/system-storage';
+import { getStorageBreakdown, getStorageOverview } from '@/services/server/system-storage';
 import type { StorageInfo, StorageSection } from '@/services/server/system-storage';
 import { useToast } from '@/core/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -302,16 +302,21 @@ export default function StorageClient({
     const [error, setError] = useState<string | undefined>(undefined);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isBreakdownLoading, setIsBreakdownLoading] = useState(false);
 
-    const fetchData = async (isRefresh = false) => {
+    const fetchOverview = async (isRefresh = false) => {
         if (isRefresh) setIsRefreshing(true);
         try {
-            const result = await getStorageInfo(serverId);
+            const result = await getStorageOverview(serverId);
             if (result.error) {
                 setError(result.error);
                 if (isRefresh) toast({ variant: 'destructive', title: 'Refresh Failed', description: result.error });
             } else {
-                setData(result.data);
+                setData((prev) => ({
+                    disk: result.data!.disk,
+                    swap: result.data!.swap,
+                    sections: prev?.sections ?? [],
+                }));
                 setError(undefined);
             }
         } catch (e: any) {
@@ -323,12 +328,44 @@ export default function StorageClient({
         }
     };
 
+    const fetchBreakdown = async (isRefresh = false) => {
+        if (isRefresh) setIsRefreshing(true);
+        setIsBreakdownLoading(true);
+        try {
+            const result = await getStorageBreakdown(serverId);
+            if (result.error) {
+                if (isRefresh) toast({ variant: 'destructive', title: 'Refresh Failed', description: result.error });
+                setError((prev) => prev ?? result.error);
+            } else if (result.data) {
+                setData((prev) => prev
+                    ? { ...prev, sections: result.data.sections }
+                    : {
+                        disk: { totalBytes: 0, usedBytes: 0, availableBytes: 0 },
+                        swap: { totalBytes: 0, usedBytes: 0 },
+                        sections: result.data.sections,
+                    }
+                );
+            }
+        } catch (e: any) {
+            if (isRefresh) toast({ variant: 'destructive', title: 'Error', description: e.message });
+            setError((prev) => prev ?? e.message);
+        } finally {
+            setIsBreakdownLoading(false);
+            if (isRefresh) setIsRefreshing(false);
+        }
+    };
+
     useEffect(() => {
-        fetchData();
+        fetchOverview();
+        // Load breakdown in the background so the page becomes interactive quickly.
+        fetchBreakdown();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [serverId]);
 
-    const handleRefresh = () => fetchData(true);
+    const handleRefresh = async () => {
+        await fetchOverview(true);
+        await fetchBreakdown(true);
+    };
 
     if (isLoading) {
         return <StorageSkeleton />;
@@ -370,7 +407,27 @@ export default function StorageClient({
             </div>
 
             <DiskOverviewCard disk={data.disk} swap={data.swap} />
-            <SpaceBreakdownCard sections={data.sections} diskTotal={data.disk.totalBytes} />
+            {isBreakdownLoading && data.sections.length === 0 ? (
+                <div className="space-y-4">
+                    <Skeleton className="h-7 w-44" />
+                    <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
+                        {[1, 2, 3].map((r) => (
+                            <div key={r} className="flex items-center gap-4 p-4 border-b last:border-0">
+                                <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+                                <div className="flex-1 space-y-2">
+                                    <div className="flex justify-between">
+                                        <Skeleton className="h-5 w-36" />
+                                        <Skeleton className="h-5 w-24" />
+                                    </div>
+                                    <Skeleton className="h-1.5 w-full rounded-full" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <SpaceBreakdownCard sections={data.sections} diskTotal={data.disk.totalBytes} />
+            )}
             <RemainingSpaceCard disk={data.disk} />
         </div>
     );
