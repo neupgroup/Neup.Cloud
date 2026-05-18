@@ -3,7 +3,6 @@
 import { getServerForRunner } from '@/services/server/server-service';
 import { runCommandOnServer } from '@/services/server/ssh';
 import { updateServer } from '@/services/server/server-service';
-import { getServerById } from '@/services/server/data';
 import {
     SWAP_DIR,
     PERSISTENT_SWAP_PREFIX,
@@ -28,17 +27,77 @@ export type SwapFileEntry = {
 // ─── Read ─────────────────────────────────────────────────────────────────────
 
 export async function getRecurringSwapSize(serverId: string): Promise<{ sizeMb: number; error?: string }> {
-    const server = await getServerById(serverId);
-    if (!server) return { sizeMb: 0, error: 'Server not found.' };
+    const server = await getServerForRunner(serverId);
+    if (!server || !server.username || !server.privateKey) {
+        return { sizeMb: 0, error: 'Server not found or missing SSH credentials.' };
+    }
 
+    let configuredMb = 0;
     try {
-        const parsed = server.moreDetails ? JSON.parse(server.moreDetails) : {};
-        const sizeMb = typeof parsed.recurringSwapMb === 'number' && Number.isFinite(parsed.recurringSwapMb)
+        const parsed = (server as any).moreDetails ? JSON.parse((server as any).moreDetails) : {};
+        configuredMb = typeof parsed.recurringSwapMb === 'number' && Number.isFinite(parsed.recurringSwapMb)
             ? Math.max(0, Math.floor(parsed.recurringSwapMb))
             : 0;
-        return { sizeMb };
     } catch {
-        return { sizeMb: 0 };
+        configuredMb = 0;
+    }
+
+    // Calculates total persistent swap based on files in the swapper directory:
+    // persistent_[x]mb_* → sum (count * x).
+    const script = `
+SUDO=""
+if command -v sudo >/dev/null 2>&1; then
+    if sudo -n true >/dev/null 2>&1; then
+        SUDO="sudo -n"
+    fi
+fi
+
+if [ -z "$SUDO" ]; then
+    echo "NO_SUDO"
+    exit 0
+fi
+
+TOTAL=0
+
+while read -r f; do
+    [ -n "$f" ] || continue
+    bn=$(basename "$f")
+    mb=$(echo "$bn" | sed -n 's/^${PERSISTENT_SWAP_PREFIX}\\([0-9][0-9]*\\)mb_.*/\\1/p')
+    if [ -n "$mb" ]; then
+        TOTAL=$((TOTAL + mb))
+    fi
+done <<EOF
+$($SUDO find "${SWAP_DIR}" -maxdepth 1 -type f -name "${PERSISTENT_SWAP_PREFIX}*" -print 2>/dev/null)
+EOF
+
+echo "$TOTAL"
+exit 0
+`.trim();
+
+    try {
+        const result = await runCommandOnServer(
+            server.publicIp,
+            server.username,
+            server.privateKey,
+            script,
+            undefined,
+            undefined,
+            true
+        );
+
+        if (result.code !== 0) {
+            return { sizeMb: 0, error: result.stderr || `Command failed with exit code ${result.code}` };
+        }
+
+        const out = result.stdout.trim();
+        if (out.startsWith('NO_SUDO')) {
+            return { sizeMb: configuredMb, error: 'Passwordless sudo is required to read /swapper; showing configured value.' };
+        }
+
+        const total = parseInt(out || '0', 10);
+        return { sizeMb: Number.isFinite(total) ? Math.max(0, total) : 0 };
+    } catch (e: any) {
+        return { sizeMb: 0, error: e.message };
     }
 }
 
@@ -186,34 +245,48 @@ export async function createRecurringSwap(
     const swapPath = persistentSwapPath(normalizedMb);
 
     const script = `
-set -e
+	set -e
 
-sudo mkdir -p "${SWAP_DIR}"
-sudo chmod 700 "${SWAP_DIR}"
+	SUDO=""
+	if command -v sudo >/dev/null 2>&1; then
+	    if sudo -n true >/dev/null 2>&1; then
+	        SUDO="sudo -n"
+	    fi
+	fi
+	if [ -z "$SUDO" ]; then
+	    echo "This action requires passwordless sudo on the server."
+	    exit 3
+	fi
 
-# Remove any existing persistent swap files
-for f in "${SWAP_DIR}/${PERSISTENT_SWAP_PREFIX}"*; do
-    [ -f "$f" ] || continue
-    sudo swapoff "$f" 2>/dev/null || true
-    sudo sed -i "\\|$f|d" /etc/fstab 2>/dev/null || true
-    sudo rm -f "$f"
-done
+	$SUDO mkdir -p "${SWAP_DIR}"
+	$SUDO chmod 700 "${SWAP_DIR}"
 
-SWAP_FILE="${swapPath}"
+	# Remove any existing persistent swap files (use sudo find; directory is root-owned)
+	$SUDO find "${SWAP_DIR}" -maxdepth 1 -type f -name "${PERSISTENT_SWAP_PREFIX}*" -print 2>/dev/null | while read -r f; do
+	    [ -n "$f" ] || continue
+	    $SUDO swapoff "$f" 2>/dev/null || true
+	    $SUDO sed -i "\\|$f|d" /etc/fstab 2>/dev/null || true
+	    $SUDO rm -f "$f" 2>/dev/null || true
+	done
 
-if ! sudo fallocate -l ${normalizedMb}M "$SWAP_FILE" 2>/dev/null; then
-    sudo dd if=/dev/zero of="$SWAP_FILE" bs=1M count=${normalizedMb} status=none
-fi
+	# Also remove any stale fstab entries for persistent swaps under ${SWAP_DIR}
+	$SUDO sed -i "\\|${SWAP_DIR}/${PERSISTENT_SWAP_PREFIX}|d" /etc/fstab 2>/dev/null || true
 
-sudo chmod 600 "$SWAP_FILE"
-sudo mkswap "$SWAP_FILE"
-sudo swapon "$SWAP_FILE"
+	SWAP_FILE="${swapPath}"
 
-sudo sed -i "\\|${SWAP_DIR}/${PERSISTENT_SWAP_PREFIX}|d" /etc/fstab
-echo "${swapPath} none swap sw 0 0" | sudo tee -a /etc/fstab > /dev/null
+	if ! $SUDO fallocate -l ${normalizedMb}M "$SWAP_FILE" 2>/dev/null; then
+	    $SUDO dd if=/dev/zero of="$SWAP_FILE" bs=1M count=${normalizedMb} status=none
+	fi
 
-echo "OK"
-`.trim();
+	$SUDO chmod 600 "$SWAP_FILE"
+	$SUDO mkswap "$SWAP_FILE"
+	$SUDO swapon "$SWAP_FILE"
+
+	$SUDO sed -i "\\|${SWAP_DIR}/${PERSISTENT_SWAP_PREFIX}|d" /etc/fstab 2>/dev/null || true
+	echo "${swapPath} none swap sw 0 0" | $SUDO tee -a /etc/fstab > /dev/null
+
+	echo "OK"
+	`.trim();
 
     try {
         const result = await runCommandOnServer(
@@ -246,14 +319,29 @@ export async function deleteRecurringSwap(
     }
 
     const script = `
-for f in "${SWAP_DIR}/${PERSISTENT_SWAP_PREFIX}"*; do
-    [ -f "$f" ] || continue
-    sudo swapoff "$f" 2>/dev/null || true
-    sudo sed -i "\\|$f|d" /etc/fstab 2>/dev/null || true
-    sudo rm -f "$f"
-done
-echo "OK"
-`.trim();
+	SUDO=""
+	if command -v sudo >/dev/null 2>&1; then
+	    if sudo -n true >/dev/null 2>&1; then
+	        SUDO="sudo -n"
+	    fi
+	fi
+	if [ -z "$SUDO" ]; then
+	    echo "This action requires passwordless sudo on the server."
+	    exit 3
+	fi
+
+	# Remove any persistent swap files (use sudo find; directory is root-owned)
+	$SUDO find "${SWAP_DIR}" -maxdepth 1 -type f -name "${PERSISTENT_SWAP_PREFIX}*" -print 2>/dev/null | while read -r f; do
+	    [ -n "$f" ] || continue
+	    $SUDO swapoff "$f" 2>/dev/null || true
+	    $SUDO sed -i "\\|$f|d" /etc/fstab 2>/dev/null || true
+	    $SUDO rm -f "$f" 2>/dev/null || true
+	done
+
+	# Remove any stale fstab entries for persistent swaps under ${SWAP_DIR}
+	$SUDO sed -i "\\|${SWAP_DIR}/${PERSISTENT_SWAP_PREFIX}|d" /etc/fstab 2>/dev/null || true
+	echo "OK"
+	`.trim();
 
     try {
         const result = await runCommandOnServer(
