@@ -52,29 +52,71 @@ export async function listSwapFiles(serverId: string): Promise<{ files: SwapFile
     // active: checks /proc/swaps first column (awk to be robust against whitespace)
     // Also scans legacy root-level swap files so nothing is missed
     const script = `
+SUDO=""
+if command -v sudo >/dev/null 2>&1; then
+    # Use non-interactive sudo when possible (avoids hanging on password prompt)
+    if sudo -n true >/dev/null 2>&1; then
+        SUDO="sudo -n"
+    fi
+fi
+
 list_file() {
-    local f="$1"
-    [ -f "$f" ] || return
-    local SIZE
-    SIZE=$(stat -c '%s' "$f" 2>/dev/null || echo 0)
-    local ACTIVE=0
+    f="$1"
+    # Missing/non-file targets are not an error (globs may not match).
+    if [ -n "$SUDO" ]; then
+        $SUDO test -f "$f" 2>/dev/null || return 0
+    else
+        [ -f "$f" ] || return 0
+    fi
+
+    if [ -n "$SUDO" ]; then
+        SIZE=$($SUDO stat -c '%s' "$f" 2>/dev/null || echo 0)
+    else
+        SIZE=$(stat -c '%s' "$f" 2>/dev/null || echo 0)
+    fi
+    ACTIVE=0
     awk 'NR>1 {print $1}' /proc/swaps 2>/dev/null | grep -qxF "$f" && ACTIVE=1
-    local FSTAB=0
+    FSTAB=0
     grep -qF "$f" /etc/fstab 2>/dev/null && FSTAB=1
     echo "$f $SIZE $ACTIVE $FSTAB"
+    return 0
 }
 
-# Managed directory
-if [ -d "${SWAP_DIR}" ]; then
-    for f in "${SWAP_DIR}"/*; do
-        list_file "$f"
+# Active swaps (includes swaps created outside our managed paths)
+# /proc/swaps columns: Filename Type Size(kiB) Used(kiB) Priority
+list_active_swaps() {
+    awk 'NR>1 {print $1 " " $3}' /proc/swaps 2>/dev/null | while read -r SWAP_PATH SIZE_KIB; do
+        [ -n "$SWAP_PATH" ] || continue
+        SIZE_BYTES=$((SIZE_KIB * 1024))
+        FSTAB=0
+        grep -qF "$SWAP_PATH" /etc/fstab 2>/dev/null && FSTAB=1
+        echo "$SWAP_PATH $SIZE_BYTES 1 $FSTAB"
     done
+}
+
+# Print active swaps first so they always show up
+list_active_swaps
+
+	# Managed directory
+	if [ -n "$SUDO" ]; then
+	    # find is robust even when the directory is 700/root-owned
+	    $SUDO find "${SWAP_DIR}" -maxdepth 1 -type f -print 2>/dev/null | while read -r f; do
+	        list_file "$f"
+	    done
+	else
+    if [ -d "${SWAP_DIR}" ]; then
+        for f in "${SWAP_DIR}"/*; do
+            list_file "$f"
+        done
+    fi
 fi
 
 # Legacy root-level files (created before /swapper directory was introduced)
 for f in /swapfile_persistent /swapfile_cmd_[0-9]*; do
     list_file "$f"
 done
+
+exit 0
 `.trim();
 
     try {
@@ -100,7 +142,7 @@ done
         const seen = new Set<string>();
         const files: SwapFileEntry[] = output.split('\n')
             .map((line) => {
-                const parts = line.trim().split(' ');
+                const parts = line.trim().split(/\s+/);
                 const path = parts[0] ?? '';
                 if (!path || seen.has(path)) return null;
                 seen.add(path);

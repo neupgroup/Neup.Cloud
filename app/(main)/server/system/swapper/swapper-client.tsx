@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { updateServer } from '@/services/server/server-service';
 import { createRecurringSwap, deleteRecurringSwap, deleteSwapFile, listSwapFiles } from '@/services/server/system-swap';
 import type { SwapFileEntry } from '@/services/server/system-swap';
+import { SWAP_DIR } from '@/services/server/swap-paths';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/core/hooks/use-toast';
@@ -319,15 +320,24 @@ function SwapFilesCard({
     const router = useRouter();
     const { toast } = useToast();
     const [swapFiles, setSwapFiles] = useState<SwapFileEntry[]>(initialSwapFiles);
-    const [deletingPath, setDeletingPath] = useState<string | null>(null);
-    const [isRefreshing, setIsRefreshing] = useState(false);
+	    const [deletingPath, setDeletingPath] = useState<string | null>(null);
+	    const [isRefreshing, setIsRefreshing] = useState(false);
 
-    const handleDelete = async (path: string) => {
-        const file = swapFiles.find((f) => f.path === path);
-        const isPersistent = file?.kind === 'persistent';
-        const msg = isPersistent
-            ? 'Remove the persistent swap? It will be deleted and removed from startup.'
-            : file?.active
+	    const handleDelete = async (path: string) => {
+	        const file = swapFiles.find((f) => f.path === path);
+	        if (!file) return;
+	        if (file.kind === 'unknown') {
+	            toast({
+	                variant: 'destructive',
+	                title: 'Cannot Delete',
+	                description: 'This swap entry is not managed by Neup.Cloud and can’t be deleted from here.',
+	            });
+	            return;
+	        }
+	        const isPersistent = file?.kind === 'persistent';
+	        const msg = isPersistent
+	            ? 'Remove the persistent swap? It will be deleted and removed from startup.'
+	            : file?.active
             ? 'This dynamic swap is currently active. Remove it anyway?'
             : 'Remove this unused dynamic swap file?';
         if (!confirm(msg)) return;
@@ -394,15 +404,20 @@ function SwapFilesCard({
                             </p>
                         </div>
                     </div>
-                ) : (
-                    swapFiles.map((file, index) => {
-                        const isPersistent = file.kind === 'persistent';
-                        const size = formatBytes(file.sizeBytes);
-                        const isDeleting = deletingPath === file.path;
+	                ) : (
+	                    swapFiles.map((file, index) => {
+	                        const isPersistent = file.kind === 'persistent';
+	                        const isUnknown = file.kind === 'unknown';
+	                        const size = formatBytes(file.sizeBytes);
+	                        const isDeleting = deletingPath === file.path;
+	                        const baseName = file.path.split('/').pop() ?? '';
+	                        const canDelete = file.path.startsWith(`${SWAP_DIR}/`)
+	                            || file.path === '/swapfile_persistent'
+	                            || baseName.startsWith('swapfile_cmd_');
 
-                        return (
-                            <div
-                                key={file.path}
+	                        return (
+	                            <div
+	                                key={file.path}
                                 className={cn(
                                     'flex items-center gap-4 p-4 transition-all hover:bg-muted/50',
                                     index !== swapFiles.length - 1 && 'border-b'
@@ -418,19 +433,21 @@ function SwapFilesCard({
                                     )} />
                                 </div>
 
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                        <span className={cn(
-                                            'text-xs font-medium px-2 py-0.5 rounded',
-                                            isPersistent
-                                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                                : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-                                        )}>
-                                            {isPersistent ? 'persistent' : 'dynamic'}
-                                        </span>
-                                        <span className={cn(
-                                            'text-xs font-medium px-2 py-0.5 rounded',
-                                            file.active
+	                                <div className="flex-1 min-w-0">
+	                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+	                                        <span className={cn(
+	                                            'text-xs font-medium px-2 py-0.5 rounded',
+	                                            isUnknown
+	                                                ? 'bg-muted text-muted-foreground'
+	                                                : isPersistent
+	                                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+	                                                    : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+	                                        )}>
+	                                            {isUnknown ? 'other' : isPersistent ? 'persistent' : 'dynamic'}
+	                                        </span>
+	                                        <span className={cn(
+	                                            'text-xs font-medium px-2 py-0.5 rounded',
+	                                            file.active
                                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                                 : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
                                         )}>
@@ -439,32 +456,36 @@ function SwapFilesCard({
                                         {size && (
                                             <span className="text-sm text-muted-foreground">{size}</span>
                                         )}
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">
-                                        {isPersistent
-                                            ? 'Persistent swap — survives reboots.'
-                                            : file.active
-                                            ? 'Dynamic swap — currently in use by a running command.'
-                                            : 'Dynamic swap — command finished, safe to delete.'
-                                        }
-                                    </p>
-                                </div>
+	                                    </div>
+	                                    <p className="text-sm text-muted-foreground">
+	                                        {isUnknown
+	                                            ? 'Swap entry detected from /proc/swaps (may be a partition or non-managed swap file).'
+	                                            : isPersistent
+	                                                ? 'Persistent swap — survives reboots.'
+	                                                : file.active
+	                                                    ? 'Dynamic swap — currently in use by a running command.'
+	                                                    : 'Dynamic swap — command finished, safe to delete.'
+	                                        }
+	                                    </p>
+	                                </div>
 
-                                <button
-                                    disabled={isDeleting}
-                                    onClick={() => handleDelete(file.path)}
-                                    className="shrink-0 h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
-                                    title="Delete"
-                                >
-                                    {isDeleting
-                                        ? <Loader2 className="h-4 w-4 animate-spin" />
-                                        : <Trash2 className="h-4 w-4" />
-                                    }
-                                </button>
-                            </div>
-                        );
-                    })
-                )}
+	                                {canDelete && (
+	                                    <button
+	                                        disabled={isDeleting}
+	                                        onClick={() => handleDelete(file.path)}
+	                                        className="shrink-0 h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+	                                        title="Delete"
+	                                    >
+	                                        {isDeleting
+	                                            ? <Loader2 className="h-4 w-4 animate-spin" />
+	                                            : <Trash2 className="h-4 w-4" />
+	                                        }
+	                                    </button>
+	                                )}
+	                            </div>
+	                        );
+	                    })
+	                )}
             </div>
         </div>
     );
