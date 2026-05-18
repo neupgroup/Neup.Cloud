@@ -216,7 +216,8 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
     const fullPath = `${currentPath.endsWith('/') ? currentPath : currentPath + '/'}${item.name}`;
 
     const openUrlInNewTab = (url: string) => {
-      const newTab = window.open(url, '_blank');
+      const absoluteUrl = new URL(url, window.location.href).toString();
+      const newTab = window.open(absoluteUrl, '_blank');
       if (newTab) {
         // Prevent the newly opened tab from controlling the opener.
         newTab.opener = null;
@@ -241,7 +242,8 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
       else if (videoExts.includes(ext)) type = 'video';
       else if (codeExts.includes(ext)) type = 'code';
 
-      return `/server/viewer?path=${encodeURIComponent(fullPath)}&type=${type}${rootMode ? '&rootMode=true' : ''}`;
+      // Relative URL so it respects Next.js `basePath` (e.g. /cloud).
+      return `viewer?path=${encodeURIComponent(fullPath)}&type=${type}${rootMode ? '&rootMode=true' : ''}`;
     };
 
     if (item.type === 'directory') {
@@ -259,12 +261,12 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
           router.push(pathname + '?' + createQueryString('path', fullPath));
         } else {
           const url = viewerUrl();
-          if (pendingTab) pendingTab.location.href = url;
+          if (pendingTab) pendingTab.location.href = new URL(url, window.location.href).toString();
           else openUrlInNewTab(url);
         }
       } catch (e) {
         const url = viewerUrl();
-        if (pendingTab) pendingTab.location.href = url;
+        if (pendingTab) pendingTab.location.href = new URL(url, window.location.href).toString();
         else openUrlInNewTab(url);
       } finally {
         setIsProcessing(false);

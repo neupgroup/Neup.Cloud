@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Cookies from 'universal-cookie';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, AlertTriangle, ArrowLeft, Shield, ShieldOff } from 'lucide-react';
 import { getFileContent, saveFileContent } from '@/services/server/viewer-service';
 import { useToast } from '@/core/hooks/use-toast';
@@ -135,6 +136,35 @@ export default function ViewerClient() {
   }
 
   if (error) {
+    const filename = path.split('/').pop() || 'Unknown File';
+    const location = path.substring(0, path.lastIndexOf('/')) || '/';
+    const isMissingFile = /no such file or directory|not found/i.test(error);
+
+    if (isMissingFile) {
+      return (
+        <div className="p-8 max-w-3xl mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle className="break-all">{filename}</CardTitle>
+              <CardDescription className="break-all">
+                <span className="font-medium text-foreground mr-1">Location:</span>
+                <span className="font-mono text-xs text-muted-foreground">{location}</span>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="font-medium">The above mentioned file does not exists.</p>
+                  <p className="text-sm text-muted-foreground break-all font-mono">{path}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     return (
       <div className="p-8 flex flex-col items-center justify-center text-destructive">
         <AlertTriangle className="h-12 w-12 mb-4" />
