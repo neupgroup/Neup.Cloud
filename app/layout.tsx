@@ -134,7 +134,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
   ];
 
   const accountLinks = [
-    { href: "/servers", label: "Servers", icon: Server },
+    { href: "/server/list", label: "Servers", icon: Server },
     { href: "/environments", label: "Environments", icon: Layers },
     { href: "/database", label: "Databases", icon: Database },
     { href: "/settings", label: "Settings", icon: Settings },

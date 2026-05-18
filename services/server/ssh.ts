@@ -61,7 +61,8 @@ async function forceCleanupSwapFile(
     host: string,
     username: string,
     privateKey: string,
-    swapFile: string
+    swapFile: string,
+    passphrase?: string
 ): Promise<void> {
     const cleanupSsh = new NodeSSH();
 
@@ -70,6 +71,7 @@ async function forceCleanupSwapFile(
             host,
             username,
             privateKey,
+            passphrase,
         });
 
         await cleanupSsh.execCommand(`sudo swapoff "${swapFile}" 2>/dev/null || true; sudo rm -f "${swapFile}" 2>/dev/null || true`);
@@ -88,7 +90,8 @@ export async function runCommandOnServer(
     onStdout?: (chunk: Buffer | string) => void,
     onStderr?: (chunk: Buffer | string) => void,
     skipSwap: boolean = false,
-    variables: Record<string, string | number | boolean> = {}
+    variables: Record<string, string | number | boolean> = {},
+    passphrase?: string
 ): Promise<{ stdout: string; stderr: string; code: number | null }> {
     const ssh = new NodeSSH();
     let swapFilePath: string | null = null;
@@ -98,6 +101,7 @@ export async function runCommandOnServer(
             host: host,
             username: username,
             privateKey: privateKey,
+            passphrase,
         });
 
         // Setup Executor wrapper around existing SSH connection
@@ -175,7 +179,7 @@ export async function runCommandOnServer(
         const result = await ssh.execCommand(finalCommand, { onStdout, onStderr });
 
         if (swapFilePath && result.code !== 0) {
-            await forceCleanupSwapFile(host, username, privateKey, swapFilePath);
+            await forceCleanupSwapFile(host, username, privateKey, swapFilePath, passphrase);
         }
 
         return {
@@ -186,7 +190,7 @@ export async function runCommandOnServer(
 
     } catch (error) {
         if (swapFilePath) {
-            await forceCleanupSwapFile(host, username, privateKey, swapFilePath);
+            await forceCleanupSwapFile(host, username, privateKey, swapFilePath, passphrase);
         }
         throw error;
 
@@ -200,7 +204,8 @@ export async function uploadFileToServer(
     username: string,
     privateKey: string,
     localPath: string,
-    remotePath: string
+    remotePath: string,
+    passphrase?: string
 ): Promise<void> {
     const ssh = new NodeSSH();
     try {
@@ -208,6 +213,7 @@ export async function uploadFileToServer(
             host: host,
             username: username,
             privateKey: privateKey,
+            passphrase,
         });
         await ssh.putFile(localPath, remotePath);
     } finally {
@@ -220,7 +226,8 @@ export async function uploadDirectoryToServer(
     username: string,
     privateKey: string,
     localPath: string,
-    remotePath: string
+    remotePath: string,
+    passphrase?: string
 ): Promise<void> {
     const ssh = new NodeSSH();
     try {
@@ -228,6 +235,7 @@ export async function uploadDirectoryToServer(
             host: host,
             username: username,
             privateKey: privateKey,
+            passphrase,
         });
         await ssh.putDirectory(localPath, remotePath, {
             recursive: true,
@@ -243,7 +251,8 @@ export async function downloadFileFromServer(
     username: string,
     privateKey: string,
     remotePath: string,
-    localPath: string
+    localPath: string,
+    passphrase?: string
 ): Promise<void> {
     const ssh = new NodeSSH();
     try {
@@ -251,6 +260,7 @@ export async function downloadFileFromServer(
             host: host,
             username: username,
             privateKey: privateKey,
+            passphrase,
         });
         await ssh.getFile(localPath, remotePath);
     } finally {

@@ -14,7 +14,7 @@ export function ServerNameLink({ name, className }: { name: string; className?: 
             )}
             onClick={() => {
                 const currentPath = window.location.pathname;
-                router.push(`/servers?redirects=${currentPath}`);
+                router.push(`/server/list?redirects=${currentPath}`);
             }}
         >
             {name}

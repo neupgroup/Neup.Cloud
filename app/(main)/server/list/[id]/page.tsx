@@ -1,142 +1,149 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/core/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { use, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Clock3, Loader2, ServerIcon, ShieldAlert, ShieldCheck } from "lucide-react";
+
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { updateServer, deleteServer } from '@/services/server/server-service';
-import { Loader2, Trash2, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import { getServer } from '@/services/server/server-service';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui/select";
+import { useToast } from "@/core/hooks/use-toast";
+import { cn } from "@/core/utils";
+import { getServer, updateServer, checkServerConnection } from "@/services/server/server-service";
+import type { Server } from "@/services/server/types";
+import { getServerExpiration, getServerSshPassphrase, parseServerMetadata, serializeServerMetadata } from "@/services/server/server-metadata";
 
-type Server = {
-    id: string;
+type FormState = {
     name: string;
     username: string;
     type: string;
     provider: string;
-    ram?: string;
-    storage?: string;
+    ram: string;
+    storage: string;
     publicIp: string;
-    privateIp?: string;
-    privateKey?: string; // Often not returned for security, but needed for update if provided
-    proxyHandler?: string;
-    loadBalancer?: string;
+    privateIp: string;
+    privateKey: string;
+    privateKeyPassphrase: string;
 };
 
-export default function ServerDetailsPage({ params }: { params: { id: string } }) {
-    const { toast } = useToast();
+function formatDate(value?: string | null) {
+    if (!value) {
+        return "No expiration set";
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return "Invalid expiration";
+    }
+
+    return date.toLocaleString();
+}
+
+function isExpired(value?: string | null) {
+    if (!value) {
+        return false;
+    }
+
+    const date = new Date(value);
+    return !Number.isNaN(date.getTime()) && date.getTime() <= Date.now();
+}
+
+function addExpirationMonths(baseValue: string | null | undefined, months: number) {
+    const baseDate = baseValue ? new Date(baseValue) : new Date();
+
+    if (Number.isNaN(baseDate.getTime())) {
+        return new Date();
+    }
+
+    const nextDate = new Date(baseDate);
+    nextDate.setMonth(nextDate.getMonth() + months);
+    return nextDate;
+}
+
+export default function ServerDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
+    const { toast } = useToast();
+    const { id: serverId } = use(params);
     const [server, setServer] = useState<Server | null>(null);
-    const [isLoadingServer, setIsLoadingServer] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         let cancelled = false;
 
-        const load = async () => {
-            setIsLoadingServer(true);
+        const loadServer = async () => {
+            setIsLoading(true);
             try {
-                const data = await getServer(params.id);
-
-                if (cancelled) return;
-
-                if (!data) {
-                    setServer(null);
-                    return;
+                const data = await getServer(serverId);
+                if (!cancelled) {
+                    setServer(data);
                 }
-
-                setServer({
-                    id: data.id,
-                    name: data.name || '',
-                    username: data.username || '',
-                    type: data.type || '',
-                    provider: (data as any).provider || '',
-                    ram: (data as any).ram || '',
-                    storage: (data as any).storage || '',
-                    publicIp: data.publicIp || '',
-                    privateIp: (data as any).privateIp || '',
-                    proxyHandler: (data as any).proxyHandler || '',
-                    loadBalancer: (data as any).loadBalancer || '',
-                });
-            } catch (error: any) {
+            } catch (error) {
                 console.error(error);
-                toast({
-                    variant: "destructive",
-                    title: "Failed to load server",
-                    description: error.message || "Could not load server details.",
-                });
-                setServer(null);
+                if (!cancelled) {
+                    toast({
+                        variant: "destructive",
+                        title: "Could not load server",
+                        description: "Please try again.",
+                    });
+                    setServer(null);
+                }
             } finally {
-                if (!cancelled) setIsLoadingServer(false);
+                if (!cancelled) {
+                    setIsLoading(false);
+                }
             }
         };
 
-        void load();
+        void loadServer();
 
         return () => {
             cancelled = true;
         };
-    }, [params.id]);
+    }, [serverId, toast]);
 
-    if (isLoadingServer) {
+    if (isLoading) {
         return (
-            <div className="space-y-6 max-w-3xl mx-auto pb-20">
-                <div className="flex flex-col gap-4">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-fit -ml-2 text-muted-foreground hover:text-foreground"
-                        onClick={() => router.push('/servers')}
-                    >
-                        <ArrowLeft className="mr-1 h-4 w-4" /> Back to Servers
-                    </Button>
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Loading...</h1>
-                    </div>
-                </div>
+            <div className="mx-auto max-w-4xl space-y-6 py-10">
+                <Button variant="ghost" className="w-fit px-0 text-muted-foreground hover:text-foreground" onClick={() => router.push("/server/list")}>
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to servers
+                </Button>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Loading server</CardTitle>
+                        <CardDescription>Fetching the latest connection details.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+                        <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+                        <div className="h-4 w-1/3 animate-pulse rounded bg-muted" />
+                    </CardContent>
+                </Card>
             </div>
         );
     }
 
     if (!server) {
         return (
-            <div className="space-y-6 max-w-3xl mx-auto pb-20">
-                <div className="flex flex-col gap-4">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-fit -ml-2 text-muted-foreground hover:text-foreground"
-                        onClick={() => router.push('/servers')}
-                    >
-                        <ArrowLeft className="mr-1 h-4 w-4" /> Back to Servers
-                    </Button>
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Server not found</h1>
-                        <p className="text-sm text-muted-foreground">The server may have been deleted.</p>
-                    </div>
-                </div>
+            <div className="mx-auto max-w-4xl space-y-6 py-10">
+                <Button variant="ghost" className="w-fit px-0 text-muted-foreground hover:text-foreground" onClick={() => router.push("/server/list")}>
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to servers
+                </Button>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Server not found</CardTitle>
+                        <CardDescription>The server may have been removed or the link is outdated.</CardDescription>
+                    </CardHeader>
+                </Card>
             </div>
         );
     }
@@ -147,147 +154,277 @@ export default function ServerDetailsPage({ params }: { params: { id: string } }
 function ServerDetailsForm({ server }: { server: Server }) {
     const router = useRouter();
     const { toast } = useToast();
-    const [isLoading, setIsLoading] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isExpiring, setIsExpiring] = useState(false);
+    const [isCheckingConnection, setIsCheckingConnection] = useState(false);
+    const [serverState, setServerState] = useState(server);
 
-    const [formData, setFormData] = useState({
-        name: server.name || '',
-        username: server.username || '',
-        type: server.type || '',
-        provider: server.provider || '',
-        ram: server.ram || '',
-        storage: server.storage || '',
-        publicIp: server.publicIp || '',
-        privateIp: server.privateIp || '',
-        privateKey: '', // Don't prefill private key for security
+    const currentExpiration = getServerExpiration(serverState.moreDetails);
+    const currentMetadata = useMemo(() => parseServerMetadata(serverState.moreDetails), [serverState.moreDetails]);
+    const currentPassphrase = useMemo(() => getServerSshPassphrase(serverState.moreDetails) ?? "", [serverState.moreDetails]);
+    const [formData, setFormData] = useState<FormState>({
+        name: serverState.name,
+        username: serverState.username,
+        type: serverState.type,
+        provider: serverState.provider,
+        ram: serverState.ram ?? "",
+        storage: serverState.storage ?? "",
+        publicIp: serverState.publicIp,
+        privateIp: serverState.privateIp ?? "",
+        privateKey: "",
+        privateKeyPassphrase: "",
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+    useEffect(() => {
+        setFormData({
+            name: serverState.name,
+            username: serverState.username,
+            type: serverState.type,
+            provider: serverState.provider,
+            ram: serverState.ram ?? "",
+            storage: serverState.storage ?? "",
+            publicIp: serverState.publicIp,
+            privateIp: serverState.privateIp ?? "",
+            privateKey: "",
+            privateKeyPassphrase: "",
+        });
+    }, [currentExpiration, serverState]);
+
+    const updateField = (name: keyof FormState, value: string) => {
+        setFormData((current) => ({ ...current, [name]: value }));
     };
 
-    const handleSelectChange = (name: string, value: string) => {
-        setFormData({ ...formData, [name]: value });
-    };
-
-    const handleUpdate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setIsSaving(true);
 
         try {
-            await updateServer(server.id, formData);
-            toast({
-                title: "Server Updated",
-                description: "The server details have been updated successfully.",
+            await updateServer(serverState.id, {
+                name: formData.name,
+                username: formData.username,
+                type: formData.type,
+                provider: formData.provider,
+                ram: formData.ram,
+                storage: formData.storage,
+                publicIp: formData.publicIp,
+                privateIp: formData.privateIp,
+                privateKey: formData.privateKey,
+                moreDetails: serializeServerMetadata(serverState.moreDetails, {
+                    ...currentMetadata,
+                    sshPassphrase: formData.privateKeyPassphrase || currentPassphrase || undefined,
+                }),
             });
-            router.refresh();
-        } catch (error: any) {
+
+            const refreshedServer = await getServer(serverState.id);
+            if (refreshedServer) {
+                setServerState(refreshedServer);
+            }
+
+            toast({
+                title: "Server updated",
+                description: "The server details were saved.",
+            });
+        } catch (error) {
+            console.error(error);
             toast({
                 variant: "destructive",
-                title: "Update Failed",
-                description: error.message || "Failed to update server.",
+                title: "Update failed",
+                description: "We could not save the server changes.",
             });
         } finally {
-            setIsLoading(false);
+            setIsSaving(false);
         }
     };
 
-    const handleDelete = async () => {
-        setIsDeleting(true);
+    const handleExpireNow = async () => {
+        await updateExpiration(new Date());
+    };
+
+    const updateExpiration = async (nextExpiration: Date | null) => {
+        setIsExpiring(true);
+
         try {
-            await deleteServer(server.id);
-            toast({
-                title: "Server Deleted",
-                description: "The server has been permanently deleted.",
+            await updateServer(serverState.id, {
+                moreDetails: serializeServerMetadata(serverState.moreDetails, {
+                    ...currentMetadata,
+                    expiresAt: nextExpiration ? nextExpiration.toISOString() : undefined,
+                    sshPassphrase: currentPassphrase || undefined,
+                }),
             });
-            router.push('/servers');
-        } catch (error: any) {
+
+            const refreshedServer = await getServer(serverState.id);
+            if (refreshedServer) {
+                setServerState(refreshedServer);
+            }
+
+            toast({
+                title: nextExpiration ? "Expiration updated" : "Server expired",
+                description: nextExpiration
+                    ? "The server expiration was extended."
+                    : "The server has been marked as expired.",
+            });
+        } catch (error) {
+            console.error(error);
             toast({
                 variant: "destructive",
-                title: "Delete Failed",
-                description: error.message || "Failed to delete server.",
+                title: "Expiration update failed",
+                description: "We could not update the server expiration.",
             });
-            setIsDeleting(false);
+        } finally {
+            setIsExpiring(false);
+        }
+    };
+
+    const handleExtendExpiration = async (months: number) => {
+        const nextExpiration = addExpirationMonths(currentExpiration, months);
+        await updateExpiration(nextExpiration);
+    };
+
+    const handleCheckConnection = async () => {
+        setIsCheckingConnection(true);
+
+        try {
+            const result = await checkServerConnection(serverState.id);
+
+            toast({
+                title: result.success ? "Connection successful" : "Connection failed",
+                description: result.message,
+                variant: result.success ? "default" : "destructive",
+            });
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: "destructive",
+                title: "Connection check failed",
+                description: error instanceof Error ? error.message : "Unable to check connection.",
+            });
+        } finally {
+            setIsCheckingConnection(false);
         }
     };
 
     return (
-        <div className="space-y-6 max-w-3xl mx-auto pb-20">
-            {/* Responsive Header */}
-            <div className="flex flex-col gap-4">
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-fit -ml-2 text-muted-foreground hover:text-foreground"
-                    onClick={() => router.push('/servers')}
+        <div className="mx-auto max-w-4xl space-y-6 py-10">
+            <Button variant="ghost" className="w-fit px-0 text-muted-foreground hover:text-foreground" onClick={() => router.push("/server/list")}>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back to servers
+            </Button>
+
+            <div className="space-y-2">
+                <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Server details</p>
+                <h1 className="text-4xl font-bold tracking-tight">{serverState.name}</h1>
+                <p className="text-muted-foreground">{serverState.username}@{serverState.publicIp} · {serverState.provider}</p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+                <Card>
+                    <CardContent className="flex items-center gap-3 p-4">
+                        <ServerIcon className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                            <p className="text-sm text-muted-foreground">Provider</p>
+                            <p className="font-medium">{server.provider}</p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="flex items-center gap-3 p-4">
+                        <Clock3 className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                            <p className="text-sm text-muted-foreground">Status</p>
+                            <p className="font-medium">{isExpired(currentExpiration) ? "Expired" : "Active"}</p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card 
+                    className="cursor-pointer transition-colors hover:bg-accent"
+                    onClick={handleCheckConnection}
                 >
-                    <ArrowLeft className="mr-1 h-4 w-4" /> Back to Servers
-                </Button>
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{server.name}</h1>
-                    <p className="text-sm text-muted-foreground">{server.username}@{server.publicIp}</p>
-                </div>
+                    <CardContent className="flex items-center justify-between gap-3 p-4">
+                        <div className="flex items-center gap-3">
+                            <ShieldCheck className="h-5 w-5 text-muted-foreground" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Connection</p>
+                                <p className="text-sm font-medium">Check SSH access</p>
+                            </div>
+                        </div>
+                        {isCheckingConnection && <Loader2 className="h-4 w-4 animate-spin" />}
+                    </CardContent>
+                </Card>
             </div>
 
             <Card>
-                <form onSubmit={handleUpdate}>
+                <CardHeader>
+                    <CardTitle>Expiration</CardTitle>
+                    <CardDescription>Extend the current expiration or expire the server immediately.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                        <Button type="button" variant="outline" onClick={() => handleExtendExpiration(1)} disabled={isExpiring}>
+                            Add 1 month
+                        </Button>
+                        <Button type="button" variant="outline" onClick={() => handleExtendExpiration(3)} disabled={isExpiring}>
+                            Add 3 months
+                        </Button>
+                        <Button type="button" variant="outline" onClick={() => handleExtendExpiration(6)} disabled={isExpiring}>
+                            Add 6 months
+                        </Button>
+                        <Button type="button" variant="outline" onClick={() => handleExtendExpiration(12)} disabled={isExpiring}>
+                            Add 1 year
+                        </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                        Current expiration: <span className="font-medium text-foreground">{formatDate(currentExpiration)}</span>
+                    </p>
+                </CardContent>
+                <CardFooter className="justify-end border-t px-6 py-4">
+                    <ConfirmDialog
+                        trigger={
+                            <Button type="button" variant="destructive" disabled={isExpiring}>
+                                <ShieldAlert className="mr-2 h-4 w-4" />
+                                Expire
+                            </Button>
+                        }
+                        title="Expire this server?"
+                        description="This will set the server expiration to now."
+                        confirmLabel={isExpiring ? "Updating..." : "Expire"}
+                        onConfirm={handleExpireNow}
+                        loading={isExpiring}
+                    />
+                </CardFooter>
+            </Card>
+
+            <Card>
+                <form onSubmit={handleSubmit}>
                     <CardHeader>
-                        <CardTitle>Edit Server Details</CardTitle>
-                        <CardDescription>
-                            Update connection information or server metadata.
-                        </CardDescription>
+                        <CardTitle>Edit server</CardTitle>
+                        <CardDescription>Update the SSH connection details or change when the server expires.</CardDescription>
                     </CardHeader>
 
                     <CardContent className="space-y-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Server Name</Label>
-                            <Input
-                                id="name"
-                                name="name"
-                                value={formData.name}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
-                            />
+                            <Label htmlFor="name">Server name</Label>
+                            <Input id="name" required value={formData.name} onChange={(event) => updateField("name", event.target.value)} />
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label htmlFor="publicIp">Public IP</Label>
-                                <Input
-                                    id="publicIp"
-                                    name="publicIp"
-                                    value={formData.publicIp}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, publicIp: e.target.value })}
-                                />
+                                <Input id="publicIp" required value={formData.publicIp} onChange={(event) => updateField("publicIp", event.target.value)} />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="privateIp">Private IP (Optional)</Label>
-                                <Input
-                                    id="privateIp"
-                                    name="privateIp"
-                                    value={formData.privateIp}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, privateIp: e.target.value })}
-                                />
+                                <Label htmlFor="privateIp">Private IP</Label>
+                                <Input id="privateIp" value={formData.privateIp} onChange={(event) => updateField("privateIp", event.target.value)} />
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label htmlFor="username">Username</Label>
-                                <Input
-                                    id="username"
-                                    name="username"
-                                    value={formData.username}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, username: e.target.value })}
-                                />
+                                <Input id="username" required value={formData.username} onChange={(event) => updateField("username", event.target.value)} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="provider">Provider</Label>
-                                <Select
-                                    name="provider"
-                                    value={formData.provider}
-                                    onValueChange={(v) => handleSelectChange('provider', v)}
-                                >
-                                    <SelectTrigger>
+                                <Select value={formData.provider} onValueChange={(value) => updateField("provider", value)}>
+                                    <SelectTrigger id="provider">
                                         <SelectValue placeholder="Select provider" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -302,75 +439,69 @@ function ServerDetailsForm({ server }: { server: Server }) {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
                             <div className="grid gap-2">
-                                <Label htmlFor="type">OS / Type</Label>
-                                <Input
-                                    id="type"
-                                    name="type"
-                                    value={formData.type}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, type: e.target.value })}
-                                />
+                                <Label htmlFor="type">OS / type</Label>
+                                <Input id="type" required value={formData.type} onChange={(event) => updateField("type", event.target.value)} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="ram">RAM</Label>
-                                <Input
-                                    id="ram"
-                                    name="ram"
-                                    value={formData.ram}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, ram: e.target.value })}
-                                />
+                                <Input id="ram" value={formData.ram} onChange={(event) => updateField("ram", event.target.value)} />
                             </div>
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="privateKey">Update SSH Private Key</Label>
+                            <Label htmlFor="storage">Storage</Label>
+                            <Input id="storage" value={formData.storage} onChange={(event) => updateField("storage", event.target.value)} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="privateKey">SSH private key</Label>
                             <Textarea
                                 id="privateKey"
-                                name="privateKey"
-                                placeholder="(Leave empty to keep existing key)"
-                                className="font-mono text-xs h-32"
                                 value={formData.privateKey}
-                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, privateKey: e.target.value })}
+                                onChange={(event) => updateField("privateKey", event.target.value)}
+                                placeholder="Leave blank to keep the existing key"
+                                className="min-h-40 font-mono text-xs"
                             />
-                            <p className="text-xs text-muted-foreground">
-                                Only enter a new private key if you want to replace the existing one.
-                            </p>
+                            <p className="text-xs text-muted-foreground">Only enter a new private key if you want to replace the existing one.</p>
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="privateKeyPassphrase">SSH key passphrase</Label>
+                            <Input
+                                id="privateKeyPassphrase"
+                                type="password"
+                                value={formData.privateKeyPassphrase}
+                                onChange={(event) => updateField("privateKeyPassphrase", event.target.value)}
+                                placeholder="Leave blank to keep the current passphrase"
+                            />
+                            <p className="text-xs text-muted-foreground">Required only if the SSH private key is encrypted.</p>
                         </div>
                     </CardContent>
 
-                    <CardFooter className="flex flex-col-reverse sm:flex-row justify-between gap-4 border-t px-6 py-4 bg-muted/10">
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="destructive" type="button" disabled={isDeleting} className="w-full sm:w-auto">
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Delete Server
+                    <CardFooter className="flex flex-col gap-2 border-t px-6 py-4 sm:flex-row sm:justify-between">
+                        <ConfirmDialog
+                            trigger={
+                                <Button type="button" variant="destructive" className="w-full sm:w-auto">
+                                    <ShieldAlert className="mr-2 h-4 w-4" />
+                                    Expire now
                                 </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        This action cannot be undone. This will permanently remove the server
-                                        from your dashboard. It will NOT destroy the actual VPS provider instance.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                        Delete
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                            }
+                            title="Expire this server?"
+                            description="This will mark the server as expired in its metadata. You can move the expiration date later by editing the server."
+                            confirmLabel={isExpiring ? "Expiring..." : "Expire now"}
+                            onConfirm={handleExpireNow}
+                            loading={isExpiring}
+                        />
 
-                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                            <Button variant="ghost" type="button" onClick={() => router.push('/servers')} className="w-full sm:w-auto">
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                            <Button type="button" variant="ghost" onClick={() => router.push("/server/list")}>
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Save Changes
+                            <Button type="submit" disabled={isSaving}>
+                                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                Save changes
                             </Button>
                         </div>
                     </CardFooter>

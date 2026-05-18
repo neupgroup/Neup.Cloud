@@ -9,4 +9,5 @@ export type Server = {
   storage?: string;
   publicIp: string;
   privateIp: string;
+  moreDetails?: string | null;
 };

@@ -1,85 +1,96 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
-import { PlusCircle, ChevronRight, ShoppingCart, ServerIcon, User, Check, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Cookies from "universal-cookie";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ArrowRight, BadgeInfo, ChevronRight, CirclePlus, ServerIcon, ShieldCheck, User } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/core/hooks/use-toast";
-import { getServers, deleteServer, selectServer } from "@/services/server/server-service";
-import type { Server } from "@/services/server/types";
 import { cn } from "@/core/utils";
+import { getServers, selectServer } from "@/services/server/server-service";
+import type { Server } from "@/services/server/types";
+import { getServerExpiration, parseServerMetadata } from "@/services/server/server-metadata";
+
+function formatExpiration(value?: string | null) {
+  if (!value) {
+    return "No expiration set";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Invalid expiration";
+  }
+
+  return date.toLocaleString();
+}
+
+function isExpired(value?: string | null) {
+  if (!value) {
+    return false;
+  }
+
+  const date = new Date(value);
+  return !Number.isNaN(date.getTime()) && date.getTime() <= Date.now();
+}
 
 function ServerCardSkeleton() {
   return (
-    <div className="flex flex-col gap-2 p-4">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2 w-full">
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-5 w-48" />
-            <Skeleton className="h-5 w-16 rounded-full" />
-          </div>
-          <div className="flex items-center gap-4 pl-6">
-            <Skeleton className="h-3 w-32" />
-            <Skeleton className="h-3 w-16" />
-            <Skeleton className="h-3 w-20" />
-          </div>
+    <Card>
+      <CardHeader className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <Skeleton className="h-6 w-56" />
+          <Skeleton className="h-5 w-16 rounded-full" />
         </div>
-        <Skeleton className="h-8 w-8 rounded-md" />
-      </div>
-    </div>
+        <Skeleton className="h-4 w-44" />
+      </CardHeader>
+      <CardContent className="grid gap-3 sm:grid-cols-3">
+        <Skeleton className="h-10 w-full rounded-lg" />
+        <Skeleton className="h-10 w-full rounded-lg" />
+        <Skeleton className="h-10 w-full rounded-lg" />
+      </CardContent>
+    </Card>
   );
 }
 
-interface ServerCardProps {
+function ServerCard({
+  server,
+  isSelected,
+  onSelected,
+}: {
   server: Server;
-  onServerDeleted: (id: string) => void;
-  onServerSelected: (id: string) => void;
-  isSelected?: boolean;
-  className?: string;
-}
-
-function ServerCard({ server, onServerDeleted, onServerSelected, isSelected, className }: ServerCardProps) {
+  isSelected: boolean;
+  onSelected: (id: string) => void;
+}) {
+  const router = useRouter();
   const { toast } = useToast();
   const [isSwitching, setIsSwitching] = useState(false);
 
-  const handleDelete = async (e: MouseEvent) => {
-    e.stopPropagation();
-    try {
-      await deleteServer(server.id);
-      toast({
-        title: "Server Deleted",
-        description: "The server has been successfully deleted.",
-      });
-      onServerDeleted(server.id);
-    } catch (error) {
-      console.error("Error deleting document: ", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "There was a problem deleting the server.",
-      });
-    }
-  };
+  const expirationAt = getServerExpiration(server.moreDetails);
+  const expired = isExpired(expirationAt);
+  const serverMetadata = parseServerMetadata(server.moreDetails);
 
-  const handleSelect = async () => {
-    if (isSelected || isSwitching) return;
+  const handleSwitch = async () => {
+    if (isSelected || isSwitching) {
+      return;
+    }
+
     setIsSwitching(true);
     try {
       await selectServer(server.id, server.name);
+      onSelected(server.id);
       toast({
-        title: "Server Selected",
-        description: `You are now managing \"${server.name}\".`,
+        title: "Server switched",
+        description: `You are now managing ${server.name}.`,
       });
-      onServerSelected(server.id);
     } catch (error) {
-      console.error("Error selecting server: ", error);
+      console.error(error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "There was a problem selecting the server.",
+        title: "Switch failed",
+        description: "We could not switch the active server.",
       });
     } finally {
       setIsSwitching(false);
@@ -87,110 +98,171 @@ function ServerCard({ server, onServerDeleted, onServerSelected, isSelected, cla
   };
 
   return (
-    <div
-      onClick={handleSelect}
-      className={cn(
-        "group flex items-center justify-between p-4 min-w-0 w-full transition-all hover:bg-muted/50 cursor-pointer",
-        isSelected && "bg-muted/50",
-        className
-      )}
-    >
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 mb-2">
-          <p className="text-sm font-medium text-foreground break-all font-mono leading-tight">
-            {server.name}
+    <Card className={cn("transition-colors", isSelected && "border-primary bg-primary/5")}>
+      <CardHeader className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1 min-w-0">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <span className="truncate">{server.name}</span>
+              {isSelected ? (
+                <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">Current</span>
+              ) : null}
+              {expired ? (
+                <span className="inline-flex items-center rounded-md bg-rose-500/10 px-2 py-1 text-xs font-medium text-rose-700">Expired</span>
+              ) : null}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              {server.username}@{server.publicIp} · {server.provider} · {server.type}
+            </p>
+          </div>
+          <ServerIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
+        </div>
+
+        <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-3">
+          <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2">
+            <User className="h-4 w-4" />
+            <span className="truncate">{server.username}</span>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2">
+            <BadgeInfo className="h-4 w-4" />
+            <span className="truncate">{server.privateIp || "No private IP"}</span>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2">
+            <ShieldCheck className="h-4 w-4" />
+            <span className="truncate">{formatExpiration(expirationAt)}</span>
+          </div>
+        </div>
+
+        {serverMetadata.expiresAt ? (
+          <p className="text-xs text-muted-foreground">
+            This server is configured to expire on {formatExpiration(serverMetadata.expiresAt)}.
           </p>
-          {isSelected && <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Current</span>}
-          {isSwitching && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
-        </div>
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1.5 shrink-0">
-            <User className="h-3.5 w-3.5" />
-            <span>{server.username}@{server.publicIp}</span>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <ServerIcon className="h-3.5 w-3.5" />
-            <span>{server.provider}</span>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="font-semibold">{server.type}</span>
-          </div>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 ml-4">
-        {isSelected && (
-          <Check className="h-5 w-5 text-primary" />
-        )}
-        <Link
-          href={`/servers/${server.id}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-          >
-            <ChevronRight className="h-5 w-5" />
-            <span className="sr-only">View Server Details</span>
-          </Button>
-        </Link>
-      </div>
-    </div>
+        ) : null}
+      </CardHeader>
+
+      <CardContent className="flex flex-wrap gap-2 pt-0">
+        <Button variant={isSelected ? "secondary" : "default"} onClick={handleSwitch} disabled={isSelected || isSwitching}>
+          {isSwitching ? "Switching..." : isSelected ? "Current server" : "Switch server"}
+        </Button>
+        <Button variant="outline" onClick={() => router.push(`/server/list/${server.id}`)}>
+          Edit server
+          <ChevronRight className="ml-2 h-4 w-4" />
+        </Button>
+      </CardContent>
+
+      <CardFooter className="justify-between border-t bg-muted/20 px-6 py-4 text-sm text-muted-foreground">
+        <span className="truncate">ID: {server.id}</span>
+        <span className="truncate">{expired ? "Expired" : "Active"}</span>
+      </CardFooter>
+    </Card>
   );
 }
 
 export default function Page() {
+  const router = useRouter();
   const { toast } = useToast();
   const [servers, setServers] = useState<Server[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<unknown>(null);
   const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
 
   useEffect(() => {
-    const cookies = new Cookies(null, { path: "/" });
-    setSelectedServerId(cookies.get("selected_server"));
+    const cookieStore = new Cookies(null, { path: "/" });
+    setSelectedServerId(cookieStore.get("selected_server") ?? null);
   }, []);
 
   useEffect(() => {
-    const fetchServers = async () => {
+    let cancelled = false;
+
+    const loadServers = async () => {
       setIsLoading(true);
       try {
-        const serversData = await getServers();
-        setServers(serversData);
-      } catch (err: any) {
-          setError(err);
-          toast && toast({
-            variant: "destructive",
-            title: "Error fetching servers",
-            description: err?.message ?? "Failed to fetch servers.",
-          });
+        const data = await getServers();
+        if (!cancelled) {
+          setServers(data);
+        }
+      } catch (error) {
+        console.error(error);
+        toast({
+          variant: "destructive",
+          title: "Could not load servers",
+          description: "Please try again.",
+        });
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
-    fetchServers();
+
+    void loadServers();
+
+    return () => {
+      cancelled = true;
+    };
   }, [toast]);
 
-  const handleServerDeleted = (id: string) => {
-    setServers((prev) => prev.filter((s) => s.id !== id));
-  };
-
-  const handleServerSelected = (id: string) => {
-    setSelectedServerId(id);
-  };
+  const orderedServers = useMemo(() => {
+    return [...servers].sort((left, right) => {
+      if (left.id === selectedServerId) return -1;
+      if (right.id === selectedServerId) return 1;
+      return left.name.localeCompare(right.name);
+    });
+  }, [servers, selectedServerId]);
 
   return (
-    <div className="max-w-2xl mx-auto py-12 space-y-8">
-      <h1 className="text-3xl font-bold mb-4">Servers</h1>
-      <Card>
-        <CardContent className="p-6 space-y-4">
-          <h2 className="text-xl font-semibold mb-2">Quick Actions</h2>
-          <div className="flex flex-col gap-4">
-            <Button variant="outline" onClick={() => window.location.href = "/servers/add"}>Add New Server</Button>
-            <Button variant="outline" onClick={() => window.location.href = "/servers/purchase"}>Purchase Managed Server</Button>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="mx-auto max-w-5xl space-y-8 py-10">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="space-y-2">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Server management</p>
+          <h1 className="text-4xl font-bold tracking-tight">Servers</h1>
+          <p className="max-w-2xl text-muted-foreground">
+            Switch the active server, add a new one, or open a server to edit its connection details and expiration.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => router.push("/server/list/add")}>
+            <CirclePlus className="mr-2 h-4 w-4" />
+            Add server
+          </Button>
+          <Button variant="secondary" onClick={() => router.push("/server/list/purchase")}>
+            <ArrowRight className="mr-2 h-4 w-4" />
+            Purchase server
+          </Button>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="grid gap-4">
+          <ServerCardSkeleton />
+          <ServerCardSkeleton />
+          <ServerCardSkeleton />
+        </div>
+      ) : orderedServers.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center gap-4 py-16 text-center">
+            <ServerIcon className="h-10 w-10 text-muted-foreground" />
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold">No servers yet</h2>
+              <p className="max-w-md text-sm text-muted-foreground">
+                Add your first server to start managing SSH access, web services, databases, and system tasks.
+              </p>
+            </div>
+            <Button onClick={() => router.push("/server/list/add")}>Add your first server</Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {orderedServers.map((server) => (
+            <ServerCard
+              key={server.id}
+              server={server}
+              isSelected={server.id === selectedServerId}
+              onSelected={setSelectedServerId}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

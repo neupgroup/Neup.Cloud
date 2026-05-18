@@ -1,63 +1,166 @@
 "use client";
-import { useState } from 'react';
-import { createServer } from '@/services/server/server-service';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/core/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { PageTitleBack } from '@/components/page-header'; // Assuming this exists or similar
+} from "@/components/ui/select";
+import { useToast } from "@/core/hooks/use-toast";
+import { createServer, checkServerConnection } from "@/services/server/server-service";
+import { serializeServerMetadata } from "@/services/server/server-metadata";
 
-export default function AddServerClientPage() {
+type FormState = {
+    name: string;
+    username: string;
+    type: string;
+    provider: string;
+    ram: string;
+    storage: string;
+    publicIp: string;
+    privateIp: string;
+    privateKey: string;
+    privateKeyPassphrase: string;
+    expiresAt: string;
+};
+
+const initialState: FormState = {
+    name: "",
+    username: "root",
+    type: "Ubuntu 22.04",
+    provider: "Custom",
+    ram: "2GB",
+    storage: "40GB",
+    publicIp: "",
+    privateIp: "",
+    privateKey: "",
+    privateKeyPassphrase: "",
+    expiresAt: "",
+};
+
+export default function AddServerPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
+    const [isCheckingConnection, setIsCheckingConnection] = useState(false);
+    const [formData, setFormData] = useState<FormState>(initialState);
 
-    const [formData, setFormData] = useState({
-        name: '',
-        username: 'root',
-        type: 'Ubuntu 22.04',
-        provider: 'Custom',
-        ram: '2GB',
-        storage: '40GB',
-        publicIp: '',
-        privateIp: '',
-        privateKey: '',
-    });
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+    const updateField = (name: keyof FormState, value: string) => {
+        setFormData((current) => ({ ...current, [name]: value }));
     };
 
-    const handleSelectChange = (name: string, value: string) => {
-        setFormData({ ...formData, [name]: value });
+    const handleCheckConnection = async () => {
+        if (!formData.publicIp || !formData.username || !formData.privateKey) {
+            toast({
+                variant: "destructive",
+                title: "Missing required fields",
+                description: "Please fill in Public IP, Username, and SSH private key.",
+            });
+            return;
+        }
+
+        setIsCheckingConnection(true);
+
+        try {
+            // Create temporary server record to test connection
+            const tempServerId = `temp-${Date.now()}`;
+            const tempServer = {
+                id: tempServerId,
+                name: formData.name || "Test",
+                username: formData.username,
+                type: formData.type,
+                provider: formData.provider,
+                publicIp: formData.publicIp,
+                privateIp: formData.privateIp || "",
+                privateKey: formData.privateKey,
+                moreDetails: serializeServerMetadata(undefined, {
+                    sshPassphrase: formData.privateKeyPassphrase || undefined,
+                }),
+            };
+
+            // Import and run connection test directly since we can't use checkServerConnection without a real DB record
+            const { runCommandOnServer } = await import("@/services/server/ssh");
+            const { getServerSshPassphrase } = await import("@/services/server/server-metadata");
+            const passphrase = getServerSshPassphrase(tempServer.moreDetails);
+
+            const result = await runCommandOnServer(
+                tempServer.publicIp,
+                tempServer.username,
+                tempServer.privateKey,
+                'echo "Connection test successful"',
+                undefined,
+                undefined,
+                false,
+                {},
+                passphrase ?? undefined
+            );
+
+            if (result.code === 0) {
+                toast({
+                    title: "Connection successful",
+                    description: "The server is reachable via SSH.",
+                });
+            } else {
+                toast({
+                    variant: "destructive",
+                    title: "Connection failed",
+                    description: result.stderr || "Could not connect to the server.",
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: "destructive",
+                title: "Connection check failed",
+                description: error instanceof Error ? error.message : "Unable to check connection.",
+            });
+        } finally {
+            setIsCheckingConnection(false);
+        }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
         setIsLoading(true);
 
         try {
-            await createServer(formData);
-            toast({
-                title: "Server Created",
-                description: "Your new server has been added successfully.",
+            await createServer({
+                name: formData.name,
+                username: formData.username,
+                type: formData.type,
+                provider: formData.provider,
+                ram: formData.ram,
+                storage: formData.storage,
+                publicIp: formData.publicIp,
+                privateIp: formData.privateIp,
+                privateKey: formData.privateKey,
+                moreDetails: serializeServerMetadata(undefined, {
+                    expiresAt: formData.expiresAt || undefined,
+                    sshPassphrase: formData.privateKeyPassphrase || undefined,
+                }),
             });
-            router.push('/servers');
-        } catch (error: any) {
+
+            toast({
+                title: "Server created",
+                description: "The new server has been added.",
+            });
+            router.push("/server/list");
+        } catch (error) {
+            console.error(error);
             toast({
                 variant: "destructive",
-                title: "Error",
-                description: error.message || "Failed to create server.",
+                title: "Create failed",
+                description: "We could not create the server.",
             });
         } finally {
             setIsLoading(false);
@@ -65,48 +168,46 @@ export default function AddServerClientPage() {
     };
 
     return (
-        <div className="space-y-6 max-w-2xl mx-auto">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Add Server</h1>
-                    <p className="text-muted-foreground">Connect a new server to your dashboard.</p>
-                </div>
+        <div className="mx-auto max-w-3xl space-y-6 py-10">
+            <div className="space-y-2">
+                <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Server management</p>
+                <h1 className="text-4xl font-bold tracking-tight">Add server</h1>
+                <p className="text-muted-foreground">Register a new server, store its SSH details, and optionally set an expiration date.</p>
             </div>
 
             <Card>
-                <CardHeader>
-                    <CardTitle>Server Details</CardTitle>
-                    <CardDescription>
-                        Enter the connection details for your existing VPS.
-                    </CardDescription>
-                </CardHeader>
                 <form onSubmit={handleSubmit}>
+                    <CardHeader>
+                        <CardTitle>Server details</CardTitle>
+                        <CardDescription>Enter the connection details for the server you want to manage.</CardDescription>
+                    </CardHeader>
+
                     <CardContent className="space-y-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Server Name</Label>
-                            <Input id="name" name="name" placeholder="my-server-1" required value={formData.name} onChange={handleChange} />
+                            <Label htmlFor="name">Server name</Label>
+                            <Input id="name" required value={formData.name} onChange={(event) => updateField("name", event.target.value)} placeholder="production-01" />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label htmlFor="publicIp">Public IP</Label>
-                                <Input id="publicIp" name="publicIp" placeholder="1.2.3.4" required value={formData.publicIp} onChange={handleChange} />
+                                <Input id="publicIp" required value={formData.publicIp} onChange={(event) => updateField("publicIp", event.target.value)} placeholder="1.2.3.4" />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="privateIp">Private IP (Optional)</Label>
-                                <Input id="privateIp" name="privateIp" placeholder="10.0.0.1" value={formData.privateIp} onChange={handleChange} />
+                                <Label htmlFor="privateIp">Private IP</Label>
+                                <Input id="privateIp" value={formData.privateIp} onChange={(event) => updateField("privateIp", event.target.value)} placeholder="10.0.0.10" />
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label htmlFor="username">Username</Label>
-                                <Input id="username" name="username" placeholder="root" required value={formData.username} onChange={handleChange} />
+                                <Input id="username" required value={formData.username} onChange={(event) => updateField("username", event.target.value)} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="provider">Provider</Label>
-                                <Select name="provider" value={formData.provider} onValueChange={(v) => handleSelectChange('provider', v)}>
-                                    <SelectTrigger>
+                                <Select value={formData.provider} onValueChange={(value) => updateField("provider", value)}>
+                                    <SelectTrigger id="provider">
                                         <SelectValue placeholder="Select provider" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -121,37 +222,74 @@ export default function AddServerClientPage() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
                             <div className="grid gap-2">
-                                <Label htmlFor="type">OS / Type</Label>
-                                <Input id="type" name="type" placeholder="Ubuntu 22.04" required value={formData.type} onChange={handleChange} />
+                                <Label htmlFor="type">OS / type</Label>
+                                <Input id="type" required value={formData.type} onChange={(event) => updateField("type", event.target.value)} placeholder="Ubuntu 22.04" />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="ram">RAM</Label>
-                                <Input id="ram" name="ram" placeholder="4GB" value={formData.ram} onChange={handleChange} />
+                                <Input id="ram" value={formData.ram} onChange={(event) => updateField("ram", event.target.value)} placeholder="4GB" />
                             </div>
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="privateKey">SSH Private Key</Label>
+                            <Label htmlFor="storage">Storage</Label>
+                            <Input id="storage" value={formData.storage} onChange={(event) => updateField("storage", event.target.value)} placeholder="40GB" />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="expiresAt">Expiration</Label>
+                            <Input id="expiresAt" type="datetime-local" value={formData.expiresAt} onChange={(event) => updateField("expiresAt", event.target.value)} />
+                            <p className="text-xs text-muted-foreground">Leave this blank if the server should stay active indefinitely.</p>
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="privateKey">SSH private key</Label>
                             <Textarea
                                 id="privateKey"
-                                name="privateKey"
-                                placeholder="-----BEGIN OPENSSH PRIVATE KEY-----..."
-                                className="font-mono text-xs h-32"
                                 required
                                 value={formData.privateKey}
-                                onChange={handleChange}
+                                onChange={(event) => updateField("privateKey", event.target.value)}
+                                placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"
+                                className="min-h-40 font-mono text-xs"
                             />
-                            <p className="text-xs text-muted-foreground">
-                                The private key is required to connect and manage the server via SSH. It is stored securely.
-                            </p>
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="privateKeyPassphrase">SSH key passphrase</Label>
+                            <Input
+                                id="privateKeyPassphrase"
+                                type="password"
+                                value={formData.privateKeyPassphrase}
+                                onChange={(event) => updateField("privateKeyPassphrase", event.target.value)}
+                                placeholder="Leave blank if the key is not encrypted"
+                            />
+                            <p className="text-xs text-muted-foreground">Required when the SSH private key is encrypted.</p>
                         </div>
                     </CardContent>
-                    <CardFooter className="flex justify-end gap-2">
-                        <Button variant="ghost" type="button" onClick={() => router.back()}>Cancel</Button>
-                        <Button type="submit" disabled={isLoading}>
-                            {isLoading ? "Adding..." : "Add Server"}
+
+                    <CardFooter className="flex flex-col-reverse gap-2 border-t px-6 py-4 sm:flex-row sm:justify-end">
+                        <Button variant="ghost" type="button" onClick={() => router.back()}>
+                            Cancel
+                        </Button>
+                        <Button 
+                            type="button" 
+                            variant="outline"
+                            disabled={isLoading || isCheckingConnection}
+                            onClick={handleCheckConnection}
+                        >
+                            {isCheckingConnection ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Checking...
+                                </>
+                            ) : (
+                                "Check connection"
+                            )}
+                        </Button>
+                        <Button type="submit" disabled={isLoading || isCheckingConnection}>
+                            {isLoading ? "Creating..." : "Create server"}
                         </Button>
                     </CardFooter>
                 </form>

@@ -1,9 +1,13 @@
 import { prisma } from '@/services/prisma';
 import { createId } from '@/core/create-id';
+import { stripSensitiveServerMetadata } from '@/services/server/server-metadata';
 
 export function toPublicServer(server: Awaited<ReturnType<typeof prisma.server.findUnique>> extends infer T ? Exclude<T, null> : never) {
-  const { privateKey, ...publicServer } = server;
-  return publicServer;
+  const { privateKey, moreDetails, ...publicServer } = server;
+  return {
+    ...publicServer,
+    moreDetails: stripSensitiveServerMetadata(moreDetails),
+  };
 }
 
 export async function getServers() {

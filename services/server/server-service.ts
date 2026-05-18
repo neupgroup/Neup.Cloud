@@ -20,6 +20,8 @@ import {
   getSystemStats as getSystemStatsLogic,
   getSystemUptime as getSystemUptimeLogic,
 } from '@/services/server/server-runtime';
+import { runCommandOnServer } from '@/services/server/ssh';
+import { getServerSshPassphrase } from '@/services/server/server-metadata';
 
 export async function getSystemStats(serverId: string) {
   return getSystemStatsLogic(serverId);
@@ -50,7 +52,7 @@ export async function createServer(serverData: {
   privateKey: string;
 }) {
   await createServerRecord(serverData);
-  revalidatePath('/servers');
+  revalidatePath('/server/list');
 }
 
 export async function updateServer(
@@ -85,13 +87,13 @@ export async function updateServer(
   }
 
   await updateServerRecord(id, filteredData);
-  revalidatePath(`/servers/${id}`);
-  revalidatePath('/servers');
+  revalidatePath(`/server/list/${id}`);
+  revalidatePath('/server/list');
 }
 
 export async function deleteServer(id: string) {
   await deleteServerRecord(id);
-  revalidatePath('/servers');
+  revalidatePath('/server/list');
 }
 
 export async function selectServer(serverId: string, serverName: string) {
@@ -100,6 +102,7 @@ export async function selectServer(serverId: string, serverName: string) {
   cookieStore.set('selected_server', serverId);
   cookieStore.set('selected_server_name', serverName);
   revalidatePath('/');
+  revalidatePath('/server/list');
   return { success: true };
 }
 
@@ -115,4 +118,62 @@ export async function getServer(id: string) {
 
 export async function getServerForRunner(id: string) {
   return getServerForRunnerLogic(id);
+}
+
+export async function checkServerConnection(
+  serverId: string
+): Promise<{
+  success: boolean;
+  message: string;
+  checkedAt?: string;
+}> {
+  if (!serverId?.trim()) {
+    throw new Error('Server ID is required.');
+  }
+
+  const server = await getServerById(serverId);
+
+  if (!server) {
+    throw new Error('Server not found.');
+  }
+
+  if (!server.username || !server.privateKey) {
+    throw new Error('Server is missing username or private key configuration for SSH access.');
+  }
+
+  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
+
+  try {
+    const result = await runCommandOnServer(
+      server.publicIp,
+      server.username,
+      server.privateKey,
+      'echo "Connection test successful"',
+      undefined,
+      undefined,
+      false,
+      {},
+      sshPassphrase ?? undefined
+    );
+
+    if (result.code !== 0) {
+      return {
+        success: false,
+        message: result.stderr || 'Connection test failed.',
+        checkedAt: new Date().toISOString(),
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Connection is active and reachable.',
+      checkedAt: new Date().toISOString(),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Connection check failed.',
+      checkedAt: new Date().toISOString(),
+    };
+  }
 }
