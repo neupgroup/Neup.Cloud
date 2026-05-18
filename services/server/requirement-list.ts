@@ -202,17 +202,17 @@ fi`,
                 name: 'Install Logging Script',
                 description: 'Deploy the background monitoring script that records CPU, RAM, network, and temperature on the same timeline.',
                 icon: 'FileCode',
-                checkCommand: '[ -f ~/.status/logger.sh ] && grep -q "TEMP_LOG=\"temperature.usage\"" ~/.status/logger.sh && grep -q "get_temp_c()" ~/.status/logger.sh',
-                installCommand: `mkdir -p ~/.status && cat << 'EOF' > ~/.status/logger.sh
+                checkCommand: 'sudo -n test -f /.status/logger.sh 2>/dev/null && sudo -n grep -q "TEMP_LOG=\\"temperature.usage\\"" /.status/logger.sh 2>/dev/null && sudo -n grep -q "get_temp_c()" /.status/logger.sh 2>/dev/null',
+                installCommand: `sudo -n mkdir -p /.status && cat << 'EOF' | sudo -n tee /.status/logger.sh > /dev/null
 #!/bin/bash
-STATUS_DIR=".status"
+STATUS_DIR="/.status"
 CPU_LOG="cpu.usage"
 RAM_LOG="ram.usage"
 NET_LOG="network.usage"
 TEMP_LOG="temperature.usage"
 
-mkdir -p ~/$STATUS_DIR
-cd ~/$STATUS_DIR
+mkdir -p $STATUS_DIR
+cd $STATUS_DIR
 
 # Detect Interface
 IFACE=$(ip route | grep default | awk '{print $5}' | head -n1)
@@ -265,7 +265,7 @@ while true; do
     sleep 60
 done
 EOF
-chmod +x ~/.status/logger.sh
+sudo -n chmod +x /.status/logger.sh
 if systemctl list-unit-files 2>/dev/null | grep -q '^neup-logger.service'; then
     sudo systemctl restart neup-logger || true
 fi`
@@ -282,9 +282,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=$(whoami)
-WorkingDirectory=$HOME
-ExecStart=/bin/bash -c "exec -a neup-logger /bin/bash $HOME/.status/logger.sh"
+User=root
+WorkingDirectory=/
+ExecStart=/bin/bash -c "exec -a neup-logger /bin/bash /.status/logger.sh"
 Restart=always
 RestartSec=10
 

@@ -6,7 +6,7 @@ import { runCommandOnServer } from '@/services/server/ssh';
 import { revalidatePath } from 'next/cache';
 
 
-const STATUS_DIR = ".status";
+const STATUS_DIR = "/.status";
 const PID_FILE = `${STATUS_DIR}/status.pid`;
 const CPU_LOG = `${STATUS_DIR}/cpu.usage`;
 const RAM_LOG = `${STATUS_DIR}/ram.usage`;
@@ -14,12 +14,25 @@ const NET_LOG = `${STATUS_DIR}/network.usage`;
 const TEMP_LOG = `${STATUS_DIR}/temperature.usage`;
 
 const SCRIPT_CONTENT = `
-mkdir -p ~/${STATUS_DIR}
-echo $$ > ~/${PID_FILE}
+SUDO=""
+if command -v sudo >/dev/null 2>&1; then
+    if sudo -n true >/dev/null 2>&1; then
+        SUDO="sudo -n"
+    fi
+fi
+
+if [ -z "$SUDO" ]; then
+    echo "This action requires passwordless sudo on the server."
+    exit 3
+fi
+
+$SUDO mkdir -p ${STATUS_DIR}
+$SUDO chmod 755 ${STATUS_DIR} 2>/dev/null || true
+echo $$ | $SUDO tee ${PID_FILE} > /dev/null
 
 cleanup() {
     echo "Stopping status tracking..."
-    rm -f ~/${PID_FILE}
+    $SUDO rm -f ${PID_FILE} 2>/dev/null || true
     exit 0
 }
 trap cleanup SIGINT SIGTERM
@@ -59,15 +72,15 @@ while true; do
 
     # CPU usage: user, system, idle
     cpu_info=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\\([0-9.]*\\)%* id.*/\\1/" | awk '{print 100 - $1}')
-    echo "$ts $cpu_info" >> ~/${CPU_LOG}
+    echo "$ts $cpu_info" | $SUDO tee -a ${CPU_LOG} > /dev/null
 
     # RAM usage: total, used, free
     ram_info=$(free -m | grep Mem | awk '{print $2, $3, $4}')
-    echo "$ts $ram_info" >> ~/${RAM_LOG}
+    echo "$ts $ram_info" | $SUDO tee -a ${RAM_LOG} > /dev/null
 
     # Temperature usage: celsius
     temp_info=$(get_temp_c)
-    echo "$ts $temp_info" >> ~/${TEMP_LOG}
+    echo "$ts $temp_info" | $SUDO tee -a ${TEMP_LOG} > /dev/null
     
     # Network usage: calc delta
     read CURR_RX CURR_TX <<< $(get_net_bytes)
@@ -78,7 +91,7 @@ while true; do
     if [ $DIFF_RX -lt 0 ]; then DIFF_RX=0; fi
     if [ $DIFF_TX -lt 0 ]; then DIFF_TX=0; fi
     
-    echo "$ts $DIFF_RX $DIFF_TX" >> ~/${NET_LOG}
+    echo "$ts $DIFF_RX $DIFF_TX" | $SUDO tee -a ${NET_LOG} > /dev/null
     
     PREV_RX=$CURR_RX
     PREV_TX=$CURR_TX
@@ -170,9 +183,11 @@ export async function getStatus(
     }
 
     // Use awk to filter and aggregate by timestamp range
+    const sudoPrefix = 'sudo -n';
+
     const readCpuCmd = intervalSec === 0
-        ? `awk -v start=${startSec} -v end=${endSec} '$1 >= start && $1 <= end' ~/${CPU_LOG} 2>/dev/null`
-        : `awk -v start=${startSec} -v end=${endSec} -v interval=${intervalSec} '
+        ? `${sudoPrefix} awk -v start=${startSec} -v end=${endSec} '$1 >= start && $1 <= end' ${CPU_LOG} 2>/dev/null`
+        : `${sudoPrefix} awk -v start=${startSec} -v end=${endSec} -v interval=${intervalSec} '
             $1 >= start && $1 <= end {
                 bin = int($1 / interval) * interval;
                 sum[bin] += $2;
@@ -181,11 +196,11 @@ export async function getStatus(
             END {
                 for (b in sum) print b, sum[b]/count[b]
             }
-           ' ~/${CPU_LOG} 2>/dev/null | sort -n`;
+           ' ${CPU_LOG} 2>/dev/null | sort -n`;
 
     const readRamCmd = intervalSec === 0
-        ? `awk -v start=${startSec} -v end=${endSec} '$1 >= start && $1 <= end' ~/${RAM_LOG} 2>/dev/null`
-        : `awk -v start=${startSec} -v end=${endSec} -v interval=${intervalSec} '
+        ? `${sudoPrefix} awk -v start=${startSec} -v end=${endSec} '$1 >= start && $1 <= end' ${RAM_LOG} 2>/dev/null`
+        : `${sudoPrefix} awk -v start=${startSec} -v end=${endSec} -v interval=${intervalSec} '
             $1 >= start && $1 <= end {
                 bin = int($1 / interval) * interval;
                 sumTotal[bin] += $2;
@@ -195,11 +210,11 @@ export async function getStatus(
             END {
                 for (b in sumUsed) print b, int(sumTotal[b]/count[b]), int(sumUsed[b]/count[b])
             }
-           ' ~/${RAM_LOG} 2>/dev/null | sort -n`;
+           ' ${RAM_LOG} 2>/dev/null | sort -n`;
 
     const readNetCmd = intervalSec === 0
-        ? `awk -v start=${startSec} -v end=${endSec} '$1 >= start && $1 <= end' ~/${NET_LOG} 2>/dev/null`
-        : `awk -v start=${startSec} -v end=${endSec} -v interval=${intervalSec} '
+        ? `${sudoPrefix} awk -v start=${startSec} -v end=${endSec} '$1 >= start && $1 <= end' ${NET_LOG} 2>/dev/null`
+        : `${sudoPrefix} awk -v start=${startSec} -v end=${endSec} -v interval=${intervalSec} '
             $1 >= start && $1 <= end {
                 bin = int($1 / interval) * interval;
                 sumRX[bin] += $2;
@@ -209,11 +224,11 @@ export async function getStatus(
             END {
                 for (b in sumRX) print b, int(sumRX[b]/count[b]), int(sumTX[b]/count[b])
             }
-           ' ~/${NET_LOG} 2>/dev/null | sort -n`;
+           ' ${NET_LOG} 2>/dev/null | sort -n`;
 
     const readTempCmd = intervalSec === 0
-        ? `awk -v start=${startSec} -v end=${endSec} '$1 >= start && $1 <= end && $2 != "nan"' ~/${TEMP_LOG} 2>/dev/null`
-        : `awk -v start=${startSec} -v end=${endSec} -v interval=${intervalSec} '
+        ? `${sudoPrefix} awk -v start=${startSec} -v end=${endSec} '$1 >= start && $1 <= end && $2 != "nan"' ${TEMP_LOG} 2>/dev/null`
+        : `${sudoPrefix} awk -v start=${startSec} -v end=${endSec} -v interval=${intervalSec} '
             $1 >= start && $1 <= end && $2 != "nan" {
                 bin = int($1 / interval) * interval;
                 sumTemp[bin] += $2;
@@ -222,7 +237,7 @@ export async function getStatus(
             END {
                 for (b in sumTemp) printf "%s %.2f\\n", b, sumTemp[b]/count[b]
             }
-           ' ~/${TEMP_LOG} 2>/dev/null | sort -n`;
+           ' ${TEMP_LOG} 2>/dev/null | sort -n`;
 
     try {
         const [pidResult, cpuResult, ramResult, netResult, tempResult] = await Promise.all([

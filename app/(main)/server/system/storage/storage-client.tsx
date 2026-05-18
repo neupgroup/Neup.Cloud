@@ -331,22 +331,23 @@ export default function StorageClient({
     const fetchBreakdown = async (isRefresh = false) => {
         if (isRefresh) setIsRefreshing(true);
         setIsBreakdownLoading(true);
-        try {
-            const result = await getStorageBreakdown(serverId);
-            if (result.error) {
-                if (isRefresh) toast({ variant: 'destructive', title: 'Refresh Failed', description: result.error });
-                setError((prev) => prev ?? result.error);
-            } else if (result.data) {
-                setData((prev) => prev
-                    ? { ...prev, sections: result.data.sections }
-                    : {
-                        disk: { totalBytes: 0, usedBytes: 0, availableBytes: 0 },
-                        swap: { totalBytes: 0, usedBytes: 0 },
-                        sections: result.data.sections,
-                    }
-                );
-            }
-        } catch (e: any) {
+	        try {
+	            const result = await getStorageBreakdown(serverId);
+	            if (result.error) {
+	                if (isRefresh) toast({ variant: 'destructive', title: 'Refresh Failed', description: result.error });
+	                setError((prev) => prev ?? result.error);
+	            } else if (result.data) {
+	                const sections = result.data.sections;
+	                setData((prev) => prev
+	                    ? { ...prev, sections }
+	                    : {
+	                        disk: { totalBytes: 0, usedBytes: 0, availableBytes: 0 },
+	                        swap: { totalBytes: 0, usedBytes: 0 },
+	                        sections,
+	                    }
+	                );
+	            }
+	        } catch (e: any) {
             if (isRefresh) toast({ variant: 'destructive', title: 'Error', description: e.message });
             setError((prev) => prev ?? e.message);
         } finally {
