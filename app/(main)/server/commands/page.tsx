@@ -39,7 +39,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { type SavedCommand } from '@/services/saved-commands/types';
 import { cn } from '@/core/utils';
-import { CommandLogCard, CommandLogList } from './command-log-card';
+import { CommandLogList, CommandLogListSkeleton } from './command-log-card';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
 
 type ServerType = {
@@ -124,7 +124,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
   const [historyLogs, setHistoryLogs] = useState<CommandHistoryItem[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(mode !== 'saved');
   const [isRunDialogOpen, setIsRunDialogOpen] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -627,22 +627,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
               </div>
 
               {isHistoryLoading ? (
-                <div className="space-y-3">
-                  {[...Array(3)].map((_, index) => (
-                    <div key={index} className="flex flex-col gap-2 rounded-lg border p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-2">
-                          <Skeleton className="h-5 w-48" />
-                          <div className="flex items-center gap-2">
-                            <Skeleton className="h-4 w-20 rounded-full" />
-                            <Skeleton className="h-3 w-32" />
-                          </div>
-                        </div>
-                        <Skeleton className="h-4 w-4 rounded-full" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <CommandLogListSkeleton rows={showDashboard ? 3 : 5} />
               ) : searchQuery && filteredHistory.length === 0 ? (
                 <div className="text-center p-8 text-muted-foreground">
                   <p>No history found matching &quot;{searchQuery}&quot;</p>

@@ -24,7 +24,7 @@ import { getCommandLog, type CommandLog } from '@/services/logs/command-log';
 import { cn } from '@/core/utils';
 import { SystemHealthCard } from "@/components/system-health-card";
 import { ServerNameLink } from "@/components/server-name-link";
-import { CommandLogList } from '@/app/(main)/server/commands/command-log-card';
+import { CommandLogList, CommandLogListSkeleton } from '@/app/(main)/server/commands/command-log-card';
 import { ApplicationSection } from '@/components/specifics/application/section';
 
 export default function Home() {
@@ -353,18 +353,14 @@ export default function Home() {
         />
       )}
 
-      {serverId && (logsLoading || activityLogs.length > 0) && (
+      {serverId && (loading || logsLoading || activityLogs.length > 0) && (
         <div className="space-y-4">
           <div className="space-y-1">
             <h2 className="text-xl font-bold tracking-tight">Recent Activity</h2>
             <p className="text-sm text-muted-foreground">Recent commands and server events.</p>
           </div>
           {logsLoading || loading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full rounded-lg" />
-              ))}
-            </div>
+            <CommandLogListSkeleton rows={5} />
           ) : (
             <CommandLogList logs={activityLogs} />
           )}

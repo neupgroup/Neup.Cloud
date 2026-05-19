@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { CheckCircle2, XCircle, Clock, ChevronRight, ArrowUpRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { cn } from '@/core/utils';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
@@ -193,6 +194,32 @@ export function CommandLogList({ logs, showSourceLink = true }: { logs: CommandL
           );
         })}
       </Accordion>
+    </Card>
+  );
+}
+
+export function CommandLogListSkeleton({ rows = 3 }: { rows?: number }) {
+  return (
+    <Card className="w-full overflow-hidden border-border">
+      <div className="w-full">
+        {Array.from({ length: rows }).map((_, index) => (
+          <div
+            key={index}
+            className={cn('px-4 py-4', index < rows - 1 && 'border-b border-border')}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-5 w-52" />
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-20 rounded-full" />
+                  <Skeleton className="h-3 w-40" />
+                </div>
+              </div>
+              <Skeleton className="h-4 w-4 rounded-full shrink-0" />
+            </div>
+          </div>
+        ))}
+      </div>
     </Card>
   );
 }
