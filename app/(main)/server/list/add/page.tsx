@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type ChangeEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
@@ -54,9 +54,55 @@ export default function AddServerPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isCheckingConnection, setIsCheckingConnection] = useState(false);
     const [formData, setFormData] = useState<FormState>(initialState);
+    const [isPrivateKeyDragActive, setIsPrivateKeyDragActive] = useState(false);
+    const privateKeyFileInputRef = useRef<HTMLInputElement | null>(null);
 
     const updateField = (name: keyof FormState, value: string) => {
         setFormData((current) => ({ ...current, [name]: value }));
+    };
+
+    const importPrivateKeyFile = async (file: File) => {
+        try {
+            if (file.size > 512_000) {
+                toast({
+                    variant: "destructive",
+                    title: "File too large",
+                    description: "Please select a smaller private key file.",
+                });
+                return;
+            }
+
+            const text = await file.text();
+            const trimmed = text.trim();
+            if (!trimmed) {
+                toast({
+                    variant: "destructive",
+                    title: "Empty file",
+                    description: "The selected file does not contain an SSH private key.",
+                });
+                return;
+            }
+
+            updateField("privateKey", trimmed);
+            toast({
+                title: "SSH key imported",
+                description: `Loaded ${file.name}`,
+            });
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: "destructive",
+                title: "Import failed",
+                description: "We could not read the selected key file.",
+            });
+        }
+    };
+
+    const handlePrivateKeyFileSelected = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (!file) return;
+        await importPrivateKeyFile(file);
     };
 
     const handleCheckConnection = async () => {
@@ -246,13 +292,60 @@ export default function AddServerPage() {
 
                         <div className="grid gap-2">
                             <Label htmlFor="privateKey">SSH private key</Label>
+                            <p className="text-xs text-muted-foreground">
+                                Import an SSH key and drag or attach your key file or type in the key.
+                            </p>
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <input
+                                    ref={privateKeyFileInputRef}
+                                    type="file"
+                                    accept=".pem,.key,.txt,*/*"
+                                    className="hidden"
+                                    onChange={handlePrivateKeyFileSelected}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => privateKeyFileInputRef.current?.click()}
+                                    className="w-full sm:w-auto"
+                                >
+                                    Import key file
+                                </Button>
+                                <p className="text-xs text-muted-foreground sm:text-right">
+                                    Supports OpenSSH keys (recommended).
+                                </p>
+                            </div>
                             <Textarea
                                 id="privateKey"
                                 required
                                 value={formData.privateKey}
                                 onChange={(event) => updateField("privateKey", event.target.value)}
+                                onDragEnter={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setIsPrivateKeyDragActive(true);
+                                }}
+                                onDragOver={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setIsPrivateKeyDragActive(true);
+                                }}
+                                onDragLeave={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setIsPrivateKeyDragActive(false);
+                                }}
+                                onDrop={async (event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setIsPrivateKeyDragActive(false);
+
+                                    const file = event.dataTransfer.files?.[0];
+                                    if (!file) return;
+                                    await importPrivateKeyFile(file);
+                                }}
                                 placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"
-                                className="min-h-40 font-mono text-xs"
+                                className={`min-h-40 font-mono text-xs ${isPrivateKeyDragActive ? "ring-2 ring-primary ring-offset-2" : ""}`}
                             />
                         </div>
 

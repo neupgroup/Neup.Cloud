@@ -19,7 +19,7 @@ Usage:
 
 Env (from .env in repo root):
   DATABASE_URL           postgresql://user:pass@host:5432/dbname?schema=public
-  SERVER_PRIVATE_KEY     SSH private key contents (supports \\n or /n newlines)
+  SERVER_PRIVATE_KEY     SSH private key contents (supports \\n newlines)
 
 Optional:
   SERVER_IP_ADDRESS      SSH host (preferred; defaults to DATABASE_URL host)
@@ -40,10 +40,21 @@ function normalizePrivateKey(raw) {
   if (!raw) return raw;
   // Common cases:
   // - stored as literal \n sequences
-  // - stored as /n sequences (legacy in this repo)
   let key = raw.trim();
-  if (key.includes('\\n')) key = key.replace(/\\n/g, '\n');
-  if (key.includes('/n') && key.includes('BEGIN') && key.includes('END')) {
+  // If dotenv already produced a multi-line key, do NOT try to interpret "/n" sequences.
+  // Base64 payloads can legitimately contain "/n", and replacing it would corrupt the key.
+  if (key.includes('\n')) return key;
+
+  if (key.includes('\\n')) {
+    key = key.replace(/\\n/g, '\n');
+    return key;
+  }
+
+  // Legacy support: some old envs used "/n" as a newline delimiter for the header/body/footer.
+  // Only treat "/n" as newlines when it is clearly being used that way.
+  const hasHeaderDelimiter = /-----BEGIN [^-]+PRIVATE KEY-----\/n/.test(key);
+  const hasFooterDelimiter = /\/n-----END [^-]+PRIVATE KEY-----/.test(key);
+  if (hasHeaderDelimiter && hasFooterDelimiter) {
     key = key.replace(/\/n/g, '\n');
   }
   return key;

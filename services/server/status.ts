@@ -144,7 +144,8 @@ export type StatusData = {
     isTracking: boolean;
     cpuHistory: { timestamp: number; usage: number }[];
     ramHistory: { timestamp: number; used: number; total: number }[];
-    temperatureHistory: { timestamp: number; celsius: number }[];
+    temperatureSupported: boolean;
+    temperatureHistory: { timestamp: number; celsius: number | null }[];
     networkHistory: { timestamp: number; incoming: number; outgoing: number }[];
 };
 
@@ -226,29 +227,36 @@ export async function getStatus(
             }
            ' ${NET_LOG} 2>/dev/null | sort -n`;
 
+    const checkTempSupportCmd = `${sudoPrefix} awk '$2 != "nan" { print "supported"; exit 0 } END { print "unsupported" }' ${TEMP_LOG} 2>/dev/null || echo "unsupported"`;
+
     const readTempCmd = intervalSec === 0
-        ? `${sudoPrefix} awk -v start=${startSec} -v end=${endSec} '$1 >= start && $1 <= end && $2 != "nan"' ${TEMP_LOG} 2>/dev/null`
+        ? `${sudoPrefix} awk -v start=${startSec} -v end=${endSec} '$1 >= start && $1 <= end { print $1, $2 }' ${TEMP_LOG} 2>/dev/null | sort -n`
         : `${sudoPrefix} awk -v start=${startSec} -v end=${endSec} -v interval=${intervalSec} '
-            $1 >= start && $1 <= end && $2 != "nan" {
+            $1 >= start && $1 <= end {
                 bin = int($1 / interval) * interval;
-                sumTemp[bin] += $2;
-                count[bin]++;
+                if ($2 != "nan") { sumTemp[bin] += $2; count[bin]++; }
             }
             END {
-                for (b in sumTemp) printf "%s %.2f\\n", b, sumTemp[b]/count[b]
+                binStart = int(start / interval) * interval;
+                for (b = binStart; b <= end; b += interval) {
+                    if (count[b] > 0) printf "%s %.2f\\n", b, sumTemp[b]/count[b];
+                    else print b, "nan";
+                }
             }
            ' ${TEMP_LOG} 2>/dev/null | sort -n`;
 
     try {
-        const [pidResult, cpuResult, ramResult, netResult, tempResult] = await Promise.all([
+        const [pidResult, cpuResult, ramResult, netResult, tempSupportResult, tempResult] = await Promise.all([
             runCommandOnServer(server.publicIp, server.username, server.privateKey, checkPidCmd),
             runCommandOnServer(server.publicIp, server.username, server.privateKey, readCpuCmd),
             runCommandOnServer(server.publicIp, server.username, server.privateKey, readRamCmd),
             runCommandOnServer(server.publicIp, server.username, server.privateKey, readNetCmd),
+            runCommandOnServer(server.publicIp, server.username, server.privateKey, checkTempSupportCmd),
             runCommandOnServer(server.publicIp, server.username, server.privateKey, readTempCmd),
         ]);
 
         const isTracking = pidResult.stdout.trim() === 'active';
+        const temperatureSupported = tempSupportResult.stdout.trim() === 'supported';
 
         const cpuHistory = cpuResult.stdout.trim().split('\n').filter(Boolean).map(line => {
             const [timestamp, usage] = line.split(' ');
@@ -272,10 +280,14 @@ export async function getStatus(
 
         const temperatureHistory = tempResult.stdout.trim().split('\n').filter(Boolean).map(line => {
             const [timestamp, celsius] = line.split(' ');
-            return { timestamp: parseInt(timestamp) * 1000, celsius: parseFloat(celsius) };
-        }).filter(point => Number.isFinite(point.celsius));
+            const parsedCelsius = parseFloat(celsius);
+            return {
+                timestamp: parseInt(timestamp) * 1000,
+                celsius: Number.isFinite(parsedCelsius) ? parsedCelsius : null
+            };
+        });
 
-        return { data: { isTracking, cpuHistory, ramHistory, temperatureHistory, networkHistory } };
+        return { data: { isTracking, cpuHistory, ramHistory, temperatureSupported, temperatureHistory, networkHistory } };
 
     } catch (e: any) {
         return { error: `Failed to get status: ${e.message}` };
