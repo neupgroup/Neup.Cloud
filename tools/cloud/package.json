@@ -1,0 +1,14 @@
+{
+  "name": "cloud",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs",
+  "bin": {
+    "cloud": "./initialize.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "node-ssh": "^13.2.0"
+  }
+}
+
