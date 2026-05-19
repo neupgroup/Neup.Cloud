@@ -38,7 +38,8 @@ import {
   Rocket,
   Play,
   Bot,
-  Workflow
+  Workflow,
+  Mail
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/core/utils';
@@ -139,6 +140,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
     { href: "/environments", label: "Environments", icon: Layers },
     { href: "/database", label: "Databases", icon: Database },
     { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/mail", label: "Mail", icon: Mail },
     { href: "/billing", label: "Billing", icon: CreditCard },
   ]
 
