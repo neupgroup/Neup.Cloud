@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { PlusCircle } from 'lucide-react';
+import { Loader2, PlusCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { ApplicationCard, ApplicationCardSkeleton } from './card';
 import { getApplicationItems } from '@/services/server/applications/queries';
@@ -30,6 +30,8 @@ export function ApplicationSection({
 }: ApplicationSectionProps) {
   const [items, setItems] = useState<ApplicationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const isFirstLoadRef = useRef(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,7 +40,11 @@ export function ApplicationSection({
       setIsLoading(true);
       try {
         const result = await getApplicationItems(source, statusFilter);
-        if (!cancelled) setItems(result);
+        if (!cancelled) {
+          setItems(result);
+          setHasLoadedOnce(true);
+          isFirstLoadRef.current = false;
+        }
       } catch {
         // silently fail
       } finally {
@@ -52,6 +58,9 @@ export function ApplicationSection({
 
   if (!isLoading && items.length === 0 && hideWhenEmpty) return null;
 
+  const showInitialSkeleton = isLoading && !hasLoadedOnce;
+  const isRefreshing = isLoading && hasLoadedOnce;
+
   const resolvedTitle = title ?? (statusFilter === 'running' ? 'Running Applications' : 'Applications');
   const resolvedDescription = description ?? (statusFilter === 'running' ? 'Currently running applications.' : 'All deployed applications.');
   const resolvedEmpty = emptyMessage ?? (statusFilter === 'running' ? 'No applications are currently running.' : 'No applications found.');
@@ -59,7 +68,12 @@ export function ApplicationSection({
   return (
     <div className="space-y-4">
       <div className="space-y-1">
-        <h2 className="text-xl font-bold tracking-tight">{resolvedTitle}</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-bold tracking-tight">{resolvedTitle}</h2>
+          {isRefreshing ? (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-label="Refreshing applications" />
+          ) : null}
+        </div>
         <p className="text-sm text-muted-foreground">{resolvedDescription}</p>
       </div>
 
@@ -78,7 +92,7 @@ export function ApplicationSection({
           </Link>
         )}
 
-        {isLoading ? (
+        {showInitialSkeleton ? (
           <>
             <ApplicationCardSkeleton />
             <ApplicationCardSkeleton />
