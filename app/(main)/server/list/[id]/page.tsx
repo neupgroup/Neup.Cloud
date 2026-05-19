@@ -407,31 +407,16 @@ function ServerDetailsForm({ server }: { server: Server }) {
                 passphrase: generatorPassphrase,
             });
 
-            const payload: Record<string, string> = {
-                name: generatorName.trim(),
-                public: generated.publicKey,
-                private: generated.privateKey,
-            };
-
-            if (generatorPassphrase) {
-                payload.passphrase = generatorPassphrase;
-            }
-
-            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const anchor = document.createElement("a");
-            anchor.href = url;
-            anchor.download = `${generatorName.trim()}.json`;
-            document.body.appendChild(anchor);
-            anchor.click();
-            anchor.remove();
-            URL.revokeObjectURL(url);
-
             setGeneratedBundle(generated);
+            updateField("privateKey", generated.privateKey);
+            updateField("publicKey", generated.publicKey);
+            updateField("privateKeyPassphrase", generatorPassphrase);
+            setHasPasskey(Boolean(generatorPassphrase));
             setHasDownloadedGeneratedFile(true);
+            setIsGenerateFlow(false);
             toast({
-                title: "Key file downloaded",
-                description: `Downloaded ${generatorName.trim()}.json`,
+                title: "SSH keys generated",
+                description: "Fields have been filled with generated key data.",
             });
         } catch (error) {
             toast({
@@ -444,14 +429,28 @@ function ServerDetailsForm({ server }: { server: Server }) {
         }
     };
 
-    const handleSaveGeneratedToForm = () => {
+    const handleDownloadGeneratedKeys = () => {
         if (!generatedBundle) return;
-        updateField("privateKey", generatedBundle.privateKey);
-        updateField("publicKey", generatedBundle.publicKey);
-        toast({
-            title: "Generated keys loaded",
-            description: "Private and public keys are ready to save.",
-        });
+
+        const payload: Record<string, string> = {
+            name: generatorName.trim() || "ssh-key",
+            public: generatedBundle.publicKey,
+            private: generatedBundle.privateKey,
+        };
+
+        if (generatorPassphrase) {
+            payload.passphrase = generatorPassphrase;
+        }
+
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = `${payload.name}.json`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -737,11 +736,6 @@ function ServerDetailsForm({ server }: { server: Server }) {
                                 </>
                             ) : null}
 
-                            {hasDownloadedGeneratedFile ? (
-                                <Button type="button" onClick={handleSaveGeneratedToForm}>
-                                    Save generated keys to form
-                                </Button>
-                            ) : null}
                         </div>
                         ) : null}
 
@@ -755,6 +749,14 @@ function ServerDetailsForm({ server }: { server: Server }) {
                                 placeholder="ssh-ed25519 AAAA..."
                                 className="min-h-24 font-mono text-xs"
                             />
+                        </div>
+                        ) : null}
+
+                        {!isGenerateFlow && hasDownloadedGeneratedFile ? (
+                        <div className="flex justify-start">
+                            <Button type="button" variant="outline" onClick={handleDownloadGeneratedKeys}>
+                                Download key data
+                            </Button>
                         </div>
                         ) : null}
                     </CardContent>
