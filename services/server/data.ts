@@ -27,19 +27,16 @@ export async function createServer(data: {
   username: string;
   type: string;
   provider: string;
-  ram?: string;
-  storage?: string;
   moreDetails?: string;
   publicIp: string;
   privateIp: string;
   privateKey: string;
+  publicKey?: string;
 }) {
   return prisma.server.create({
     data: {
       id: createId(),
       ...data,
-      ram: data.ram ?? null,
-      storage: data.storage ?? null,
       moreDetails: data.moreDetails ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -52,12 +49,11 @@ export async function updateServer(id: string, data: Partial<{
   username: string;
   type: string;
   provider: string;
-  ram: string;
-  storage: string;
   moreDetails: string;
   publicIp: string;
   privateIp: string;
   privateKey: string;
+  publicKey: string;
   proxyHandler: string;
   loadBalancer: string;
 }>) {

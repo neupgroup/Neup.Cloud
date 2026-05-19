@@ -19,12 +19,11 @@ model Server {
   username     String    @db.Text
   type         String    @db.Text
   provider     String    @db.Text
-  ram          String?   @db.Text
-  storage      String?   @db.Text
   moreDetails   String?   @map("moreDetails") @db.Text
   publicIp     String    @map("publicIp") @db.Text
   privateIp    String?   @map("privateIp") @db.Text
   privateKey   String?   @map("privateKey") @db.Text
+  publicKey    String?   @map("publicKey") @db.Text
   proxyHandler String?   @map("proxyHandler") @db.Text
   loadBalancer String?   @map("loadBalancer") @db.Text
   createdAt    DateTime  @map("createdAt") @db.Timestamp(6)

@@ -5,9 +5,8 @@ export type Server = {
   username: string;
   type: string;
   provider: string;
-  ram?: string;
-  storage?: string;
   publicIp: string;
   privateIp: string;
+  publicKey?: string | null;
   moreDetails?: string | null;
 };

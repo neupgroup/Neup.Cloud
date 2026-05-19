@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, use, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Clock3, Loader2, ServerIcon, ShieldAlert, ShieldCheck } from "lucide-react";
 
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/core/hooks/use-toast";
 import { cn } from "@/core/utils";
-import { getServer, updateServer, checkServerConnection } from "@/services/server/server-service";
+import { getServer, updateServer, checkServerConnection, generateSshKeyPair } from "@/services/server/server-service";
 import type { Server } from "@/services/server/types";
 import { getServerExpiration, getServerSshPassphrase, parseServerMetadata, serializeServerMetadata } from "@/services/server/server-metadata";
 
@@ -28,11 +28,10 @@ type FormState = {
     username: string;
     type: string;
     provider: string;
-    ram: string;
-    storage: string;
     publicIp: string;
     privateIp: string;
     privateKey: string;
+    publicKey: string;
     privateKeyPassphrase: string;
 };
 
@@ -158,6 +157,15 @@ function ServerDetailsForm({ server }: { server: Server }) {
     const [isExpiring, setIsExpiring] = useState(false);
     const [isCheckingConnection, setIsCheckingConnection] = useState(false);
     const [serverState, setServerState] = useState(server);
+    const [isPrivateKeyDragActive, setIsPrivateKeyDragActive] = useState(false);
+    const [hasPasskey, setHasPasskey] = useState(false);
+    const [isGenerateFlow, setIsGenerateFlow] = useState(false);
+    const [generatorName, setGeneratorName] = useState("");
+    const [generatorAlgo, setGeneratorAlgo] = useState<"ed25519" | "rsa" | "ecdsa">("ed25519");
+    const [isGeneratingKeys, setIsGeneratingKeys] = useState(false);
+    const [generatedBundle, setGeneratedBundle] = useState<{ privateKey: string; publicKey: string } | null>(null);
+    const [hasDownloadedGeneratedFile, setHasDownloadedGeneratedFile] = useState(false);
+    const privateKeyFileInputRef = useRef<HTMLInputElement | null>(null);
 
     const currentExpiration = getServerExpiration(serverState.moreDetails);
     const currentMetadata = useMemo(() => parseServerMetadata(serverState.moreDetails), [serverState.moreDetails]);
@@ -167,11 +175,10 @@ function ServerDetailsForm({ server }: { server: Server }) {
         username: serverState.username,
         type: serverState.type,
         provider: serverState.provider,
-        ram: serverState.ram ?? "",
-        storage: serverState.storage ?? "",
         publicIp: serverState.publicIp,
         privateIp: serverState.privateIp ?? "",
         privateKey: "",
+        publicKey: serverState.publicKey ?? "",
         privateKeyPassphrase: "",
     });
 
@@ -181,17 +188,65 @@ function ServerDetailsForm({ server }: { server: Server }) {
             username: serverState.username,
             type: serverState.type,
             provider: serverState.provider,
-            ram: serverState.ram ?? "",
-            storage: serverState.storage ?? "",
             publicIp: serverState.publicIp,
             privateIp: serverState.privateIp ?? "",
             privateKey: "",
+            publicKey: serverState.publicKey ?? "",
             privateKeyPassphrase: "",
         });
+        setHasPasskey(Boolean(currentPassphrase));
     }, [currentExpiration, serverState]);
 
     const updateField = (name: keyof FormState, value: string) => {
         setFormData((current) => ({ ...current, [name]: value }));
+    };
+
+    const passkeyLabel = isGenerateFlow ? "Use passkey" : "Has passkey?";
+    const shouldShowPasskeyToggle = !(isGenerateFlow && hasPasskey);
+    const canGenerate = useMemo(() => generatorName.trim().length > 0, [generatorName]);
+
+    const importPrivateKeyFile = async (file: File) => {
+        try {
+            if (file.size > 512_000) {
+                toast({
+                    variant: "destructive",
+                    title: "File too large",
+                    description: "Please select a smaller private key file.",
+                });
+                return;
+            }
+
+            const text = await file.text();
+            const trimmed = text.trim();
+            if (!trimmed) {
+                toast({
+                    variant: "destructive",
+                    title: "Empty file",
+                    description: "The selected file does not contain an SSH private key.",
+                });
+                return;
+            }
+
+            updateField("privateKey", trimmed);
+            toast({
+                title: "SSH key imported",
+                description: `Loaded ${file.name}`,
+            });
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: "destructive",
+                title: "Import failed",
+                description: "We could not read the selected key file.",
+            });
+        }
+    };
+
+    const handlePrivateKeyFileSelected = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (!file) return;
+        await importPrivateKeyFile(file);
     };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -204,14 +259,13 @@ function ServerDetailsForm({ server }: { server: Server }) {
                 username: formData.username,
                 type: formData.type,
                 provider: formData.provider,
-                ram: formData.ram,
-                storage: formData.storage,
                 publicIp: formData.publicIp,
                 privateIp: formData.privateIp,
                 privateKey: formData.privateKey,
+                publicKey: formData.publicKey,
                 moreDetails: serializeServerMetadata(serverState.moreDetails, {
                     ...currentMetadata,
-                    sshPassphrase: formData.privateKeyPassphrase || currentPassphrase || undefined,
+                    sshPassphrase: hasPasskey ? formData.privateKeyPassphrase || currentPassphrase || undefined : undefined,
                 }),
             });
 
@@ -301,6 +355,64 @@ function ServerDetailsForm({ server }: { server: Server }) {
         } finally {
             setIsCheckingConnection(false);
         }
+    };
+
+    const handleGenerateKeys = async () => {
+        if (!canGenerate) return;
+
+        setIsGeneratingKeys(true);
+        try {
+            const generated = await generateSshKeyPair({
+                name: generatorName.trim(),
+                algorithm: generatorAlgo,
+                passphrase: hasPasskey ? formData.privateKeyPassphrase : "",
+            });
+
+            const payload: Record<string, string> = {
+                name: generatorName.trim(),
+                public: generated.publicKey,
+                private: generated.privateKey,
+            };
+
+            if (hasPasskey && formData.privateKeyPassphrase) {
+                payload.passphrase = formData.privateKeyPassphrase;
+            }
+
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement("a");
+            anchor.href = url;
+            anchor.download = `${generatorName.trim()}.json`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            URL.revokeObjectURL(url);
+
+            setGeneratedBundle(generated);
+            setHasDownloadedGeneratedFile(true);
+            toast({
+                title: "Key file downloaded",
+                description: `Downloaded ${generatorName.trim()}.json`,
+            });
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Failed to generate keys",
+                description: error instanceof Error ? error.message : "Please try again.",
+            });
+        } finally {
+            setIsGeneratingKeys(false);
+        }
+    };
+
+    const handleSaveGeneratedToForm = () => {
+        if (!generatedBundle) return;
+        updateField("privateKey", generatedBundle.privateKey);
+        updateField("publicKey", generatedBundle.publicKey);
+        toast({
+            title: "Generated keys loaded",
+            description: "Private and public keys are ready to save.",
+        });
     };
 
     return (
@@ -439,44 +551,151 @@ function ServerDetailsForm({ server }: { server: Server }) {
                             </div>
                         </div>
 
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            <div className="grid gap-2">
-                                <Label htmlFor="type">OS / type</Label>
-                                <Input id="type" required value={formData.type} onChange={(event) => updateField("type", event.target.value)} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="ram">RAM</Label>
-                                <Input id="ram" value={formData.ram} onChange={(event) => updateField("ram", event.target.value)} />
-                            </div>
-                        </div>
-
                         <div className="grid gap-2">
-                            <Label htmlFor="storage">Storage</Label>
-                            <Input id="storage" value={formData.storage} onChange={(event) => updateField("storage", event.target.value)} />
+                            <Label htmlFor="type">OS / type</Label>
+                            <Input id="type" required value={formData.type} onChange={(event) => updateField("type", event.target.value)} />
                         </div>
 
                         <div className="grid gap-2">
                             <Label htmlFor="privateKey">SSH private key</Label>
+                            <p className="mt-2 text-xs text-muted-foreground">
+                                Import an SSH key file or generate a new one.
+                            </p>
+                            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <input
+                                    ref={privateKeyFileInputRef}
+                                    type="file"
+                                    accept=".pem,.key,.txt,*/*"
+                                    className="hidden"
+                                    onChange={handlePrivateKeyFileSelected}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => privateKeyFileInputRef.current?.click()}
+                                    className="w-full sm:w-auto"
+                                >
+                                    Import key file
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="w-full sm:w-auto"
+                                    onClick={() => setIsGenerateFlow(true)}
+                                >
+                                    Generate key
+                                </Button>
+                            </div>
+                            {isGenerateFlow ? (
+                                <div className="space-y-3 rounded-md border bg-muted/20 p-4">
+                                    <div className="grid gap-3 sm:grid-cols-2">
+                                        <div className="grid gap-2 sm:col-span-2">
+                                            <Label htmlFor="generatorName">Name</Label>
+                                            <Input
+                                                id="generatorName"
+                                                value={generatorName}
+                                                onChange={(event) => setGeneratorName(event.target.value)}
+                                                placeholder="mail-key"
+                                            />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="generatorAlgo">Key type</Label>
+                                            <Select value={generatorAlgo} onValueChange={(value: "ed25519" | "rsa" | "ecdsa") => setGeneratorAlgo(value)}>
+                                                <SelectTrigger id="generatorAlgo">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="ed25519">Ed25519</SelectItem>
+                                                    <SelectItem value="rsa">RSA 4096</SelectItem>
+                                                    <SelectItem value="ecdsa">ECDSA 521</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : null}
                             <Textarea
                                 id="privateKey"
                                 value={formData.privateKey}
                                 onChange={(event) => updateField("privateKey", event.target.value)}
+                                onDragEnter={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setIsPrivateKeyDragActive(true);
+                                }}
+                                onDragOver={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setIsPrivateKeyDragActive(true);
+                                }}
+                                onDragLeave={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setIsPrivateKeyDragActive(false);
+                                }}
+                                onDrop={async (event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setIsPrivateKeyDragActive(false);
+                                    const file = event.dataTransfer.files?.[0];
+                                    if (!file) return;
+                                    await importPrivateKeyFile(file);
+                                }}
                                 placeholder="Leave blank to keep the existing key"
-                                className="min-h-40 font-mono text-xs"
+                                className={`min-h-40 font-mono text-xs ${isPrivateKeyDragActive ? "ring-2 ring-primary ring-offset-2" : ""}`}
                             />
                             <p className="text-xs text-muted-foreground">Only enter a new private key if you want to replace the existing one.</p>
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="privateKeyPassphrase">SSH key passphrase</Label>
-                            <Input
-                                id="privateKeyPassphrase"
-                                type="password"
-                                value={formData.privateKeyPassphrase}
-                                onChange={(event) => updateField("privateKeyPassphrase", event.target.value)}
-                                placeholder="Leave blank to keep the current passphrase"
+                            {shouldShowPasskeyToggle ? (
+                                <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                                    <input
+                                        type="checkbox"
+                                        checked={hasPasskey}
+                                        onChange={(event) => setHasPasskey(event.target.checked)}
+                                    />
+                                    {passkeyLabel}
+                                </label>
+                            ) : null}
+
+                            {hasPasskey ? (
+                                <>
+                                    <Label htmlFor="privateKeyPassphrase">Passphrase</Label>
+                                    <Input
+                                        id="privateKeyPassphrase"
+                                        type="password"
+                                        value={formData.privateKeyPassphrase}
+                                        onChange={(event) => updateField("privateKeyPassphrase", event.target.value)}
+                                        placeholder="Enter passphrase"
+                                    />
+                                </>
+                            ) : null}
+
+                            {isGenerateFlow ? (
+                                <div className="flex flex-col gap-2">
+                                    <Button type="button" variant="outline" disabled={!canGenerate || isGeneratingKeys} onClick={handleGenerateKeys}>
+                                        {isGeneratingKeys ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                        Generate
+                                    </Button>
+                                    {hasDownloadedGeneratedFile ? (
+                                        <Button type="button" onClick={handleSaveGeneratedToForm}>
+                                            Save generated keys to form
+                                        </Button>
+                                    ) : null}
+                                </div>
+                            ) : null}
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="publicKey">Public key</Label>
+                            <Textarea
+                                id="publicKey"
+                                value={formData.publicKey}
+                                onChange={(event) => updateField("publicKey", event.target.value)}
+                                placeholder="ssh-ed25519 AAAA..."
+                                className="min-h-24 font-mono text-xs"
                             />
-                            <p className="text-xs text-muted-foreground">Required only if the SSH private key is encrypted.</p>
                         </div>
                     </CardContent>
 

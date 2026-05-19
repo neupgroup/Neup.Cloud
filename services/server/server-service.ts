@@ -5,6 +5,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
+import { promisify } from 'node:util';
+import { execFile as execFileCallback } from 'node:child_process';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
   createServer as createServerRecord,
   deleteServer as deleteServerRecord,
@@ -22,6 +27,7 @@ import {
 } from '@/services/server/server-runtime';
 import { runCommandOnServer } from '@/services/server/ssh';
 import { getServerSshPassphrase } from '@/services/server/server-metadata';
+const execFile = promisify(execFileCallback);
 
 export async function getSystemStats(serverId: string) {
   return getSystemStatsLogic(serverId);
@@ -44,12 +50,11 @@ export async function createServer(serverData: {
   username: string;
   type: string;
   provider: string;
-  ram?: string;
-  storage?: string;
   moreDetails?: string;
   publicIp: string;
   privateIp: string;
   privateKey: string;
+  publicKey?: string;
 }) {
   await createServerRecord(serverData);
   revalidatePath('/server/list');
@@ -62,12 +67,11 @@ export async function updateServer(
     username: string;
     type: string;
     provider: string;
-    ram: string;
-    storage: string;
     moreDetails: string;
     publicIp: string;
     privateIp: string;
     privateKey: string;
+    publicKey: string;
     proxyHandler: string;
     loadBalancer: string;
   }>
@@ -175,5 +179,48 @@ export async function checkServerConnection(
       message: error instanceof Error ? error.message : 'Connection check failed.',
       checkedAt: new Date().toISOString(),
     };
+  }
+}
+
+export async function generateSshKeyPair(input?: {
+  name?: string;
+  algorithm?: 'ed25519' | 'rsa' | 'ecdsa';
+  passphrase?: string;
+}) {
+  const tempDir = await mkdtemp(join(tmpdir(), 'neup-ssh-keygen-'));
+  const keyPath = join(tempDir, 'id_ed25519');
+  const algorithm = input?.algorithm ?? 'ed25519';
+  const passphrase = input?.passphrase ?? '';
+  const comment = input?.name?.trim() || 'neup-cloud';
+  const args = ['-t', algorithm, '-N', passphrase, '-C', comment, '-f', keyPath, '-q'];
+
+  if (algorithm === 'rsa') {
+    args.splice(2, 0, '-b', '4096');
+  }
+
+  if (algorithm === 'ecdsa') {
+    args.splice(2, 0, '-b', '521');
+  }
+
+  try {
+    await execFile('ssh-keygen', args);
+
+    const [privateKey, publicKey] = await Promise.all([
+      readFile(keyPath, 'utf8'),
+      readFile(`${keyPath}.pub`, 'utf8'),
+    ]);
+
+    return {
+      privateKey: privateKey.trim(),
+      publicKey: publicKey.trim(),
+    };
+  } catch (error) {
+    throw new Error(
+      error instanceof Error
+        ? `Failed to generate SSH key pair: ${error.message}`
+        : 'Failed to generate SSH key pair.'
+    );
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
   }
 }

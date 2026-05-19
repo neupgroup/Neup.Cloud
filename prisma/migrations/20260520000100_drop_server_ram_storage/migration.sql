@@ -1,0 +1,3 @@
+ALTER TABLE "servers"
+  DROP COLUMN IF EXISTS "ram",
+  DROP COLUMN IF EXISTS "storage";
