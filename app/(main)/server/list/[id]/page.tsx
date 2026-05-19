@@ -162,6 +162,7 @@ function ServerDetailsForm({ server }: { server: Server }) {
     const [isGenerateFlow, setIsGenerateFlow] = useState(false);
     const [generatorName, setGeneratorName] = useState("");
     const [generatorAlgo, setGeneratorAlgo] = useState<"ed25519" | "rsa" | "ecdsa">("ed25519");
+    const [generatorPassphrase, setGeneratorPassphrase] = useState("");
     const [isGeneratingKeys, setIsGeneratingKeys] = useState(false);
     const [generatedBundle, setGeneratedBundle] = useState<{ privateKey: string; publicKey: string } | null>(null);
     const [hasDownloadedGeneratedFile, setHasDownloadedGeneratedFile] = useState(false);
@@ -201,8 +202,7 @@ function ServerDetailsForm({ server }: { server: Server }) {
         setFormData((current) => ({ ...current, [name]: value }));
     };
 
-    const passkeyLabel = isGenerateFlow ? "Use passkey" : "Has passkey?";
-    const shouldShowPasskeyToggle = !(isGenerateFlow && hasPasskey);
+    const passkeyLabel = "Has passkey?";
     const canGenerate = useMemo(() => generatorName.trim().length > 0, [generatorName]);
 
     const importPrivateKeyFile = async (file: File) => {
@@ -365,7 +365,7 @@ function ServerDetailsForm({ server }: { server: Server }) {
             const generated = await generateSshKeyPair({
                 name: generatorName.trim(),
                 algorithm: generatorAlgo,
-                passphrase: hasPasskey ? formData.privateKeyPassphrase : "",
+                passphrase: generatorPassphrase,
             });
 
             const payload: Record<string, string> = {
@@ -374,8 +374,8 @@ function ServerDetailsForm({ server }: { server: Server }) {
                 private: generated.privateKey,
             };
 
-            if (hasPasskey && formData.privateKeyPassphrase) {
-                payload.passphrase = formData.privateKeyPassphrase;
+            if (generatorPassphrase) {
+                payload.passphrase = generatorPassphrase;
             }
 
             const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -556,12 +556,12 @@ function ServerDetailsForm({ server }: { server: Server }) {
                             <Input id="type" required value={formData.type} onChange={(event) => updateField("type", event.target.value)} />
                         </div>
 
-                        <div className="grid gap-2">
+                        <div className="mt-8 grid gap-1.5">
                             <Label htmlFor="privateKey">SSH private key</Label>
-                            <p className="mt-2 text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground">
                                 Import an SSH key file or generate a new one.
                             </p>
-                            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex flex-wrap items-center gap-2">
                                 <input
                                     ref={privateKeyFileInputRef}
                                     type="file"
@@ -587,9 +587,13 @@ function ServerDetailsForm({ server }: { server: Server }) {
                                 </Button>
                             </div>
                             {isGenerateFlow ? (
-                                <div className="space-y-3 rounded-md border bg-muted/20 p-4">
-                                    <div className="grid gap-3 sm:grid-cols-2">
-                                        <div className="grid gap-2 sm:col-span-2">
+                                <div className="rounded-md border bg-muted/20 p-4 space-y-3">
+                                    <div>
+                                        <p className="text-sm font-medium text-foreground">Generate SSH key</p>
+                                        <p className="text-xs text-muted-foreground">Provide a key name, type, and optional passphrase.</p>
+                                    </div>
+                                    <div className="grid gap-3">
+                                        <div className="grid gap-2">
                                             <Label htmlFor="generatorName">Name</Label>
                                             <Input
                                                 id="generatorName"
@@ -611,9 +615,29 @@ function ServerDetailsForm({ server }: { server: Server }) {
                                                 </SelectContent>
                                             </Select>
                                         </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="generatorPassphrase">Passphrase</Label>
+                                            <Input
+                                                id="generatorPassphrase"
+                                                type="password"
+                                                value={generatorPassphrase}
+                                                onChange={(event) => setGeneratorPassphrase(event.target.value)}
+                                                placeholder="Keep this empty to not have a passphrase"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button type="button" variant="outline" onClick={() => setIsGenerateFlow(false)}>
+                                            Cancel
+                                        </Button>
+                                        <Button type="button" disabled={!canGenerate || isGeneratingKeys} onClick={handleGenerateKeys}>
+                                            {isGeneratingKeys ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                            Generate
+                                        </Button>
                                     </div>
                                 </div>
                             ) : null}
+                            {!isGenerateFlow ? (
                             <Textarea
                                 id="privateKey"
                                 value={formData.privateKey}
@@ -644,11 +668,13 @@ function ServerDetailsForm({ server }: { server: Server }) {
                                 placeholder="Leave blank to keep the existing key"
                                 className={`min-h-40 font-mono text-xs ${isPrivateKeyDragActive ? "ring-2 ring-primary ring-offset-2" : ""}`}
                             />
+                            ) : null}
                             <p className="text-xs text-muted-foreground">Only enter a new private key if you want to replace the existing one.</p>
                         </div>
 
+                        {!isGenerateFlow ? (
                         <div className="grid gap-2">
-                            {shouldShowPasskeyToggle ? (
+                            {(
                                 <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                                     <input
                                         type="checkbox"
@@ -657,7 +683,7 @@ function ServerDetailsForm({ server }: { server: Server }) {
                                     />
                                     {passkeyLabel}
                                 </label>
-                            ) : null}
+                            )}
 
                             {hasPasskey ? (
                                 <>
@@ -672,21 +698,15 @@ function ServerDetailsForm({ server }: { server: Server }) {
                                 </>
                             ) : null}
 
-                            {isGenerateFlow ? (
-                                <div className="flex flex-col gap-2">
-                                    <Button type="button" variant="outline" disabled={!canGenerate || isGeneratingKeys} onClick={handleGenerateKeys}>
-                                        {isGeneratingKeys ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                        Generate
-                                    </Button>
-                                    {hasDownloadedGeneratedFile ? (
-                                        <Button type="button" onClick={handleSaveGeneratedToForm}>
-                                            Save generated keys to form
-                                        </Button>
-                                    ) : null}
-                                </div>
+                            {hasDownloadedGeneratedFile ? (
+                                <Button type="button" onClick={handleSaveGeneratedToForm}>
+                                    Save generated keys to form
+                                </Button>
                             ) : null}
                         </div>
+                        ) : null}
 
+                        {!isGenerateFlow ? (
                         <div className="grid gap-2">
                             <Label htmlFor="publicKey">Public key</Label>
                             <Textarea
@@ -697,6 +717,7 @@ function ServerDetailsForm({ server }: { server: Server }) {
                                 className="min-h-24 font-mono text-xs"
                             />
                         </div>
+                        ) : null}
                     </CardContent>
 
                     <CardFooter className="flex flex-col gap-2 border-t px-6 py-4 sm:flex-row sm:justify-between">
