@@ -27,6 +27,11 @@ export function serializeServerMetadata(existingValue: string | null | undefined
     ...patch,
   };
 
+  if (typeof merged.sshPassphrase === 'string') {
+    const trimmed = merged.sshPassphrase.trim();
+    merged.sshPassphrase = trimmed.length > 0 ? trimmed : undefined;
+  }
+
   Object.keys(merged).forEach((key) => {
     if (merged[key] === undefined) {
       delete merged[key];
@@ -41,7 +46,13 @@ export function getServerExpiration(value?: string | null) {
 }
 
 export function getServerSshPassphrase(value?: string | null) {
-  return parseServerMetadata(value).sshPassphrase ?? null;
+  const raw = parseServerMetadata(value).sshPassphrase;
+  if (typeof raw !== 'string') {
+    return raw ?? null;
+  }
+
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 export function stripSensitiveServerMetadata(value?: string | null) {
