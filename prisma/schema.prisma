@@ -7,6 +7,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ApplicationServerMapStatus {
+  stopped
+  started
+  inactive
+}
+
 model Server {
   id           String    @id @db.Text
   name         String    @db.Text
@@ -23,6 +29,7 @@ model Server {
   loadBalancer String?   @map("loadBalancer") @db.Text
   createdAt    DateTime  @map("createdAt") @db.Timestamp(6)
   updatedAt    DateTime  @map("updatedAt") @db.Timestamp(6)
+  applicationServerMaps ApplicationServerMap[]
 
   @@map("servers")
 }
@@ -69,8 +76,25 @@ model Application {
   updatedAt     DateTime @map("updatedAt") @db.Timestamp(6)
   environments  Json?
   files         Json?
+  serverMaps    ApplicationServerMap[]
 
   @@map("applications")
+}
+
+model ApplicationServerMap {
+  id            String                     @id @db.Text
+  serverId      String                     @map("server_id") @db.Text
+  applicationId String                     @map("application_id") @db.Text
+  status        ApplicationServerMapStatus @default(started)
+  isPrimary     Boolean                    @default(false) @map("is_primary")
+
+  server      Server      @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, serverId], map: "application_server_map_app_server_unique")
+  @@index([applicationId], map: "application_server_map_application_id_idx")
+  @@index([serverId], map: "application_server_map_server_id_idx")
+  @@map("application_server_map")
 }
 
 model Domain {

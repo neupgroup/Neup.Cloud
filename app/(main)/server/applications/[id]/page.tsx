@@ -13,6 +13,7 @@ import { SystemSection } from './system-section';
 import { DeploymentActionsCard } from './deployment-actions-card';
 import { ApplicationActions } from './application-actions';
 import { ApplicationLifecycleWrapper } from './application-lifecycle-wrapper';
+import { RunningInSection } from './running-in-section';
 
 function getSupervisorBadgeClasses(state: string) {
   const normalizedState = state.toUpperCase();
@@ -91,7 +92,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
     );
   }
 
-  const { application, appLanguage, serverName, serverId } = pageData;
+  const { application, appLanguage, serverName, maps, runningSection } = pageData;
 
   return (
     <div className="flex flex-col gap-8 max-w-5xl animate-in fade-in duration-500">
@@ -117,6 +118,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
       </div>
 
       <StatusDashboard applicationId={application.id} />
+      <RunningInSection applicationId={application.id} maps={maps} runningSection={runningSection} />
       <ApplicationLifecycleWrapper applicationId={application.id} application={application} />
       {application.repository ? <GitHubSection application={application} /> : null}
       <SystemSection application={application} />

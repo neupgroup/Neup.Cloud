@@ -8,6 +8,7 @@ import * as Python from '@/services/core/python';
 import { getApplication } from './crud';
 import { getProcessDetails, getSupervisorProcesses } from './process-management';
 import { getSelectedServerId, getSelectedServerName } from './session';
+import { getApplicationServerMapData } from './server-map';
 
 export async function getApplicationDetailPageData(params: Promise<{ id: string }>) {
   const { id } = await params;
@@ -31,6 +32,7 @@ export async function getApplicationDetailPageData(params: Promise<{ id: string 
 
   const application = await getApplication(id) as any;
   if (!application) return { notFound: true as const };
+  const serverMapData = await getApplicationServerMapData(application.id, serverId);
 
   const appLanguage = application.language === 'next' ? 'Next.js' :
     application.language === 'node' ? 'Node.js' :
@@ -76,7 +78,7 @@ export async function getApplicationDetailPageData(params: Promise<{ id: string 
 
   application.commandDefinitions = commandsArray;
 
-  return { supervisor: false as const, application, appLanguage, serverName, serverId };
+  return { supervisor: false as const, application, appLanguage, serverName, serverId, ...serverMapData };
 }
 
 export async function getApplicationFilesPageData(params: Promise<{ id: string }>) {

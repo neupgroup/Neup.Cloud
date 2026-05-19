@@ -4,6 +4,7 @@ import { executeCommand } from '@/services/saved-commands/saved-commands-service
 
 import { getApplication } from './crud';
 import { getSelectedServerId } from './session';
+import { upsertApplicationServerStatus } from './server-map';
 
 function sanitizeStageName(value: string) {
   return value
@@ -25,6 +26,17 @@ export async function executeApplicationCommand(
   const serverId = await getSelectedServerId();
   if (!serverId) {
     throw new Error('No server selected. Please select a server first.');
+  }
+
+  const normalizedCommandName = (commandName || '').toLowerCase();
+  if (
+    normalizedCommandName.includes('start') ||
+    normalizedCommandName.includes('restart') ||
+    normalizedCommandName.includes('dev')
+  ) {
+    await upsertApplicationServerStatus(applicationId, serverId, 'started');
+  } else if (normalizedCommandName.includes('stop')) {
+    await upsertApplicationServerStatus(applicationId, serverId, 'stopped');
   }
 
   const formattedCommandName = commandName

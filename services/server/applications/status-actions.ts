@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { getApplication } from './_data';
 import { getSupervisorProcesses } from './processes';
 import { findBestSupervisorProcessForApplication } from './_utils';
+import { upsertApplicationServerStatus } from './server-map';
 import { executeQuickCommand } from '@/services/saved-commands/saved-commands-service';
 
 export type AppStatusResult = {
@@ -96,6 +97,14 @@ export async function checkApplicationStatus(applicationId: string): Promise<App
     }
   } else {
     availability = 'inactive';
+  }
+
+  if (processStatus === 'running') {
+    await upsertApplicationServerStatus(applicationId, serverId, 'started');
+  } else if (processStatus === 'stopped' || processStatus === 'error' || processStatus === 'not_running') {
+    await upsertApplicationServerStatus(applicationId, serverId, 'stopped');
+  } else {
+    await upsertApplicationServerStatus(applicationId, serverId, 'inactive');
   }
 
   return {
