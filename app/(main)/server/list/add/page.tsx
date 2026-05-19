@@ -92,7 +92,46 @@ export default function AddServerPage() {
                 return;
             }
 
-            updateField("privateKey", trimmed);
+            let importedPrivateKey = trimmed;
+            let importedPublicKey = "";
+            let importedPassphrase = "";
+
+            if (trimmed.startsWith("{")) {
+                try {
+                    const parsed = JSON.parse(trimmed) as {
+                        private?: string;
+                        public?: string;
+                        passphrase?: string;
+                    };
+
+                    if (parsed.private?.trim()) {
+                        importedPrivateKey = parsed.private.trim();
+                        importedPublicKey = parsed.public?.trim() ?? "";
+                        importedPassphrase = parsed.passphrase?.trim() ?? "";
+                    }
+                } catch {
+                    // Fall back to plain key text handling.
+                }
+            }
+
+            if (!importedPrivateKey) {
+                toast({
+                    variant: "destructive",
+                    title: "Invalid key file",
+                    description: "Could not find a valid private key in this file.",
+                });
+                return;
+            }
+
+            updateField("privateKey", importedPrivateKey);
+            if (importedPublicKey) {
+                updateField("publicKey", importedPublicKey);
+            }
+            if (importedPassphrase) {
+                updateField("privateKeyPassphrase", importedPassphrase);
+                setHasPasskey(true);
+            }
+
             toast({
                 title: "SSH key imported",
                 description: `Loaded ${file.name}`,
@@ -362,7 +401,7 @@ export default function AddServerPage() {
                                 <input
                                     ref={privateKeyFileInputRef}
                                     type="file"
-                                    accept=".pem,.key,.txt,*/*"
+                                    accept=".pem,.key,.txt,.json,application/json,text/plain"
                                     className="hidden"
                                     onChange={handlePrivateKeyFileSelected}
                                 />
