@@ -434,8 +434,24 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
 
     const visibleProcesses = filteredProcesses.slice(0, visibleProcessesCount);
     const visibleConnections = filteredConnections.slice(0, visibleConnectionsCount);
+    const topProcessesByRam = [...(Array.isArray(processes) ? processes : [])]
+        .sort((a, b) => parseFloat(b.memory || '0') - parseFloat(a.memory || '0'))
+        .slice(0, 5);
+    const topNetworkConnections = [...(Array.isArray(connections) ? connections : [])].slice(0, 5);
 
     const startTime = new Date(endTime - TIME_FRAMES[timeFrame].minutes * 60 * 1000);
+    const loadingDurationMs = TIME_FRAMES[timeFrame].minutes * 60 * 1000;
+    const loadingPointsCount = 12;
+    const loadingChartData = Array.from({ length: loadingPointsCount }).map((_, index) => {
+        const progress = index / (loadingPointsCount - 1);
+        return {
+            timestamp: endTime - loadingDurationMs + progress * loadingDurationMs,
+            usage: 0,
+            used: 0,
+            celsius: 0,
+        };
+    });
+    const baselineFallbackData = loadingChartData;
 
     return (
         <div className="grid gap-6">
@@ -495,17 +511,133 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                 </Card>
 	            ) : isLoading ? (
 	                <div className="grid gap-6">
-	                    {(statusData?.temperatureSupported === false ? [1, 2] : [1, 2, 3]).map((i) => (
-	                        <Card key={i}>
-	                            <CardHeader className="space-y-2">
-	                                <Skeleton className="h-6 w-1/3" />
-	                                <Skeleton className="h-4 w-1/4" />
-	                            </CardHeader>
-                            <CardContent className="h-[250px] w-full pt-0">
-                                <Skeleton className="h-full w-full rounded-md" />
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-headline">CPU Usage History</CardTitle>
+                            <CardDescription>
+                                Average for selected period: <span className="font-semibold text-foreground">.....%</span>
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="h-[250px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={loadingChartData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                    <Tooltip content={<CustomTooltip unit="%" />} />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="usage"
+                                        name="CPU"
+                                        strokeWidth={2}
+                                        stroke="hsl(var(--muted-foreground))"
+                                        strokeDasharray="4 4"
+                                        fill="hsl(var(--muted))"
+                                        fillOpacity={0.15}
+                                    />
+                                    <XAxis
+                                        dataKey="timestamp"
+                                        stroke="hsl(var(--muted-foreground))"
+                                        fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickFormatter={(value) => {
+                                            const date = new Date(value);
+                                            if (isNaN(date.getTime())) return "";
+                                            return format(date, timeFrame === '1h' ? "h:mm a" : "MMM d");
+                                        }}
+                                        interval="preserveStartEnd"
+                                        minTickGap={30}
+                                    />
+                                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-headline">RAM Usage History</CardTitle>
+                            <CardDescription>
+                                Average for selected period: <span className="font-semibold text-foreground">.....% (.....MB)</span>
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="h-[250px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={loadingChartData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                    <Tooltip content={<CustomTooltip unit="MB" />} />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="used"
+                                        name="Used RAM"
+                                        strokeWidth={2}
+                                        stroke="hsl(var(--muted-foreground))"
+                                        strokeDasharray="4 4"
+                                        fill="hsl(var(--muted))"
+                                        fillOpacity={0.15}
+                                    />
+                                    <XAxis
+                                        dataKey="timestamp"
+                                        stroke="hsl(var(--muted-foreground))"
+                                        fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickFormatter={(value) => {
+                                            const date = new Date(value);
+                                            if (isNaN(date.getTime())) return "";
+                                            return format(date, timeFrame === '1h' ? "h:mm a" : "MMM d");
+                                        }}
+                                        interval="preserveStartEnd"
+                                        minTickGap={30}
+                                    />
+                                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}MB`} />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+
+                    {statusData?.temperatureSupported !== false && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="font-headline">Temperature History</CardTitle>
+                                <CardDescription>
+                                    Average for selected period: <span className="font-semibold text-foreground">.....°C</span>
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="h-[250px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={loadingChartData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                        <Tooltip content={<CustomTooltip unit="°C" />} />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="celsius"
+                                            name="Temperature"
+                                            strokeWidth={2}
+                                            stroke="hsl(var(--muted-foreground))"
+                                            strokeDasharray="4 4"
+                                            fill="hsl(var(--muted))"
+                                            fillOpacity={0.15}
+                                        />
+                                        <XAxis
+                                            dataKey="timestamp"
+                                            stroke="hsl(var(--muted-foreground))"
+                                            fontSize={12}
+                                            tickLine={false}
+                                            axisLine={false}
+                                            tickFormatter={(value) => {
+                                                const date = new Date(value);
+                                                if (isNaN(date.getTime())) return "";
+                                                return format(date, timeFrame === '1h' ? "h:mm a" : "MMM d");
+                                            }}
+                                            interval="preserveStartEnd"
+                                            minTickGap={30}
+                                        />
+                                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}°C`} />
+                                    </AreaChart>
+                                </ResponsiveContainer>
                             </CardContent>
                         </Card>
-                    ))}
+                    )}
                 </div>
             ) : (
                 <div className="grid gap-6">
@@ -555,7 +687,19 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                 </defs>
                                                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                                                 <Tooltip content={<CustomTooltip unit="%" />} />
-                                                <Area type="monotone" dataKey="usage" name="CPU" strokeWidth={2} stroke="hsl(var(--primary))" fill="url(#colorCpu)" />
+                                                <Area
+                                                    type="monotone"
+                                                    dataKey="usage"
+                                                    name="CPU"
+                                                    baseValue={0}
+                                                    strokeWidth={2}
+                                                    stroke="hsl(var(--primary))"
+                                                    fill="url(#colorCpu)"
+                                                    isAnimationActive
+                                                    animationBegin={0}
+                                                    animationDuration={500}
+                                                    animationEasing="ease-out"
+                                                />
                                                 <XAxis
                                                     dataKey="timestamp"
                                                     stroke="hsl(var(--muted-foreground))"
@@ -574,7 +718,37 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                             </AreaChart>
                                         </ResponsiveContainer>
                                     ) : (
-                                        <div className="flex justify-center items-center h-full text-muted-foreground">No CPU data available for this period.</div>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <AreaChart data={baselineFallbackData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                                <Tooltip content={<CustomTooltip unit="%" />} />
+                                                <Area
+                                                    type="monotone"
+                                                    dataKey="usage"
+                                                    name="CPU"
+                                                    strokeWidth={2}
+                                                    stroke="hsl(var(--muted-foreground))"
+                                                    strokeDasharray="4 4"
+                                                    fill="hsl(var(--muted))"
+                                                    fillOpacity={0.15}
+                                                />
+                                                <XAxis
+                                                    dataKey="timestamp"
+                                                    stroke="hsl(var(--muted-foreground))"
+                                                    fontSize={12}
+                                                    tickLine={false}
+                                                    axisLine={false}
+                                                    tickFormatter={(value) => {
+                                                        const date = new Date(value);
+                                                        if (isNaN(date.getTime())) return "";
+                                                        return format(date, timeFrame === '1h' ? "h:mm a" : "MMM d");
+                                                    }}
+                                                    interval="preserveStartEnd"
+                                                    minTickGap={30}
+                                                />
+                                                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
+                                            </AreaChart>
+                                        </ResponsiveContainer>
                                     )}
                                 </CardContent>
                             </Card>
@@ -602,7 +776,19 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                 </defs>
                                                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                                                 <Tooltip content={<CustomTooltip unit="MB" />} />
-                                                <Area type="monotone" dataKey="used" name="Used RAM" strokeWidth={2} stroke="hsl(var(--primary))" fill="url(#colorRamUsed)" />
+                                                <Area
+                                                    type="monotone"
+                                                    dataKey="used"
+                                                    name="Used RAM"
+                                                    baseValue={0}
+                                                    strokeWidth={2}
+                                                    stroke="hsl(var(--primary))"
+                                                    fill="url(#colorRamUsed)"
+                                                    isAnimationActive
+                                                    animationBegin={0}
+                                                    animationDuration={500}
+                                                    animationEasing="ease-out"
+                                                />
                                                 <XAxis
                                                     dataKey="timestamp"
                                                     stroke="hsl(var(--muted-foreground))"
@@ -628,7 +814,37 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                             </AreaChart>
                                         </ResponsiveContainer>
                                     ) : (
-                                        <div className="flex justify-center items-center h-full text-muted-foreground">No RAM data available for this period.</div>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <AreaChart data={baselineFallbackData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                                <Tooltip content={<CustomTooltip unit="MB" />} />
+                                                <Area
+                                                    type="monotone"
+                                                    dataKey="used"
+                                                    name="Used RAM"
+                                                    strokeWidth={2}
+                                                    stroke="hsl(var(--muted-foreground))"
+                                                    strokeDasharray="4 4"
+                                                    fill="hsl(var(--muted))"
+                                                    fillOpacity={0.15}
+                                                />
+                                                <XAxis
+                                                    dataKey="timestamp"
+                                                    stroke="hsl(var(--muted-foreground))"
+                                                    fontSize={12}
+                                                    tickLine={false}
+                                                    axisLine={false}
+                                                    tickFormatter={(value) => {
+                                                        const date = new Date(value);
+                                                        if (isNaN(date.getTime())) return "";
+                                                        return format(date, timeFrame === '1h' ? "h:mm a" : "MMM d");
+                                                    }}
+                                                    interval="preserveStartEnd"
+                                                    minTickGap={30}
+                                                />
+                                                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}MB`} />
+                                            </AreaChart>
+                                        </ResponsiveContainer>
                                     )}
                                 </CardContent>
                             </Card>
@@ -641,7 +857,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
 	                                            <CardDescription>
 	                                                Average for selected period:{" "}
 	                                                <span className="font-semibold text-foreground">
-	                                                    {!statusData?.temperatureSupported ? "No temperature" : avgTemperature ? `${avgTemperature}°C` : "No data"}
+	                                                    {avgTemperature ? `${avgTemperature}°C` : ".....°C"}
 	                                                </span>
 	                                            </CardDescription>
 	                                        </div>
@@ -649,7 +865,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
 	                                </CardHeader>
 	                                <CardContent className="relative h-[250px] w-full">
 	                                    <ResponsiveContainer width="100%" height="100%">
-	                                        <AreaChart data={temperatureChartData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
+	                                        <AreaChart data={temperatureHasValues ? temperatureChartData : baselineFallbackData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
 	                                            <defs>
 	                                                <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
 	                                                    <stop offset="5%" stopColor="hsl(var(--chart-4))" stopOpacity={0.8} />
@@ -660,12 +876,19 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
 	                                            <Tooltip content={<CustomTooltip unit="°C" />} />
 	                                            <Area
 	                                                type="monotone"
-	                                                dataKey="celsius"
+	                                                dataKey={temperatureHasValues ? "celsius" : "usage"}
 	                                                name="Temperature"
+                                                    baseValue={0}
 	                                                strokeWidth={2}
-	                                                stroke="hsl(var(--chart-4))"
-	                                                fill="url(#colorTemp)"
+	                                                stroke={temperatureHasValues ? "hsl(var(--chart-4))" : "hsl(var(--muted-foreground))"}
+	                                                fill={temperatureHasValues ? "url(#colorTemp)" : "hsl(var(--muted))"}
+                                                    fillOpacity={temperatureHasValues ? undefined : 0.15}
+                                                    strokeDasharray={temperatureHasValues ? undefined : "4 4"}
 	                                                connectNulls={false}
+                                                    isAnimationActive
+                                                    animationBegin={0}
+                                                    animationDuration={500}
+                                                    animationEasing="ease-out"
 	                                            />
 	                                            <XAxis
 	                                                dataKey="timestamp"
@@ -685,11 +908,6 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
 	                                        </AreaChart>
 	                                    </ResponsiveContainer>
 
-	                                    {statusData && (!statusData.temperatureSupported || !temperatureHasValues) && (
-	                                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-muted-foreground">
-	                                            {statusData.temperatureSupported ? "No temperature data" : "No temperature"}
-	                                        </div>
-	                                    )}
 	                                </CardContent>
 	                            </Card>
 
@@ -720,8 +938,32 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                 </defs>
                                                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                                                 <Tooltip content={<CustomTooltip unit="MB" />} />
-                                                <Area type="monotone" dataKey="incoming" name="Incoming" strokeWidth={2} stroke="hsl(var(--chart-1))" fill="url(#colorNetRx)" />
-                                                <Area type="monotone" dataKey="outgoing" name="Outgoing" strokeWidth={2} stroke="hsl(var(--chart-2))" fill="url(#colorNetTx)" />
+                                                <Area
+                                                    type="monotone"
+                                                    dataKey="incoming"
+                                                    name="Incoming"
+                                                    baseValue={0}
+                                                    strokeWidth={2}
+                                                    stroke="hsl(var(--chart-1))"
+                                                    fill="url(#colorNetRx)"
+                                                    isAnimationActive
+                                                    animationBegin={0}
+                                                    animationDuration={500}
+                                                    animationEasing="ease-out"
+                                                />
+                                                <Area
+                                                    type="monotone"
+                                                    dataKey="outgoing"
+                                                    name="Outgoing"
+                                                    baseValue={0}
+                                                    strokeWidth={2}
+                                                    stroke="hsl(var(--chart-2))"
+                                                    fill="url(#colorNetTx)"
+                                                    isAnimationActive
+                                                    animationBegin={0}
+                                                    animationDuration={500}
+                                                    animationEasing="ease-out"
+                                                />
                                                 <XAxis
                                                     dataKey="timestamp"
                                                     stroke="hsl(var(--muted-foreground))"
@@ -745,28 +987,161 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                 </CardContent>
                             </Card>
 
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <Card>
+                            <div className="grid gap-6">
+                                <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
                                     <CardHeader>
-                                        <CardTitle className="font-headline">Processes</CardTitle>
-                                        <CardDescription>View and manage running processes in a dedicated page.</CardDescription>
+                                        <CardTitle className="font-headline">Top Processes (RAM)</CardTitle>
+                                        <CardDescription>Top 5 processes by memory consumption.</CardDescription>
                                     </CardHeader>
-                                    <CardContent>
-                                        <Button asChild className="w-full">
-                                            <Link href="/server/status/processes">Open Processes</Link>
-                                        </Button>
+                                    <CardContent className="p-0">
+                                        {isProcessesLoading ? (
+                                            <div className="min-w-0 w-full">
+                                                {Array.from({ length: 5 }).map((_, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className={cn(
+                                                            "p-4 min-w-0 w-full",
+                                                            index !== 4 && "border-b border-border"
+                                                        )}
+                                                    >
+                                                        <div className="space-y-3">
+                                                            <Skeleton className="h-4 w-full" />
+                                                            <div className="flex gap-6">
+                                                                <Skeleton className="h-3 w-16" />
+                                                                <Skeleton className="h-3 w-16" />
+                                                                <Skeleton className="h-3 w-16" />
+                                                                <Skeleton className="h-3 w-16" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="min-w-0 w-full">
+                                                {topProcessesByRam.map((process, index) => (
+                                                    <div
+                                                        key={process.pid}
+                                                        className={cn(
+                                                            "p-4 min-w-0 w-full transition-colors hover:bg-muted/50",
+                                                            index !== topProcessesByRam.length - 1 && "border-b border-border"
+                                                        )}
+                                                    >
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="text-sm font-medium text-foreground break-all font-mono leading-tight mb-3">
+                                                                {process.name}
+                                                            </p>
+                                                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+                                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                                    <Hash className="h-3.5 w-3.5" />
+                                                                    <span className="font-mono">{process.pid}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                                    <User className="h-3.5 w-3.5" />
+                                                                    <span>{process.user}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                                    <Cpu className="h-3.5 w-3.5" />
+                                                                    <span className="font-medium">{process.cpu} CPU</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-memory-stick"><path d="M6 3v18" /><path d="M18 3v18" /><path d="M6 9h12" /><path d="M6 15h12" /><path d="M9 3v18" /><path d="M15 3v18" /></svg>
+                                                                    <span className="font-medium">
+                                                                        {Number.isFinite(parseFloat(process.memory || '0'))
+                                                                            ? `${parseFloat(process.memory || '0').toFixed(1)}% RAM`
+                                                                            : '0.0% RAM'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {topProcessesByRam.length === 0 && (
+                                                    <div className="p-4 text-sm text-muted-foreground">.....</div>
+                                                )}
+                                            </div>
+                                        )}
+                                        <div className="p-4 border-t border-border">
+                                            <Button asChild variant="outline" className="w-full">
+                                                <Link href="/server/status/processes">View more</Link>
+                                            </Button>
+                                        </div>
                                     </CardContent>
                                 </Card>
 
-                                <Card>
+                                <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
                                     <CardHeader>
-                                        <CardTitle className="font-headline">Network Connections</CardTitle>
-                                        <CardDescription>Inspect active network sessions and listeners in a dedicated page.</CardDescription>
+                                        <CardTitle className="font-headline">Top Network Connections</CardTitle>
+                                        <CardDescription>Preview of active listeners and sessions.</CardDescription>
                                     </CardHeader>
-                                    <CardContent>
-                                        <Button asChild className="w-full">
-                                            <Link href="/server/status/network">Open Network</Link>
-                                        </Button>
+                                    <CardContent className="p-0">
+                                        {isNetworkLoading ? (
+                                            <div className="min-w-0 w-full">
+                                                {Array.from({ length: 5 }).map((_, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className={cn(
+                                                            "p-4 min-w-0 w-full",
+                                                            index !== 4 && "border-b border-border"
+                                                        )}
+                                                    >
+                                                        <div className="space-y-3">
+                                                            <Skeleton className="h-4 w-1/3" />
+                                                            <div className="flex gap-6">
+                                                                <Skeleton className="h-3 w-12" />
+                                                                <Skeleton className="h-3 w-12" />
+                                                                <Skeleton className="h-3 w-16" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="min-w-0 w-full">
+                                                {topNetworkConnections.map((conn, index) => (
+                                                    <div
+                                                        key={`${conn.protocol}-${conn.port}-${conn.pid}-${index}`}
+                                                        className={cn(
+                                                            "p-4 min-w-0 w-full transition-colors hover:bg-muted/50",
+                                                            index !== topNetworkConnections.length - 1 && "border-b border-border"
+                                                        )}
+                                                    >
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="text-sm font-medium text-foreground break-all font-mono leading-tight mb-3">
+                                                                {conn.process !== '-' ? conn.process : 'System / Unknown'}
+                                                            </p>
+                                                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+                                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                                    <Hash className="h-3.5 w-3.5" />
+                                                                    <span className="font-mono">{conn.port}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                                    <ArrowLeftRight className="h-3.5 w-3.5" />
+                                                                    <span>{conn.protocol}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                                    <Activity className="h-3.5 w-3.5" />
+                                                                    <span className="font-medium">{conn.state}</span>
+                                                                </div>
+                                                                {conn.state !== 'LISTEN' && (
+                                                                    <div className="flex items-center gap-1.5 shrink-0" title={`Peer: ${conn.peerAddress}`}>
+                                                                        <Globe className="h-3.5 w-3.5" />
+                                                                        <span className="font-mono truncate max-w-[150px]">{conn.peerAddress}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {topNetworkConnections.length === 0 && (
+                                                    <div className="p-4 text-sm text-muted-foreground">.....</div>
+                                                )}
+                                            </div>
+                                        )}
+                                        <div className="p-4 border-t border-border">
+                                            <Button asChild variant="outline" size="sm" className="w-auto">
+                                                <Link href="/server/status/network">View more</Link>
+                                            </Button>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </div>
