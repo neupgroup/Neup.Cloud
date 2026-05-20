@@ -1,11 +1,5 @@
 import { runCommandOnServer } from '@/services/server/ssh';
 import { getDomains } from '@/services/domains/data';
-import {
-  getAllWebServices,
-  getLatestWebService,
-  getWebServiceById,
-  getWebServicesByType,
-} from '@/services/webservices/data';
 import { getServerForRunner } from '@/services/server/server-runtime';
 import type { WebServiceConfig } from '@/services/webservices/service';
 
@@ -74,20 +68,13 @@ export async function getServerPublicIp(serverId: string) {
 
 export async function getNginxConfigurationsForServer(serverId?: string): Promise<WebServiceConfig[]> {
   try {
-    const dbConfigs = await getWebServicesByType('nginx');
-    const draftConfigs = dbConfigs.map((config) => ({
-      ...config,
-      id: `@${config.id}`,
-      isDraft: true,
-    }));
-
     if (!serverId) {
-      return draftConfigs;
+      return [];
     }
 
     const server = await getServerForRunner(serverId);
     if (!server || !server.username || !server.privateKey) {
-      return draftConfigs;
+      return [];
     }
 
     const command = `
@@ -130,7 +117,7 @@ export async function getNginxConfigurationsForServer(serverId?: string): Promis
 
     if (code !== 0) {
       console.error('Failed to fetch nginx configs from server');
-      return draftConfigs;
+      return [];
     }
 
     const serverConfigs: WebServiceConfig[] = [];
@@ -170,7 +157,7 @@ export async function getNginxConfigurationsForServer(serverId?: string): Promis
       });
     }
 
-    return [...draftConfigs, ...serverConfigs];
+    return serverConfigs;
   } catch (error) {
     console.error('Error getting combined nginx configs:', error);
     return [];
@@ -178,11 +165,6 @@ export async function getNginxConfigurationsForServer(serverId?: string): Promis
 }
 
 export async function getWebOrServerNginxConfigById(id: string, serverId?: string): Promise<WebServiceConfig | null> {
-  if (id.startsWith('@')) {
-    const config = await getWebServiceById(id.substring(1));
-    return config ? { ...config, isDraft: true } : null;
-  }
-
   if (!serverId) {
     return null;
   }

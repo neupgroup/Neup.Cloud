@@ -131,20 +131,6 @@ model AppError {
   @@map("errors")
 }
 
-model WebService {
-  id         String    @id @db.Text
-  name       String?   @db.Text
-  type       String    @db.Text
-  createdOn  DateTime  @map("created_on") @db.Timestamp(6)
-  updatedOn  DateTime? @map("updated_on") @db.Timestamp(6)
-  createdBy  String    @map("created_by") @db.Text
-  value      Json
-  serverId   String?   @map("serverId") @db.Text
-  serverName String?   @map("serverName") @db.Text
-
-  @@map("webservices")
-}
-
 model LiveSession {
   id          String   @id @db.Text
   createdAt   DateTime @map("createdAt") @db.Timestamp(6)

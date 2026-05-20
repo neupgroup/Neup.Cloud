@@ -1,15 +1,9 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { runCommandOnServer } from '@/services/server/ssh';
 import { executeCommand, executeQuickCommand } from '@/services/server/commands/server-command-service';
 import { getServerForRunner } from '@/services/server/server-service';
 import { getServerPublicIp as getServerPublicIpLogic } from '@/services/webservices/service';
-import {
-    createWebService,
-    getLatestWebService,
-    updateWebService,
-} from '@/services/webservices/data';
 import { generateNginxConfigFromContext as generateNginxConfigFromContextLogic } from '@/services/webservices/nginx/config-generator';
 
 export interface SubPath {
@@ -76,76 +70,6 @@ type GenerateNginxConfigResult =
     | { success: false; error: string; config?: undefined };
 
 /**
- * Save Nginx configuration for a specific server
- */
-export async function saveNginxConfiguration(
-    serverId: string,
-    config: NginxConfiguration
-) {
-    try {
-        const latest = await getLatestWebService('nginx', serverId);
-        const value = {
-            serverIp: config.serverIp,
-            configName: config.configName,
-            blocks: config.blocks ?? [],
-            domainRedirects: config.domainRedirects ?? [],
-        };
-
-        if (latest?.id) {
-            await updateWebService(latest.id, {
-                name: config.configName,
-                value,
-            });
-        } else {
-            await createWebService({
-                type: 'nginx',
-                name: config.configName,
-                createdBy: 'System',
-                value,
-                serverId,
-            });
-        }
-
-        revalidatePath('/server/webservices/nginx');
-
-        return { success: true };
-    } catch (error: any) {
-        console.error('Error saving nginx configuration:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-/**
- * Get Nginx configuration for a specific server
- */
-export async function getNginxConfiguration(serverId: string) {
-    try {
-        const config = await getLatestWebService('nginx', serverId);
-        if (!config) {
-            return null;
-        }
-
-        const value = (config.value ?? {}) as {
-            serverIp?: string;
-            configName?: string;
-            blocks?: DomainBlock[];
-            domainRedirects?: DomainRedirect[];
-        };
-
-        return {
-          serverIp: value.serverIp ?? '',
-          configName: value.configName ?? config.name ?? 'default',
-          blocks: value.blocks ?? [],
-          domainRedirects: value.domainRedirects ?? [],
-          updatedAt: config.updated_on ?? config.created_on,
-        } as NginxConfiguration;
-    } catch (error: any) {
-        console.error('Error fetching nginx configuration:', error);
-        return null;
-    }
-}
-
-/**
  * Fetch the public IP of a server by running a command on it
  */
 export async function getServerPublicIp(serverId: string) {
@@ -161,28 +85,6 @@ export async function generateNginxConfigFromContext(config: NginxConfiguration)
         return generateNginxConfigFromContextLogic(config);
     } catch (error: any) {
         console.error('Error generating nginx config from context:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-/**
- * Generate Nginx configuration file content from path rules
- */
-export async function generateNginxConfigFile(serverId: string): Promise<GenerateNginxConfigResult> {
-    try {
-        const config = await getNginxConfiguration(serverId);
-
-        if (!config || !config.blocks || config.blocks.length === 0) {
-            return {
-                success: false,
-                error: 'No configuration found for this server'
-            };
-        }
-
-        // Use the new context-based generator
-        return await generateNginxConfigFromContext(config);
-    } catch (error: any) {
-        console.error('Error generating nginx config:', error);
         return { success: false, error: error.message };
     }
 }
@@ -259,24 +161,12 @@ export async function deleteNginxConfig(serverId: string, configName: string) {
  */
 export async function deployNginxConfig(serverId: string, configContent?: string, configName?: string) {
     try {
-        let finalConfig = configContent;
-
-        // If no config content provided, try to generate it from the saved state (backward compatibility)
-        if (!finalConfig) {
-            const configResult = await generateNginxConfigFile(serverId);
-            if (!configResult.success || !configResult.config) {
-                return {
-                    success: false,
-                    error: configResult.error || 'Failed to generate config'
-                };
-            }
-            finalConfig = configResult.config;
-        }
+        const finalConfig = configContent;
 
         if (!finalConfig) {
             return {
                 success: false,
-                error: 'Failed to build nginx configuration'
+                error: 'No nginx configuration content provided'
             };
         }
 

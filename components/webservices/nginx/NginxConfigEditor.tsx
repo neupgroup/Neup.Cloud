@@ -11,7 +11,6 @@ import {
     deployNginxConfig,
     deleteNginxConfig,
     generateSslCertificate,
-    saveNginxConfiguration,
 } from '@/services/webservices/nginx/service';
 import { getCertificates } from '@/services/webservices/certificates-service';
 import { getWebOrServerNginxConfig } from '@/services/webservices/service';
@@ -92,13 +91,6 @@ interface DomainBlock {
     sslEnabled: boolean;
     sslCertificateFile?: string;
     pathRules: PathRule[];
-}
-
-interface NginxConfiguration {
-    serverIp: string;
-    configName: string;
-    blocks: DomainBlock[];
-    domainRedirects: DomainRedirect[];
 }
 
 interface ServerOption {
@@ -1100,21 +1092,12 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
 
         setDeploying(true);
         try {
-            // Save configuration to the database first
-            const configToSave: NginxConfiguration = {
-                serverIp: selectedServerIp,
-                configName: configName,
-                blocks: domainBlocks,
-                domainRedirects: domainRedirects,
-            };
-            await saveNginxConfiguration(selectedServerId, configToSave);
-
             const result = await deployNginxConfig(selectedServerId, generatedConfig, configName);
 
             if (result.success) {
                 toast({
                     title: 'Success',
-                    description: 'Nginx configuration saved, deployed, and reloaded successfully.',
+                    description: 'Nginx configuration deployed and reloaded successfully.',
                 });
             } else {
                 // Check for SSL certificate errors
