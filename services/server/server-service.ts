@@ -26,8 +26,18 @@ import {
   getSystemUptime as getSystemUptimeLogic,
 } from '@/services/server/server-runtime';
 import { runCommandOnServer } from '@/services/server/ssh';
-import { getServerSshPassphrase } from '@/services/server/server-metadata';
+import { getServerExpiration, getServerSshPassphrase } from '@/services/server/server-metadata';
 const execFile = promisify(execFileCallback);
+
+function isServerExpired(moreDetails?: string | null) {
+  const validTill = getServerExpiration(moreDetails);
+  if (!validTill) return false;
+
+  const validTillDate = new Date(validTill);
+  if (Number.isNaN(validTillDate.getTime())) return false;
+
+  return validTillDate.getTime() <= Date.now();
+}
 
 export async function getSystemStats(serverId: string) {
   return getSystemStatsLogic(serverId);
@@ -101,6 +111,15 @@ export async function deleteServer(id: string) {
 }
 
 export async function selectServer(serverId: string, serverName: string) {
+  const server = await getServerById(serverId);
+  if (!server) {
+    throw new Error('Server not found.');
+  }
+
+  if (isServerExpired(server.moreDetails)) {
+    throw new Error('This server is expired and cannot be selected.');
+  }
+
   // Only use cookies and revalidatePath in server context
   const cookieStore = await cookies();
   cookieStore.set('selected_server', serverId);

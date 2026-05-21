@@ -1,4 +1,5 @@
 export type ServerMetadata = {
+  validTill?: string | null;
   expiresAt?: string | null;
   sshPassphrase?: string | null;
   [key: string]: unknown;
@@ -42,7 +43,8 @@ export function serializeServerMetadata(existingValue: string | null | undefined
 }
 
 export function getServerExpiration(value?: string | null) {
-  return parseServerMetadata(value).expiresAt ?? null;
+  const metadata = parseServerMetadata(value);
+  return metadata.validTill ?? metadata.expiresAt ?? null;
 }
 
 export function getServerSshPassphrase(value?: string | null) {

@@ -189,7 +189,8 @@ function ServerDetailsForm({ server }: { server: Server }) {
       await updateServer(serverState.id, {
         moreDetails: serializeServerMetadata(serverState.moreDetails, {
           ...currentMetadata,
-          expiresAt: nextExpiration ? nextExpiration.toISOString() : undefined,
+          validTill: nextExpiration ? nextExpiration.toISOString() : undefined,
+          expiresAt: undefined,
           sshPassphrase: currentPassphrase || undefined,
         }),
       });

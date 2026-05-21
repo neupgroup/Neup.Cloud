@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/core/hooks/use-toast";
 import { getServers, selectServer } from "@/services/server/server-service";
+import { getServerExpiration } from "@/services/server/server-metadata";
 import type { Server } from "@/services/server/types";
 function sanitizeRedirect(value: string | null) {
   if (!value) return null;
@@ -17,6 +18,12 @@ function sanitizeRedirect(value: string | null) {
   if (value.startsWith("//")) return null;
   if (value.includes("://")) return null;
   return value;
+}
+
+function isExpired(value?: string | null) {
+  if (!value) return false;
+  const date = new Date(value);
+  return !Number.isNaN(date.getTime()) && date.getTime() <= Date.now();
 }
 
 export default function Page() {
@@ -111,7 +118,7 @@ export default function Page() {
       toast({
         variant: "destructive",
         title: "Switch failed",
-        description: "We could not switch the active server.",
+        description: error instanceof Error ? error.message : "We could not switch the active server.",
       });
     } finally {
       setSwitchingId(null);
@@ -174,6 +181,7 @@ export default function Page() {
         orderedServers.map((server) => {
           const isSelected = server.id === selectedServerId;
           const isSwitching = switchingId === server.id;
+          const isServerExpired = isExpired(getServerExpiration(server.moreDetails));
 
           return (
             <Card key={server.id} className={isSelected ? "border-primary" : undefined}>
@@ -188,6 +196,11 @@ export default function Page() {
                           Current
                         </span>
                       ) : null}
+                      {isServerExpired ? (
+                        <span className="inline-flex items-center rounded-md bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                          Expired
+                        </span>
+                      ) : null}
                     </div>
                     <p className="truncate text-xs text-muted-foreground">
                       {server.username}@{server.publicIp}
@@ -197,7 +210,7 @@ export default function Page() {
                   <div className="flex items-center gap-2">
                     <Button
                       variant={isSelected ? "secondary" : "default"}
-                      disabled={!!switchingId || isSelected}
+                      disabled={!!switchingId || isSelected || isServerExpired}
                       onClick={() => handleSwitch(server)}
                     >
                       {isSwitching ? (

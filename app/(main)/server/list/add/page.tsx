@@ -109,7 +109,8 @@ export default function AddServerPage() {
         privateKey: formData.privateKey,
         publicKey: formData.publicKey,
         moreDetails: serializeServerMetadata(undefined, {
-          expiresAt: formData.expiresAt || undefined,
+          validTill: formData.expiresAt || undefined,
+          expiresAt: undefined,
           sshPassphrase: hasPasskey ? formData.privateKeyPassphrase || undefined : undefined,
         }),
       });
