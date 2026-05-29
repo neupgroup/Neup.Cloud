@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { ChevronDown, ExternalLink, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 type WhoisInfo = {
   domainName: string | null;
@@ -216,20 +217,30 @@ export default function DomainsBulkPage() {
                     )}
 
                     <div>
-                      <Button
-                        variant={result.whoisExists ? 'outline' : 'default'}
-                        asChild
-                      >
-                        <a
-                          href={result.nameComUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(event) => event.stopPropagation()}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Button variant="outline" asChild>
+                          <Link
+                            href={`/domain/whois/${encodeURIComponent(result.domain)}`}
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            Detailed WHOIS
+                          </Link>
+                        </Button>
+                        <Button
+                          variant={result.whoisExists ? 'outline' : 'default'}
+                          asChild
                         >
-                          Search via name.com
-                          <ExternalLink className="ml-2 h-3 w-3" />
-                        </a>
-                      </Button>
+                          <a
+                            href={result.nameComUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            Search via name.com
+                            <ExternalLink className="ml-2 h-3 w-3" />
+                          </a>
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </CollapsibleContent>
