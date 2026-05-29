@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Loader2 } from 'lucide-react';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { ChevronDown, ExternalLink, Loader2 } from 'lucide-react';
 
 type WhoisInfo = {
   domainName: string | null;
@@ -59,6 +60,7 @@ export default function DomainsBulkPage() {
   const [results, setResults] = useState<AvailabilityResult[]>([]);
   const [isChecking, startTransition] = useTransition();
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
+  const [openCards, setOpenCards] = useState<Record<string, boolean>>({});
 
   const parsedDomains = useMemo(() => extractDomainsFromCsv(csvInput), [csvInput]);
 
@@ -73,6 +75,7 @@ export default function DomainsBulkPage() {
     startTransition(async () => {
       setResults([]);
       setProgress({ completed: 0, total: domains.length });
+      setOpenCards({});
 
       for (let index = 0; index < domains.length; index += 1) {
         const domain = domains[index];
@@ -148,52 +151,89 @@ export default function DomainsBulkPage() {
       {results.length > 0 && (
         <div className="grid gap-4">
           {results.map((result) => (
-            <Card key={result.domain}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <CardTitle className="text-xl">{result.domain}</CardTitle>
-                  {result.whoisExists ? (
-                    <Badge className="bg-green-500/10 text-green-700 border-green-200 hover:bg-green-500/20 border">
-                      WHOIS Found
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary">WHOIS Not Found</Badge>
-                  )}
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{result.reason}</p>
-
-                {result.whoisExists && result.whois ? (
-                  <div className="grid gap-2 text-sm">
-                    <p><span className="text-muted-foreground">Registrar:</span> {result.whois.registrar ?? 'N/A'}</p>
-                    <p><span className="text-muted-foreground">Handle:</span> {result.whois.whoisHandle ?? 'N/A'}</p>
-                    <p><span className="text-muted-foreground">Created:</span> {formatDate(result.whois.createdAt)}</p>
-                    <p><span className="text-muted-foreground">Updated:</span> {formatDate(result.whois.updatedAt)}</p>
-                    <p><span className="text-muted-foreground">Expires:</span> {formatDate(result.whois.expiresAt)}</p>
-                    <p>
-                      <span className="text-muted-foreground">Statuses:</span>{' '}
-                      {result.whois.statuses.length > 0 ? result.whois.statuses.join(', ') : 'N/A'}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Nameservers:</span>{' '}
-                      {result.whois.nameservers.length > 0 ? result.whois.nameservers.join(', ') : 'N/A'}
-                    </p>
+            <Card
+              key={result.domain}
+              className="cursor-pointer"
+              onClick={() =>
+                setOpenCards((previous) => ({
+                  ...previous,
+                  [result.domain]: !previous[result.domain],
+                }))
+              }
+            >
+              <Collapsible
+                open={Boolean(openCards[result.domain])}
+                onOpenChange={(open) =>
+                  setOpenCards((previous) => ({
+                    ...previous,
+                    [result.domain]: open,
+                  }))
+                }
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <CardTitle className="text-xl">{result.domain}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      {result.whoisExists ? (
+                        <Badge className="bg-green-500/10 text-green-700 border-green-200 hover:bg-green-500/20 border">
+                          WHOIS Found
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">WHOIS Not Found</Badge>
+                      )}
+                      <Button variant="ghost" size="sm">
+                        Details
+                        <ChevronDown
+                          className={`ml-2 h-4 w-4 transition-transform duration-200 ${openCards[result.domain] ? 'rotate-180' : ''}`}
+                        />
+                      </Button>
+                    </div>
                   </div>
-                ) : (
-                  <p className="text-sm">Whois information does not exists.</p>
-                )}
+                </CardHeader>
 
-                <div>
-                  <Button variant={result.whoisExists ? 'outline' : 'default'} asChild>
-                    <a href={result.nameComUrl} target="_blank" rel="noopener noreferrer">
-                      Search via name.com
-                      <ExternalLink className="ml-2 h-3 w-3" />
-                    </a>
-                  </Button>
-                </div>
-              </CardContent>
+                <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">{result.reason}</p>
+
+                    {result.whoisExists && result.whois ? (
+                      <div className="grid gap-2 text-sm">
+                        <p><span className="text-muted-foreground">Registrar:</span> {result.whois.registrar ?? 'N/A'}</p>
+                        <p><span className="text-muted-foreground">Handle:</span> {result.whois.whoisHandle ?? 'N/A'}</p>
+                        <p><span className="text-muted-foreground">Created:</span> {formatDate(result.whois.createdAt)}</p>
+                        <p><span className="text-muted-foreground">Updated:</span> {formatDate(result.whois.updatedAt)}</p>
+                        <p><span className="text-muted-foreground">Expires:</span> {formatDate(result.whois.expiresAt)}</p>
+                        <p>
+                          <span className="text-muted-foreground">Statuses:</span>{' '}
+                          {result.whois.statuses.length > 0 ? result.whois.statuses.join(', ') : 'N/A'}
+                        </p>
+                        <p>
+                          <span className="text-muted-foreground">Nameservers:</span>{' '}
+                          {result.whois.nameservers.length > 0 ? result.whois.nameservers.join(', ') : 'N/A'}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-sm">Whois information does not exists.</p>
+                    )}
+
+                    <div>
+                      <Button
+                        variant={result.whoisExists ? 'outline' : 'default'}
+                        asChild
+                      >
+                        <a
+                          href={result.nameComUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          Search via name.com
+                          <ExternalLink className="ml-2 h-3 w-3" />
+                        </a>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
             </Card>
           ))}
         </div>
