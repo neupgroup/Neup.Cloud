@@ -1,98 +1,26 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Activity, TerminalSquare, FolderOpen, Rocket, Database, Globe, HardDrive, Shield, ServerIcon, ArrowRight, Loader2, Check } from 'lucide-react';
+import { Activity, TerminalSquare, FolderOpen, Rocket, Database, Globe, HardDrive, Shield } from 'lucide-react';
 import { PageTitle } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useServerName } from '@/core/hooks/use-server-name';
-import { getServers, selectServer } from "@/services/server/server-service";
-import type { Server } from "@/services/server/types";
-import Cookies from "universal-cookie";
 
 export default function ServerHomePage() {
     const serverName = useServerName();
-    const router = useRouter();
-    const [servers, setServers] = useState<Server[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [switchingId, setSwitchingId] = useState<string | null>(null);
-    const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
-
-    useEffect(() => {
-        const cookies = new Cookies(null, { path: "/" });
-        setSelectedServerId(cookies.get("selected_server"));
-    }, []);
-
-    useEffect(() => {
-        (async () => {
-            setIsLoading(true);
-            try {
-                const data = await getServers();
-                setServers(data);
-            } finally {
-                setIsLoading(false);
-            }
-        })();
-    }, []);
-
-    const handleSwitch = async (id: string, name: string) => {
-        setSwitchingId(id);
-        await selectServer(id, name);
-        setSwitchingId(null);
-        setSelectedServerId(id);
-        router.push("/server/home");
-    };
-
-    useEffect(() => { document.title = 'Server Management, Neup.Cloud'; }, []);
 
     return (
         <div className="space-y-8">
             <PageTitle
                 title="Server Management"
-                description="Open and manage each server area from one dashboard."
+                description={
+                    <>
+                        <span>Open and manage each server area from one dashboard </span>
+                    </>
+                }
                 serverName={serverName}
             />
-
-            {/* Server Switcher Section */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Switch Server</CardTitle>
-                    <CardDescription>Select a different server to manage</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {isLoading ? (
-                        <div className="flex items-center gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span className="text-sm text-muted-foreground">Loading servers...</span>
-                        </div>
-                    ) : servers.length === 0 ? (
-                        <div className="text-sm text-muted-foreground">No servers found.</div>
-                    ) : (
-                        <div className="flex flex-col gap-2">
-                            {servers.map(server => (
-                                <Button
-                                    key={server.id}
-                                    variant={selectedServerId === server.id ? "default" : "ghost"}
-                                    className="flex items-center justify-between h-auto py-3 px-3"
-                                    disabled={!!switchingId}
-                                    onClick={() => handleSwitch(server.id, server.name)}
-                                >
-                                    <span className="flex items-center gap-2">
-                                        <ServerIcon className="h-4 w-4" />
-                                        <div className="text-left">
-                                            <p className="font-medium text-sm">{server.name}</p>
-                                            <p className="text-xs text-muted-foreground">{server.username}@{server.publicIp}</p>
-                                        </div>
-                                    </span>
-                                    {switchingId === server.id ? <Loader2 className="h-4 w-4 animate-spin" /> : selectedServerId === server.id && <Check className="h-4 w-4" />}
-                                </Button>
-                            ))}
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
 
             {/* Server Features Grid */}
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
