@@ -62,13 +62,14 @@ interface ProxySettings {
 interface PathRule {
     id: string;
     path: string;
-    action: 'proxy' | 'return-404' | 'redirect-301' | 'redirect-302' | 'redirect-307' | 'redirect-308';
+    action: 'proxy' | 'alias' | 'return-404' | 'redirect-301' | 'redirect-302' | 'redirect-307' | 'redirect-308';
     proxyTarget?: 'remote-server' | 'local-port';
     serverId?: string;
     serverName?: string;
     serverIp?: string;
     port?: string;
     localPort?: string;
+    aliasPath?: string;
     proxySettings?: ProxySettings;
     redirectTarget?: string;
     passParameters?: boolean;
@@ -856,6 +857,13 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                         });
                         return;
                     }
+                } else if (rule.action === 'alias' && !rule.aliasPath?.trim()) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Validation Error',
+                        description: `Path "${rule.path}" with alias mode must have a filesystem path specified.`,
+                    });
+                    return;
                 }
             }
         }
@@ -1099,6 +1107,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                     title: 'Success',
                     description: 'Nginx configuration deployed and reloaded successfully.',
                 });
+                router.back();
             } else {
                 // Check for SSL certificate errors
                 const isSslError = result.error && (
@@ -1559,7 +1568,11 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     <Badge variant="secondary" className="text-[10px] font-mono h-6 px-2">
-                                                        {rule.action === 'proxy' ? (rule.proxyTarget === 'local-port' ? `→ :${rule.localPort}` : '→ Remote') : rule.action}
+                                                        {rule.action === 'proxy'
+                                                            ? (rule.proxyTarget === 'local-port' ? `-> :${rule.localPort}` : '-> Remote')
+                                                            : rule.action === 'alias'
+                                                                ? `alias ${rule.aliasPath || ''}`
+                                                                : rule.action}
                                                     </Badge>
                                                     <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${expandedRuleId === rule.id ? 'rotate-180' : ''}`} />
                                                 </div>
@@ -1590,12 +1603,25 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                                                 </SelectTrigger>
                                                                 <SelectContent>
                                                                     <SelectItem value="proxy">Proxy Request</SelectItem>
+                                                                    <SelectItem value="alias">Alias Static Files</SelectItem>
                                                                     <SelectItem value="redirect-301">301 Permanent Redirect</SelectItem>
                                                                     <SelectItem value="redirect-302">302 Temporary Redirect</SelectItem>
                                                                     <SelectItem value="return-404">Return 404 Not Found</SelectItem>
                                                                 </SelectContent>
                                                             </Select>
                                                         </div>
+
+                                                        {rule.action === 'alias' && (
+                                                            <div className="space-y-2">
+                                                                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Alias Filesystem Path</Label>
+                                                                <Input
+                                                                    value={rule.aliasPath || ''}
+                                                                    onChange={(e) => updatePathRule(block.id, rule.id, 'aliasPath', e.target.value)}
+                                                                    placeholder="/var/www/folder/uploads/"
+                                                                    className="h-9 font-mono bg-background"
+                                                                />
+                                                            </div>
+                                                        )}
 
                                                         {/* Proxy Configuration */}
                                                         {rule.action === 'proxy' && (

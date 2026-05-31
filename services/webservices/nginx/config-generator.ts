@@ -11,7 +11,7 @@ function normalizePathRule(rule: PathRule): PathRule {
     normalizedPath = `/${normalizedPath}`;
   }
 
-  if (normalizedPath.length > 1 && normalizedPath.endsWith('/')) {
+  if (rule.action !== 'alias' && normalizedPath.length > 1 && normalizedPath.endsWith('/')) {
     normalizedPath = normalizedPath.slice(0, -1);
   }
 
@@ -75,6 +75,7 @@ function renderLocationRules(normalizedRules: PathRule[]): string {
   let locations = '';
 
   for (const rule of normalizedRules) {
+    const isProxyRule = rule.action === 'proxy';
     locations += `
     location ${rule.path} {
 `;
@@ -85,23 +86,27 @@ function renderLocationRules(normalizedRules: PathRule[]): string {
       const statusCode = rule.action.split('-')[1];
       const suffix = rule.passParameters ? '$request_uri' : '';
       locations += `        return ${statusCode} ${rule.redirectTarget || '/'}${suffix};\n`;
-    } else if (rule.proxyTarget === 'local-port' && rule.localPort) {
+    } else if (rule.action === 'alias' && rule.aliasPath) {
+      locations += `        alias ${rule.aliasPath.trim()};\n`;
+    } else if (isProxyRule && rule.proxyTarget === 'local-port' && rule.localPort) {
       locations += `        proxy_pass http://127.0.0.1:${rule.localPort};\n`;
-    } else if (rule.proxyTarget === 'remote-server' && rule.serverIp) {
+    } else if (isProxyRule && rule.proxyTarget === 'remote-server' && rule.serverIp) {
       locations += `        proxy_pass http://${rule.serverIp}${rule.port ? `:${rule.port}` : ''};\n`;
     }
 
-    if (rule.proxySettings?.setHost) locations += '        proxy_set_header Host $host;\n';
-    if (rule.proxySettings?.setRealIp) locations += '        proxy_set_header X-Real-IP $remote_addr;\n';
-    if (rule.proxySettings?.setForwardedFor) locations += '        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n';
-    if (rule.proxySettings?.setForwardedProto) locations += '        proxy_set_header X-Forwarded-Proto $scheme;\n';
-    if (rule.proxySettings?.upgradeWebSocket) {
-      locations += '        proxy_set_header Upgrade $http_upgrade;\n';
-      locations += '        proxy_set_header Connection "upgrade";\n';
-    }
+    if (isProxyRule) {
+      if (rule.proxySettings?.setHost) locations += '        proxy_set_header Host $host;\n';
+      if (rule.proxySettings?.setRealIp) locations += '        proxy_set_header X-Real-IP $remote_addr;\n';
+      if (rule.proxySettings?.setForwardedFor) locations += '        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n';
+      if (rule.proxySettings?.setForwardedProto) locations += '        proxy_set_header X-Forwarded-Proto $scheme;\n';
+      if (rule.proxySettings?.upgradeWebSocket) {
+        locations += '        proxy_set_header Upgrade $http_upgrade;\n';
+        locations += '        proxy_set_header Connection "upgrade";\n';
+      }
 
-    for (const header of rule.proxySettings?.customHeaders || []) {
-      locations += `        proxy_set_header ${header.key} ${header.value};\n`;
+      for (const header of rule.proxySettings?.customHeaders || []) {
+        locations += `        proxy_set_header ${header.key} ${header.value};\n`;
+      }
     }
 
     locations += '    }\n';

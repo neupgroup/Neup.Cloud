@@ -24,13 +24,14 @@ export interface ProxySettings {
 export interface PathRule {
     id: string;
     path: string;
-    action: 'proxy' | 'return-404' | 'redirect-301' | 'redirect-302' | 'redirect-307' | 'redirect-308';
+    action: 'proxy' | 'alias' | 'return-404' | 'redirect-301' | 'redirect-302' | 'redirect-307' | 'redirect-308';
     proxyTarget?: 'remote-server' | 'local-port';
     serverId?: string;
     serverName?: string;
     serverIp?: string;
     port?: string;
     localPort?: string;
+    aliasPath?: string;
     proxySettings?: ProxySettings;
     subPaths?: SubPath[];
     redirectTarget?: string;

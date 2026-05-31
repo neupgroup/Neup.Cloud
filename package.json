@@ -7,7 +7,7 @@
     "genkit:dev": "genkit start -- tsx ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch ai/dev.ts",
     "postinstall": "patch-package",
-    "build": "next build",
+    "build": "cp -R ../components ./components && cp -R ../logica ./logica && npx prisma generate && npx next build",
     "start": "next start -p 25683",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
