@@ -82,6 +82,8 @@ export function getLanguageDisplay(language: string) {
     next: 'Next.js',
     node: 'Node.js',
     python: 'Python',
+    php: 'Core PHP',
+    laravel: 'Laravel',
     go: 'Go',
     custom: 'Custom',
   }[language] || language;

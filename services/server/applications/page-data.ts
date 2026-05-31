@@ -1,6 +1,8 @@
 'use server';
 
 import * as Go from '@/services/core/go';
+import * as PHP from '@/services/core/php';
+import * as Laravel from '@/services/core/laravel';
 import * as NextJs from '@/services/core/nextjs';
 import * as NodeJs from '@/services/core/nodejs';
 import * as Python from '@/services/core/python';
@@ -37,6 +39,8 @@ export async function getApplicationDetailPageData(params: Promise<{ id: string 
   const appLanguage = application.language === 'next' ? 'Next.js' :
     application.language === 'node' ? 'Node.js' :
       application.language === 'python' ? 'Python' :
+        application.language === 'php' ? 'Core PHP' :
+          application.language === 'laravel' ? 'Laravel' :
         application.language === 'go' ? 'Go' : 'Custom';
 
   if (!application.commands) {
@@ -61,6 +65,10 @@ export async function getApplicationDetailPageData(params: Promise<{ id: string 
     commandsArray = NodeJs.getCommands(context);
   } else if (application.language === 'python') {
     commandsArray = Python.getCommands(context);
+  } else if (application.language === 'php') {
+    commandsArray = PHP.getCommands(context);
+  } else if (application.language === 'laravel') {
+    commandsArray = Laravel.getCommands(context);
   } else if (application.language === 'go') {
     commandsArray = Go.getCommands(context);
   }

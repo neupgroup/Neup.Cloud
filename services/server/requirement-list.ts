@@ -137,6 +137,30 @@ fi`,
         ]
     },
     {
+        id: 'php',
+        title: 'PHP',
+        description: 'Install PHP and Composer for hosting core PHP and Laravel applications.',
+        icon: 'FileCode',
+        steps: [
+            {
+                name: 'Install PHP CLI',
+                description: 'Install PHP 8.3 and common extensions used by modern PHP applications.',
+                icon: 'Download',
+                checkCommand: 'php -v',
+                installCommand: 'sudo apt-get update && sudo apt-get install -y php php-cli php-common php-curl php-mbstring php-xml php-zip php-sqlite3',
+                uninstallCommand: 'sudo apt-get purge -y php php-cli php-common php-curl php-mbstring php-xml php-zip php-sqlite3 && sudo apt-get autoremove -y'
+            },
+            {
+                name: 'Install Composer',
+                description: 'Install Composer for dependency management.',
+                icon: 'Package',
+                checkCommand: 'composer --version',
+                installCommand: 'sudo apt-get install -y composer',
+                uninstallCommand: 'sudo apt-get purge -y composer'
+            }
+        ]
+    },
+    {
         id: 'go',
         title: 'Go (Golang)',
         description: 'Install the Go programming language to build and run high-performance applications and binaries.',

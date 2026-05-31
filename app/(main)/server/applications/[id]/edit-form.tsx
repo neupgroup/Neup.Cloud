@@ -41,6 +41,18 @@ const FRAMEWORKS = [
         ]
     },
     {
+        id: 'php', name: 'Core PHP', defaultCommands: [
+            { name: 'build', description: 'Install PHP dependencies', value: 'composer install --no-interaction --prefer-dist --no-progress' },
+            { name: 'start', description: 'Start the application', value: 'php -S 0.0.0.0:8000 -t public public/index.php' }
+        ]
+    },
+    {
+        id: 'laravel', name: 'Laravel', defaultCommands: [
+            { name: 'build', description: 'Install Laravel dependencies', value: 'composer install --no-interaction --prefer-dist --no-progress' },
+            { name: 'start', description: 'Start the application', value: 'php artisan serve --host=0.0.0.0 --port=8000' }
+        ]
+    },
+    {
         id: 'go', name: 'Go', defaultCommands: [
             { name: 'build', description: 'Build the application', value: 'go build -o main .' },
             { name: 'start', description: 'Start the application', value: './main' }

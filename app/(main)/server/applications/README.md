@@ -12,7 +12,7 @@ Applications are stored in Firestore under the `applications` collection with th
 |-------|------|----------|-------------|
 | `name` | `string` | Yes | Name of the application |
 | `location` | `string` | Yes | File path where the application is located on the server (e.g., `/var/www/myapp`) |
-| `language` | `string` | Yes | Programming language or framework (e.g., "Node.js", "Python", "React") |
+| `language` | `string` | Yes | Programming language or framework (e.g., "Node.js", "Python", "Core PHP", "Laravel", "React") |
 | `repository` | `string` | No | Git repository URL (GitHub, GitLab, etc.) |
 | `networkAccess` | `string[]` | No | Array of ports the application uses (e.g., `["8080", "3000:80"]`) |
 | `commands` | `Record<string, string>` | No | Key-value pairs of commands (e.g., `{"start": "npm start", "stop": "npm stop"}`) |
