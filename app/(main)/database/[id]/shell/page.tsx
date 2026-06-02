@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { AlertCircle, CheckCircle2, Clock, Play, Terminal, Trash2 } from 'lucide-react';
 import { PageTitleBack } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,10 +45,11 @@ function formatCell(value: unknown) {
 }
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export default function DatabaseShellPage({ params }: Props) {
+  const { id } = use(params);
   const { toast } = useToast();
   const [query, setQuery] = useState('SELECT 1;');
   const [isExecuting, setIsExecuting] = useState(false);
@@ -67,7 +68,7 @@ export default function DatabaseShellPage({ params }: Props) {
     setError('');
     setResult(null);
 
-    getDatabaseShellMeta(params.id)
+    getDatabaseShellMeta(id)
       .then((meta) => {
         if (cancelled) {
           return;
@@ -104,7 +105,7 @@ export default function DatabaseShellPage({ params }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [params.id]);
+  }, [id]);
 
   const runQuery = async () => {
     if (!connectionId) {

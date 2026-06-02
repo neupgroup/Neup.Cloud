@@ -96,7 +96,7 @@ function NavLink({
       onClick={handleClick}
       className={cn(
         'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold hover:bg-muted hover:text-primary',
-        isActive && 'bg-muted text-primary'
+        isActive && 'bg-muted text-primary mr-4'
       )}
     >
       {children}
