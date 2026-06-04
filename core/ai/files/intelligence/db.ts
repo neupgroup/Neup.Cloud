@@ -50,27 +50,9 @@ export async function ensureIntelligenceTables(): Promise<void> {
           model TEXT NOT NULL,
           description TEXT,
           currency TEXT NOT NULL DEFAULT 'USD',
-          rate TEXT NOT NULL DEFAULT '0/1000',
-          "costPer1000Tokens" DOUBLE PRECISION NOT NULL DEFAULT 0,
           "inputPrice" DOUBLE PRECISION NOT NULL DEFAULT 0,
           "outputPrice" DOUBLE PRECISION NOT NULL DEFAULT 0,
-          price JSONB NOT NULL DEFAULT '{}'::jsonb
         )
-      `);
-
-      await db.query(`
-        ALTER TABLE "intelligence_models"
-        ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'USD'
-      `);
-
-      await db.query(`
-        ALTER TABLE "intelligence_models"
-        ADD COLUMN IF NOT EXISTS rate TEXT NOT NULL DEFAULT '0/1000'
-      `);
-
-      await db.query(`
-        ALTER TABLE "intelligence_models"
-        ADD COLUMN IF NOT EXISTS "costPer1000Tokens" DOUBLE PRECISION NOT NULL DEFAULT 0
       `);
 
       await db.query(`
@@ -81,24 +63,6 @@ export async function ensureIntelligenceTables(): Promise<void> {
       await db.query(`
         ALTER TABLE "intelligence_models"
         ADD COLUMN IF NOT EXISTS "outputPrice" DOUBLE PRECISION NOT NULL DEFAULT 0
-      `);
-
-      await db.query(`
-        UPDATE "intelligence_models"
-        SET
-          currency = COALESCE(NULLIF(currency, ''), 'USD'),
-          rate = CASE
-            WHEN "costPer1000Tokens" > 0 THEN rate
-            WHEN "inputPrice" > 0 THEN concat("inputPrice"::text, '/1000')
-            WHEN "outputPrice" > 0 THEN concat("outputPrice"::text, '/1000')
-            ELSE rate
-          END,
-          "costPer1000Tokens" = CASE
-            WHEN "costPer1000Tokens" > 0 THEN "costPer1000Tokens"
-            WHEN "inputPrice" > 0 THEN "inputPrice"
-            WHEN "outputPrice" > 0 THEN "outputPrice"
-            ELSE 0
-          END
       `);
 
       await db.query(`

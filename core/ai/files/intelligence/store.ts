@@ -30,7 +30,6 @@ export interface IntelligenceModelRecord {
   outputRate: string;
   inputCostPer1000Tokens: number;
   outputCostPer1000Tokens: number;
-  price: Record<string, unknown>;
 }
 
 export interface StoredModelConfig {
@@ -96,11 +95,8 @@ interface IntelligenceModelRow {
   model: string;
   description: string | null;
   currency: string | null;
-  rate: string | null;
-  costPer1000Tokens: number | string | null;
   inputPrice: number | string | null;
   outputPrice: number | string | null;
-  price: unknown;
 }
 
 interface AccessTokenRow {
@@ -392,23 +388,14 @@ function normalizeStoredModelConfig(value: unknown): StoredModelConfig | null {
       typeof record.currency === 'string' && record.currency.trim()
         ? record.currency.trim().toUpperCase()
         : 'USD',
-    inputRate:
-      readPriceString(record, ['inputRate']) ||
-      (typeof record.rate === 'string' && record.rate.trim() ? record.rate.trim() : '0/1000'),
-    outputRate:
-      readPriceString(record, ['outputRate']) ||
-      (typeof record.rate === 'string' && record.rate.trim() ? record.rate.trim() : '0/1000'),
     inputCostPer1000Tokens:
       normalizeOptionalNumber(record.inputCostPer1000Tokens) ??
       normalizeOptionalNumber(record.inputPrice) ??
-      normalizeOptionalNumber(record.costPer1000Tokens) ??
       0,
     outputCostPer1000Tokens:
       normalizeOptionalNumber(record.outputCostPer1000Tokens) ??
       normalizeOptionalNumber(record.outputPrice) ??
-      normalizeOptionalNumber(record.costPer1000Tokens) ??
       0,
-    price: normalizeModelPrice(record.price),
   };
 }
 
@@ -421,7 +408,7 @@ export async function getIntelligenceModels(): Promise<IntelligenceModelRecord[]
   const db = getIntelligenceDbPool();
   const result = await db.query<IntelligenceModelRow>(
     `
-      SELECT id, title, provider, model, description, currency, rate, "costPer1000Tokens", "inputPrice", "outputPrice", price
+      SELECT id, title, provider, model, description, currency, "inputPrice", "outputPrice"
       FROM "intelligence_models"
       ORDER BY title ASC, provider ASC, model ASC
     `
@@ -434,25 +421,14 @@ export async function getIntelligenceModels(): Promise<IntelligenceModelRecord[]
     model: row.model,
     description: row.description,
     currency: row.currency || 'USD',
-    inputRate:
-      readPriceString(normalizeModelPrice(row.price), ['inputRate']) ||
-      row.rate ||
-      '0/1000',
-    outputRate:
-      readPriceString(normalizeModelPrice(row.price), ['outputRate']) ||
-      row.rate ||
-      '0/1000',
+    inputRate: `${normalizeOptionalNumber(row.inputPrice) ?? 0}/1000`,
+    outputRate: `${normalizeOptionalNumber(row.outputPrice) ?? 0}/1000`,
     inputCostPer1000Tokens:
-      normalizeOptionalNumber((normalizeModelPrice(row.price) as Record<string, unknown>).inputCostPer1000Tokens) ??
       normalizeOptionalNumber(row.inputPrice) ??
-      normalizeOptionalNumber(row.costPer1000Tokens) ??
       0,
     outputCostPer1000Tokens:
-      normalizeOptionalNumber((normalizeModelPrice(row.price) as Record<string, unknown>).outputCostPer1000Tokens) ??
       normalizeOptionalNumber(row.outputPrice) ??
-      normalizeOptionalNumber(row.costPer1000Tokens) ??
       0,
-    price: normalizeModelPrice(row.price),
   }));
 }
 
@@ -461,7 +437,7 @@ export async function getIntelligenceModelById(modelId: number): Promise<Intelli
   const db = getIntelligenceDbPool();
   const result = await db.query<IntelligenceModelRow>(
     `
-      SELECT id, title, provider, model, description, currency, rate, "costPer1000Tokens", "inputPrice", "outputPrice", price
+      SELECT id, title, provider, model, description, currency, "inputPrice", "outputPrice"
       FROM "intelligence_models"
       WHERE id = $1
       LIMIT 1
@@ -482,25 +458,14 @@ export async function getIntelligenceModelById(modelId: number): Promise<Intelli
     model: row.model,
     description: row.description,
     currency: row.currency || 'USD',
-    inputRate:
-      readPriceString(normalizeModelPrice(row.price), ['inputRate']) ||
-      row.rate ||
-      '0/1000',
-    outputRate:
-      readPriceString(normalizeModelPrice(row.price), ['outputRate']) ||
-      row.rate ||
-      '0/1000',
+    inputRate: `${normalizeOptionalNumber(row.inputPrice) ?? 0}/1000`,
+    outputRate: `${normalizeOptionalNumber(row.outputPrice) ?? 0}/1000`,
     inputCostPer1000Tokens:
-      normalizeOptionalNumber((normalizeModelPrice(row.price) as Record<string, unknown>).inputCostPer1000Tokens) ??
       normalizeOptionalNumber(row.inputPrice) ??
-      normalizeOptionalNumber(row.costPer1000Tokens) ??
       0,
     outputCostPer1000Tokens:
-      normalizeOptionalNumber((normalizeModelPrice(row.price) as Record<string, unknown>).outputCostPer1000Tokens) ??
       normalizeOptionalNumber(row.outputPrice) ??
-      normalizeOptionalNumber(row.costPer1000Tokens) ??
       0,
-    price: normalizeModelPrice(row.price),
   };
 }
 
@@ -732,28 +697,18 @@ export async function createIntelligenceModelRecord(input: {
 }): Promise<void> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
-  const price = {
-    currency: input.currency,
-    inputRate: input.inputRate,
-    outputRate: input.outputRate,
-    inputCostPer1000Tokens: input.inputCostPer1000Tokens,
-    outputCostPer1000Tokens: input.outputCostPer1000Tokens,
-  };
 
   await db.query(
     `
-      INSERT INTO "intelligence_models" (title, provider, model, description, currency, rate, "costPer1000Tokens", "inputPrice", "outputPrice", price)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)
+      INSERT INTO "intelligence_models" (title, provider, model, description, currency, "inputPrice", "outputPrice")
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       ON CONFLICT (provider, model)
       DO UPDATE SET
         title = EXCLUDED.title,
         description = EXCLUDED.description,
         currency = EXCLUDED.currency,
-        rate = EXCLUDED.rate,
-        "costPer1000Tokens" = EXCLUDED."costPer1000Tokens",
         "inputPrice" = EXCLUDED."inputPrice",
-        "outputPrice" = EXCLUDED."outputPrice",
-        price = EXCLUDED.price
+        "outputPrice" = EXCLUDED."outputPrice"
     `,
     [
       input.title,
@@ -761,11 +716,8 @@ export async function createIntelligenceModelRecord(input: {
       input.model.trim(),
       input.description,
       input.currency,
-      input.inputRate,
-      input.inputCostPer1000Tokens,
       input.inputCostPer1000Tokens,
       input.outputCostPer1000Tokens,
-      JSON.stringify(price),
     ]
   );
 }
@@ -784,13 +736,6 @@ export async function updateIntelligenceModelRecord(input: {
 }): Promise<void> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
-  const price = {
-    currency: input.currency,
-    inputRate: input.inputRate,
-    outputRate: input.outputRate,
-    inputCostPer1000Tokens: input.inputCostPer1000Tokens,
-    outputCostPer1000Tokens: input.outputCostPer1000Tokens,
-  };
 
   try {
     const result = await db.query(
@@ -802,12 +747,9 @@ export async function updateIntelligenceModelRecord(input: {
           model = $3,
           description = $4,
           currency = $5,
-          rate = $6,
-          "costPer1000Tokens" = $7,
-          "inputPrice" = $8,
-          "outputPrice" = $9,
-          price = $10::jsonb
-        WHERE id = $11
+          "inputPrice" = $6,
+          "outputPrice" = $7
+        WHERE id = $8
       `,
       [
         input.title,
@@ -815,11 +757,8 @@ export async function updateIntelligenceModelRecord(input: {
         input.model.trim(),
         input.description,
         input.currency,
-        input.inputRate,
-        input.inputCostPer1000Tokens,
         input.inputCostPer1000Tokens,
         input.outputCostPer1000Tokens,
-        JSON.stringify(price),
         input.modelId,
       ]
     );
@@ -901,7 +840,7 @@ export async function createIntelligenceAccessRecord(input: {
   if (modelIds.length > 0) {
     const modelResult = await db.query<IntelligenceModelRow>(
       `
-        SELECT id, title, provider, model, description, currency, rate, "costPer1000Tokens", "inputPrice", "outputPrice", price
+        SELECT id, title, provider, model, description, currency, "inputPrice", "outputPrice"
         FROM "intelligence_models"
         WHERE id = ANY($1::bigint[])
       `,
@@ -922,25 +861,17 @@ export async function createIntelligenceAccessRecord(input: {
           model: row.model,
           description: row.description,
           currency: row.currency || 'USD',
-          inputRate:
-            readPriceString(normalizeModelPrice(row.price), ['inputRate']) ||
-            row.rate ||
-            '0/1000',
-          outputRate:
-            readPriceString(normalizeModelPrice(row.price), ['outputRate']) ||
-            row.rate ||
-            '0/1000',
-          inputCostPer1000Tokens:
-            normalizeOptionalNumber((normalizeModelPrice(row.price) as Record<string, unknown>).inputCostPer1000Tokens) ??
-            normalizeOptionalNumber(row.inputPrice) ??
-            normalizeOptionalNumber(row.costPer1000Tokens) ??
-            0,
-          outputCostPer1000Tokens:
-            normalizeOptionalNumber((normalizeModelPrice(row.price) as Record<string, unknown>).outputCostPer1000Tokens) ??
-            normalizeOptionalNumber(row.outputPrice) ??
-            normalizeOptionalNumber(row.costPer1000Tokens) ??
-            0,
-          price: normalizeModelPrice(row.price),
+          inputRate: `${normalizeOptionalNumber(row.inputPrice) ?? 0}/1000`,
+          outputRate: `${normalizeOptionalNumber(row.outputPrice) ?? 0}/1000`,
+          inputCostPer1000Tokens: normalizeOptionalNumber(row.inputPrice) ?? 0,
+          outputCostPer1000Tokens: normalizeOptionalNumber(row.outputPrice) ?? 0,
+          price: {
+            currency: row.currency || 'USD',
+            inputRate: `${normalizeOptionalNumber(row.inputPrice) ?? 0}/1000`,
+            outputRate: `${normalizeOptionalNumber(row.outputPrice) ?? 0}/1000`,
+            inputCostPer1000Tokens: normalizeOptionalNumber(row.inputPrice) ?? 0,
+            outputCostPer1000Tokens: normalizeOptionalNumber(row.outputPrice) ?? 0,
+          },
         },
       ])
     );
@@ -1047,7 +978,7 @@ export async function updateIntelligenceAccessRecord(input: {
   if (modelIds.length > 0) {
     const modelResult = await db.query<IntelligenceModelRow>(
       `
-        SELECT id, title, provider, model, description, currency, rate, "costPer1000Tokens", "inputPrice", "outputPrice", price
+        SELECT id, title, provider, model, description, currency, "inputPrice", "outputPrice"
         FROM "intelligence_models"
         WHERE id = ANY($1::bigint[])
       `,
@@ -1068,25 +999,17 @@ export async function updateIntelligenceAccessRecord(input: {
           model: row.model,
           description: row.description,
           currency: row.currency || 'USD',
-          inputRate:
-            readPriceString(normalizeModelPrice(row.price), ['inputRate']) ||
-            row.rate ||
-            '0/1000',
-          outputRate:
-            readPriceString(normalizeModelPrice(row.price), ['outputRate']) ||
-            row.rate ||
-            '0/1000',
-          inputCostPer1000Tokens:
-            normalizeOptionalNumber((normalizeModelPrice(row.price) as Record<string, unknown>).inputCostPer1000Tokens) ??
-            normalizeOptionalNumber(row.inputPrice) ??
-            normalizeOptionalNumber(row.costPer1000Tokens) ??
-            0,
-          outputCostPer1000Tokens:
-            normalizeOptionalNumber((normalizeModelPrice(row.price) as Record<string, unknown>).outputCostPer1000Tokens) ??
-            normalizeOptionalNumber(row.outputPrice) ??
-            normalizeOptionalNumber(row.costPer1000Tokens) ??
-            0,
-          price: normalizeModelPrice(row.price),
+          inputRate: `${normalizeOptionalNumber(row.inputPrice) ?? 0}/1000`,
+          outputRate: `${normalizeOptionalNumber(row.outputPrice) ?? 0}/1000`,
+          inputCostPer1000Tokens: normalizeOptionalNumber(row.inputPrice) ?? 0,
+          outputCostPer1000Tokens: normalizeOptionalNumber(row.outputPrice) ?? 0,
+          price: {
+            currency: row.currency || 'USD',
+            inputRate: `${normalizeOptionalNumber(row.inputPrice) ?? 0}/1000`,
+            outputRate: `${normalizeOptionalNumber(row.outputPrice) ?? 0}/1000`,
+            inputCostPer1000Tokens: normalizeOptionalNumber(row.inputPrice) ?? 0,
+            outputCostPer1000Tokens: normalizeOptionalNumber(row.outputPrice) ?? 0,
+          },
         },
       ])
     );

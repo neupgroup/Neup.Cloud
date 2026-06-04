@@ -159,11 +159,8 @@ model IntelligenceModel {
   model             String @db.Text
   description       String? @db.Text
   currency          String @default("USD") @db.Text
-  rate              String @default("0/1000") @db.Text
-  costPer1000Tokens Float  @map("costPer1000Tokens")
   inputPrice        Float  @map("inputPrice")
   outputPrice       Float  @map("outputPrice")
-  price             Json
 
   @@unique([provider, model], map: "intelligence_models_provider_model_unique")
   @@map("intelligence_models")
