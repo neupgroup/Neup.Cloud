@@ -103,7 +103,7 @@ export async function ensureIntelligenceTables(): Promise<void> {
           created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
           CONSTRAINT "intelligenceAccess_account_id_prompt_id_key" UNIQUE (account_id, prompt_id),
-          CONSTRAINT intelligence_access_type_check CHECK (type IN ('open', 'model_def', 'model_key_def', 'prompt_def'))
+          CONSTRAINT intelligence_access_type_check CHECK (type IN ('open', 'model_key_def', 'prompt_def'))
         )
       `);
 

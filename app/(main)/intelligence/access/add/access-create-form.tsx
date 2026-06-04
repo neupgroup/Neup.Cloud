@@ -1,17 +1,15 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Copy, KeyRound } from 'lucide-react';
+import { Copy, KeyRound, Plus, Trash2 } from 'lucide-react';
 
 import {
   createIntelligenceAccessAction,
   type CreateIntelligenceAccessActionState,
 } from '@/services/intelligence/intelligence-service';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Card,
   CardContent,
@@ -19,6 +17,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface TokenOption {
   id: number;
@@ -34,10 +40,18 @@ interface ModelOption {
   description: string | null;
 }
 
-interface SelectableOption {
-  id: number;
-  label: string;
+interface ModelRow {
+  modelInput: string;
+  tokenInput: string;
 }
+
+type AccessType = 'open' | 'model_key_def' | 'prompt_def';
+
+const accessTypeOptions: Array<{ value: AccessType; label: string; description: string }> = [
+  { value: 'prompt_def', label: 'Prompt Access', description: 'Model, key, and prompt are all defined in advance.' },
+  { value: 'model_key_def', label: 'Model Key Defined', description: 'Model is defined, each key is defined, and the user passes prompt and context.' },
+  { value: 'open', label: 'Open Access', description: 'The user passes a set of [model, key] plus prompt and context at runtime.' },
+];
 
 const initialState: CreateIntelligenceAccessActionState = {
   error: null,
@@ -45,37 +59,12 @@ const initialState: CreateIntelligenceAccessActionState = {
   generatedToken: null,
 };
 
-function normalizeSelectionInput(value: string): string {
-  return value.trim().toLowerCase();
-}
-
 function buildModelLabel(model: ModelOption): string {
   return `${model.title} (${model.provider}:${model.model})`;
 }
 
 function buildTokenLabel(token: TokenOption): string {
   return token.name;
-}
-
-function getMatchingOptionId(options: SelectableOption[], value: string): number | null {
-  const normalized = normalizeSelectionInput(value);
-
-  if (!normalized) {
-    return null;
-  }
-
-  const match = options.find((option) => normalizeSelectionInput(option.label) === normalized);
-  return match?.id ?? null;
-}
-
-function getFilteredOptions(options: SelectableOption[], value: string): SelectableOption[] {
-  const normalized = normalizeSelectionInput(value);
-
-  if (!normalized) {
-    return options;
-  }
-
-  return options.filter((option) => normalizeSelectionInput(option.label).includes(normalized));
 }
 
 export default function AccessCreateForm({
@@ -87,34 +76,74 @@ export default function AccessCreateForm({
 }) {
   const [state, formAction, isPending] = useActionState(createIntelligenceAccessAction, initialState);
   const [copied, setCopied] = useState(false);
-  const modelOptions = models.map((model) => ({
-    id: model.id,
-    label: buildModelLabel(model),
-  }));
-  const tokenOptions = tokens.map((token) => ({
-    id: token.id,
-    label: buildTokenLabel(token),
-  }));
-  const [primaryModelInput, setPrimaryModelInput] = useState('');
-  const [fallbackModelInput, setFallbackModelInput] = useState('');
-  const [primaryTokenInput, setPrimaryTokenInput] = useState('');
-  const [fallbackTokenInput, setFallbackTokenInput] = useState('');
+  const modelOptions = useMemo(
+    () =>
+      models.map((model) => ({
+        id: model.id,
+        label: buildModelLabel(model),
+      })),
+    [models]
+  );
+  const tokenOptions = useMemo(
+    () =>
+      tokens.map((token) => ({
+        id: token.id,
+        label: buildTokenLabel(token),
+      })),
+    [tokens]
+  );
+  const [rows, setRows] = useState<ModelRow[]>([{ modelInput: '', tokenInput: '' }]);
+  const [accessType, setAccessType] = useState<AccessType>('prompt_def');
 
-  const primaryModelId = getMatchingOptionId(modelOptions, primaryModelInput);
-  const fallbackModelId = getMatchingOptionId(modelOptions, fallbackModelInput);
-  const primaryTokenId = getMatchingOptionId(tokenOptions, primaryTokenInput);
-  const fallbackTokenId = getMatchingOptionId(tokenOptions, fallbackTokenInput);
+  const getModelLabel = (id: string) => modelOptions.find((option) => String(option.id) === id)?.label || 'Select a model';
+  const getTokenLabel = (id: string) => tokenOptions.find((option) => String(option.id) === id)?.label || 'Select a token';
 
-  const primaryModelSuggestions = primaryModelId ? [] : getFilteredOptions(modelOptions, primaryModelInput);
-  const fallbackModelSuggestions = fallbackModelId ? [] : getFilteredOptions(modelOptions, fallbackModelInput);
-  const primaryTokenSuggestions = primaryTokenId ? [] : getFilteredOptions(tokenOptions, primaryTokenInput);
-  const fallbackTokenSuggestions = fallbackTokenId ? [] : getFilteredOptions(tokenOptions, fallbackTokenInput);
+  const rowState = rows.map((row, index) => {
+    const modelId = row.modelInput ? Number(row.modelInput) : null;
+    const tokenId = row.tokenInput ? Number(row.tokenInput) : null;
+    return {
+      index,
+      ...row,
+      modelId,
+      tokenId,
+    };
+  });
 
-  const canSubmit =
-    (!primaryModelInput || primaryModelId !== null) &&
-    (!fallbackModelInput || fallbackModelId !== null) &&
-    (!primaryTokenInput || primaryTokenId !== null) &&
-    (!fallbackTokenInput || fallbackTokenId !== null);
+  const canSubmit = rowState.every((row) => {
+    const modelValid = row.modelInput === '' || row.modelId !== null;
+    const tokenValid = row.tokenInput === '' || row.tokenId !== null;
+    return modelValid && tokenValid;
+  });
+
+  const setRowValue = (index: number, key: keyof ModelRow, value: string) => {
+    setRows((current) =>
+      current.map((row, rowIndex) => (rowIndex === index ? { ...row, [key]: value } : row))
+    );
+  };
+
+  const addRow = () => {
+    setRows((current) => [...current, { modelInput: '', tokenInput: '' }]);
+  };
+
+  const removeRow = (index: number) => {
+    setRows((current) => current.filter((_, rowIndex) => rowIndex !== index));
+  };
+
+  const serializedEntries = rowState
+    .filter((row) => row.index > 0 && (row.modelId !== null || row.tokenId !== null))
+    .map((row) => ({
+      modelId: row.modelId,
+      keyId: row.tokenId,
+      index: row.index,
+      details: {
+        label: row.modelInput,
+        tokenLabel: row.tokenInput,
+        role: row.index === 0 ? 'primary' : 'fallback',
+      },
+    }));
+
+  const primaryRow = rowState[0];
+  const secondaryRow = rowState[1] ?? null;
 
   const handleCopy = async () => {
     if (!state.generatedToken) {
@@ -174,233 +203,148 @@ export default function AccessCreateForm({
 
       <Card className="border-primary/15 bg-gradient-to-br from-primary/5 via-background to-background">
         <CardHeader className="space-y-3">
-          <CardTitle className="text-2xl font-headline">
-            Prompt creation form
-          </CardTitle>
+          <CardTitle className="text-2xl font-headline">Access creation form</CardTitle>
           <CardDescription className="max-w-2xl text-base">
-            Your signed-in account is used automatically. Access ID and access token are generated for you automatically.
+            Add a primary model row and any number of additional model/key rows. The first row is stored as the primary source of truth; the rest are saved as indexed fallbacks.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form action={formAction} className="grid gap-5">
-            <input type="hidden" name="primary_model_id" value={primaryModelId !== null ? String(primaryModelId) : ''} />
-            <input type="hidden" name="fallback_model_id" value={fallbackModelId !== null ? String(fallbackModelId) : ''} />
-            <input type="hidden" name="primary_access_key" value={primaryTokenId !== null ? String(primaryTokenId) : ''} />
-            <input type="hidden" name="fallback_access_key" value={fallbackTokenId !== null ? String(fallbackTokenId) : ''} />
-
             <div className="grid gap-2">
-              <Label htmlFor="primary_model_input">Primary Model</Label>
-              <Input
-                id="primary_model_input"
-                value={primaryModelInput}
-                onChange={(event) => setPrimaryModelInput(event.target.value)}
-                placeholder="Type or choose a primary model"
-                className="max-w-2xl"
-              />
-              {primaryModelId !== null ? (
-                <p className="text-sm text-muted-foreground">Selected model: {primaryModelInput}</p>
-              ) : primaryModelInput ? (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    {primaryModelSuggestions.map((option) => (
-                      <Button
-                        key={option.id}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full"
-                        onClick={() => setPrimaryModelInput(option.label)}
-                      >
-                        {option.label}
-                      </Button>
-                    ))}
-                  </div>
-                  <p className="text-sm text-destructive">Type an exact model label or click a chip to select one.</p>
-                </>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {primaryModelSuggestions.map((option) => (
-                    <Button
-                      key={option.id}
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full"
-                      onClick={() => setPrimaryModelInput(option.label)}
-                    >
-                      {option.label}
-                    </Button>
+              <Label>What is the type of access you're trying to open?</Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" className="justify-between">
+                    <span className="truncate">
+                      {accessTypeOptions.find((option) => option.value === accessType)?.label || 'Select access type'}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-96">
+                  {accessTypeOptions.map((option) => (
+                    <DropdownMenuItem key={option.value} onClick={() => setAccessType(option.value)}>
+                      <div className="grid gap-0.5">
+                        <span>{option.label}</span>
+                        <span className="text-xs text-muted-foreground">{option.description}</span>
+                      </div>
+                    </DropdownMenuItem>
                   ))}
-                </div>
-              )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
+            <input type="hidden" name="primary_model_id" value={primaryRow?.modelId !== null ? String(primaryRow.modelId) : ''} />
+            <input type="hidden" name="fallback_model_id" value={secondaryRow?.modelId != null ? String(secondaryRow.modelId) : ''} />
+            <input type="hidden" name="primary_access_key" value={primaryRow?.tokenId !== null ? String(primaryRow.tokenId) : ''} />
+            <input type="hidden" name="fallback_access_key" value={secondaryRow?.tokenId != null ? String(secondaryRow.tokenId) : ''} />
+            <input type="hidden" name="access_type" value={accessType} />
+            <input type="hidden" name="model_entries" value={JSON.stringify(serializedEntries)} />
 
-            <div className="grid gap-2">
-              <Label htmlFor="fallback_model_input">Fallback Model</Label>
-              <Input
-                id="fallback_model_input"
-                value={fallbackModelInput}
-                onChange={(event) => setFallbackModelInput(event.target.value)}
-                placeholder="Type or choose a fallback model"
-                className="max-w-2xl"
-              />
-              {fallbackModelId !== null ? (
-                <p className="text-sm text-muted-foreground">Selected model: {fallbackModelInput}</p>
-              ) : fallbackModelInput ? (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    {fallbackModelSuggestions.map((option) => (
-                      <Button
-                        key={option.id}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full"
-                        onClick={() => setFallbackModelInput(option.label)}
-                      >
-                        {option.label}
+            <div className="grid gap-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Model blocks</p>
+                  <p className="text-sm text-muted-foreground">Row 1 is primary. Row 2 and beyond are saved to `intelligence_fallbacks` with an index.</p>
+                </div>
+                <Button type="button" variant="outline" onClick={addRow}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Model Block
+                </Button>
+              </div>
+
+              {rowState.map((row, index) => (
+                <div key={index} className="grid gap-4 rounded-2xl border border-border/70 bg-background p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {index === 0 ? 'Primary model block' : `Fallback block ${index}`}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {index === 0
+                          ? 'This is the main source of truth.'
+                          : 'This row will be persisted in the fallback index table.'}
+                      </p>
+                    </div>
+                    {index > 0 && (
+                      <Button type="button" variant="ghost" size="sm" onClick={() => removeRow(index)}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Remove
                       </Button>
-                    ))}
+                    )}
                   </div>
-                  <p className="text-sm text-destructive">Type an exact model label or click a chip to select one.</p>
-                </>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {fallbackModelSuggestions.map((option) => (
-                    <Button
-                      key={option.id}
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full"
-                      onClick={() => setFallbackModelInput(option.label)}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              )}
-            </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="primary_token_input">Primary Provider Token</Label>
-              <Input
-                id="primary_token_input"
-                value={primaryTokenInput}
-                onChange={(event) => setPrimaryTokenInput(event.target.value)}
-                placeholder="Type or choose a primary token"
-                className="max-w-lg"
-              />
-              {primaryTokenId !== null ? (
-                <p className="text-sm text-muted-foreground">Selected token: {primaryTokenInput}</p>
-              ) : primaryTokenInput ? (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    {primaryTokenSuggestions.map((option) => (
-                      <Button
-                        key={option.id}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full"
-                        onClick={() => setPrimaryTokenInput(option.label)}
-                      >
-                        {option.label}
-                      </Button>
-                    ))}
+                  <div className="grid gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor={`model_input_${index}`}>Model</Label>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            id={`model_input_${index}`}
+                            type="button"
+                            variant="outline"
+                            className="justify-between"
+                          >
+                            <span className="truncate">{getModelLabel(row.modelInput)}</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="max-h-72 w-96 overflow-auto">
+                          {modelOptions.map((option) => (
+                            <DropdownMenuItem
+                              key={option.id}
+                              onClick={() => setRowValue(index, 'modelInput', String(option.id))}
+                            >
+                              {option.label}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor={`token_input_${index}`}>Token</Label>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            id={`token_input_${index}`}
+                            type="button"
+                            variant="outline"
+                            className="justify-between"
+                          >
+                            <span className="truncate">{getTokenLabel(row.tokenInput)}</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="max-h-72 w-96 overflow-auto">
+                          {tokenOptions.map((option) => (
+                            <DropdownMenuItem
+                              key={option.id}
+                              onClick={() => setRowValue(index, 'tokenInput', String(option.id))}
+                            >
+                              {option.label}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
-                  <p className="text-sm text-destructive">Type an exact token name or click a chip to select one.</p>
-                </>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {primaryTokenSuggestions.map((option) => (
-                    <Button
-                      key={option.id}
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full"
-                      onClick={() => setPrimaryTokenInput(option.label)}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
                 </div>
-              )}
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="fallback_token_input">Fallback Provider Token</Label>
-              <Input
-                id="fallback_token_input"
-                value={fallbackTokenInput}
-                onChange={(event) => setFallbackTokenInput(event.target.value)}
-                placeholder="Type or choose a fallback token"
-                className="max-w-lg"
-              />
-              {fallbackTokenId !== null ? (
-                <p className="text-sm text-muted-foreground">Selected token: {fallbackTokenInput}</p>
-              ) : fallbackTokenInput ? (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    {fallbackTokenSuggestions.map((option) => (
-                      <Button
-                        key={option.id}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full"
-                        onClick={() => setFallbackTokenInput(option.label)}
-                      >
-                        {option.label}
-                      </Button>
-                    ))}
-                  </div>
-                  <p className="text-sm text-destructive">Type an exact token name or click a chip to select one.</p>
-                </>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {fallbackTokenSuggestions.map((option) => (
-                    <Button
-                      key={option.id}
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full"
-                      onClick={() => setFallbackTokenInput(option.label)}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="max_tokens">Max Tokens</Label>
-              <Input id="max_tokens" name="max_tokens" type="number" min="1" placeholder="Optional" className="max-w-xs" />
+              ))}
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="guider">Guider</Label>
-              <Textarea
-                id="guider"
-                name="guider"
-                placeholder="Fixed guider for how the model should behave..."
-                className="min-h-40"
-              />
+              <Textarea id="guider" name="guider" className="min-h-40" />
             </div>
 
-            <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground">
-              Prompt balance starts at <span className="font-medium text-foreground">0.00</span> and can be recharged later from the logs recharge page.
+            <div className="grid gap-2">
+              <Label htmlFor="max_tokens">Max Tokens</Label>
+              <Input id="max_tokens" name="max_tokens" type="number" min="1" placeholder="Optional" />
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button type="submit" disabled={isPending || !canSubmit}>
-                {isPending ? 'Creating Prompt...' : 'Create Prompt'}
+                {isPending ? 'Saving...' : 'Create Access'}
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/intelligence/models">Manage Models First</Link>
+                <Link href="/intelligence/access">View Access</Link>
               </Button>
             </div>
           </form>

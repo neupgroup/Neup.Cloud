@@ -36,8 +36,8 @@ export async function createAccessTokenAction(formData: FormData) {
     key: input.key,
   });
   revalidatePath('/intelligence/tokens');
-  revalidatePath('/intelligence/prompts');
-  revalidatePath('/intelligence/prompts/add');
+  revalidatePath('/intelligence/access');
+  revalidatePath('/intelligence/access/add');
   redirect('/intelligence/tokens');
 }
 
@@ -48,8 +48,8 @@ export async function createIntelligenceModelAction(formData: FormData) {
 
   revalidatePath('/intelligence/models');
   revalidatePath('/intelligence/models/add');
-  revalidatePath('/intelligence/prompts');
-  revalidatePath('/intelligence/prompts/add');
+  revalidatePath('/intelligence/access');
+  revalidatePath('/intelligence/access/add');
   redirect('/intelligence/models');
 }
 
@@ -88,16 +88,18 @@ export async function createIntelligenceAccessAction(
       accessIdentifier: generatedAccessId,
       accountId,
       tokenHash: hashAccessToken(generatedToken),
+      accessType: input.accessType,
       primaryModelId: input.primaryModelId,
       fallbackModelId: input.fallbackModelId,
       primaryAccessKey: input.primaryAccessKey,
       fallbackAccessKey: input.fallbackAccessKey,
       maxTokens: input.maxTokens,
       defPrompt: input.guider,
+      fallbackEntries: input.fallbackEntries,
     });
 
-    revalidatePath('/intelligence/prompts');
-    revalidatePath('/intelligence/prompts/add');
+    revalidatePath('/intelligence/access');
+    revalidatePath('/intelligence/access/add');
     revalidatePath('/intelligence/logs');
 
     return {
@@ -121,7 +123,7 @@ export async function rechargeIntelligenceBalanceAction(formData: FormData) {
     ...input,
     accountId,
   });
-  revalidatePath('/intelligence/prompts');
+  revalidatePath('/intelligence/access');
   revalidatePath('/intelligence/logs');
   revalidatePath('/intelligence/logs/recharge');
   redirect('/intelligence/logs');
@@ -182,8 +184,8 @@ export async function updateIntelligenceAccessAction(
       defPrompt: input.guider,
     });
 
-    revalidatePath('/intelligence/prompts');
-    revalidatePath(`/intelligence/prompts/${accessId}`);
+    revalidatePath('/intelligence/access');
+    revalidatePath(`/intelligence/access/${accessId}`);
     revalidatePath('/intelligence/logs');
 
     return {
@@ -207,10 +209,10 @@ export async function deleteIntelligenceAccessAction(formData: FormData) {
     accountId,
   });
 
-  revalidatePath('/intelligence/prompts');
-  revalidatePath(`/intelligence/prompts/${accessId}`);
+  revalidatePath('/intelligence/access');
+  revalidatePath(`/intelligence/access/${accessId}`);
   revalidatePath('/intelligence/logs');
-  redirect('/intelligence/prompts');
+  redirect('/intelligence/access');
 }
 
 export async function updateIntelligenceModelAction(
@@ -229,8 +231,8 @@ export async function updateIntelligenceModelAction(
     revalidatePath('/intelligence/models');
     revalidatePath(`/intelligence/models/${modelId}`);
     revalidatePath('/intelligence/models/add');
-    revalidatePath('/intelligence/prompts');
-    revalidatePath('/intelligence/prompts/add');
+    revalidatePath('/intelligence/access');
+    revalidatePath('/intelligence/access/add');
 
     return {
       error: null,
@@ -253,7 +255,7 @@ export async function deleteIntelligenceModelAction(formData: FormData) {
 
   revalidatePath('/intelligence/models');
   revalidatePath(`/intelligence/models/${modelId}`);
-  revalidatePath('/intelligence/prompts');
-  revalidatePath('/intelligence/prompts/add');
+  revalidatePath('/intelligence/access');
+  revalidatePath('/intelligence/access/add');
   redirect('/intelligence/models');
 }

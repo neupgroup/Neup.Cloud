@@ -842,12 +842,19 @@ export async function createIntelligenceAccessRecord(input: {
   accessIdentifier: string;
   accountId: string;
   tokenHash: string;
+  accessType: 'open' | 'model_key_def' | 'prompt_def';
   primaryModelId: number | null;
   fallbackModelId: number | null;
   primaryAccessKey: number | null;
   fallbackAccessKey: number | null;
   maxTokens: number | null;
   defPrompt: string | null;
+  fallbackEntries: Array<{
+    modelId: number | null;
+    keyId: number | null;
+    index: number;
+    details: Record<string, unknown>;
+  }>;
 }): Promise<void> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
@@ -930,6 +937,7 @@ export async function createIntelligenceAccessRecord(input: {
         prompt_id,
         account_id,
         token_hash,
+        type,
         "primaryModel",
         "fallbackModel",
         "primaryModelConfig",
@@ -940,10 +948,11 @@ export async function createIntelligenceAccessRecord(input: {
         "defPrompt",
         balance
       )
-      VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8, $9, $10, $11, $12)
+      VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $9, $10, $11, $12, $13)
       ON CONFLICT (account_id, prompt_id)
       DO UPDATE SET
         token_hash = EXCLUDED.token_hash,
+        type = EXCLUDED.type,
         "primaryModel" = EXCLUDED."primaryModel",
         "fallbackModel" = EXCLUDED."fallbackModel",
         "primaryModelConfig" = EXCLUDED."primaryModelConfig",
@@ -958,6 +967,7 @@ export async function createIntelligenceAccessRecord(input: {
       input.accessIdentifier,
       input.accountId,
       input.tokenHash,
+      input.accessType,
       primaryModelConfig ? toModelIdentifier(primaryModelConfig) : null,
       fallbackModelConfig ? toModelIdentifier(fallbackModelConfig) : null,
       primaryModelConfig ? JSON.stringify(primaryModelConfig) : null,
@@ -969,6 +979,57 @@ export async function createIntelligenceAccessRecord(input: {
       0,
     ]
   );
+
+  await db.query(
+    `
+      DELETE FROM "intelligence_fallbacks"
+      WHERE access_id = (
+        SELECT id
+        FROM "intelligenceAccess"
+        WHERE account_id = $1 AND prompt_id = $2
+        LIMIT 1
+      )
+    `,
+    [input.accountId, input.accessIdentifier]
+  );
+
+  const accessLookup = await db.query<{ id: string }>(
+    `
+      SELECT id
+      FROM "intelligenceAccess"
+      WHERE account_id = $1 AND prompt_id = $2
+      LIMIT 1
+    `,
+    [input.accountId, input.accessIdentifier]
+  );
+
+  const accessRowId = accessLookup.rows[0]?.id;
+
+  if (!accessRowId) {
+    throw new Error('Failed to locate access record after creation');
+  }
+
+  for (const entry of input.fallbackEntries) {
+    await db.query(
+      `
+        INSERT INTO "intelligence_fallbacks" (
+          access_id,
+          dependent_model_id,
+          dependent_key_id,
+          "index",
+          details
+        )
+        VALUES ($1, $2, $3, $4, $5::jsonb)
+      `,
+      [
+        accessRowId,
+        entry.modelId,
+        entry.keyId,
+        entry.index,
+        JSON.stringify(entry.details || {}),
+      ]
+    );
+  }
 }
 
 export async function updateIntelligenceAccessRecord(input: {
@@ -1354,13 +1415,63 @@ export function parseModelIdFormData(formData: FormData) {
 }
 
 export function parseAccessFormData(formData: FormData) {
+  const modelEntriesRaw = formData.get('model_entries');
+  let fallbackEntries: Array<{
+    modelId: number | null;
+    keyId: number | null;
+    index: number;
+    details: Record<string, unknown>;
+  }> = [];
+
+  if (typeof modelEntriesRaw === 'string' && modelEntriesRaw.trim()) {
+    try {
+      const parsed = JSON.parse(modelEntriesRaw);
+      if (Array.isArray(parsed)) {
+        fallbackEntries = parsed.map((entry, index) => ({
+          modelId:
+            entry?.modelId === null || entry?.modelId === undefined || entry?.modelId === ''
+              ? null
+              : Number.isFinite(Number(entry?.modelId))
+                ? Number(entry.modelId)
+                : null,
+          keyId:
+            entry?.keyId === null || entry?.keyId === undefined || entry?.keyId === ''
+              ? null
+              : Number.isFinite(Number(entry?.keyId))
+                ? Number(entry.keyId)
+                : null,
+          index:
+            entry?.index === null || entry?.index === undefined || entry?.index === ''
+              ? index
+              : Number.isFinite(Number(entry?.index))
+                ? Number(entry.index)
+                : index,
+          details:
+            entry && typeof entry.details === 'object' && entry.details !== null
+              ? (entry.details as Record<string, unknown>)
+              : {},
+        }));
+      }
+    } catch {
+      throw new Error('Model entries are invalid');
+    }
+  }
+
+  const accessType = parseOptionalString(formData.get('access_type')) || 'prompt_def';
+
+  if (!['open', 'model_key_def', 'prompt_def'].includes(accessType)) {
+    throw new Error('Access type must be one of: open, model_key_def, prompt_def');
+  }
+
   return {
+    accessType: accessType as 'open' | 'model_key_def' | 'prompt_def',
     primaryModelId: parseOptionalInteger(formData.get('primary_model_id')),
     fallbackModelId: parseOptionalInteger(formData.get('fallback_model_id')),
     primaryAccessKey: parseOptionalInteger(formData.get('primary_access_key')),
     fallbackAccessKey: parseOptionalInteger(formData.get('fallback_access_key')),
     maxTokens: parseOptionalInteger(formData.get('max_tokens')),
     guider: parseOptionalString(formData.get('guider') ?? formData.get('def_prompt')),
+    fallbackEntries,
   };
 }
 
