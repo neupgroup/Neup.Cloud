@@ -17,6 +17,7 @@ import {
   getIntelligenceModels,
 } from '@/core/ai/files/intelligence/store';
 import AccessEditForm from '@/app/(main)/intelligence/access/[id]/access-edit-form';
+import PromptTestPanel from './prompt-test-panel';
 
 export const metadata: Metadata = {
   title: 'Edit Intelligence Prompt, Neup.Cloud',
@@ -68,6 +69,38 @@ export default async function IntelligencePromptDetailPage({
   const initialFallbackModelId =
     access.fallbackModelConfig?.id ||
     findMatchingModelId(models, access.fallbackModel);
+  const suggestedModel =
+    access.primaryModel ||
+    (access.primaryModelConfig ? `${access.primaryModelConfig.provider}:${access.primaryModelConfig.model}` : '');
+  const modelOptions = [
+    access.primaryModelConfig
+      ? {
+          label: `Primary: ${access.primaryModelConfig.provider}:${access.primaryModelConfig.model}`,
+          value: access.primaryModelConfig.model,
+        }
+      : null,
+    access.fallbackModelConfig
+      ? {
+          label: `Fallback: ${access.fallbackModelConfig.provider}:${access.fallbackModelConfig.model}`,
+          value: access.fallbackModelConfig.model,
+        }
+      : null,
+    access.primaryModel
+      ? {
+          label: `Primary saved value: ${access.primaryModel}`,
+          value: access.primaryModel,
+        }
+      : null,
+    access.fallbackModel
+      ? {
+          label: `Fallback saved value: ${access.fallbackModel}`,
+          value: access.fallbackModel,
+        }
+      : null,
+  ].filter((option): option is { label: string; value: string } => Boolean(option));
+  const uniqueModelOptions = modelOptions.filter(
+    (option, index, all) => index === all.findIndex((candidate) => candidate.value === option.value)
+  );
   const requestUrl = new URL('http://localhost:25683/bridge/api.v1/intelligence/getResponse');
 
   if (access.primaryModel) {
@@ -123,6 +156,14 @@ export default async function IntelligencePromptDetailPage({
           </pre>
         </CardContent>
       </Card>
+
+      <PromptTestPanel
+        accountId={access.account_id}
+        accessIdentifier={access.prompt_id}
+        tokenKey={access.token_hash}
+        modelOptions={uniqueModelOptions}
+        suggestedModel={suggestedModel}
+      />
 
       <AccessEditForm
         accessId={access.id}

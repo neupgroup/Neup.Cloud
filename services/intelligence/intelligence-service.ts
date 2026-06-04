@@ -13,6 +13,7 @@ import {
   generateAccessIdentifier,
   generateAccessToken,
   getIntelligenceAccessById,
+  getIntelligenceSettings,
   hashAccessToken,
   parseAccessFormData,
   parseAccessIdFormData,
@@ -20,6 +21,7 @@ import {
   parseModelFormData,
   parseRechargeFormData,
   parseTokenFormData,
+  setIntelligenceDevMode,
   rechargeIntelligenceAccessBalance,
   updateIntelligenceModelRecord,
   updateIntelligenceAccessRecord,
@@ -63,6 +65,11 @@ export interface UpdateIntelligenceAccessActionState {
 }
 
 export interface UpdateIntelligenceModelActionState {
+  error: string | null;
+  success: string | null;
+}
+
+export interface UpdateIntelligenceSettingsActionState {
   error: string | null;
   success: string | null;
 }
@@ -118,6 +125,33 @@ export async function rechargeIntelligenceBalanceAction(formData: FormData) {
   revalidatePath('/intelligence/logs');
   revalidatePath('/intelligence/logs/recharge');
   redirect('/intelligence/logs');
+}
+
+export async function updateIntelligenceSettingsAction(
+  formData: FormData
+): Promise<UpdateIntelligenceSettingsActionState> {
+  const accountId = await getCurrentIntelligenceAccountId();
+  const devMode = formData.get('dev_mode') === 'on';
+
+  try {
+    await setIntelligenceDevMode(accountId, devMode);
+    revalidatePath('/intelligence/settings');
+    revalidatePath('/intelligence');
+    return {
+      error: null,
+      success: devMode ? 'Dev mode enabled.' : 'Dev mode disabled.',
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'Failed to update intelligence settings',
+      success: null,
+    };
+  }
+}
+
+export async function getIntelligenceSettingsForAccount() {
+  const accountId = await getCurrentIntelligenceAccountId();
+  return getIntelligenceSettings(accountId);
 }
 
 export async function updateIntelligenceAccessAction(

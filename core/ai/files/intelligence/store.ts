@@ -88,6 +88,37 @@ export interface PaginatedIntelligenceLogsResult {
   pageSize: number;
 }
 
+export interface IntelligenceDevLogRecord {
+  id: number;
+  account_id: string | null;
+  access_id: string | null;
+  request_id: string;
+  request_method: string;
+  request_url: string;
+  request_headers: Record<string, unknown>;
+  request_body: Record<string, unknown> | null;
+  request_query: Record<string, string>;
+  request_context: Record<string, unknown> | null;
+  response_status: number | null;
+  response_body: Record<string, unknown> | null;
+  error_message: string | null;
+  error_stack: string | null;
+  created_at: string;
+}
+
+export interface PaginatedIntelligenceDevLogsResult {
+  logs: IntelligenceDevLogRecord[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export interface IntelligenceSettingsRecord {
+  account_id: string;
+  dev_mode: boolean;
+}
+
 interface IntelligenceModelRow {
   id: number | string;
   title: string;
@@ -138,6 +169,45 @@ interface IntelligenceLogRow {
   balance: number | null;
   prompt_id: string;
   account_id: string;
+}
+
+interface IntelligenceSettingsRow {
+  account_id: string;
+  dev_mode: boolean;
+}
+
+interface IntelligenceDevLogRow {
+  id: number | string;
+  account_id: string | null;
+  access_id: string | null;
+  request_id: string;
+  request_method: string;
+  request_url: string;
+  request_headers: unknown;
+  request_body: unknown;
+  request_query: unknown;
+  request_context: unknown;
+  response_status: number | string | null;
+  response_body: unknown;
+  error_message: string | null;
+  error_stack: string | null;
+  created_at: string;
+}
+
+export interface IntelligenceDevLogInput {
+  accountId: string | null;
+  accessId: string | null;
+  requestId: string;
+  requestMethod: string;
+  requestUrl: string;
+  requestHeaders: Record<string, unknown>;
+  requestBody: Record<string, unknown> | null;
+  requestQuery: Record<string, string>;
+  requestContext: Record<string, unknown> | null;
+  responseStatus: number | null;
+  responseBody: Record<string, unknown> | null;
+  errorMessage: string | null;
+  errorStack: string | null;
 }
 
 export function hashAccessToken(value: string): string {
@@ -1100,6 +1170,180 @@ export async function rechargeIntelligenceAccessBalance(input: {
   if (result.rowCount === 0) {
     throw new Error('Access record not found');
   }
+}
+
+export async function getIntelligenceSettings(accountId: string): Promise<IntelligenceSettingsRecord> {
+  await ensureIntelligenceTables();
+  const db = getIntelligenceDbPool();
+
+  const result = await db.query<IntelligenceSettingsRow>(
+    `
+      SELECT account_id, dev_mode
+      FROM "intelligence_settings"
+      WHERE account_id = $1
+      LIMIT 1
+    `,
+    [accountId]
+  );
+
+  return result.rows[0] || { account_id: accountId, dev_mode: false };
+}
+
+export async function setIntelligenceDevMode(accountId: string, devMode: boolean): Promise<void> {
+  await ensureIntelligenceTables();
+  const db = getIntelligenceDbPool();
+
+  await db.query(
+    `
+      INSERT INTO "intelligence_settings" (account_id, dev_mode)
+      VALUES ($1, $2)
+      ON CONFLICT (account_id)
+      DO UPDATE SET dev_mode = EXCLUDED.dev_mode, updated_at = CURRENT_TIMESTAMP
+    `,
+    [accountId, devMode]
+  );
+}
+
+export async function insertIntelligenceDevLog(input: IntelligenceDevLogInput): Promise<void> {
+  await ensureIntelligenceTables();
+  const db = getIntelligenceDbPool();
+
+  await db.query(
+    `
+      INSERT INTO "intelligence_devlog" (
+        account_id,
+        access_id,
+        request_id,
+        request_method,
+        request_url,
+        request_headers,
+        request_body,
+        request_query,
+        request_context,
+        response_status,
+        response_body,
+        error_message,
+        error_stack
+      )
+      VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8::jsonb, $9::jsonb, $10, $11::jsonb, $12, $13)
+    `,
+    [
+      input.accountId,
+      input.accessId,
+      input.requestId,
+      input.requestMethod,
+      input.requestUrl,
+      JSON.stringify(input.requestHeaders),
+      JSON.stringify(input.requestBody),
+      JSON.stringify(input.requestQuery),
+      JSON.stringify(input.requestContext),
+      input.responseStatus,
+      JSON.stringify(input.responseBody),
+      input.errorMessage,
+      input.errorStack,
+    ]
+  );
+}
+
+function normalizeDevLogObject(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null;
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function normalizeDevLogQuery(value: unknown): Record<string, string> {
+  const normalized = normalizeDevLogObject(value);
+
+  if (!normalized) {
+    return {};
+  }
+
+  return Object.entries(normalized).reduce<Record<string, string>>((accumulator, [key, entryValue]) => {
+    if (entryValue === null || entryValue === undefined) {
+      return accumulator;
+    }
+
+    accumulator[key] = String(entryValue);
+    return accumulator;
+  }, {});
+}
+
+export async function getPaginatedIntelligenceDevLogs(
+  accountId: string,
+  page: number,
+  pageSize: number
+): Promise<PaginatedIntelligenceDevLogsResult> {
+  await ensureIntelligenceTables();
+  const db = getIntelligenceDbPool();
+  const requestedPage = Math.max(1, Math.trunc(page || 1));
+  const normalizedPageSize = Math.max(1, Math.trunc(pageSize || 10));
+
+  const countResult = await db.query<{ count: string }>(
+    `
+      SELECT COUNT(*)::text AS count
+      FROM "intelligence_devlog"
+      WHERE account_id = $1
+    `,
+    [accountId]
+  );
+
+  const totalCount = Number(countResult.rows[0]?.count || 0);
+  const totalPages = Math.max(1, Math.ceil(totalCount / normalizedPageSize));
+  const currentPage = Math.min(requestedPage, totalPages);
+  const offset = (currentPage - 1) * normalizedPageSize;
+
+  const result = await db.query<IntelligenceDevLogRow>(
+    `
+      SELECT
+        id,
+        account_id,
+        access_id,
+        request_id,
+        request_method,
+        request_url,
+        request_headers,
+        request_body,
+        request_query,
+        request_context,
+        response_status,
+        response_body,
+        error_message,
+        error_stack,
+        created_at
+      FROM "intelligence_devlog"
+      WHERE account_id = $1
+      ORDER BY id DESC
+      LIMIT $2
+      OFFSET $3
+    `,
+    [accountId, normalizedPageSize, offset]
+  );
+
+  return {
+    logs: result.rows.map((row) => ({
+      id: normalizeNumericId(row.id),
+      account_id: row.account_id,
+      access_id: row.access_id,
+      request_id: row.request_id,
+      request_method: row.request_method,
+      request_url: row.request_url,
+      request_headers: normalizeDevLogObject(row.request_headers) || {},
+      request_body: normalizeDevLogObject(row.request_body),
+      request_query: normalizeDevLogQuery(row.request_query),
+      request_context: normalizeDevLogObject(row.request_context),
+      response_status: row.response_status === null ? null : Number(row.response_status),
+      response_body: normalizeDevLogObject(row.response_body),
+      error_message: row.error_message,
+      error_stack: row.error_stack,
+      created_at: row.created_at,
+    })),
+    totalCount,
+    totalPages,
+    currentPage,
+    pageSize: normalizedPageSize,
+  };
 }
 
 export function parseTokenFormData(formData: FormData) {

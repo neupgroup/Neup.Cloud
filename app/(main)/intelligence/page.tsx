@@ -10,6 +10,8 @@ import {
   ScrollText,
   Sparkles,
   Zap,
+  ShieldAlert,
+  BugPlay,
 } from 'lucide-react';
 
 import { PageTitle } from '@/components/page-header';
@@ -75,6 +77,18 @@ const intelligenceCards = [
     description: 'Prepare future balance top-ups and recharge flows for intelligence usage.',
     icon: BatteryCharging,
     href: '/intelligence/logs/recharge',
+  },
+  {
+    title: 'Settings',
+    description: 'Enable dev mode to capture full request and error logs for debugging.',
+    icon: ShieldAlert,
+    href: '/intelligence/settings',
+  },
+  {
+    title: 'Devlog',
+    description: 'Review the complete request audit trail, including invalid and failed requests.',
+    icon: BugPlay,
+    href: '/intelligence/devlog',
   },
   {
     title: 'Signal First',

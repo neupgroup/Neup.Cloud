@@ -1,8 +1,9 @@
 import { after, NextRequest, NextResponse } from 'next/server';
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 
 import { ensureIntelligenceTables, getIntelligenceDbPool } from '@/core/ai/files/intelligence/db';
 import { invokeModel } from '@/core/ai/files/intelligence/model-client';
+import { getIntelligenceSettings, insertIntelligenceDevLog } from '@/core/ai/files/intelligence/store';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -22,6 +23,7 @@ interface ParsedInput {
   parameters: Record<string, string>;
   context: string;
   userQuery: string;
+  rawBody: Record<string, unknown> | null;
 }
 
 interface IntelligenceAccessRow {
@@ -125,6 +127,10 @@ function errorResponse(message: string, status = 400) {
       headers: RESPONSE_HEADERS,
     }
   );
+}
+
+function traceStep(step: string, details: Record<string, unknown> = {}) {
+  console.info('[intelligence getResponse]', { step, ...details });
 }
 
 function safeEquals(left: string, right: string): boolean {
@@ -529,6 +535,7 @@ async function parseInput(request: NextRequest): Promise<ParsedInput> {
     parameters,
     context,
     userQuery,
+    rawBody: parsedBody,
   };
 }
 
@@ -566,6 +573,37 @@ async function findAccessRow(accountId: string, accessIdentifier: string): Promi
   );
 
   return result.rows[0] || null;
+}
+
+async function shouldLogDevRequest(accountId: string | null): Promise<boolean> {
+  if (!accountId) {
+    return false;
+  }
+
+  const settings = await getIntelligenceSettings(accountId);
+  return Boolean(settings.dev_mode);
+}
+
+async function logDevRequest(input: {
+  accountId: string | null;
+  accessId: string | null;
+  requestId: string;
+  requestMethod: string;
+  requestUrl: string;
+  requestHeaders: Record<string, unknown>;
+  requestBody: Record<string, unknown> | null;
+  requestQuery: Record<string, string>;
+  requestContext: Record<string, unknown> | null;
+  responseStatus: number | null;
+  responseBody: Record<string, unknown> | null;
+  errorMessage: string | null;
+  errorStack: string | null;
+}) {
+  try {
+    await insertIntelligenceDevLog(input);
+  } catch (error) {
+    console.error('Failed to write intelligence dev log:', error);
+  }
 }
 
 async function finalizeRequestLog(input: {
@@ -667,37 +705,228 @@ async function logFailedRequest(input: {
 }
 
 async function handleRequest(request: NextRequest) {
+  const requestId = randomUUID();
+  traceStep('request_received', {
+    requestId,
+    method: request.method,
+    url: request.url,
+  });
+  const requestHeaders = Object.fromEntries(request.headers.entries());
+  let parsedBodyForDevLog: Record<string, unknown> | null = null;
+  let parsedQueryForDevLog: Record<string, string> = {};
+  let parsedContextForDevLog: Record<string, unknown> | null = null;
+  let accountIdForDevLog: string | null = null;
+  let accessIdForDevLog: string | null = null;
+  let devModeEnabled = false;
+
   let input: ParsedInput;
 
   try {
     input = await parseInput(request);
+    traceStep('request_parsed', {
+      requestId,
+      accountId: input.accountId || null,
+      accessIdentifier: input.accessIdentifier || null,
+      requestedModel: input.requestedModel || null,
+      parameterKeys: Object.keys(input.parameters),
+      hasContext: Boolean(input.context.trim()),
+      hasQuery: Boolean(input.userQuery.trim()),
+    });
+    parsedBodyForDevLog = input.rawBody;
+    parsedQueryForDevLog = Object.fromEntries(request.nextUrl.searchParams.entries());
+    parsedContextForDevLog =
+      parsedBodyForDevLog && typeof parsedBodyForDevLog.context === 'object' && parsedBodyForDevLog.context !== null && !Array.isArray(parsedBodyForDevLog.context)
+        ? (parsedBodyForDevLog.context as Record<string, unknown>)
+        : null;
   } catch (error) {
+    traceStep('request_parse_failed', {
+      requestId,
+      error: error instanceof Error ? error.message : 'Invalid request body',
+    });
+    await logDevRequest({
+      accountId: null,
+      accessId: null,
+      requestId,
+      requestMethod: request.method,
+      requestUrl: request.url,
+      requestHeaders,
+      requestBody: null,
+      requestQuery: Object.fromEntries(request.nextUrl.searchParams.entries()),
+      requestContext: null,
+      responseStatus: 400,
+      responseBody: {
+        status: 'fail',
+        error: error instanceof Error ? error.message : 'Invalid request body',
+      },
+      errorMessage: error instanceof Error ? error.message : 'Invalid request body',
+      errorStack: error instanceof Error ? error.stack ?? null : null,
+    });
     return errorResponse(error instanceof Error ? error.message : 'Invalid request body', 400);
   }
 
+  accountIdForDevLog = input.accountId || null;
+  accessIdForDevLog = input.accessIdentifier || null;
+  devModeEnabled = await shouldLogDevRequest(accountIdForDevLog);
+  traceStep('dev_mode_state', {
+    requestId,
+    accountId: accountIdForDevLog,
+    devModeEnabled,
+  });
+
+  if (devModeEnabled) {
+    await logDevRequest({
+      accountId: accountIdForDevLog,
+      accessId: accessIdForDevLog,
+      requestId,
+      requestMethod: request.method,
+      requestUrl: request.url,
+      requestHeaders,
+      requestBody: parsedBodyForDevLog,
+      requestQuery: parsedQueryForDevLog,
+      requestContext: parsedContextForDevLog,
+      responseStatus: null,
+      responseBody: null,
+      errorMessage: null,
+      errorStack: null,
+    });
+  }
+
   if (!input.accountId) {
+    traceStep('validation_failed', { requestId, reason: 'missing_userid' });
+    if (devModeEnabled) {
+      await logDevRequest({
+        accountId: accountIdForDevLog,
+        accessId: accessIdForDevLog,
+        requestId,
+        requestMethod: request.method,
+        requestUrl: request.url,
+        requestHeaders,
+        requestBody: parsedBodyForDevLog,
+        requestQuery: parsedQueryForDevLog,
+        requestContext: parsedContextForDevLog,
+        responseStatus: 400,
+        responseBody: { status: 'fail', error: 'Missing userid header' },
+        errorMessage: 'Missing userid header',
+        errorStack: null,
+      });
+    }
     return errorResponse('Missing userid header', 400);
   }
 
   if (!input.tokenKey) {
+    traceStep('validation_failed', { requestId, reason: 'missing_tokenKey' });
+    if (devModeEnabled) {
+      await logDevRequest({
+        accountId: accountIdForDevLog,
+        accessId: accessIdForDevLog,
+        requestId,
+        requestMethod: request.method,
+        requestUrl: request.url,
+        requestHeaders,
+        requestBody: parsedBodyForDevLog,
+        requestQuery: parsedQueryForDevLog,
+        requestContext: parsedContextForDevLog,
+        responseStatus: 400,
+        responseBody: { status: 'fail', error: 'Missing tokenKey header' },
+        errorMessage: 'Missing tokenKey header',
+        errorStack: null,
+      });
+    }
     return errorResponse('Missing tokenKey header', 400);
   }
 
   if (!input.accessIdentifier) {
+    traceStep('validation_failed', { requestId, reason: 'missing_accessid' });
+    if (devModeEnabled) {
+      await logDevRequest({
+        accountId: accountIdForDevLog,
+        accessId: accessIdForDevLog,
+        requestId,
+        requestMethod: request.method,
+        requestUrl: request.url,
+        requestHeaders,
+        requestBody: parsedBodyForDevLog,
+        requestQuery: parsedQueryForDevLog,
+        requestContext: parsedContextForDevLog,
+        responseStatus: 400,
+        responseBody: { status: 'fail', error: 'Missing accessid header' },
+        errorMessage: 'Missing accessid header',
+        errorStack: null,
+      });
+    }
     return errorResponse('Missing accessid header', 400);
   }
 
   const access = await findAccessRow(input.accountId, input.accessIdentifier);
 
   if (!access) {
+    traceStep('validation_failed', {
+      requestId,
+      reason: 'access_not_found',
+      accountId: input.accountId,
+      accessIdentifier: input.accessIdentifier,
+    });
+    if (devModeEnabled) {
+      await logDevRequest({
+        accountId: accountIdForDevLog,
+        accessId: accessIdForDevLog,
+        requestId,
+        requestMethod: request.method,
+        requestUrl: request.url,
+        requestHeaders,
+        requestBody: parsedBodyForDevLog,
+        requestQuery: parsedQueryForDevLog,
+        requestContext: parsedContextForDevLog,
+        responseStatus: 404,
+        responseBody: { status: 'fail', error: 'Invalid userid or accessid. No intelligence prompt was found for this account and access ID.' },
+        errorMessage: 'Invalid userid or accessid. No intelligence prompt was found for this account and access ID.',
+        errorStack: null,
+      });
+    }
     return errorResponse('Invalid userid or accessid. No intelligence prompt was found for this account and access ID.', 404);
   }
 
   if (!tokenMatchesHash(input.tokenKey, access.token_hash)) {
+    traceStep('validation_failed', { requestId, reason: 'invalid_token' });
+    if (devModeEnabled) {
+      await logDevRequest({
+        accountId: accountIdForDevLog,
+        accessId: accessIdForDevLog,
+        requestId,
+        requestMethod: request.method,
+        requestUrl: request.url,
+        requestHeaders,
+        requestBody: parsedBodyForDevLog,
+        requestQuery: parsedQueryForDevLog,
+        requestContext: parsedContextForDevLog,
+        responseStatus: 401,
+        responseBody: { status: 'fail', error: 'Invalid tokenKey for this intelligence prompt.' },
+        errorMessage: 'Invalid tokenKey for this intelligence prompt.',
+        errorStack: null,
+      });
+    }
     return errorResponse('Invalid tokenKey for this intelligence prompt.', 401);
   }
 
   if (Number(access.balance) <= 0) {
+    traceStep('validation_failed', { requestId, reason: 'insufficient_balance' });
+    if (devModeEnabled) {
+      await logDevRequest({
+        accountId: accountIdForDevLog,
+        accessId: accessIdForDevLog,
+        requestId,
+        requestMethod: request.method,
+        requestUrl: request.url,
+        requestHeaders,
+        requestBody: parsedBodyForDevLog,
+        requestQuery: parsedQueryForDevLog,
+        requestContext: parsedContextForDevLog,
+        responseStatus: 402,
+        responseBody: { status: 'fail', error: 'Insufficient balance for this intelligence prompt.' },
+        errorMessage: 'Insufficient balance for this intelligence prompt.',
+        errorStack: null,
+      });
+    }
     return errorResponse('Insufficient balance for this intelligence prompt.', 402);
   }
 
@@ -706,10 +935,19 @@ async function handleRequest(request: NextRequest) {
   const primaryModelConfig = normalizeStoredModelConfig(access.primaryModelConfig);
   const fallbackModelConfig = normalizeStoredModelConfig(access.fallbackModelConfig);
   const requestedModel = normalizeModelName(input.requestedModel);
+  traceStep('model_context', {
+    requestId,
+    requestedModel,
+    primaryModel,
+    fallbackModel,
+    primaryProvider: primaryModelConfig?.provider || null,
+    fallbackProvider: fallbackModelConfig?.provider || null,
+  });
 
   const promptPayload = buildPrompt(access.defPrompt, input.userQuery, input.parameters, input.context);
 
   if (!promptPayload.renderedPrompt) {
+    traceStep('validation_failed', { requestId, reason: 'empty_rendered_prompt' });
     if (request.method !== 'POST') {
       return errorResponse(
         'Invalid request method for this payload. Send a POST request with a raw JSON body containing query and/or context.',
@@ -717,10 +955,26 @@ async function handleRequest(request: NextRequest) {
       );
     }
 
-    return errorResponse(
-      'Invalid request parameters. No masterPrompt is saved for this access, and the JSON body did not include query or context.',
-      400
-    );
+    const message =
+      'Invalid request parameters. No masterPrompt is saved for this access, and the JSON body did not include query or context.';
+    if (devModeEnabled) {
+      await logDevRequest({
+        accountId: accountIdForDevLog,
+        accessId: accessIdForDevLog,
+        requestId,
+        requestMethod: request.method,
+        requestUrl: request.url,
+        requestHeaders,
+        requestBody: parsedBodyForDevLog,
+        requestQuery: parsedQueryForDevLog,
+        requestContext: parsedContextForDevLog,
+        responseStatus: 400,
+        responseBody: { status: 'fail', error: message },
+        errorMessage: message,
+        errorStack: null,
+      });
+    }
+    return errorResponse(message, 400);
   }
 
   const modelCandidates = requestedModel
@@ -788,12 +1042,54 @@ async function handleRequest(request: NextRequest) {
             }
           : null,
       ].filter(Boolean);
+  traceStep('model_candidates_built', {
+    requestId,
+    requestedModel: requestedModel || null,
+    candidateCount: modelCandidates.length,
+    candidateIdentifiers: modelCandidates.map((candidate) => candidate?.identifier).filter(Boolean),
+  });
 
   if (requestedModel && modelCandidates.length === 0) {
+    traceStep('validation_failed', { requestId, reason: 'requested_model_mismatch', requestedModel });
+    if (devModeEnabled) {
+      await logDevRequest({
+        accountId: accountIdForDevLog,
+        accessId: accessIdForDevLog,
+        requestId,
+        requestMethod: request.method,
+        requestUrl: request.url,
+        requestHeaders,
+        requestBody: parsedBodyForDevLog,
+        requestQuery: parsedQueryForDevLog,
+        requestContext: parsedContextForDevLog,
+        responseStatus: 403,
+        responseBody: { status: 'fail', error: 'Requested model does not match configured primaryModel or fallbackModel' },
+        errorMessage: 'Requested model does not match configured primaryModel or fallbackModel',
+        errorStack: null,
+      });
+    }
     return errorResponse('Requested model does not match configured primaryModel or fallbackModel', 403);
   }
 
   if (modelCandidates.length === 0) {
+    traceStep('validation_failed', { requestId, reason: 'no_model_candidates' });
+    if (devModeEnabled) {
+      await logDevRequest({
+        accountId: accountIdForDevLog,
+        accessId: accessIdForDevLog,
+        requestId,
+        requestMethod: request.method,
+        requestUrl: request.url,
+        requestHeaders,
+        requestBody: parsedBodyForDevLog,
+        requestQuery: parsedQueryForDevLog,
+        requestContext: parsedContextForDevLog,
+        responseStatus: 400,
+        responseBody: { status: 'fail', error: 'No primaryModel or fallbackModel configured for this access' },
+        errorMessage: 'No primaryModel or fallbackModel configured for this access',
+        errorStack: null,
+      });
+    }
     return errorResponse('No primaryModel or fallbackModel configured for this access', 400);
   }
 
@@ -815,6 +1111,24 @@ async function handleRequest(request: NextRequest) {
   );
 
   if (usableCandidates.length === 0) {
+    traceStep('validation_failed', { requestId, reason: 'no_usable_candidates' });
+    if (devModeEnabled) {
+      await logDevRequest({
+        accountId: accountIdForDevLog,
+        accessId: accessIdForDevLog,
+        requestId,
+        requestMethod: request.method,
+        requestUrl: request.url,
+        requestHeaders,
+        requestBody: parsedBodyForDevLog,
+        requestQuery: parsedQueryForDevLog,
+        requestContext: parsedContextForDevLog,
+        responseStatus: 400,
+        responseBody: { status: 'fail', error: 'No access token configured for the available models' },
+        errorMessage: 'No access token configured for the available models',
+        errorStack: null,
+      });
+    }
     return errorResponse('No access token configured for the available models', 400);
   }
 
@@ -822,12 +1136,28 @@ async function handleRequest(request: NextRequest) {
 
   for (const candidate of usableCandidates) {
     try {
+      traceStep('provider_invoke_start', {
+        requestId,
+        source: candidate.source,
+        provider: candidate.provider,
+        model: candidate.model,
+        identifier: candidate.identifier,
+      });
       const modelResult = await invokeModel({
         provider: candidate.provider,
         model: candidate.model,
         prompt: promptPayload.renderedPrompt,
         maxTokens: access.maxTokens,
         apiKey: candidate.apiKey,
+      });
+      traceStep('provider_invoke_success', {
+        requestId,
+        source: candidate.source,
+        provider: modelResult.provider,
+        model: modelResult.model,
+        inputTokens: modelResult.inputTokens,
+        outputTokens: modelResult.outputTokens,
+        usageTokens: modelResult.usageTokens,
       });
 
       const estimatedCost = estimateModelCost(
@@ -839,6 +1169,23 @@ async function handleRequest(request: NextRequest) {
 
       after(async () => {
         try {
+          if (devModeEnabled) {
+            await logDevRequest({
+              accountId: accountIdForDevLog,
+              accessId: accessIdForDevLog,
+              requestId,
+              requestMethod: request.method,
+              requestUrl: request.url,
+              requestHeaders,
+              requestBody: parsedBodyForDevLog,
+              requestQuery: parsedQueryForDevLog,
+              requestContext: parsedContextForDevLog,
+              responseStatus: 200,
+              responseBody: { status: 'pass', response: modelResult.responseText },
+              errorMessage: null,
+              errorStack: null,
+            });
+          }
           await finalizeRequestLog({
             accessId: access.id,
             query: promptPayload.query,
@@ -861,11 +1208,36 @@ async function handleRequest(request: NextRequest) {
       return successResponse(modelResult.responseText);
     } catch (error) {
       lastErrorMessage = error instanceof Error ? error.message : 'Failed to generate response';
+      traceStep('provider_invoke_failed', {
+        requestId,
+        error: lastErrorMessage,
+      });
     }
   }
 
   after(async () => {
     try {
+      traceStep('final_failure_response', {
+        requestId,
+        error: lastErrorMessage,
+      });
+      if (devModeEnabled) {
+        await logDevRequest({
+          accountId: accountIdForDevLog,
+          accessId: accessIdForDevLog,
+          requestId,
+          requestMethod: request.method,
+          requestUrl: request.url,
+          requestHeaders,
+          requestBody: parsedBodyForDevLog,
+          requestQuery: parsedQueryForDevLog,
+          requestContext: parsedContextForDevLog,
+          responseStatus: 500,
+          responseBody: { status: 'fail', error: lastErrorMessage },
+          errorMessage: lastErrorMessage,
+          errorStack: null,
+        });
+      }
       await logFailedRequest({
         accessId: access.id,
         query: promptPayload.query,

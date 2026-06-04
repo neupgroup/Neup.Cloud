@@ -144,6 +144,46 @@ export async function ensureIntelligenceTables(): Promise<void> {
       `);
 
       await db.query(`
+        CREATE TABLE IF NOT EXISTS "intelligence_settings" (
+          id BIGSERIAL PRIMARY KEY,
+          account_id TEXT NOT NULL UNIQUE,
+          dev_mode BOOLEAN NOT NULL DEFAULT FALSE,
+          created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS "intelligence_devlog" (
+          id BIGSERIAL PRIMARY KEY,
+          account_id TEXT,
+          access_id TEXT,
+          request_id TEXT NOT NULL,
+          request_method TEXT NOT NULL,
+          request_url TEXT NOT NULL,
+          request_headers JSONB NOT NULL DEFAULT '{}'::jsonb,
+          request_body JSONB,
+          request_query JSONB NOT NULL DEFAULT '{}'::jsonb,
+          request_context JSONB,
+          response_status INTEGER,
+          response_body JSONB,
+          error_message TEXT,
+          error_stack TEXT,
+          created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      await db.query(`
+        CREATE INDEX IF NOT EXISTS "intelligence_devlog_account_id_idx"
+        ON "intelligence_devlog" (account_id)
+      `);
+
+      await db.query(`
+        CREATE INDEX IF NOT EXISTS "intelligence_devlog_access_id_idx"
+        ON "intelligence_devlog" (access_id)
+      `);
+
+      await db.query(`
         DO $$
         BEGIN
           IF NOT EXISTS (
