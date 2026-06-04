@@ -55,12 +55,6 @@ const intelligenceCards = [
     href: '/intelligence/tokens',
   },
   {
-    title: 'OpenFlow',
-    description: 'Direct AI connection with token selection, prompt input, and automatic fallback support.',
-    icon: Zap,
-    href: '/intelligence/openflow',
-  },
-  {
     title: 'Models',
     description: 'Maintain a reusable catalog of supported provider models, descriptions, and pricing JSON.',
     icon: Bot,
