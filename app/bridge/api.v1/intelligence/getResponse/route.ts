@@ -34,6 +34,7 @@ interface IntelligenceAccessRow {
   prompt_id: string;
   account_id: string;
   token_hash: string;
+  type: string;
   primaryModel: string | null;
   fallbackModel: string | null;
   primaryModelConfig: unknown;
@@ -580,6 +581,7 @@ async function findAccessRow(accountId: string, accessIdentifier: string): Promi
         ia.prompt_id,
         ia.account_id,
         ia.token_hash,
+        ia.type,
         ia."primaryModel",
         ia."fallbackModel",
         ia."primaryModelConfig",
@@ -616,6 +618,7 @@ async function findAccessRowByPromptId(promptId: string): Promise<IntelligenceAc
         ia.prompt_id,
         ia.account_id,
         ia.token_hash,
+        ia.type,
         ia."primaryModel",
         ia."fallbackModel",
         ia."primaryModelConfig",
@@ -889,11 +892,10 @@ async function handleRequest(request: NextRequest) {
 
   const legacyAccess = access as IntelligenceAccessRow | null;
 
-  const primaryModel = hasDirectModelCandidates ? null : normalizeModelName(legacyAccess?.primaryModel);
-  const fallbackModel = hasDirectModelCandidates ? null : normalizeModelName(legacyAccess?.fallbackModel);
-  const primaryModelConfig = hasDirectModelCandidates ? null : normalizeStoredModelConfig(legacyAccess?.primaryModelConfig);
-  const fallbackModelConfig = hasDirectModelCandidates ? null : normalizeStoredModelConfig(legacyAccess?.fallbackModelConfig);
-  const requestedModel = normalizeModelName(input.requestedModel);
+  const primaryModel = normalizeModelName(legacyAccess?.primaryModel);
+  const fallbackModel = normalizeModelName(legacyAccess?.fallbackModel);
+  const primaryModelConfig = normalizeStoredModelConfig(legacyAccess?.primaryModelConfig);
+  const fallbackModelConfig = normalizeStoredModelConfig(legacyAccess?.fallbackModelConfig);
   traceStep('model_context', {
     requestId,
     requestedModel: input.promptId || null,
@@ -904,7 +906,7 @@ async function handleRequest(request: NextRequest) {
     fallbackProvider: fallbackModelConfig?.provider || null,
   });
 
-  const promptPayload = buildPrompt(isPromptRequest ? legacyAccess?.defPrompt || null : null, input.userQuery, input.parameters, input.context);
+  const promptPayload = buildPrompt(legacyAccess?.defPrompt || null, input.userQuery, input.parameters, input.context);
 
   if (!promptPayload.renderedPrompt) {
     traceStep('validation_failed', { requestId, reason: 'empty_rendered_prompt' });
@@ -937,7 +939,7 @@ async function handleRequest(request: NextRequest) {
     return errorResponse(message, 400);
   }
 
-  const modelCandidates = isOpenFlowRequest
+  const modelCandidates = legacyAccess?.type === 'open'
     ? input.openFlowCandidates.map((candidate) => ({
         provider: candidate.provider,
         model: candidate.model,
@@ -951,6 +953,39 @@ async function handleRequest(request: NextRequest) {
         apiKey: candidate.apiKey,
         source: 'direct' as const,
       }))
+    : legacyAccess?.type === 'model_key_def'
+    ? [
+        modelMatchesRequest(input.promptId, primaryModelConfig, primaryModel)
+          ? {
+              provider: primaryModelConfig?.provider || null,
+              model: primaryModelConfig?.model || primaryModel,
+              identifier: getModelIdentifier(primaryModelConfig, primaryModel),
+              modelConfig: {
+                currency: primaryModelConfig?.currency || 'USD',
+                inputCostPer1000Tokens: primaryModelConfig?.inputCostPer1000Tokens || 0,
+                outputCostPer1000Tokens: primaryModelConfig?.outputCostPer1000Tokens || 0,
+                price: primaryModelConfig?.price || {},
+              },
+              apiKey: legacyAccess?.primaryAccessTokenKey || '',
+              source: 'primary' as const,
+            }
+          : null,
+        modelMatchesRequest(input.promptId, fallbackModelConfig, fallbackModel)
+          ? {
+              provider: fallbackModelConfig?.provider || null,
+              model: fallbackModelConfig?.model || fallbackModel,
+              identifier: getModelIdentifier(fallbackModelConfig, fallbackModel),
+              modelConfig: {
+                currency: fallbackModelConfig?.currency || 'USD',
+                inputCostPer1000Tokens: fallbackModelConfig?.inputCostPer1000Tokens || 0,
+                outputCostPer1000Tokens: fallbackModelConfig?.outputCostPer1000Tokens || 0,
+                price: fallbackModelConfig?.price || {},
+              },
+              apiKey: legacyAccess?.fallbackAccessTokenKey || '',
+              source: 'fallback' as const,
+            }
+          : null,
+      ].filter(Boolean)
     : isPromptRequest
     ? [
         modelMatchesRequest(input.promptId, primaryModelConfig, primaryModel)
@@ -987,8 +1022,8 @@ async function handleRequest(request: NextRequest) {
     : [];
   traceStep('model_candidates_built', {
     requestId,
-    requestedModel: requestedModel || null,
-    directModelCount: input.directModelCandidates.length,
+    requestedModel: input.promptId || null,
+    directModelCount: input.openFlowCandidates.length,
     candidateCount: modelCandidates.length,
     candidateIdentifiers: modelCandidates.map((candidate) => candidate?.identifier).filter(Boolean),
   });

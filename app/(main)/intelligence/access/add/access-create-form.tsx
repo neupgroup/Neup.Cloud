@@ -49,8 +49,8 @@ type AccessType = 'open' | 'model_key_def' | 'prompt_def';
 
 const accessTypeOptions: Array<{ value: AccessType; label: string; description: string }> = [
   { value: 'prompt_def', label: 'Prompt Access', description: 'Model, key, and prompt are all defined in advance.' },
-  { value: 'model_key_def', label: 'Model Key Defined', description: 'Model is defined, each key is defined, and the user passes prompt and context.' },
-  { value: 'open', label: 'Open Access', description: 'The user passes a set of [model, key] plus prompt and context at runtime.' },
+  { value: 'model_key_def', label: 'Model Key Defined', description: 'Model and key are defined; the user passes prompt and context at runtime.' },
+  { value: 'open', label: 'Open Access', description: 'The user passes a set of [model, key] at runtime. No prompt is stored here.' },
 ];
 
 const initialState: CreateIntelligenceAccessActionState = {
@@ -94,6 +94,7 @@ export default function AccessCreateForm({
   );
   const [rows, setRows] = useState<ModelRow[]>([{ modelInput: '', tokenInput: '' }]);
   const [accessType, setAccessType] = useState<AccessType>('prompt_def');
+  const [prompt, setPrompt] = useState('');
 
   const getModelLabel = (id: string) => modelOptions.find((option) => String(option.id) === id)?.label || 'Select a model';
   const getTokenLabel = (id: string) => tokenOptions.find((option) => String(option.id) === id)?.label || 'Select a token';
@@ -237,102 +238,115 @@ export default function AccessCreateForm({
             <input type="hidden" name="primary_access_key" value={primaryRow?.tokenId !== null ? String(primaryRow.tokenId) : ''} />
             <input type="hidden" name="fallback_access_key" value={secondaryRow?.tokenId != null ? String(secondaryRow.tokenId) : ''} />
             <input type="hidden" name="access_type" value={accessType} />
+            <input type="hidden" name="def_prompt" value={accessType === 'prompt_def' ? prompt : ''} />
             <input type="hidden" name="model_entries" value={JSON.stringify(serializedEntries)} />
 
-            <div className="grid gap-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Model blocks</p>
-                  <p className="text-sm text-muted-foreground">Row 1 is primary. Row 2 and beyond are saved to `intelligence_fallbacks` with an index.</p>
+            {accessType !== 'open' && (
+              <div className="grid gap-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Model blocks</p>
+                    <p className="text-sm text-muted-foreground">Row 1 is primary. Row 2 and beyond are saved to `intelligence_fallbacks` with an index.</p>
+                  </div>
+                  <Button type="button" variant="outline" onClick={addRow}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Model Block
+                  </Button>
                 </div>
-                <Button type="button" variant="outline" onClick={addRow}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Model Block
-                </Button>
+
+                {rowState.map((row, index) => (
+                  <div key={index} className="grid gap-4 rounded-2xl border border-border/70 bg-background p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="font-medium text-foreground">
+                          {index === 0 ? 'Primary model block' : `Fallback block ${index}`}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {index === 0
+                            ? 'This is the main source of truth.'
+                            : 'This row will be persisted in the fallback index table.'}
+                        </p>
+                      </div>
+                      {index > 0 && (
+                        <Button type="button" variant="ghost" size="sm" onClick={() => removeRow(index)}>
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="grid gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor={`model_input_${index}`}>Model</Label>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              id={`model_input_${index}`}
+                              type="button"
+                              variant="outline"
+                              className="justify-between"
+                            >
+                              <span className="truncate">{getModelLabel(row.modelInput)}</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="max-h-72 w-96 overflow-auto">
+                            {modelOptions.map((option) => (
+                              <DropdownMenuItem
+                                key={option.id}
+                                onClick={() => setRowValue(index, 'modelInput', String(option.id))}
+                              >
+                                {option.label}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor={`token_input_${index}`}>Token</Label>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              id={`token_input_${index}`}
+                              type="button"
+                              variant="outline"
+                              className="justify-between"
+                              disabled={!row.modelInput}
+                            >
+                              <span className="truncate">{getTokenLabel(row.tokenInput)}</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="max-h-72 w-96 overflow-auto">
+                            {tokenOptions.map((option) => (
+                              <DropdownMenuItem
+                                key={option.id}
+                                onClick={() => setRowValue(index, 'tokenInput', String(option.id))}
+                              >
+                                {option.label}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
+            )}
 
-              {rowState.map((row, index) => (
-                <div key={index} className="grid gap-4 rounded-2xl border border-border/70 bg-background p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="font-medium text-foreground">
-                        {index === 0 ? 'Primary model block' : `Fallback block ${index}`}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {index === 0
-                          ? 'This is the main source of truth.'
-                          : 'This row will be persisted in the fallback index table.'}
-                      </p>
-                    </div>
-                    {index > 0 && (
-                      <Button type="button" variant="ghost" size="sm" onClick={() => removeRow(index)}>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor={`model_input_${index}`}>Model</Label>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            id={`model_input_${index}`}
-                            type="button"
-                            variant="outline"
-                            className="justify-between"
-                          >
-                            <span className="truncate">{getModelLabel(row.modelInput)}</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="max-h-72 w-96 overflow-auto">
-                          {modelOptions.map((option) => (
-                            <DropdownMenuItem
-                              key={option.id}
-                              onClick={() => setRowValue(index, 'modelInput', String(option.id))}
-                            >
-                              {option.label}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor={`token_input_${index}`}>Token</Label>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            id={`token_input_${index}`}
-                            type="button"
-                            variant="outline"
-                            className="justify-between"
-                          >
-                            <span className="truncate">{getTokenLabel(row.tokenInput)}</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="max-h-72 w-96 overflow-auto">
-                          {tokenOptions.map((option) => (
-                            <DropdownMenuItem
-                              key={option.id}
-                              onClick={() => setRowValue(index, 'tokenInput', String(option.id))}
-                            >
-                              {option.label}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="guider">Guider</Label>
-              <Textarea id="guider" name="guider" className="min-h-40" />
-            </div>
+            {accessType === 'prompt_def' && (
+              <div className="grid gap-2">
+                <Label htmlFor="prompt">Prompt</Label>
+                <Textarea
+                  id="prompt"
+                  name="prompt"
+                  className="min-h-40"
+                  value={prompt}
+                  onChange={(event) => setPrompt(event.target.value)}
+                  placeholder="Define the prompt that will be stored with this access record."
+                />
+              </div>
+            )}
 
             <div className="grid gap-2">
               <Label htmlFor="max_tokens">Max Tokens</Label>

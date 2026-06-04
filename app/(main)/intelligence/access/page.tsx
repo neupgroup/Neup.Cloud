@@ -58,6 +58,39 @@ export default async function IntelligenceAccessPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle className="font-headline">Endpoint Guide</CardTitle>
+          <CardDescription>
+            How to call `/bridge/api.v1/intelligence/getResponse` with each access type.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 text-sm text-muted-foreground">
+          <div>
+            <p className="font-medium text-foreground">`prompt_def`</p>
+            <p>Send `promptId` and `accessKey`. The stored prompt, model, and key are used. Include `query` and optional `context` in the body when you want extra runtime details.</p>
+          </div>
+          <div>
+            <p className="font-medium text-foreground">`model_key_def`</p>
+            <p>Send `promptId`, `accessKey`, `query`, and `context`. The access record defines the model and key wiring, while the request supplies the prompt text at runtime.</p>
+          </div>
+          <div>
+            <p className="font-medium text-foreground">`open`</p>
+            <p>Send `promptId`, `accessKey`, `query`, `context`, and a `model` array. Each item should look like `&lt;provider&gt;/&lt;model&gt;@@@&lt;apiKey&gt;`.</p>
+          </div>
+          <div>
+            <p className="font-medium text-foreground">Example POST body</p>
+            <pre className="overflow-auto rounded-xl bg-muted p-3 text-xs text-foreground">{`{
+  "promptId": "ACC-123",
+  "accessKey": "token-here",
+  "query": "Write a short summary",
+  "context": "optional context",
+  "model": ["openai/gpt-4o@@@sk-...", "anthropic/claude-3-5-sonnet@@@sk-..."]
+}`}</pre>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle className="flex items-center gap-2 font-headline">
             <Plus className="h-5 w-5 text-primary" />
             Existing Access Records

@@ -1470,7 +1470,7 @@ export function parseAccessFormData(formData: FormData) {
     primaryAccessKey: parseOptionalInteger(formData.get('primary_access_key')),
     fallbackAccessKey: parseOptionalInteger(formData.get('fallback_access_key')),
     maxTokens: parseOptionalInteger(formData.get('max_tokens')),
-    guider: parseOptionalString(formData.get('guider') ?? formData.get('def_prompt')),
+    prompt: parseOptionalString(formData.get('prompt') ?? formData.get('def_prompt')),
     fallbackEntries,
   };
 }
