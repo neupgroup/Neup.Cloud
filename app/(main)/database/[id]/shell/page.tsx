@@ -32,120 +32,6 @@ const QUICK_QUERIES: Record<DatabaseConnectionType, Array<{ label: string; query
   firestore: [],
 };
 
-const QUERY_TEMPLATES: Record<
-  DatabaseConnectionType,
-  Array<{ label: string; query: string }>
-> = {
-  postgres: [
-    {
-      label: 'Select',
-      query: `-- Replace exampleTable and exampleField before running.
-SELECT
-  exampleField
-FROM exampleTable
-WHERE exampleField = 'exampleValue'
-LIMIT 10
-OFFSET 0;`,
-    },
-    {
-      label: 'Insert',
-      query: `-- Replace exampleTable and exampleField before running.
-INSERT INTO exampleTable (
-  exampleField
-) VALUES (
-  'exampleValue'
-);`,
-    },
-    {
-      label: 'Update',
-      query: `-- Replace exampleTable and exampleField before running.
-UPDATE exampleTable
-SET exampleField = 'updatedValue'
-WHERE exampleField = 'matchValue';`,
-    },
-    {
-      label: 'Delete',
-      query: `-- Replace exampleTable and exampleField before running.
-DELETE FROM exampleTable
-WHERE exampleField = 'matchValue';`,
-    },
-  ],
-  mysql: [
-    {
-      label: 'Select',
-      query: `-- Replace exampleTable and exampleField before running.
-SELECT
-  exampleField
-FROM exampleTable
-WHERE exampleField = 'exampleValue'
-LIMIT 10
-OFFSET 0;`,
-    },
-    {
-      label: 'Insert',
-      query: `-- Replace exampleTable and exampleField before running.
-INSERT INTO exampleTable (
-  exampleField
-) VALUES (
-  'exampleValue'
-);`,
-    },
-    {
-      label: 'Update',
-      query: `-- Replace exampleTable and exampleField before running.
-UPDATE exampleTable
-SET exampleField = 'updatedValue'
-WHERE exampleField = 'matchValue'
-LIMIT 10;`,
-    },
-    {
-      label: 'Delete',
-      query: `-- Replace exampleTable and exampleField before running.
-DELETE FROM exampleTable
-WHERE exampleField = 'matchValue'
-LIMIT 10;`,
-    },
-  ],
-  mariadb: [
-    {
-      label: 'Select',
-      query: `-- Replace exampleTable and exampleField before running.
-SELECT
-  exampleField
-FROM exampleTable
-WHERE exampleField = 'exampleValue'
-LIMIT 10
-OFFSET 0;`,
-    },
-    {
-      label: 'Insert',
-      query: `-- Replace exampleTable and exampleField before running.
-INSERT INTO exampleTable (
-  exampleField
-) VALUES (
-  'exampleValue'
-);`,
-    },
-    {
-      label: 'Update',
-      query: `-- Replace exampleTable and exampleField before running.
-UPDATE exampleTable
-SET exampleField = 'updatedValue'
-WHERE exampleField = 'matchValue'
-LIMIT 10;`,
-    },
-    {
-      label: 'Delete',
-      query: `-- Replace exampleTable and exampleField before running.
-DELETE FROM exampleTable
-WHERE exampleField = 'matchValue'
-LIMIT 10;`,
-    },
-  ],
-  sqlite: [],
-  firestore: [],
-};
-
 function formatCell(value: unknown) {
   if (value === null || value === undefined) {
     return 'NULL';
@@ -165,13 +51,7 @@ type Props = {
 export default function DatabaseShellPage({ params }: Props) {
   const { id } = use(params);
   const { toast } = useToast();
-  const [query, setQuery] = useState(`-- Replace exampleTable and exampleField before running.
-SELECT
-  exampleField
-FROM exampleTable
-WHERE exampleField = 'exampleValue'
-LIMIT 10
-OFFSET 0;`);
+  const [query, setQuery] = useState('SELECT 1;');
   const [isExecuting, setIsExecuting] = useState(false);
   const [result, setResult] = useState<DatabaseShellQueryResult | null>(null);
   const [error, setError] = useState('');
@@ -314,13 +194,7 @@ OFFSET 0;`);
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             className="min-h-[200px] font-mono text-sm"
-            placeholder={`-- Replace exampleTable and exampleField before running.
-SELECT
-  exampleField
-FROM exampleTable
-WHERE exampleField = 'exampleValue'
-LIMIT 10
-OFFSET 0;`}
+            placeholder="SELECT * FROM your_table LIMIT 10;"
             disabled={isExecuting || isLoadingMeta || !connectionId}
           />
 
@@ -338,26 +212,6 @@ OFFSET 0;`}
                   </Button>
                 ))
               : null}
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">Templates</p>
-            <div className="flex flex-wrap gap-2">
-              {connectionType
-                ? QUERY_TEMPLATES[connectionType].map((item) => (
-                    <Button
-                      key={item.label}
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => setQuery(item.query)}
-                      disabled={isExecuting || isLoadingMeta}
-                      className="uppercase"
-                    >
-                      {item.label}
-                    </Button>
-                  ))
-                : null}
-            </div>
           </div>
 
           <div className="flex items-center gap-2">

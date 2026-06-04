@@ -39,7 +39,7 @@ export default async function IntelligenceModelsPage() {
             Central model registry
           </CardTitle>
           <CardDescription className="max-w-2xl text-base">
-            Add valid OpenAI, Anthropic, or Google model entries here first. Prompt records copy the model snapshot at creation time, so they do not depend on a live foreign key.
+            Add valid OpenAI, Anthropic, Google, or NVIDIA model entries here first. Prompt records copy the model snapshot at creation time, so they do not depend on a live foreign key.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 sm:flex-row">

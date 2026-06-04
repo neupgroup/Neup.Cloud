@@ -1,6 +1,7 @@
 import { invokeAnthropicModel } from '@/services/intelligence/providers/anthropic';
 import { invokeGeminiModel } from '@/services/intelligence/providers/gemini';
 import { invokeOpenAIModel } from '@/services/intelligence/providers/openai';
+import { invokeNvidiaModel } from '@/services/intelligence/providers/nvidia';
 import type { ModelInvocationResult, SupportedProvider } from '@/services/intelligence/types';
 
 export interface ModelInvocationInput {
@@ -18,7 +19,7 @@ function normalizeModel(model: string): string {
 function normalizeProvider(value: string | null | undefined): SupportedProvider | null {
   const normalized = (value || '').trim().toLowerCase();
 
-  if (normalized === 'openai' || normalized === 'anthropic' || normalized === 'google') {
+  if (normalized === 'openai' || normalized === 'anthropic' || normalized === 'google' || normalized === 'nvidia') {
     return normalized;
   }
 
@@ -47,6 +48,10 @@ function resolveProvider(model: string, provider?: string | null): { provider: S
     return { provider: 'google', modelName: normalized.split(/[:/]/, 2)[1] || normalized };
   }
 
+  if (lowerModel.startsWith('nvidia:') || lowerModel.startsWith('nvidia/')) {
+    return { provider: 'nvidia', modelName: normalized.split(/[:/]/, 2)[1] || normalized };
+  }
+
   if (lowerModel.startsWith('gpt-') || lowerModel.startsWith('o1') || lowerModel.startsWith('o3') || lowerModel.startsWith('o4')) {
     return { provider: 'openai', modelName: normalized };
   }
@@ -57,6 +62,10 @@ function resolveProvider(model: string, provider?: string | null): { provider: S
 
   if (lowerModel.startsWith('gemini')) {
     return { provider: 'google', modelName: normalized };
+  }
+
+  if (lowerModel.startsWith('nemotron') || lowerModel.startsWith('nvidia/')) {
+    return { provider: 'nvidia', modelName: normalized };
   }
 
   throw new Error(`Unsupported model "${model}"`);
@@ -82,6 +91,13 @@ export async function invokeModel(input: ModelInvocationInput): Promise<ModelInv
       });
     case 'google':
       return invokeGeminiModel({
+        model: modelName,
+        prompt: input.prompt,
+        apiKey: input.apiKey,
+        maxTokens: input.maxTokens,
+      });
+    case 'nvidia':
+      return invokeNvidiaModel({
         model: modelName,
         prompt: input.prompt,
         apiKey: input.apiKey,

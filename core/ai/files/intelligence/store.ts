@@ -1191,8 +1191,8 @@ export function parseModelFormData(formData: FormData) {
   const inputRate = parseRateToPer1000(formData.get('input_rate'), 'Input rate');
   const outputRate = parseRateToPer1000(formData.get('output_rate'), 'Output rate');
 
-  if (!['openai', 'anthropic', 'google'].includes(provider)) {
-    throw new Error('Provider must be one of: openai, anthropic, google');
+  if (!['openai', 'anthropic', 'google', 'nvidia'].includes(provider)) {
+    throw new Error('Provider must be one of: openai, anthropic, google, nvidia');
   }
 
   return {

@@ -37,7 +37,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
 }
 
 export default function ModelCreateForm() {
-  const [provider, setProvider] = useState('openai');
+  const [provider, setProvider] = useState('nvidia');
   const [currency, setCurrency] = useState('USD');
   const [inputRate, setInputRate] = useState('');
   const [outputRate, setOutputRate] = useState('');
@@ -82,7 +82,7 @@ export default function ModelCreateForm() {
               name="provider"
               value={provider}
               onChange={(event) => setProvider(normalizeProviderInput(event.target.value))}
-              placeholder="openai"
+              placeholder="nvidia"
               required
               className="max-w-sm"
             />

@@ -1,4 +1,4 @@
-export type SupportedProvider = 'openai' | 'anthropic' | 'google';
+export type SupportedProvider = 'openai' | 'anthropic' | 'google' | 'nvidia';
 
 export interface ModelInvocationResult {
   provider: SupportedProvider;

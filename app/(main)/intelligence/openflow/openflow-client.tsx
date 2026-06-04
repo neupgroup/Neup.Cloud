@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/collapsible';
 import { invokeOpenFlowAction } from './openflow-actions';
 
-type ProviderValue = 'openai' | 'anthropic' | 'google';
+type ProviderValue = 'openai' | 'anthropic' | 'google' | 'nvidia';
 
 interface ModelOption {
   id: number;
@@ -139,7 +139,13 @@ export function OpenFlowClient({ tokens, models, accountId }: OpenFlowClientProp
                   {providerOptions.length > 0 ? (
                     providerOptions.map((providerOption) => (
                       <SelectItem key={providerOption} value={providerOption}>
-                        {providerOption === 'openai' ? 'OpenAI' : providerOption === 'anthropic' ? 'Anthropic' : 'Google'}
+                        {providerOption === 'openai'
+                          ? 'OpenAI'
+                          : providerOption === 'anthropic'
+                            ? 'Anthropic'
+                            : providerOption === 'google'
+                              ? 'Google'
+                              : 'NVIDIA'}
                       </SelectItem>
                     ))
                   ) : (
@@ -255,7 +261,13 @@ export function OpenFlowClient({ tokens, models, accountId }: OpenFlowClientProp
                         {providerOptions.length > 0 ? (
                           providerOptions.map((providerOption) => (
                             <SelectItem key={providerOption} value={providerOption}>
-                              {providerOption === 'openai' ? 'OpenAI' : providerOption === 'anthropic' ? 'Anthropic' : 'Google'}
+                              {providerOption === 'openai'
+                                ? 'OpenAI'
+                                : providerOption === 'anthropic'
+                                  ? 'Anthropic'
+                                  : providerOption === 'google'
+                                    ? 'Google'
+                                    : 'NVIDIA'}
                             </SelectItem>
                           ))
                         ) : (

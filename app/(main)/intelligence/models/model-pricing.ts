@@ -49,6 +49,7 @@ export const providerOptions = [
   { value: 'openai', label: 'OpenAI' },
   { value: 'anthropic', label: 'Anthropic' },
   { value: 'google', label: 'Google' },
+  { value: 'nvidia', label: 'NVIDIA' },
 ] as const;
 
 const commonCurrencyCodes = [
