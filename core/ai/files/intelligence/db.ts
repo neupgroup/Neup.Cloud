@@ -71,76 +71,35 @@ export async function ensureIntelligenceTables(): Promise<void> {
       `);
 
       await db.query(`
-        CREATE TABLE IF NOT EXISTS "intelligenceAccess" (
+        DROP TABLE IF EXISTS "intelligenceLog" CASCADE
+      `);
+
+      await db.query(`
+        DROP TABLE IF EXISTS "intelligenceAccess" CASCADE
+      `);
+
+      await db.query(`
+        DROP TABLE IF EXISTS "intelligence_access" CASCADE
+      `);
+
+      await db.query(`
+        CREATE TABLE "intelligence_access" (
           id BIGSERIAL PRIMARY KEY,
-          prompt_id TEXT NOT NULL,
           account_id TEXT NOT NULL,
-          token_hash TEXT NOT NULL,
-          model TEXT,
-          "primaryModel" TEXT,
-          "fallbackModel" TEXT,
-          "maxTokens" INTEGER,
-          "defPrompt" TEXT,
-          balance DOUBLE PRECISION NOT NULL DEFAULT 0
+          key_hash TEXT NOT NULL UNIQUE,
+          type TEXT NOT NULL,
+          available_to JSONB NOT NULL DEFAULT '[]'::jsonb,
+          details JSONB NOT NULL DEFAULT '[]'::jsonb,
+          max_token INTEGER,
+          created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT intelligence_access_type_check CHECK (type IN ('open', 'model_def', 'model_key_def', 'prompt_def'))
         )
       `);
 
       await db.query(`
-        ALTER TABLE "intelligenceAccess"
-        ALTER COLUMN balance TYPE DOUBLE PRECISION
-        USING balance::double precision
-      `);
-
-      await db.query(`
-        ALTER TABLE "intelligenceAccess"
-        ADD COLUMN IF NOT EXISTS "primaryModel" TEXT
-      `);
-
-      await db.query(`
-        ALTER TABLE "intelligenceAccess"
-        ADD COLUMN IF NOT EXISTS "fallbackModel" TEXT
-      `);
-
-      await db.query(`
-        UPDATE "intelligenceAccess"
-        SET "primaryModel" = model
-        WHERE "primaryModel" IS NULL
-          AND model IS NOT NULL
-      `);
-
-      await db.query(`
-        ALTER TABLE "intelligenceAccess"
-        ADD COLUMN IF NOT EXISTS "primaryAccessKey" BIGINT
-      `);
-
-      await db.query(`
-        ALTER TABLE "intelligenceAccess"
-        ADD COLUMN IF NOT EXISTS "fallbackAccessKey" BIGINT
-      `);
-
-      await db.query(`
-        ALTER TABLE "intelligenceAccess"
-        ADD COLUMN IF NOT EXISTS "primaryModelConfig" JSONB
-      `);
-
-      await db.query(`
-        ALTER TABLE "intelligenceAccess"
-        ADD COLUMN IF NOT EXISTS "fallbackModelConfig" JSONB
-      `);
-
-      await db.query(`
-        CREATE UNIQUE INDEX IF NOT EXISTS "intelligenceAccess_account_prompt_unique"
-        ON "intelligenceAccess" (account_id, prompt_id)
-      `);
-
-      await db.query(`
-        CREATE INDEX IF NOT EXISTS "intelligenceAccess_primaryAccessKey_idx"
-        ON "intelligenceAccess" ("primaryAccessKey")
-      `);
-
-      await db.query(`
-        CREATE INDEX IF NOT EXISTS "intelligenceAccess_fallbackAccessKey_idx"
-        ON "intelligenceAccess" ("fallbackAccessKey")
+        CREATE INDEX IF NOT EXISTS "intelligence_access_account_id_idx"
+        ON "intelligence_access" (account_id)
       `);
 
       await db.query(`

@@ -16,11 +16,9 @@ const RESPONSE_HEADERS = {
 };
 
 interface ParsedInput {
-  accountId: string;
-  tokenKey: string;
-  accessIdentifier: string;
-  requestedModel: string;
-  directModelCandidates: Array<{
+  promptId: string;
+  accessKey: string;
+  openFlowCandidates: Array<{
     provider: string;
     model: string;
     apiKey: string;
@@ -29,12 +27,6 @@ interface ParsedInput {
   context: string;
   userQuery: string;
   rawBody: Record<string, unknown> | null;
-}
-
-interface DirectModelCandidate {
-  provider: string;
-  model: string;
-  apiKey: string;
 }
 
 interface IntelligenceAccessRow {
@@ -103,7 +95,6 @@ function buildStoredContext(
 }
 
 const RESERVED_QUERY_KEYS = new Set([
-  'prompt',
   'model',
   'parameter',
   'parameters',
@@ -112,6 +103,8 @@ const RESERVED_QUERY_KEYS = new Set([
   'input',
   'text',
   'message',
+  'promptId',
+  'accessKey',
 ]);
 
 function successResponse(response: string, status = 200) {
@@ -141,7 +134,8 @@ function errorResponse(message: string, status = 400) {
 }
 
 function traceStep(step: string, details: Record<string, unknown> = {}) {
-  console.info('[intelligence getResponse]', { step, ...details });
+  void step;
+  void details;
 }
 
 function safeEquals(left: string, right: string): boolean {
@@ -260,82 +254,45 @@ function normalizeModelName(value: string | null | undefined): string {
   return (value || '').trim();
 }
 
-function parseDirectModelSpec(value: string): DirectModelCandidate | null {
-  const normalized = value.trim();
-
-  if (!normalized) {
-    return null;
-  }
-
-  const [modelSpec, apiKey] = normalized.split('@@@', 2);
-
-  if (!modelSpec || !apiKey) {
-    return null;
-  }
-
-  const trimmedKey = apiKey.trim();
-  const trimmedModelSpec = modelSpec.trim();
-
-  if (!trimmedKey || !trimmedModelSpec) {
-    return null;
-  }
-
-  const providerSplit = trimmedModelSpec.includes('/')
-    ? trimmedModelSpec.split('/', 2)
-    : trimmedModelSpec.includes(':')
-      ? trimmedModelSpec.split(':', 2)
-      : [null, trimmedModelSpec];
-
-  const provider = (providerSplit[0] || '').trim().toLowerCase();
-  const model = (providerSplit[1] || '').trim();
-
-  if (!provider || !model) {
-    return null;
-  }
-
-  return {
-    provider,
-    model,
-    apiKey: trimmedKey,
-  };
-}
-
-function parseDirectModelCandidates(value: unknown): DirectModelCandidate[] {
-  if (typeof value === 'string') {
-    const parsed = parseDirectModelSpec(value);
-    return parsed ? [parsed] : [];
-  }
-
+function parseOpenFlowCandidates(value: unknown): Array<{ provider: string; model: string; apiKey: string }> {
   if (!Array.isArray(value)) {
     return [];
   }
 
   return value
     .flatMap((entry) => {
-      if (typeof entry === 'string') {
-        const parsed = parseDirectModelSpec(entry);
-        return parsed ? [parsed] : [];
+      if (typeof entry !== 'string') {
+        return [];
       }
 
-      if (
-        entry &&
-        typeof entry === 'object' &&
-        typeof (entry as { provider?: unknown }).provider === 'string' &&
-        typeof (entry as { model?: unknown }).model === 'string' &&
-        typeof (entry as { apiKey?: unknown }).apiKey === 'string'
-      ) {
-        const provider = String((entry as { provider?: unknown }).provider || '').trim().toLowerCase();
-        const model = String((entry as { model?: unknown }).model || '').trim();
-        const apiKey = String((entry as { apiKey?: unknown }).apiKey || '').trim();
-
-        if (provider && model && apiKey) {
-          return [{ provider, model, apiKey }];
-        }
+      const normalized = entry.trim();
+      if (!normalized) {
+        return [];
       }
 
-      return [];
+      const [modelSpec, apiKey] = normalized.split('@@@', 2);
+      if (!modelSpec || !apiKey) {
+        return [];
+      }
+
+      const trimmedModelSpec = modelSpec.trim();
+      const trimmedKey = apiKey.trim();
+      if (!trimmedModelSpec || !trimmedKey) {
+        return [];
+      }
+
+      const slashIndex = trimmedModelSpec.indexOf('/');
+      if (slashIndex <= 0 || slashIndex === trimmedModelSpec.length - 1) {
+        return [];
+      }
+
+      return [{
+        provider: trimmedModelSpec.slice(0, slashIndex).trim().toLowerCase(),
+        model: trimmedModelSpec.slice(slashIndex + 1).trim(),
+        apiKey: trimmedKey,
+      }];
     })
-    .filter((candidate): candidate is DirectModelCandidate => Boolean(candidate?.provider && candidate?.model && candidate?.apiKey));
+    .filter((candidate): candidate is { provider: string; model: string; apiKey: string } => Boolean(candidate.provider && candidate.model && candidate.apiKey));
 }
 
 function normalizeStoredModelConfig(value: unknown): StoredModelConfig | null {
@@ -578,24 +535,9 @@ async function parseInput(request: NextRequest): Promise<ParsedInput> {
       ? (body as Record<string, unknown>)
       : {};
 
-  const accountId =
-    request.headers.get('userid') ||
-    request.headers.get('userId') ||
-    request.headers.get('x-userid') ||
-    '';
-  const tokenKey =
-    request.headers.get('tokenkey') ||
-    request.headers.get('tokenKey') ||
-    request.headers.get('x-tokenkey') ||
-    '';
-  const accessIdentifier =
-    request.headers.get('accessid') ||
-    request.headers.get('accessId') ||
-    request.headers.get('x-accessid') ||
-    '';
-
-  const requestedModel = String(parsedBody?.model || queryParameters.get('model') || '').trim();
-  const directModelCandidates = parseDirectModelCandidates(parsedBody?.model);
+  const promptId = String(parsedBody?.promptId || queryParameters.get('promptId') || '').trim();
+  const accessKey = String(parsedBody?.accessKey || queryParameters.get('accessKey') || '').trim();
+  const openFlowCandidates = parseOpenFlowCandidates(parsedBody?.model);
   const userQuery = String(
     parsedBody?.query ||
     parsedBody?.input ||
@@ -618,11 +560,9 @@ async function parseInput(request: NextRequest): Promise<ParsedInput> {
   );
 
   return {
-    accountId: accountId.trim(),
-    tokenKey: tokenKey.trim(),
-    accessIdentifier: accessIdentifier.trim(),
-    requestedModel,
-    directModelCandidates,
+    promptId,
+    accessKey,
+    openFlowCandidates,
     parameters,
     context,
     userQuery,
@@ -661,6 +601,42 @@ async function findAccessRow(accountId: string, accessIdentifier: string): Promi
       LIMIT 1
     `,
     [accountId, accessIdentifier]
+  );
+
+  return result.rows[0] || null;
+}
+
+async function findAccessRowByPromptId(promptId: string): Promise<IntelligenceAccessRow | null> {
+  await ensureIntelligenceTables();
+  const db = getIntelligenceDbPool();
+  const result = await db.query<IntelligenceAccessRow>(
+    `
+      SELECT
+        ia.id,
+        ia.prompt_id,
+        ia.account_id,
+        ia.token_hash,
+        ia."primaryModel",
+        ia."fallbackModel",
+        ia."primaryModelConfig",
+        ia."fallbackModelConfig",
+        ia."primaryAccessKey",
+        ia."fallbackAccessKey",
+        primary_token."key" AS "primaryAccessTokenKey",
+        fallback_token."key" AS "fallbackAccessTokenKey",
+        ia."maxTokens",
+        ia."defPrompt",
+        ia.balance
+      FROM "intelligenceAccess" ia
+      LEFT JOIN "accessTokens" primary_token
+        ON primary_token.id = ia."primaryAccessKey"
+      LEFT JOIN "accessTokens" fallback_token
+        ON fallback_token.id = ia."fallbackAccessKey"
+      WHERE ia.prompt_id = $1
+      ORDER BY ia.id DESC
+      LIMIT 1
+    `,
+    [promptId]
   );
 
   return result.rows[0] || null;
@@ -816,9 +792,9 @@ async function handleRequest(request: NextRequest) {
     input = await parseInput(request);
     traceStep('request_parsed', {
       requestId,
-      accountId: input.accountId || null,
-      accessIdentifier: input.accessIdentifier || null,
-      requestedModel: input.requestedModel || null,
+      promptId: input.promptId || null,
+      accessKeyPresent: Boolean(input.accessKey),
+      hasOpenFlowModels: input.openFlowCandidates.length > 0,
       parameterKeys: Object.keys(input.parameters),
       hasContext: Boolean(input.context.trim()),
       hasQuery: Boolean(input.userQuery.trim()),
@@ -855,8 +831,8 @@ async function handleRequest(request: NextRequest) {
     return errorResponse(error instanceof Error ? error.message : 'Invalid request body', 400);
   }
 
-  accountIdForDevLog = input.accountId || null;
-  accessIdForDevLog = input.accessIdentifier || null;
+  accountIdForDevLog = null;
+  accessIdForDevLog = input.promptId || null;
   devModeEnabled = await shouldLogDevRequest(accountIdForDevLog);
   traceStep('dev_mode_state', {
     requestId,
@@ -882,144 +858,32 @@ async function handleRequest(request: NextRequest) {
     });
   }
 
-  const hasDirectModelCandidates = input.directModelCandidates.length > 0;
+  const isOpenFlowRequest = input.openFlowCandidates.length > 0;
+  const isPromptRequest = Boolean(input.promptId || input.accessKey);
 
-  if (!input.accountId && !hasDirectModelCandidates) {
-    traceStep('validation_failed', { requestId, reason: 'missing_userid' });
-    if (devModeEnabled) {
-      await logDevRequest({
-        accountId: accountIdForDevLog,
-        accessId: accessIdForDevLog,
-        requestId,
-        requestMethod: request.method,
-        requestUrl: request.url,
-        requestHeaders,
-        requestBody: parsedBodyForDevLog,
-        requestQuery: parsedQueryForDevLog,
-        requestContext: parsedContextForDevLog,
-        responseStatus: 400,
-        responseBody: { status: 'fail', error: 'Missing userid header' },
-        errorMessage: 'Missing userid header',
-        errorStack: null,
-      });
-    }
-    return errorResponse('Missing userid header', 400);
+  if (isOpenFlowRequest && isPromptRequest) {
+    return errorResponse('Use either promptId/accessKey or model array, not both.', 400);
   }
 
-  if (!input.tokenKey && !hasDirectModelCandidates) {
-    traceStep('validation_failed', { requestId, reason: 'missing_tokenKey' });
-    if (devModeEnabled) {
-      await logDevRequest({
-        accountId: accountIdForDevLog,
-        accessId: accessIdForDevLog,
-        requestId,
-        requestMethod: request.method,
-        requestUrl: request.url,
-        requestHeaders,
-        requestBody: parsedBodyForDevLog,
-        requestQuery: parsedQueryForDevLog,
-        requestContext: parsedContextForDevLog,
-        responseStatus: 400,
-        responseBody: { status: 'fail', error: 'Missing tokenKey header' },
-        errorMessage: 'Missing tokenKey header',
-        errorStack: null,
-      });
-    }
-    return errorResponse('Missing tokenKey header', 400);
+  const access = isPromptRequest ? await findAccessRowByPromptId(input.promptId) : null;
+
+  if (isPromptRequest && !input.promptId) {
+    return errorResponse('promptId is required for prompt-based requests.', 400);
   }
 
-  if (!input.accessIdentifier && !hasDirectModelCandidates) {
-    traceStep('validation_failed', { requestId, reason: 'missing_accessid' });
-    if (devModeEnabled) {
-      await logDevRequest({
-        accountId: accountIdForDevLog,
-        accessId: accessIdForDevLog,
-        requestId,
-        requestMethod: request.method,
-        requestUrl: request.url,
-        requestHeaders,
-        requestBody: parsedBodyForDevLog,
-        requestQuery: parsedQueryForDevLog,
-        requestContext: parsedContextForDevLog,
-        responseStatus: 400,
-        responseBody: { status: 'fail', error: 'Missing accessid header' },
-        errorMessage: 'Missing accessid header',
-        errorStack: null,
-      });
-    }
-    return errorResponse('Missing accessid header', 400);
+  if (isPromptRequest && !input.accessKey) {
+    return errorResponse('accessKey is required for prompt-based requests.', 400);
   }
 
-  const access = hasDirectModelCandidates ? null : await findAccessRow(input.accountId, input.accessIdentifier);
-
-  if (!hasDirectModelCandidates && !access) {
-    traceStep('validation_failed', {
-      requestId,
-      reason: 'access_not_found',
-      accountId: input.accountId,
-      accessIdentifier: input.accessIdentifier,
-    });
-    if (devModeEnabled) {
-      await logDevRequest({
-        accountId: accountIdForDevLog,
-        accessId: accessIdForDevLog,
-        requestId,
-        requestMethod: request.method,
-        requestUrl: request.url,
-        requestHeaders,
-        requestBody: parsedBodyForDevLog,
-        requestQuery: parsedQueryForDevLog,
-        requestContext: parsedContextForDevLog,
-        responseStatus: 404,
-        responseBody: { status: 'fail', error: 'Invalid userid or accessid. No intelligence prompt was found for this account and access ID.' },
-        errorMessage: 'Invalid userid or accessid. No intelligence prompt was found for this account and access ID.',
-        errorStack: null,
-      });
-    }
-    return errorResponse('Invalid userid or accessid. No intelligence prompt was found for this account and access ID.', 404);
+  if (isPromptRequest && !access) {
+    return errorResponse('No intelligence prompt was found for this promptId.', 404);
   }
 
-  if (!hasDirectModelCandidates && access && !tokenMatchesHash(input.tokenKey, access.token_hash)) {
-    traceStep('validation_failed', { requestId, reason: 'invalid_token' });
-    if (devModeEnabled) {
-      await logDevRequest({
-        accountId: accountIdForDevLog,
-        accessId: accessIdForDevLog,
-        requestId,
-        requestMethod: request.method,
-        requestUrl: request.url,
-        requestHeaders,
-        requestBody: parsedBodyForDevLog,
-        requestQuery: parsedQueryForDevLog,
-        requestContext: parsedContextForDevLog,
-        responseStatus: 401,
-        responseBody: { status: 'fail', error: 'Invalid tokenKey for this intelligence prompt.' },
-        errorMessage: 'Invalid tokenKey for this intelligence prompt.',
-        errorStack: null,
-      });
-    }
-    return errorResponse('Invalid tokenKey for this intelligence prompt.', 401);
+  if (isPromptRequest && access && !tokenMatchesHash(input.accessKey, access.token_hash)) {
+    return errorResponse('Invalid accessKey for this intelligence prompt.', 401);
   }
 
-  if (!hasDirectModelCandidates && access && Number(access.balance) <= 0) {
-    traceStep('validation_failed', { requestId, reason: 'insufficient_balance' });
-    if (devModeEnabled) {
-      await logDevRequest({
-        accountId: accountIdForDevLog,
-        accessId: accessIdForDevLog,
-        requestId,
-        requestMethod: request.method,
-        requestUrl: request.url,
-        requestHeaders,
-        requestBody: parsedBodyForDevLog,
-        requestQuery: parsedQueryForDevLog,
-        requestContext: parsedContextForDevLog,
-        responseStatus: 402,
-        responseBody: { status: 'fail', error: 'Insufficient balance for this intelligence prompt.' },
-        errorMessage: 'Insufficient balance for this intelligence prompt.',
-        errorStack: null,
-      });
-    }
+  if (isPromptRequest && access && Number(access.balance) <= 0) {
     return errorResponse('Insufficient balance for this intelligence prompt.', 402);
   }
 
@@ -1032,15 +896,15 @@ async function handleRequest(request: NextRequest) {
   const requestedModel = normalizeModelName(input.requestedModel);
   traceStep('model_context', {
     requestId,
-    requestedModel,
+    requestedModel: input.promptId || null,
     primaryModel,
     fallbackModel,
-    directModelCount: input.directModelCandidates.length,
+    directModelCount: input.openFlowCandidates.length,
     primaryProvider: primaryModelConfig?.provider || null,
     fallbackProvider: fallbackModelConfig?.provider || null,
   });
 
-  const promptPayload = buildPrompt(hasDirectModelCandidates ? null : legacyAccess?.defPrompt || null, input.userQuery, input.parameters, input.context);
+  const promptPayload = buildPrompt(isPromptRequest ? legacyAccess?.defPrompt || null : null, input.userQuery, input.parameters, input.context);
 
   if (!promptPayload.renderedPrompt) {
     traceStep('validation_failed', { requestId, reason: 'empty_rendered_prompt' });
@@ -1073,8 +937,8 @@ async function handleRequest(request: NextRequest) {
     return errorResponse(message, 400);
   }
 
-  const modelCandidates = hasDirectModelCandidates
-    ? input.directModelCandidates.map((candidate) => ({
+  const modelCandidates = isOpenFlowRequest
+    ? input.openFlowCandidates.map((candidate) => ({
         provider: candidate.provider,
         model: candidate.model,
         identifier: `${candidate.provider}:${candidate.model}`,
@@ -1087,9 +951,9 @@ async function handleRequest(request: NextRequest) {
         apiKey: candidate.apiKey,
         source: 'direct' as const,
       }))
-    : requestedModel
+    : isPromptRequest
     ? [
-        modelMatchesRequest(requestedModel, primaryModelConfig, primaryModel)
+        modelMatchesRequest(input.promptId, primaryModelConfig, primaryModel)
           ? {
               provider: primaryModelConfig?.provider || null,
               model: primaryModelConfig?.model || primaryModel,
@@ -1104,7 +968,7 @@ async function handleRequest(request: NextRequest) {
               source: 'primary' as const,
             }
           : null,
-        modelMatchesRequest(requestedModel, fallbackModelConfig, fallbackModel)
+        modelMatchesRequest(input.promptId, fallbackModelConfig, fallbackModel)
           ? {
               provider: fallbackModelConfig?.provider || null,
               model: fallbackModelConfig?.model || fallbackModel,
@@ -1120,38 +984,7 @@ async function handleRequest(request: NextRequest) {
             }
           : null,
       ].filter(Boolean)
-    : [
-        (primaryModelConfig?.model || primaryModel)
-          ? {
-              provider: primaryModelConfig?.provider || null,
-              model: primaryModelConfig?.model || primaryModel,
-              identifier: getModelIdentifier(primaryModelConfig, primaryModel),
-              modelConfig: {
-                currency: primaryModelConfig?.currency || 'USD',
-                inputCostPer1000Tokens: primaryModelConfig?.inputCostPer1000Tokens || 0,
-                outputCostPer1000Tokens: primaryModelConfig?.outputCostPer1000Tokens || 0,
-                price: primaryModelConfig?.price || {},
-              },
-              apiKey: legacyAccess?.primaryAccessTokenKey || '',
-              source: 'primary' as const,
-            }
-          : null,
-        (fallbackModelConfig?.model || fallbackModel)
-          ? {
-              provider: fallbackModelConfig?.provider || null,
-              model: fallbackModelConfig?.model || fallbackModel,
-              identifier: getModelIdentifier(fallbackModelConfig, fallbackModel),
-              modelConfig: {
-                currency: fallbackModelConfig?.currency || 'USD',
-                inputCostPer1000Tokens: fallbackModelConfig?.inputCostPer1000Tokens || 0,
-                outputCostPer1000Tokens: fallbackModelConfig?.outputCostPer1000Tokens || 0,
-                price: fallbackModelConfig?.price || {},
-              },
-              apiKey: legacyAccess?.fallbackAccessTokenKey || '',
-              source: 'fallback' as const,
-            }
-          : null,
-      ].filter(Boolean);
+    : [];
   traceStep('model_candidates_built', {
     requestId,
     requestedModel: requestedModel || null,
@@ -1160,48 +993,8 @@ async function handleRequest(request: NextRequest) {
     candidateIdentifiers: modelCandidates.map((candidate) => candidate?.identifier).filter(Boolean),
   });
 
-  if (!hasDirectModelCandidates && requestedModel && modelCandidates.length === 0) {
-    traceStep('validation_failed', { requestId, reason: 'requested_model_mismatch', requestedModel });
-    if (devModeEnabled) {
-      await logDevRequest({
-        accountId: accountIdForDevLog,
-        accessId: accessIdForDevLog,
-        requestId,
-        requestMethod: request.method,
-        requestUrl: request.url,
-        requestHeaders,
-        requestBody: parsedBodyForDevLog,
-        requestQuery: parsedQueryForDevLog,
-        requestContext: parsedContextForDevLog,
-        responseStatus: 403,
-        responseBody: { status: 'fail', error: 'Requested model does not match configured primaryModel or fallbackModel' },
-        errorMessage: 'Requested model does not match configured primaryModel or fallbackModel',
-        errorStack: null,
-      });
-    }
-    return errorResponse('Requested model does not match configured primaryModel or fallbackModel', 403);
-  }
-
   if (modelCandidates.length === 0) {
-    traceStep('validation_failed', { requestId, reason: 'no_model_candidates' });
-    if (devModeEnabled) {
-      await logDevRequest({
-        accountId: accountIdForDevLog,
-        accessId: accessIdForDevLog,
-        requestId,
-        requestMethod: request.method,
-        requestUrl: request.url,
-        requestHeaders,
-        requestBody: parsedBodyForDevLog,
-        requestQuery: parsedQueryForDevLog,
-        requestContext: parsedContextForDevLog,
-        responseStatus: 400,
-        responseBody: { status: 'fail', error: 'No primaryModel or fallbackModel configured for this access' },
-        errorMessage: 'No primaryModel or fallbackModel configured for this access',
-        errorStack: null,
-      });
-    }
-    return errorResponse('No primaryModel or fallbackModel configured for this access', 400);
+    return errorResponse(isOpenFlowRequest ? 'No valid open flow models were provided.' : 'No model candidates found for this promptId.', 400);
   }
 
   const usableCandidates = modelCandidates.filter(
@@ -1258,7 +1051,7 @@ async function handleRequest(request: NextRequest) {
         provider: candidate.provider,
         model: candidate.model,
         prompt: promptPayload.renderedPrompt,
-        maxTokens: hasDirectModelCandidates ? null : legacyAccess?.maxTokens ?? null,
+        maxTokens: isPromptRequest ? legacyAccess?.maxTokens ?? null : null,
         apiKey: candidate.apiKey,
       });
       traceStep('provider_invoke_success', {
@@ -1297,7 +1090,7 @@ async function handleRequest(request: NextRequest) {
               errorStack: null,
             });
           }
-          if (!hasDirectModelCandidates && legacyAccess) {
+          if (isPromptRequest && legacyAccess) {
             await finalizeRequestLog({
               accessId: legacyAccess.id,
               query: promptPayload.query,
@@ -1314,7 +1107,7 @@ async function handleRequest(request: NextRequest) {
             });
           }
         } catch (error) {
-          console.error('Failed to finalize intelligence log:', error);
+          void error;
         }
       });
 
@@ -1351,7 +1144,7 @@ async function handleRequest(request: NextRequest) {
           errorStack: null,
         });
       }
-      if (!hasDirectModelCandidates && legacyAccess) {
+      if (isPromptRequest && legacyAccess) {
         await logFailedRequest({
           accessId: legacyAccess.id,
           query: promptPayload.query,
@@ -1364,7 +1157,7 @@ async function handleRequest(request: NextRequest) {
         });
       }
     } catch (logError) {
-      console.error('Failed to log intelligence error:', logError);
+      void logError;
     }
   });
 

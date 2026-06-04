@@ -17,7 +17,7 @@ import {
   getIntelligenceModels,
 } from '@/core/ai/files/intelligence/store';
 import AccessEditForm from '@/app/(main)/intelligence/access/[id]/access-edit-form';
-import PromptTestPanel from './prompt-test-panel';
+import { PromptTestPanel } from './prompt-test-panel';
 
 export const metadata: Metadata = {
   title: 'Edit Intelligence Prompt, Neup.Cloud',
@@ -69,60 +69,7 @@ export default async function IntelligencePromptDetailPage({
   const initialFallbackModelId =
     access.fallbackModelConfig?.id ||
     findMatchingModelId(models, access.fallbackModel);
-  const suggestedModel =
-    access.primaryModel ||
-    (access.primaryModelConfig ? `${access.primaryModelConfig.provider}:${access.primaryModelConfig.model}` : '');
-  const modelOptions = [
-    access.primaryModelConfig
-      ? {
-          label: `Primary: ${access.primaryModelConfig.provider}:${access.primaryModelConfig.model}`,
-          value: access.primaryModelConfig.model,
-        }
-      : null,
-    access.fallbackModelConfig
-      ? {
-          label: `Fallback: ${access.fallbackModelConfig.provider}:${access.fallbackModelConfig.model}`,
-          value: access.fallbackModelConfig.model,
-        }
-      : null,
-    access.primaryModel
-      ? {
-          label: `Primary saved value: ${access.primaryModel}`,
-          value: access.primaryModel,
-        }
-      : null,
-    access.fallbackModel
-      ? {
-          label: `Fallback saved value: ${access.fallbackModel}`,
-          value: access.fallbackModel,
-        }
-      : null,
-  ].filter((option): option is { label: string; value: string } => Boolean(option));
-  const uniqueModelOptions = modelOptions.filter(
-    (option, index, all) => index === all.findIndex((candidate) => candidate.value === option.value)
-  );
-  const requestUrl = new URL('http://localhost:25683/bridge/api.v1/intelligence/getResponse');
-  const directModel = access.primaryModelConfig
-    ? `${access.primaryModelConfig.provider}/${access.primaryModelConfig.model}@@@xxxxxxx`
-    : access.primaryModel
-      ? `${access.primaryModel}@@@xxxxxxx`
-      : '';
-  const requestBody = JSON.stringify(
-    {
-      model: directModel,
-      context: '',
-      query: 'who are you?',
-    },
-    null,
-    2
-  );
-
-  const exampleCurl = [
-    `curl "${requestUrl.toString()}"`,
-    '  -X POST',
-    '  -H "Content-Type: application/json"',
-    `  -d '${requestBody}'`,
-  ].join(' \\\n');
+  const requestUrl = 'http://localhost:25683/bridge/api.v1/intelligence/getResponse';
 
   return (
     <div className="grid gap-8">
@@ -138,29 +85,24 @@ export default async function IntelligencePromptDetailPage({
       />
 
       <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 font-headline">
-          <Terminal className="h-5 w-5 text-primary" />
-          Example Curl Request
-        </CardTitle>
-        <CardDescription>
-          This example uses the direct model tuple format. Replace the masked API key with your real secret.
-        </CardDescription>
-      </CardHeader>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-headline">
+            <Terminal className="h-5 w-5 text-primary" />
+            Example Curl Request
+          </CardTitle>
+          <CardDescription>
+            Edit the request fields here, then run the request and inspect the response below.
+          </CardDescription>
+        </CardHeader>
         <CardContent>
-          <pre className="overflow-x-auto rounded-xl border border-border/70 bg-muted/30 p-4 text-sm whitespace-pre-wrap">
-            {exampleCurl}
-          </pre>
+          <PromptTestPanel
+            requestUrl={requestUrl}
+            initialPromptId={access.prompt_id}
+            initialAccessKey="xxxxxxx"
+            initialContext=""
+          />
         </CardContent>
       </Card>
-
-      <PromptTestPanel
-        accountId={access.account_id}
-        accessIdentifier={access.prompt_id}
-        tokenKey={access.token_hash}
-        modelOptions={uniqueModelOptions}
-        suggestedModel={suggestedModel}
-      />
 
       <AccessEditForm
         accessId={access.id}

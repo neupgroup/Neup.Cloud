@@ -167,23 +167,17 @@ model IntelligenceModel {
 }
 
 model IntelligenceAccess {
-  id                 BigInt  @id @default(autoincrement())
-  promptId           String  @map("prompt_id") @db.Text
-  accountId          String  @map("account_id") @db.Text
-  tokenHash          String  @map("token_hash") @db.Text
-  model              String? @db.Text
-  primaryModel       String? @map("primaryModel") @db.Text
-  fallbackModel      String? @map("fallbackModel") @db.Text
-  maxTokens          Int?    @map("maxTokens")
-  defPrompt          String? @map("defPrompt") @db.Text
-  balance            Float
-  primaryAccessKey   BigInt? @map("primaryAccessKey")
-  fallbackAccessKey  BigInt? @map("fallbackAccessKey")
-  primaryModelConfig Json?   @map("primaryModelConfig")
-  fallbackModelConfig Json?  @map("fallbackModelConfig")
+  id          BigInt   @id @default(autoincrement())
+  accountId   String   @map("account_id") @db.Text
+  keyHash     String   @map("key_hash") @db.Text
+  type        String   @db.Text
+  availableTo Json     @map("available_to")
+  details     Json
+  maxToken    Int?     @map("max_token")
+  createdAt   DateTime @map("created_at") @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime @map("updated_at") @updatedAt @db.Timestamp(6)
 
-  @@unique([accountId, promptId], map: "intelligenceAccess_account_prompt_unique")
-  @@map("intelligenceAccess")
+  @@map("intelligence_access")
 }
 
 model IntelligenceLog {
