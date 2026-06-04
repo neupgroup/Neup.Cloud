@@ -51,7 +51,7 @@ export async function ensureIntelligenceTables(): Promise<void> {
           description TEXT,
           currency TEXT NOT NULL DEFAULT 'USD',
           "inputPrice" DOUBLE PRECISION NOT NULL DEFAULT 0,
-          "outputPrice" DOUBLE PRECISION NOT NULL DEFAULT 0,
+          "outputPrice" DOUBLE PRECISION NOT NULL DEFAULT 0
         )
       `);
 
