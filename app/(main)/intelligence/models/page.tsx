@@ -47,7 +47,7 @@ export default async function IntelligenceModelsPage() {
             <Link href="/intelligence/models/add">Add Model</Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/intelligence/prompts/add">Create Prompt</Link>
+            <Link href="/intelligence/access/add">Create Access</Link>
           </Button>
         </CardContent>
       </Card>

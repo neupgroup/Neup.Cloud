@@ -200,7 +200,7 @@ export default function AccessEditForm({
                 {isPending ? 'Saving...' : 'Save Changes'}
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/intelligence/prompts">Back to Prompts</Link>
+                <Link href="/intelligence/access">Back to Access</Link>
               </Button>
             </div>
           </form>
@@ -222,7 +222,7 @@ export default function AccessEditForm({
               Delete Prompt
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/intelligence/prompts">Cancel</Link>
+                <Link href="/intelligence/access">Cancel</Link>
             </Button>
           </form>
         </CardContent>

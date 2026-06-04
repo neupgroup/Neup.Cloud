@@ -64,7 +64,7 @@ export default async function IntelligenceTokensPage() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button type="submit">Add Token</Button>
               <Button variant="outline" asChild>
-                <Link href="/intelligence/prompts/add">Create Prompt</Link>
+                <Link href="/intelligence/access/add">Create Access</Link>
               </Button>
             </div>
           </form>

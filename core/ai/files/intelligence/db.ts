@@ -75,31 +75,72 @@ export async function ensureIntelligenceTables(): Promise<void> {
       `);
 
       await db.query(`
+        DROP VIEW IF EXISTS "intelligence_access" CASCADE
+      `);
+
+      await db.query(`
         DROP TABLE IF EXISTS "intelligenceAccess" CASCADE
       `);
 
       await db.query(`
-        DROP TABLE IF EXISTS "intelligence_access" CASCADE
-      `);
-
-      await db.query(`
-        CREATE TABLE "intelligence_access" (
+        CREATE TABLE "intelligenceAccess" (
           id BIGSERIAL PRIMARY KEY,
+          prompt_id TEXT NOT NULL,
           account_id TEXT NOT NULL,
-          key_hash TEXT NOT NULL UNIQUE,
-          type TEXT NOT NULL,
+          token_hash TEXT NOT NULL UNIQUE,
+          "primaryModel" TEXT,
+          "fallbackModel" TEXT,
+          "primaryModelConfig" JSONB,
+          "fallbackModelConfig" JSONB,
+          "primaryAccessKey" BIGINT,
+          "fallbackAccessKey" BIGINT,
+          max_token INTEGER,
+          "defPrompt" TEXT,
+          balance DOUBLE PRECISION NOT NULL DEFAULT 0,
+          type TEXT NOT NULL DEFAULT 'prompt_def',
           available_to JSONB NOT NULL DEFAULT '[]'::jsonb,
           details JSONB NOT NULL DEFAULT '[]'::jsonb,
-          max_token INTEGER,
           created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT "intelligenceAccess_account_id_prompt_id_key" UNIQUE (account_id, prompt_id),
           CONSTRAINT intelligence_access_type_check CHECK (type IN ('open', 'model_def', 'model_key_def', 'prompt_def'))
         )
       `);
 
       await db.query(`
-        CREATE INDEX IF NOT EXISTS "intelligence_access_account_id_idx"
-        ON "intelligence_access" (account_id)
+        CREATE INDEX IF NOT EXISTS "intelligenceAccess_account_id_idx"
+        ON "intelligenceAccess" (account_id)
+      `);
+
+      await db.query(`
+        CREATE VIEW "intelligence_access" AS
+        SELECT
+          id,
+          account_id,
+          token_hash AS key_hash,
+          type,
+          available_to,
+          details,
+          max_token,
+          created_at,
+          updated_at
+        FROM "intelligenceAccess"
+      `);
+
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS "intelligence_fallbacks" (
+          id BIGSERIAL PRIMARY KEY,
+          access_id BIGINT NOT NULL REFERENCES "intelligenceAccess" (id) ON DELETE CASCADE,
+          dependent_model_id BIGINT,
+          dependent_key_id BIGINT,
+          "index" INTEGER NOT NULL DEFAULT 0,
+          details JSONB NOT NULL DEFAULT '{}'::jsonb
+        )
+      `);
+
+      await db.query(`
+        CREATE INDEX IF NOT EXISTS "intelligence_fallbacks_access_id_idx"
+        ON "intelligence_fallbacks" (access_id)
       `);
 
       await db.query(`

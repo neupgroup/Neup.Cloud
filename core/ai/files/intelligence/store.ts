@@ -139,20 +139,14 @@ interface AccessTokenRow {
 
 interface IntelligenceAccessRow {
   id: number | string;
-  prompt_id: string;
   account_id: string;
-  token_hash: string;
-  primaryModel: string | null;
-  fallbackModel: string | null;
-  primaryModelConfig: unknown;
-  fallbackModelConfig: unknown;
-  primaryAccessKey: number | string | null;
-  fallbackAccessKey: number | string | null;
-  primaryAccessTokenName: string | null;
-  fallbackAccessTokenName: string | null;
-  maxTokens: number | null;
-  defPrompt: string | null;
-  balance: number;
+  key_hash: string;
+  type: string;
+  available_to: unknown;
+  details: unknown;
+  max_token: number | string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface IntelligenceLogRow {
@@ -544,40 +538,30 @@ export async function getIntelligenceAccesses(accountId: string): Promise<Intell
   const db = getIntelligenceDbPool();
   const result = await db.query<IntelligenceAccessRow>(
     `
-      SELECT
-        ia.id,
-        ia.prompt_id,
-        ia.account_id,
-        ia.token_hash,
-        ia."primaryModel",
-        ia."fallbackModel",
-        ia."primaryModelConfig",
-        ia."fallbackModelConfig",
-        ia."primaryAccessKey",
-        ia."fallbackAccessKey",
-        primary_token.name AS "primaryAccessTokenName",
-        fallback_token.name AS "fallbackAccessTokenName",
-        ia."maxTokens",
-        ia."defPrompt",
-        ia.balance
-      FROM "intelligenceAccess" ia
-      LEFT JOIN "accessTokens" primary_token
-        ON primary_token.id = ia."primaryAccessKey"
-      LEFT JOIN "accessTokens" fallback_token
-        ON fallback_token.id = ia."fallbackAccessKey"
-      WHERE ia.account_id = $1
-      ORDER BY ia.id DESC
+      SELECT id, account_id, key_hash, type, available_to, details, max_token, created_at, updated_at
+      FROM "intelligence_access"
+      WHERE account_id = $1
+      ORDER BY id DESC
     `,
     [accountId]
   );
 
   return result.rows.map((row) => ({
-    ...row,
     id: normalizeNumericId(row.id),
-    primaryAccessKey: row.primaryAccessKey === null ? null : normalizeNumericId(row.primaryAccessKey),
-    fallbackAccessKey: row.fallbackAccessKey === null ? null : normalizeNumericId(row.fallbackAccessKey),
-    primaryModelConfig: normalizeStoredModelConfig(row.primaryModelConfig),
-    fallbackModelConfig: normalizeStoredModelConfig(row.fallbackModelConfig),
+    prompt_id: String(row.id),
+    account_id: row.account_id,
+    token_hash: row.key_hash,
+    primaryModel: null,
+    fallbackModel: null,
+    primaryModelConfig: null,
+    fallbackModelConfig: null,
+    primaryAccessKey: null,
+    fallbackAccessKey: null,
+    primaryAccessTokenName: null,
+    fallbackAccessTokenName: null,
+    maxTokens: row.max_token === null ? null : normalizeNumericId(row.max_token),
+    defPrompt: null,
+    balance: 0,
   }));
 }
 
@@ -589,28 +573,9 @@ export async function getIntelligenceAccessById(
   const db = getIntelligenceDbPool();
   const result = await db.query<IntelligenceAccessRow>(
     `
-      SELECT
-        ia.id,
-        ia.prompt_id,
-        ia.account_id,
-        ia.token_hash,
-        ia."primaryModel",
-        ia."fallbackModel",
-        ia."primaryModelConfig",
-        ia."fallbackModelConfig",
-        ia."primaryAccessKey",
-        ia."fallbackAccessKey",
-        primary_token.name AS "primaryAccessTokenName",
-        fallback_token.name AS "fallbackAccessTokenName",
-        ia."maxTokens",
-        ia."defPrompt",
-        ia.balance
-      FROM "intelligenceAccess" ia
-      LEFT JOIN "accessTokens" primary_token
-        ON primary_token.id = ia."primaryAccessKey"
-      LEFT JOIN "accessTokens" fallback_token
-        ON fallback_token.id = ia."fallbackAccessKey"
-      WHERE ia.account_id = $1 AND ia.id = $2
+      SELECT id, account_id, key_hash, type, available_to, details, max_token, created_at, updated_at
+      FROM "intelligence_access"
+      WHERE account_id = $1 AND id = $2
       LIMIT 1
     `,
     [accountId, accessId]
@@ -623,12 +588,21 @@ export async function getIntelligenceAccessById(
   }
 
   return {
-    ...row,
     id: normalizeNumericId(row.id),
-    primaryAccessKey: row.primaryAccessKey === null ? null : normalizeNumericId(row.primaryAccessKey),
-    fallbackAccessKey: row.fallbackAccessKey === null ? null : normalizeNumericId(row.fallbackAccessKey),
-    primaryModelConfig: normalizeStoredModelConfig(row.primaryModelConfig),
-    fallbackModelConfig: normalizeStoredModelConfig(row.fallbackModelConfig),
+    prompt_id: String(row.id),
+    account_id: row.account_id,
+    token_hash: row.key_hash,
+    primaryModel: null,
+    fallbackModel: null,
+    primaryModelConfig: null,
+    fallbackModelConfig: null,
+    primaryAccessKey: null,
+    fallbackAccessKey: null,
+    primaryAccessTokenName: null,
+    fallbackAccessTokenName: null,
+    maxTokens: row.max_token === null ? null : normalizeNumericId(row.max_token),
+    defPrompt: null,
+    balance: 0,
   };
 }
 

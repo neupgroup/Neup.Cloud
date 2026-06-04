@@ -159,7 +159,7 @@ export default function AccessCreateForm({
                 {copied ? 'Copied' : 'Copy Access Token'}
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/intelligence/prompts">View Prompts</Link>
+                <Link href="/intelligence/access">View Access</Link>
               </Button>
             </div>
           </CardContent>
