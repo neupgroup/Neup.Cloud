@@ -2,13 +2,7 @@ import type { ModelInvocationResult } from '@/services/intelligence/types';
 import { ensureApiKey, extractText, readErrorMessage } from '@/services/intelligence/provider-utils';
 
 function normalizeNvidiaModel(value: string): string {
-  const trimmed = value.trim();
-
-  if (trimmed.includes(':')) {
-    return trimmed.split(':')[0] || trimmed;
-  }
-
-  return trimmed;
+  return value.trim();
 }
 
 export async function invokeNvidiaModel(input: {
@@ -19,7 +13,7 @@ export async function invokeNvidiaModel(input: {
 }): Promise<ModelInvocationResult> {
   const resolvedApiKey = ensureApiKey(input.apiKey, 'nvidia');
   const model = normalizeNvidiaModel(input.model);
-  const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${resolvedApiKey}`,
@@ -28,6 +22,9 @@ export async function invokeNvidiaModel(input: {
     body: JSON.stringify({
       model,
       messages: [{ role: 'user', content: input.prompt }],
+      reasoning: {
+        enabled: true,
+      },
       ...(input.maxTokens ? { max_tokens: input.maxTokens } : {}),
     }),
   });

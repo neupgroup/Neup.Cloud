@@ -102,13 +102,14 @@ export default async function IntelligencePromptDetailPage({
     (option, index, all) => index === all.findIndex((candidate) => candidate.value === option.value)
   );
   const requestUrl = new URL('http://localhost:25683/bridge/api.v1/intelligence/getResponse');
-
-  if (access.primaryModel) {
-    requestUrl.searchParams.set('model', access.primaryModel);
-  }
-
+  const directModel = access.primaryModelConfig
+    ? `${access.primaryModelConfig.provider}/${access.primaryModelConfig.model}@@@xxxxxxx`
+    : access.primaryModel
+      ? `${access.primaryModel}@@@xxxxxxx`
+      : '';
   const requestBody = JSON.stringify(
     {
+      model: directModel,
       context: '',
       query: 'who are you?',
     },
@@ -120,10 +121,6 @@ export default async function IntelligencePromptDetailPage({
     `curl "${requestUrl.toString()}"`,
     '  -X POST',
     '  -H "Content-Type: application/json"',
-    `  -H "userid: ${access.account_id}"`,
-    `  -H "accessid: ${access.prompt_id}"`,
-    '  -H "tokenKey: xxxxxxx"',
-    '  -H "authcode: xxxxxxx"',
     `  -d '${requestBody}'`,
   ].join(' \\\n');
 
@@ -141,15 +138,15 @@ export default async function IntelligencePromptDetailPage({
       />
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-headline">
-            <Terminal className="h-5 w-5 text-primary" />
-            Example Curl Request
-          </CardTitle>
-          <CardDescription>
-            This example uses the saved database values for this prompt. Replace the masked header values with your real secrets.
-          </CardDescription>
-        </CardHeader>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 font-headline">
+          <Terminal className="h-5 w-5 text-primary" />
+          Example Curl Request
+        </CardTitle>
+        <CardDescription>
+          This example uses the direct model tuple format. Replace the masked API key with your real secret.
+        </CardDescription>
+      </CardHeader>
         <CardContent>
           <pre className="overflow-x-auto rounded-xl border border-border/70 bg-muted/30 p-4 text-sm whitespace-pre-wrap">
             {exampleCurl}

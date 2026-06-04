@@ -20,10 +20,21 @@ interface ParsedInput {
   tokenKey: string;
   accessIdentifier: string;
   requestedModel: string;
+  directModelCandidates: Array<{
+    provider: string;
+    model: string;
+    apiKey: string;
+  }>;
   parameters: Record<string, string>;
   context: string;
   userQuery: string;
   rawBody: Record<string, unknown> | null;
+}
+
+interface DirectModelCandidate {
+  provider: string;
+  model: string;
+  apiKey: string;
 }
 
 interface IntelligenceAccessRow {
@@ -247,6 +258,84 @@ function buildPrompt(
 
 function normalizeModelName(value: string | null | undefined): string {
   return (value || '').trim();
+}
+
+function parseDirectModelSpec(value: string): DirectModelCandidate | null {
+  const normalized = value.trim();
+
+  if (!normalized) {
+    return null;
+  }
+
+  const [modelSpec, apiKey] = normalized.split('@@@', 2);
+
+  if (!modelSpec || !apiKey) {
+    return null;
+  }
+
+  const trimmedKey = apiKey.trim();
+  const trimmedModelSpec = modelSpec.trim();
+
+  if (!trimmedKey || !trimmedModelSpec) {
+    return null;
+  }
+
+  const providerSplit = trimmedModelSpec.includes('/')
+    ? trimmedModelSpec.split('/', 2)
+    : trimmedModelSpec.includes(':')
+      ? trimmedModelSpec.split(':', 2)
+      : [null, trimmedModelSpec];
+
+  const provider = (providerSplit[0] || '').trim().toLowerCase();
+  const model = (providerSplit[1] || '').trim();
+
+  if (!provider || !model) {
+    return null;
+  }
+
+  return {
+    provider,
+    model,
+    apiKey: trimmedKey,
+  };
+}
+
+function parseDirectModelCandidates(value: unknown): DirectModelCandidate[] {
+  if (typeof value === 'string') {
+    const parsed = parseDirectModelSpec(value);
+    return parsed ? [parsed] : [];
+  }
+
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .flatMap((entry) => {
+      if (typeof entry === 'string') {
+        const parsed = parseDirectModelSpec(entry);
+        return parsed ? [parsed] : [];
+      }
+
+      if (
+        entry &&
+        typeof entry === 'object' &&
+        typeof (entry as { provider?: unknown }).provider === 'string' &&
+        typeof (entry as { model?: unknown }).model === 'string' &&
+        typeof (entry as { apiKey?: unknown }).apiKey === 'string'
+      ) {
+        const provider = String((entry as { provider?: unknown }).provider || '').trim().toLowerCase();
+        const model = String((entry as { model?: unknown }).model || '').trim();
+        const apiKey = String((entry as { apiKey?: unknown }).apiKey || '').trim();
+
+        if (provider && model && apiKey) {
+          return [{ provider, model, apiKey }];
+        }
+      }
+
+      return [];
+    })
+    .filter((candidate): candidate is DirectModelCandidate => Boolean(candidate?.provider && candidate?.model && candidate?.apiKey));
 }
 
 function normalizeStoredModelConfig(value: unknown): StoredModelConfig | null {
@@ -506,6 +595,7 @@ async function parseInput(request: NextRequest): Promise<ParsedInput> {
     '';
 
   const requestedModel = String(parsedBody?.model || queryParameters.get('model') || '').trim();
+  const directModelCandidates = parseDirectModelCandidates(parsedBody?.model);
   const userQuery = String(
     parsedBody?.query ||
     parsedBody?.input ||
@@ -532,6 +622,7 @@ async function parseInput(request: NextRequest): Promise<ParsedInput> {
     tokenKey: tokenKey.trim(),
     accessIdentifier: accessIdentifier.trim(),
     requestedModel,
+    directModelCandidates,
     parameters,
     context,
     userQuery,
@@ -791,7 +882,9 @@ async function handleRequest(request: NextRequest) {
     });
   }
 
-  if (!input.accountId) {
+  const hasDirectModelCandidates = input.directModelCandidates.length > 0;
+
+  if (!input.accountId && !hasDirectModelCandidates) {
     traceStep('validation_failed', { requestId, reason: 'missing_userid' });
     if (devModeEnabled) {
       await logDevRequest({
@@ -813,7 +906,7 @@ async function handleRequest(request: NextRequest) {
     return errorResponse('Missing userid header', 400);
   }
 
-  if (!input.tokenKey) {
+  if (!input.tokenKey && !hasDirectModelCandidates) {
     traceStep('validation_failed', { requestId, reason: 'missing_tokenKey' });
     if (devModeEnabled) {
       await logDevRequest({
@@ -835,7 +928,7 @@ async function handleRequest(request: NextRequest) {
     return errorResponse('Missing tokenKey header', 400);
   }
 
-  if (!input.accessIdentifier) {
+  if (!input.accessIdentifier && !hasDirectModelCandidates) {
     traceStep('validation_failed', { requestId, reason: 'missing_accessid' });
     if (devModeEnabled) {
       await logDevRequest({
@@ -857,9 +950,9 @@ async function handleRequest(request: NextRequest) {
     return errorResponse('Missing accessid header', 400);
   }
 
-  const access = await findAccessRow(input.accountId, input.accessIdentifier);
+  const access = hasDirectModelCandidates ? null : await findAccessRow(input.accountId, input.accessIdentifier);
 
-  if (!access) {
+  if (!hasDirectModelCandidates && !access) {
     traceStep('validation_failed', {
       requestId,
       reason: 'access_not_found',
@@ -886,7 +979,7 @@ async function handleRequest(request: NextRequest) {
     return errorResponse('Invalid userid or accessid. No intelligence prompt was found for this account and access ID.', 404);
   }
 
-  if (!tokenMatchesHash(input.tokenKey, access.token_hash)) {
+  if (!hasDirectModelCandidates && access && !tokenMatchesHash(input.tokenKey, access.token_hash)) {
     traceStep('validation_failed', { requestId, reason: 'invalid_token' });
     if (devModeEnabled) {
       await logDevRequest({
@@ -908,7 +1001,7 @@ async function handleRequest(request: NextRequest) {
     return errorResponse('Invalid tokenKey for this intelligence prompt.', 401);
   }
 
-  if (Number(access.balance) <= 0) {
+  if (!hasDirectModelCandidates && access && Number(access.balance) <= 0) {
     traceStep('validation_failed', { requestId, reason: 'insufficient_balance' });
     if (devModeEnabled) {
       await logDevRequest({
@@ -930,21 +1023,24 @@ async function handleRequest(request: NextRequest) {
     return errorResponse('Insufficient balance for this intelligence prompt.', 402);
   }
 
-  const primaryModel = normalizeModelName(access.primaryModel);
-  const fallbackModel = normalizeModelName(access.fallbackModel);
-  const primaryModelConfig = normalizeStoredModelConfig(access.primaryModelConfig);
-  const fallbackModelConfig = normalizeStoredModelConfig(access.fallbackModelConfig);
+  const legacyAccess = access as IntelligenceAccessRow | null;
+
+  const primaryModel = hasDirectModelCandidates ? null : normalizeModelName(legacyAccess?.primaryModel);
+  const fallbackModel = hasDirectModelCandidates ? null : normalizeModelName(legacyAccess?.fallbackModel);
+  const primaryModelConfig = hasDirectModelCandidates ? null : normalizeStoredModelConfig(legacyAccess?.primaryModelConfig);
+  const fallbackModelConfig = hasDirectModelCandidates ? null : normalizeStoredModelConfig(legacyAccess?.fallbackModelConfig);
   const requestedModel = normalizeModelName(input.requestedModel);
   traceStep('model_context', {
     requestId,
     requestedModel,
     primaryModel,
     fallbackModel,
+    directModelCount: input.directModelCandidates.length,
     primaryProvider: primaryModelConfig?.provider || null,
     fallbackProvider: fallbackModelConfig?.provider || null,
   });
 
-  const promptPayload = buildPrompt(access.defPrompt, input.userQuery, input.parameters, input.context);
+  const promptPayload = buildPrompt(hasDirectModelCandidates ? null : legacyAccess?.defPrompt || null, input.userQuery, input.parameters, input.context);
 
   if (!promptPayload.renderedPrompt) {
     traceStep('validation_failed', { requestId, reason: 'empty_rendered_prompt' });
@@ -977,7 +1073,21 @@ async function handleRequest(request: NextRequest) {
     return errorResponse(message, 400);
   }
 
-  const modelCandidates = requestedModel
+  const modelCandidates = hasDirectModelCandidates
+    ? input.directModelCandidates.map((candidate) => ({
+        provider: candidate.provider,
+        model: candidate.model,
+        identifier: `${candidate.provider}:${candidate.model}`,
+        modelConfig: {
+          currency: 'USD',
+          inputCostPer1000Tokens: 0,
+          outputCostPer1000Tokens: 0,
+          price: {},
+        },
+        apiKey: candidate.apiKey,
+        source: 'direct' as const,
+      }))
+    : requestedModel
     ? [
         modelMatchesRequest(requestedModel, primaryModelConfig, primaryModel)
           ? {
@@ -990,7 +1100,7 @@ async function handleRequest(request: NextRequest) {
                 outputCostPer1000Tokens: primaryModelConfig?.outputCostPer1000Tokens || 0,
                 price: primaryModelConfig?.price || {},
               },
-              apiKey: access.primaryAccessTokenKey,
+              apiKey: legacyAccess?.primaryAccessTokenKey || '',
               source: 'primary' as const,
             }
           : null,
@@ -1005,7 +1115,7 @@ async function handleRequest(request: NextRequest) {
                 outputCostPer1000Tokens: fallbackModelConfig?.outputCostPer1000Tokens || 0,
                 price: fallbackModelConfig?.price || {},
               },
-              apiKey: access.fallbackAccessTokenKey,
+              apiKey: legacyAccess?.fallbackAccessTokenKey || '',
               source: 'fallback' as const,
             }
           : null,
@@ -1022,7 +1132,7 @@ async function handleRequest(request: NextRequest) {
                 outputCostPer1000Tokens: primaryModelConfig?.outputCostPer1000Tokens || 0,
                 price: primaryModelConfig?.price || {},
               },
-              apiKey: access.primaryAccessTokenKey,
+              apiKey: legacyAccess?.primaryAccessTokenKey || '',
               source: 'primary' as const,
             }
           : null,
@@ -1037,7 +1147,7 @@ async function handleRequest(request: NextRequest) {
                 outputCostPer1000Tokens: fallbackModelConfig?.outputCostPer1000Tokens || 0,
                 price: fallbackModelConfig?.price || {},
               },
-              apiKey: access.fallbackAccessTokenKey,
+              apiKey: legacyAccess?.fallbackAccessTokenKey || '',
               source: 'fallback' as const,
             }
           : null,
@@ -1045,11 +1155,12 @@ async function handleRequest(request: NextRequest) {
   traceStep('model_candidates_built', {
     requestId,
     requestedModel: requestedModel || null,
+    directModelCount: input.directModelCandidates.length,
     candidateCount: modelCandidates.length,
     candidateIdentifiers: modelCandidates.map((candidate) => candidate?.identifier).filter(Boolean),
   });
 
-  if (requestedModel && modelCandidates.length === 0) {
+  if (!hasDirectModelCandidates && requestedModel && modelCandidates.length === 0) {
     traceStep('validation_failed', { requestId, reason: 'requested_model_mismatch', requestedModel });
     if (devModeEnabled) {
       await logDevRequest({
@@ -1105,7 +1216,7 @@ async function handleRequest(request: NextRequest) {
         price: Record<string, unknown>;
       };
       apiKey: string;
-      source: 'primary' | 'fallback';
+      source: 'primary' | 'fallback' | 'direct';
     } =>
       Boolean(candidate?.model && candidate?.apiKey)
   );
@@ -1147,7 +1258,7 @@ async function handleRequest(request: NextRequest) {
         provider: candidate.provider,
         model: candidate.model,
         prompt: promptPayload.renderedPrompt,
-        maxTokens: access.maxTokens,
+        maxTokens: hasDirectModelCandidates ? null : legacyAccess?.maxTokens ?? null,
         apiKey: candidate.apiKey,
       });
       traceStep('provider_invoke_success', {
@@ -1186,20 +1297,22 @@ async function handleRequest(request: NextRequest) {
               errorStack: null,
             });
           }
-          await finalizeRequestLog({
-            accessId: access.id,
-            query: promptPayload.query,
-            masterPrompt: promptPayload.masterPrompt,
-            context: promptPayload.context,
-            modal: candidate.identifier,
-            responseText: modelResult.responseText,
-            usageTokens: modelResult.usageTokens,
-            inputTokens: modelResult.inputTokens,
-            outputTokens: modelResult.outputTokens,
-            cost: estimatedCost.cost,
-            currency: estimatedCost.currency,
-            currentBalance: Number(access.balance),
-          });
+          if (!hasDirectModelCandidates && legacyAccess) {
+            await finalizeRequestLog({
+              accessId: legacyAccess.id,
+              query: promptPayload.query,
+              masterPrompt: promptPayload.masterPrompt,
+              context: promptPayload.context,
+              modal: candidate.identifier,
+              responseText: modelResult.responseText,
+              usageTokens: modelResult.usageTokens,
+              inputTokens: modelResult.inputTokens,
+              outputTokens: modelResult.outputTokens,
+              cost: estimatedCost.cost,
+              currency: estimatedCost.currency,
+              currentBalance: Number(legacyAccess.balance),
+            });
+          }
         } catch (error) {
           console.error('Failed to finalize intelligence log:', error);
         }
@@ -1238,16 +1351,18 @@ async function handleRequest(request: NextRequest) {
           errorStack: null,
         });
       }
-      await logFailedRequest({
-        accessId: access.id,
-        query: promptPayload.query,
-        masterPrompt: promptPayload.masterPrompt,
-        context: promptPayload.context,
-        modal: usableCandidates.map((candidate) => candidate.identifier).join(' -> '),
-        errorMessage: lastErrorMessage,
-        balance: Number(access.balance),
-        currency: usableCandidates[0]?.modelConfig.currency || null,
-      });
+      if (!hasDirectModelCandidates && legacyAccess) {
+        await logFailedRequest({
+          accessId: legacyAccess.id,
+          query: promptPayload.query,
+          masterPrompt: promptPayload.masterPrompt,
+          context: promptPayload.context,
+          modal: usableCandidates.map((candidate) => candidate.identifier).join(' -> '),
+          errorMessage: lastErrorMessage,
+          balance: Number(legacyAccess.balance),
+          currency: usableCandidates[0]?.modelConfig.currency || null,
+        });
+      }
     } catch (logError) {
       console.error('Failed to log intelligence error:', logError);
     }
