@@ -24,6 +24,7 @@ import {
   parseTokenFormData,
   publishIntelligenceAccess,
   rechargeIntelligenceAccessBalance,
+  updateIntelligenceAccessStatus,
   updateIntelligenceModelRecord,
   updateIntelligenceAccessRecord,
 } from '@/core/ai/files/intelligence/store';
@@ -68,6 +69,11 @@ export interface PublishIntelligenceAccessActionState {
   error: string | null;
   success: string | null;
   generatedAccessKey: string | null;
+}
+
+export interface UpdateIntelligenceAccessStatusActionState {
+  error: string | null;
+  success: string | null;
 }
 
 export interface UpdateIntelligenceModelActionState {
@@ -324,6 +330,61 @@ export async function publishIntelligenceAccessAction(
       error: error instanceof Error ? error.message : 'Failed to publish access',
       success: null,
       generatedAccessKey: null,
+    };
+  }
+}
+
+export async function updateIntelligenceAccessStatusAction(
+  _prevState: UpdateIntelligenceAccessStatusActionState,
+  formData: FormData
+): Promise<UpdateIntelligenceAccessStatusActionState> {
+  const accountId = await getCurrentIntelligenceAccountId();
+  const accessId = parseAccessIdFormData(formData);
+  const status = formData.get('status') as string;
+
+  if (!['dev', 'prod', 'hold'].includes(status)) {
+    return {
+      error: 'Invalid status value',
+      success: null,
+    };
+  }
+
+  try {
+    // Get the current access to verify it's published
+    const access = await getIntelligenceAccessById(accountId, accessId);
+
+    if (!access) {
+      return {
+        error: 'Access record not found',
+        success: null,
+      };
+    }
+
+    if (access.status === 'unpublished') {
+      return {
+        error: 'Cannot change status of unpublished access. Please publish first.',
+        success: null,
+      };
+    }
+
+    await updateIntelligenceAccessStatus({
+      accessId,
+      accountId,
+      status: status as 'dev' | 'prod' | 'hold',
+    });
+
+    revalidatePath('/intelligence/access');
+    revalidatePath(`/intelligence/access/${accessId}`);
+    revalidatePath('/intelligence/logs');
+
+    return {
+      error: null,
+      success: 'Status updated successfully',
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'Failed to update status',
+      success: null,
     };
   }
 }

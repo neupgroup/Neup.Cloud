@@ -1369,6 +1369,30 @@ export async function publishIntelligenceAccess(input: {
   };
 }
 
+export async function updateIntelligenceAccessStatus(input: {
+  accessId: string;
+  accountId: string;
+  status: 'dev' | 'prod' | 'hold';
+}): Promise<void> {
+  await ensureIntelligenceTables();
+  const db = getIntelligenceDbPool();
+
+  const result = await db.query(
+    `
+      UPDATE "intelligence_access"
+      SET
+        status = $1,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2 AND account_id = $3 AND status != 'unpublished'
+    `,
+    [input.status, input.accessId, input.accountId]
+  );
+
+  if (result.rowCount === 0) {
+    throw new Error('Access record not found or is unpublished');
+  }
+}
+
 export function parseDetailsArray(details: unknown): string[] {
   if (!details) {
     return [];

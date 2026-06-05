@@ -167,30 +167,37 @@ model IntelligenceModel {
 }
 
 model IntelligenceAccess {
-  id           BigInt   @id @default(autoincrement())
+  id           String   @id @db.Text
   accountId    String   @map("account_id") @db.Text
   keyHash      String   @unique @map("key_hash") @db.Text
   type         String   @db.Text
   availableTo  Json     @map("available_to")
-  details      Json     @default("{}")
+  details      Json     @default("[]")
   maxTokens    Int?     @map("max_tokens")
   tokenBalance Float    @default(0) @map("token_balance")
-  status       String   @default("prod") @db.Text
+  status       String   @default("unpublished") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
 
+  logs IntelligenceLog[]
+
   @@index([accountId], map: "intelligence_access_account_id_idx")
+  @@index([keyHash], map: "intelligence_access_key_hash_idx")
   @@map("intelligence_access")
 }
 
 model IntelligenceLog {
   id          BigInt   @id @default(autoincrement())
-  accessId    BigInt   @map("access_id")
+  accessId    String   @map("access_id") @db.Text
   details     Json
   from        String?  @db.Text
   balanceUsed Float?   @map("balance_used")
   devDetails  Json?    @map("dev_details")
   loggedOn    DateTime @default(now()) @map("logged_on") @db.Timestamp(6)
 
+  access IntelligenceAccess @relation(fields: [accessId], references: [id], onDelete: Cascade)
+
+  @@index([accessId], map: "intelligence_log_access_id_idx")
   @@map("intelligence_log")
 }
 

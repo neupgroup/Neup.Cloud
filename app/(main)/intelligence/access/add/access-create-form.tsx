@@ -46,18 +46,11 @@ interface ModelRow {
 }
 
 type AccessType = 'open' | 'hybrid' | 'closed';
-type AccessStatus = 'dev' | 'prod' | 'hold';
 
 const accessTypeOptions: Array<{ value: AccessType; label: string; description: string }> = [
   { value: 'open', label: 'Open Access', description: 'User provides model/key at runtime. No stored configuration.' },
   { value: 'hybrid', label: 'Hybrid Access', description: 'Models are stored. Keys provided at runtime. Prompt optional.' },
   { value: 'closed', label: 'Closed Access', description: 'Prompt, models, and keys are stored (encrypted).' },
-];
-
-const accessStatusOptions: Array<{ value: AccessStatus; label: string; description: string }> = [
-  { value: 'prod', label: 'Production', description: 'No logging, standard behavior.' },
-  { value: 'dev', label: 'Development', description: 'Logs requests, responses, and errors.' },
-  { value: 'hold', label: 'Hold', description: 'Requests are rejected with an error.' },
 ];
 
 const initialState: CreateIntelligenceAccessActionState = {
@@ -91,7 +84,6 @@ export default function AccessCreateForm({
   }));
   const [rows, setRows] = useState<ModelRow[]>([{ modelInput: '', tokenInput: '' }]);
   const [accessType, setAccessType] = useState<AccessType>('open');
-  const [accessStatus, setAccessStatus] = useState<AccessStatus>('prod');
   const [prompt, setPrompt] = useState('');
 
   const getModelLabel = (id: string) => modelOptions.find((option) => String(option.id) === id)?.label || 'Select a model';
@@ -153,7 +145,6 @@ export default function AccessCreateForm({
             <input type="hidden" name="primary_access_key" value={primaryRow?.tokenId !== null ? String(primaryRow.tokenId) : ''} />
             <input type="hidden" name="fallback_access_key" value={secondaryRow?.tokenId != null ? String(secondaryRow.tokenId) : ''} />
             <input type="hidden" name="access_type" value={accessType} />
-            <input type="hidden" name="access_status" value={accessStatus} />
             <input type="hidden" name="def_prompt" value={accessType === 'closed' ? prompt : ''} />
 
             <div className="grid gap-2">
@@ -169,29 +160,6 @@ export default function AccessCreateForm({
                 <DropdownMenuContent className="w-96">
                   {accessTypeOptions.map((option) => (
                     <DropdownMenuItem key={option.value} onClick={() => setAccessType(option.value)}>
-                      <div className="grid gap-0.5">
-                        <span>{option.label}</span>
-                        <span className="text-xs text-muted-foreground">{option.description}</span>
-                      </div>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            <div className="grid gap-2">
-              <Label>Access status</Label>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button type="button" variant="outline" className="justify-between">
-                    <span className="truncate">
-                      {accessStatusOptions.find((option) => option.value === accessStatus)?.label || 'Select status'}
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-96">
-                  {accessStatusOptions.map((option) => (
-                    <DropdownMenuItem key={option.value} onClick={() => setAccessStatus(option.value)}>
                       <div className="grid gap-0.5">
                         <span>{option.label}</span>
                         <span className="text-xs text-muted-foreground">{option.description}</span>

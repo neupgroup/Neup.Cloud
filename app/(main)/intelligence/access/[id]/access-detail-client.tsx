@@ -2,12 +2,14 @@
 
 import { useActionState, useState } from 'react';
 import Link from 'next/link';
-import { Save, Trash2, Lock, Unlock, KeyRound, Copy, AlertCircle } from 'lucide-react';
+import { Save, Trash2, Lock, Unlock, KeyRound, Copy, AlertCircle, Settings } from 'lucide-react';
 
 import {
   deleteIntelligenceAccessAction,
   publishIntelligenceAccessAction,
+  updateIntelligenceAccessStatusAction,
   type PublishIntelligenceAccessActionState,
+  type UpdateIntelligenceAccessStatusActionState,
 } from '@/services/intelligence/intelligence-service';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,10 +43,17 @@ const initialPublishState: PublishIntelligenceAccessActionState = {
   generatedAccessKey: null,
 };
 
+const initialStatusState: UpdateIntelligenceAccessStatusActionState = {
+  error: null,
+  success: null,
+};
+
 export default function AccessDetailClient({ accountId, access }: AccessDetailProps) {
   const [publishState, publishAction, isPublishing] = useActionState(publishIntelligenceAccessAction, initialPublishState);
+  const [statusState, statusAction, isUpdatingStatus] = useActionState(updateIntelligenceAccessStatusAction, initialStatusState);
   const [previousKey, setPreviousKey] = useState('');
   const [copied, setCopied] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(access.status);
 
   const handleCopy = async (text: string) => {
     await navigator.clipboard.writeText(text);
@@ -96,6 +105,18 @@ export default function AccessDetailClient({ accountId, access }: AccessDetailPr
       {publishState.success && !publishState.generatedAccessKey && (
         <div className="rounded-xl border border-emerald-300/60 bg-emerald-50/70 p-4 text-sm text-emerald-900">
           {publishState.success}
+        </div>
+      )}
+
+      {statusState.error && (
+        <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+          {statusState.error}
+        </div>
+      )}
+
+      {statusState.success && (
+        <div className="rounded-xl border border-emerald-300/60 bg-emerald-50/70 p-4 text-sm text-emerald-900">
+          {statusState.success}
         </div>
       )}
 
@@ -250,13 +271,48 @@ export default function AccessDetailClient({ accountId, access }: AccessDetailPr
               Access Published
             </CardTitle>
             <CardDescription className="text-emerald-800">
-              This access record is published and active. The access key is encrypted and stored securely.
+              This access record is published and active. You can now change the status below.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      {access.published && access.status !== 'unpublished' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 font-headline">
+              <Settings className="h-5 w-5 text-primary" />
+              Manage Status
+            </CardTitle>
+            <CardDescription>
+              Change the status of this access record. Only available after publishing.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              To make changes, you can update the configuration and republish with a new key or the original key.
-            </p>
+            <form action={statusAction} className="grid gap-4">
+              <input type="hidden" name="access_id" value={String(access.id)} />
+              <div className="grid gap-2">
+                <Label htmlFor="status">Status</Label>
+                <select
+                  id="status"
+                  name="status"
+                  title="Select access status"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                >
+                  <option value="prod">Production - No logging, standard behavior</option>
+                  <option value="dev">Development - Logs requests, responses, and errors</option>
+                  <option value="hold">Hold - Requests are rejected with an error</option>
+                </select>
+              </div>
+              <div className="flex gap-3">
+                <Button type="submit" disabled={isUpdatingStatus || selectedStatus === access.status}>
+                  <Save className="mr-2 h-4 w-4" />
+                  {isUpdatingStatus ? 'Updating...' : 'Update Status'}
+                </Button>
+              </div>
+            </form>
           </CardContent>
         </Card>
       )}
