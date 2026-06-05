@@ -3,7 +3,7 @@ import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 
 import { ensureIntelligenceTables, getIntelligenceDbPool } from '@/core/ai/files/intelligence/db';
 import { invokeModel } from '@/core/ai/files/intelligence/model-client';
-import { insertIntelligenceDevLog } from '@/core/ai/files/intelligence/store';
+import { insertIntelligenceDevLog, decryptValue } from '@/core/ai/files/intelligence/store';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -382,6 +382,83 @@ function modelMatchesRequest(requestedModel: string, config: StoredModelConfig |
   ].filter(Boolean);
 
   return candidates.includes(normalizedRequestedModel);
+}
+
+function parseModelsFromDetails(details: unknown, accessKey: string): Array<{
+  provider: string | null;
+  model: string;
+  identifier: string;
+  modelConfig: {
+    currency: string;
+    inputCostPer1000Tokens: number;
+    outputCostPer1000Tokens: number;
+    price: Record<string, unknown>;
+  };
+  apiKey: string;
+  source: 'primary' | 'fallback' | 'direct';
+}> {
+  const candidates = [];
+  
+  try {
+    // Details should be an array like ["prompt", "provider/model/encrypted_key/key_id", ...]
+    if (!Array.isArray(details)) {
+      return [];
+    }
+
+    // Skip the first element if it's the prompt (type='closed')
+    const startIndex = details.length > 0 && typeof details[0] === 'string' && !details[0].includes('/') ? 1 : 0;
+
+    // Process each model string starting from index 1 (or 0 if no prompt)
+    for (let i = startIndex; i < details.length; i++) {
+      const modelStr = details[i];
+      
+      if (typeof modelStr !== 'string' || !modelStr.includes('/')) {
+        continue;
+      }
+
+      const parts = modelStr.split('/');
+      if (parts.length < 4) {
+        continue;
+      }
+
+      const provider = parts[0];
+      const model = parts[1];
+      const encryptedKey = parts[2];
+      
+      // Try to decrypt the key
+      let apiKey = '';
+      try {
+        if (encryptedKey && encryptedKey !== '0') {
+          apiKey = decryptValue(encryptedKey, accessKey);
+        }
+      } catch (error) {
+        console.error(`Failed to decrypt key for ${provider}/${model}:`, error);
+        continue;
+      }
+
+      if (!apiKey) {
+        continue;
+      }
+
+      candidates.push({
+        provider: provider || null,
+        model: model || '',
+        identifier: `${provider}:${model}`,
+        modelConfig: {
+          currency: 'USD',
+          inputCostPer1000Tokens: 0,
+          outputCostPer1000Tokens: 0,
+          price: {},
+        },
+        apiKey,
+        source: (i === startIndex ? 'primary' : 'fallback') as const,
+      });
+    }
+  } catch (error) {
+    console.error('Error parsing models from details:', error);
+  }
+
+  return candidates;
 }
 
 function readPriceNumber(source: Record<string, unknown>, keys: string[]): number | null {
@@ -960,72 +1037,8 @@ async function handleRequest(request: NextRequest) {
         apiKey: candidate.apiKey,
         source: 'direct' as const,
       }))
-    : legacyAccess?.type === 'model_key_def'
-    ? [
-        modelMatchesRequest(input.accessId, primaryModelConfig, primaryModel)
-          ? {
-              provider: primaryModelConfig?.provider || null,
-              model: primaryModelConfig?.model || primaryModel,
-              identifier: getModelIdentifier(primaryModelConfig, primaryModel),
-              modelConfig: {
-                currency: primaryModelConfig?.currency || 'USD',
-                inputCostPer1000Tokens: primaryModelConfig?.inputCostPer1000Tokens || 0,
-                outputCostPer1000Tokens: primaryModelConfig?.outputCostPer1000Tokens || 0,
-                price: primaryModelConfig?.price || {},
-              },
-              apiKey: legacyAccess?.primaryAccessTokenKey || '',
-              source: 'primary' as const,
-            }
-          : null,
-        modelMatchesRequest(input.accessId, fallbackModelConfig, fallbackModel)
-          ? {
-              provider: fallbackModelConfig?.provider || null,
-              model: fallbackModelConfig?.model || fallbackModel,
-              identifier: getModelIdentifier(fallbackModelConfig, fallbackModel),
-              modelConfig: {
-                currency: fallbackModelConfig?.currency || 'USD',
-                inputCostPer1000Tokens: fallbackModelConfig?.inputCostPer1000Tokens || 0,
-                outputCostPer1000Tokens: fallbackModelConfig?.outputCostPer1000Tokens || 0,
-                price: fallbackModelConfig?.price || {},
-              },
-              apiKey: legacyAccess?.fallbackAccessTokenKey || '',
-              source: 'fallback' as const,
-            }
-          : null,
-      ].filter(Boolean)
-    : isPromptRequest
-    ? [
-        modelMatchesRequest(input.accessId, primaryModelConfig, primaryModel)
-          ? {
-              provider: primaryModelConfig?.provider || null,
-              model: primaryModelConfig?.model || primaryModel,
-              identifier: getModelIdentifier(primaryModelConfig, primaryModel),
-              modelConfig: {
-                currency: primaryModelConfig?.currency || 'USD',
-                inputCostPer1000Tokens: primaryModelConfig?.inputCostPer1000Tokens || 0,
-                outputCostPer1000Tokens: primaryModelConfig?.outputCostPer1000Tokens || 0,
-                price: primaryModelConfig?.price || {},
-              },
-              apiKey: legacyAccess?.primaryAccessTokenKey || '',
-              source: 'primary' as const,
-            }
-          : null,
-        modelMatchesRequest(input.accessId, fallbackModelConfig, fallbackModel)
-          ? {
-              provider: fallbackModelConfig?.provider || null,
-              model: fallbackModelConfig?.model || fallbackModel,
-              identifier: getModelIdentifier(fallbackModelConfig, fallbackModel),
-              modelConfig: {
-                currency: fallbackModelConfig?.currency || 'USD',
-                inputCostPer1000Tokens: fallbackModelConfig?.inputCostPer1000Tokens || 0,
-                outputCostPer1000Tokens: fallbackModelConfig?.outputCostPer1000Tokens || 0,
-                price: fallbackModelConfig?.price || {},
-              },
-              apiKey: legacyAccess?.fallbackAccessTokenKey || '',
-              source: 'fallback' as const,
-            }
-          : null,
-      ].filter(Boolean)
+    : legacyAccess?.type === 'closed' || legacyAccess?.type === 'hybrid'
+    ? parseModelsFromDetails(legacyAccess.details, input.accessKey)
     : [];
   traceStep('model_candidates_built', {
     requestId,
@@ -1036,7 +1049,7 @@ async function handleRequest(request: NextRequest) {
   });
 
   if (modelCandidates.length === 0) {
-    return errorResponse(isOpenFlowRequest ? 'No valid open flow models were provided.' : 'No model candidates found for this accessId.', 400);
+    return errorResponse(isOpenFlowRequest ? 'no_valid_openflow_models' : 'no_model_candidates', isOpenFlowRequest ? 'No valid open flow models were provided.' : 'No model candidates found for this accessId.', 400);
   }
 
   const usableCandidates = modelCandidates.filter(
