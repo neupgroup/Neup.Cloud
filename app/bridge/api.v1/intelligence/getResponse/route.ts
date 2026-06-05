@@ -30,12 +30,13 @@ interface ParsedInput {
 }
 
 interface IntelligenceAccessRow {
-  id: number;
-  prompt_id: string;
+  id: string;
   account_id: string;
-  token_hash: string;
+  key_hash: string;
   status: string;
   type: string;
+  available_to: unknown;
+  details: unknown;
   primaryModel: string | null;
   fallbackModel: string | null;
   primaryModelConfig: unknown;
@@ -104,16 +105,17 @@ const RESERVED_QUERY_KEYS = new Set([
   'query',
   'input',
   'text',
-  'message',
   'accessId',
   'accessKey',
 ]);
 
-function successResponse(response: string, status = 200) {
+function successResponse(response: string | unknown, status = 200) {
+  const data = typeof response === 'string' ? { response } : response;
+  
   return NextResponse.json(
     {
-      status: 'pass',
-      response,
+      success: true,
+      ...data,
     },
     {
       status,
@@ -122,11 +124,11 @@ function successResponse(response: string, status = 200) {
   );
 }
 
-function errorResponse(message: string, status = 400) {
+function errorResponse(errorCode: string, message?: string, status = 400) {
   return NextResponse.json(
     {
-      status: 'fail',
-      error: message,
+      success: false,
+      error: message || errorCode,
     },
     {
       status,
@@ -552,7 +554,6 @@ async function parseInput(request: NextRequest): Promise<ParsedInput> {
     parsedBody?.query ||
     parsedBody?.input ||
     parsedBody?.text ||
-    parsedBody?.message ||
     ''
   ).trim();
 
@@ -587,24 +588,25 @@ async function findAccessRow(accountId: string, accessIdentifier: string): Promi
     `
       SELECT
         ia.id,
-        ia.key_hash AS prompt_id,
-        ia.key_hash AS account_id,
-        ia.key_hash AS token_hash,
+        ia.account_id,
+        ia.key_hash,
         ia.status,
         ia.type,
+        ia.available_to,
+        ia.details,
         (ia.details->>'primaryModel')::TEXT AS "primaryModel",
         (ia.details->>'fallbackModel')::TEXT AS "fallbackModel",
         (ia.details->'primaryModelConfig')::JSONB AS "primaryModelConfig",
         (ia.details->'fallbackModelConfig')::JSONB AS "fallbackModelConfig",
         (ia.details->>'primaryAccessKey')::BIGINT AS "primaryAccessKey",
         (ia.details->>'fallbackAccessKey')::BIGINT AS "fallbackAccessKey",
-        NULL::TEXT AS "primaryAccessTokenKey",
-        NULL::TEXT AS "fallbackAccessTokenKey",
+        (ia.details->>'primaryAccessTokenKey')::TEXT AS "primaryAccessTokenKey",
+        (ia.details->>'fallbackAccessTokenKey')::TEXT AS "fallbackAccessTokenKey",
         (ia.details->>'maxTokens')::INTEGER AS "maxTokens",
         (ia.details->>'defPrompt')::TEXT AS "defPrompt",
         ia.token_balance AS balance
       FROM "intelligence_access" ia
-      WHERE ia.key_hash = $1 AND ia.key_hash = $2
+      WHERE ia.account_id = $1 AND ia.id = $2
       ORDER BY ia.id DESC
       LIMIT 1
     `,
@@ -621,23 +623,25 @@ async function findAccessRowByAccessId(accessId: string): Promise<IntelligenceAc
     `
       SELECT
         ia.id,
-        ia.key_hash AS prompt_id,
-        ia.key_hash AS account_id,
-        ia.key_hash AS token_hash,
+        ia.account_id,
+        ia.key_hash,
+        ia.status,
         ia.type,
+        ia.available_to,
+        ia.details,
         (ia.details->>'primaryModel')::TEXT AS "primaryModel",
         (ia.details->>'fallbackModel')::TEXT AS "fallbackModel",
         (ia.details->'primaryModelConfig')::JSONB AS "primaryModelConfig",
         (ia.details->'fallbackModelConfig')::JSONB AS "fallbackModelConfig",
         (ia.details->>'primaryAccessKey')::BIGINT AS "primaryAccessKey",
         (ia.details->>'fallbackAccessKey')::BIGINT AS "fallbackAccessKey",
-        NULL::TEXT AS "primaryAccessTokenKey",
-        NULL::TEXT AS "fallbackAccessTokenKey",
+        (ia.details->>'primaryAccessTokenKey')::TEXT AS "primaryAccessTokenKey",
+        (ia.details->>'fallbackAccessTokenKey')::TEXT AS "fallbackAccessTokenKey",
         (ia.details->>'maxTokens')::INTEGER AS "maxTokens",
         (ia.details->>'defPrompt')::TEXT AS "defPrompt",
         ia.token_balance AS balance
       FROM "intelligence_access" ia
-      WHERE ia.key_hash = $1
+      WHERE ia.id = $1
       ORDER BY ia.id DESC
       LIMIT 1
     `,
@@ -670,7 +674,7 @@ async function logDevRequest(input: {
 }
 
 async function finalizeRequestLog(input: {
-  accessId: number;
+  accessId: string;
   query: string;
   masterPrompt: string;
   context: string;
@@ -736,7 +740,7 @@ async function finalizeRequestLog(input: {
 }
 
 async function logFailedRequest(input: {
-  accessId: number;
+  accessId: string;
   query: string;
   masterPrompt: string;
   context: string;
@@ -821,32 +825,32 @@ async function handleRequest(request: NextRequest) {
       requestId,
       error: error instanceof Error ? error.message : 'Invalid request body',
     });
-    return errorResponse(error instanceof Error ? error.message : 'Invalid request body', 400);
+    return errorResponse('invalid_request', error instanceof Error ? error.message : 'Invalid request body', 400);
   }
 
   const isOpenFlowRequest = input.openFlowCandidates.length > 0;
   const isPromptRequest = Boolean(input.accessId || input.accessKey);
 
   if (isOpenFlowRequest && isPromptRequest) {
-    return errorResponse('Use either accessId/accessKey or model array, not both.', 400);
+    return errorResponse('invalid_request', 'Use either accessId/accessKey or model array, not both.', 400);
   }
 
   const access = isPromptRequest ? await findAccessRowByAccessId(input.accessId) : null;
 
   if (isPromptRequest && !input.accessId) {
-    return errorResponse('accessId is required for prompt-based requests.', 400);
+    return errorResponse('access_id_required', 'accessId is required for prompt-based requests.', 400);
   }
 
   if (isPromptRequest && !input.accessKey) {
-    return errorResponse('accessKey is required for prompt-based requests.', 400);
+    return errorResponse('access_key_required', 'accessKey is required for prompt-based requests.', 400);
   }
 
   if (isPromptRequest && !access) {
-    return errorResponse('No intelligence access was found for this accessId.', 404);
+    return errorResponse('access_id_invalid', 'No intelligence access was found for this accessId.', 404);
   }
 
   accountIdForDevLog = access?.account_id || null;
-  accessIdForDevLog = access?.prompt_id || input.accessId || null;
+  accessIdForDevLog = access?.id || input.accessId || null;
   devModeEnabled = shouldLogAccessStatus(access?.status);
   traceStep('access_status_state', {
     requestId,
@@ -857,7 +861,11 @@ async function handleRequest(request: NextRequest) {
   });
 
   if (access?.status?.trim().toLowerCase() === 'hold') {
-    return errorResponse('This access is on hold.', 403);
+    return errorResponse('access_invalid', 'This access is on hold.', 403);
+  }
+
+  if (access?.status?.trim().toLowerCase() === 'unpublished') {
+    return errorResponse('access_invalid', 'This access is unpublished.', 403);
   }
 
   if (devModeEnabled) {
@@ -878,12 +886,12 @@ async function handleRequest(request: NextRequest) {
     });
   }
 
-  if (isPromptRequest && access && !tokenMatchesHash(input.accessKey, access.token_hash)) {
-    return errorResponse('Invalid accessKey for this intelligence prompt.', 401);
+  if (isPromptRequest && access && !tokenMatchesHash(input.accessKey, access.key_hash)) {
+    return errorResponse('access_key_invalid', 'Invalid accessKey for this intelligence prompt.', 401);
   }
 
   if (isPromptRequest && access && Number(access.balance) <= 0) {
-    return errorResponse('Insufficient balance for this intelligence prompt.', 402);
+    return errorResponse('negative_balance', 'Insufficient balance for this intelligence prompt.', 402);
   }
 
   const legacyAccess = access as IntelligenceAccessRow | null;

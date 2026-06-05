@@ -58,6 +58,7 @@ interface AccessDetailProps {
     tokenBalance: number;
     details: string[];
     published: boolean;
+    availableTo: string[];
   };
   tokens: TokenOption[];
   models: ModelOption[];
@@ -100,6 +101,10 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
   const [testResponse, setTestResponse] = useState<string | null>(null);
   const [testLoading, setTestLoading] = useState(false);
   const [testError, setTestError] = useState<string | null>(null);
+  const [allowedSources, setAllowedSources] = useState<string[]>(
+    Array.isArray(access.availableTo) ? access.availableTo : []
+  );
+  const [newSource, setNewSource] = useState('');
 
   // Parse existing details
   const existingPrompt = access.type === 'closed' ? (access.details[0] || '') : '';
