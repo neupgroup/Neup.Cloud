@@ -56,7 +56,7 @@ export async function createIntelligenceModelAction(formData: FormData) {
 
 export interface CreateIntelligenceAccessActionState {
   error: string | null;
-  generatedAccessId: number | null;
+  generatedAccessId: string | null;
 }
 
 export interface UpdateIntelligenceAccessActionState {

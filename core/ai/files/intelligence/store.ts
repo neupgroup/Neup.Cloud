@@ -121,14 +121,13 @@ export interface IntelligenceAccessRecord {
 
 export interface IntelligenceLogRecord {
   id: number;
-  access_id: number;
+  access_id: string;
   details: Record<string, unknown>;
   from: string | null;
   balance_used: number | null;
   dev_details?: Record<string, unknown> | null;
   logged_on: string;
   // Computed/helper properties for backwards compatibility
-  account_id?: number;  // alias for access_id
   inputTokens?: number;
   outputTokens?: number;
   cost?: number | null;
@@ -186,7 +185,7 @@ interface AccessTokenRow {
 }
 
 interface IntelligenceAccessRow {
-  id: number | string;
+  id: string;
   key_hash: string;
   type: string;
   available_to: unknown;
@@ -199,7 +198,7 @@ interface IntelligenceAccessRow {
 
 interface IntelligenceLogRow {
   id: number | string;
-  access_id: number | string;
+  access_id: string;
   details: unknown;
   from: string | null;
   balance_used: number | string | null;
@@ -446,13 +445,13 @@ export async function getIntelligenceAccesses(accountId: string): Promise<Intell
       SELECT id, key_hash, type, available_to, details, max_tokens, token_balance, status, updated_at
       FROM "intelligence_access"
       WHERE account_id = $1
-      ORDER BY id DESC
+      ORDER BY created_at DESC
     `,
     [accountId]
   );
 
   return result.rows.map((row) => ({
-    id: normalizeNumericId(row.id),
+    id: row.id,
     key_hash: row.key_hash,
     type: row.type as AccessType,
     available_to: row.available_to,
@@ -464,7 +463,7 @@ export async function getIntelligenceAccesses(accountId: string): Promise<Intell
   }));
 }
 
-export async function getIntelligenceAccessById(accountId: string, accessId: number): Promise<IntelligenceAccessRecord | null> {
+export async function getIntelligenceAccessById(accountId: string, accessId: string): Promise<IntelligenceAccessRecord | null> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
   const result = await db.query<IntelligenceAccessRow>(
@@ -484,7 +483,7 @@ export async function getIntelligenceAccessById(accountId: string, accessId: num
   }
 
   return {
-    id: normalizeNumericId(row.id),
+    id: row.id,
     key_hash: row.key_hash,
     type: row.type as AccessType,
     available_to: row.available_to,
@@ -516,7 +515,7 @@ export async function getIntelligenceAccessByHash(accountId: string, keyHash: st
   }
 
   return {
-    id: normalizeNumericId(row.id),
+    id: row.id,
     key_hash: row.key_hash,
     type: row.type as AccessType,
     available_to: row.available_to,
@@ -552,8 +551,7 @@ export async function getIntelligenceLogs(accountId: string): Promise<Intelligen
 
   return result.rows.map((row) => ({
     id: normalizeNumericId(row.id),
-    access_id: normalizeNumericId(row.access_id),
-    account_id: normalizeNumericId(row.access_id), // alias
+    access_id: row.access_id,
     details: row.details,
     from: row.from,
     balance_used: row.balance_used === null ? null : Number(row.balance_used),
@@ -619,8 +617,7 @@ export async function getPaginatedIntelligenceLogs(
   return {
     logs: logsResult.rows.map((row) => ({
       id: normalizeNumericId(row.id),
-      access_id: normalizeNumericId(row.access_id),
-      account_id: normalizeNumericId(row.access_id), // alias
+      access_id: row.access_id,
       details: row.details,
       from: row.from,
       balance_used: row.balance_used === null ? null : Number(row.balance_used),
@@ -778,13 +775,14 @@ export async function createIntelligenceAccessRecord(input: {
   accessType: 'open' | 'hybrid' | 'closed';
   maxTokens: number | null;
   details: string[];
-}): Promise<number> {
+}): Promise<string> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
 
-  const result = await db.query<{ id: number | string }>(
+  const result = await db.query<{ id: string }>(
     `
       INSERT INTO "intelligence_access" (
+        id,
         account_id,
         key_hash,
         type,
@@ -794,10 +792,11 @@ export async function createIntelligenceAccessRecord(input: {
         token_balance,
         status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING id
     `,
     [
+      input.accessIdentifier,
       input.accountId,
       input.tokenHash,
       input.accessType,
@@ -809,11 +808,11 @@ export async function createIntelligenceAccessRecord(input: {
     ]
   );
 
-  return normalizeNumericId(result.rows[0].id);
+  return result.rows[0].id;
 }
 
 export async function updateIntelligenceAccessRecord(input: {
-  accessId: number;
+  accessId: string;
   accountId: string;
   status: 'dev' | 'prod' | 'hold';
   accessType: 'open' | 'hybrid' | 'closed';
@@ -852,7 +851,7 @@ export async function updateIntelligenceAccessRecord(input: {
 }
 
 export async function deleteIntelligenceAccessRecord(input: {
-  accessId: number;
+  accessId: string;
   accountId: string;
 }): Promise<void> {
   await ensureIntelligenceTables();
@@ -872,7 +871,7 @@ export async function deleteIntelligenceAccessRecord(input: {
 }
 
 export async function rechargeIntelligenceAccessBalance(input: {
-  accessId: number;
+  accessId: string;
   accountId: string;
   amount: number;
 }): Promise<void> {
@@ -896,7 +895,7 @@ export async function rechargeIntelligenceAccessBalance(input: {
 }
 
 export async function logIntelligenceUsage(input: {
-  accessId: number;
+  accessId: string;
   details: Record<string, unknown>;
   from: string | null;
   balanceUsed: number;
@@ -921,7 +920,7 @@ export async function logIntelligenceUsage(input: {
 }
 
 export async function deductBalance(input: {
-  accessId: number;
+  accessId: string;
   amount: number;
 }): Promise<void> {
   await ensureIntelligenceTables();
@@ -1256,10 +1255,6 @@ export function parseAccessFormData(formData: FormData) {
   };
 }
 
-export function parseAccessIdFormData(formData: FormData) {
-  return parseRequiredInteger(formData.get('access_id'), 'Access ID');
-}
-
 export function parseRechargeFormData(formData: FormData) {
   const amount = parseRequiredDecimal(formData.get('amount'), 'Recharge amount');
 
@@ -1268,13 +1263,17 @@ export function parseRechargeFormData(formData: FormData) {
   }
 
   return {
-    accessId: parseRequiredInteger(formData.get('access_id'), 'Access ID'),
+    accessId: parseRequiredString(formData.get('access_id'), 'Access ID'),
     amount,
   };
 }
 
+export function parseAccessIdFormData(formData: FormData) {
+  return parseRequiredString(formData.get('access_id'), 'Access ID');
+}
+
 export async function publishIntelligenceAccess(input: {
-  accessId: number;
+  accessId: string;
   accountId: string;
   accessKey: string;
   resetKey?: boolean;

@@ -22,9 +22,9 @@ export default async function IntelligenceAccessDetailPage({
 }) {
   const accountId = await getCurrentIntelligenceAccountId();
   const resolvedParams = await params;
-  const accessId = Number(resolvedParams.id);
+  const accessId = resolvedParams.id;
 
-  if (!Number.isFinite(accessId)) {
+  if (!accessId || typeof accessId !== 'string') {
     notFound();
   }
 

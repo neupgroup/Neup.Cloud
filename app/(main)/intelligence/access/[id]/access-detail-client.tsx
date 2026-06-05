@@ -24,7 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 interface AccessDetailProps {
   accountId: string;
   access: {
-    id: number;
+    id: string;
     keyHash: string;
     type: string;
     status: string;
