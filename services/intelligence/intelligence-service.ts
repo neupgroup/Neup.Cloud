@@ -12,7 +12,9 @@ import {
   deleteIntelligenceModelRecord,
   generateAccessIdentifier,
   generateAccessToken,
+  getAccessTokenById,
   getIntelligenceAccessById,
+  getIntelligenceModels,
   hashAccessToken,
   parseAccessFormData,
   parseAccessIdFormData,
@@ -20,6 +22,7 @@ import {
   parseModelFormData,
   parseRechargeFormData,
   parseTokenFormData,
+  publishIntelligenceAccess,
   rechargeIntelligenceAccessBalance,
   updateIntelligenceModelRecord,
   updateIntelligenceAccessRecord,
@@ -53,13 +56,18 @@ export async function createIntelligenceModelAction(formData: FormData) {
 
 export interface CreateIntelligenceAccessActionState {
   error: string | null;
-  generatedAccessId: string | null;
-  generatedToken: string | null;
+  generatedAccessId: number | null;
 }
 
 export interface UpdateIntelligenceAccessActionState {
   error: string | null;
   success: string | null;
+}
+
+export interface PublishIntelligenceAccessActionState {
+  error: string | null;
+  success: string | null;
+  generatedAccessKey: string | null;
 }
 
 export interface UpdateIntelligenceModelActionState {
@@ -78,32 +86,62 @@ export async function createIntelligenceAccessAction(
   const tokenHash = hashAccessToken(generatedToken);
 
   try {
-    await createIntelligenceAccessRecord({
+    // Build details array: ["prompt", "provider/model/0/tokenId", "provider/model/0/tokenId", ...]
+    const details: string[] = [];
+
+    if (input.accessType === 'open') {
+      // Open access: no details
+      details.push('');
+    } else if (input.accessType === 'hybrid' || input.accessType === 'closed') {
+      // Add prompt first for closed access
+      if (input.accessType === 'closed' && input.prompt) {
+        details.push(input.prompt);
+      } else if (input.accessType === 'hybrid') {
+        details.push('');
+      }
+
+      // Add model blocks with 0 as placeholder for key
+      const modelIds = [input.primaryModelId, input.fallbackModelId].filter(Boolean) as number[];
+      const tokenIds = [input.primaryAccessKey, input.fallbackAccessKey].filter(Boolean) as number[];
+
+      for (let i = 0; i < modelIds.length; i++) {
+        const modelId = modelIds[i];
+        const tokenId = tokenIds[i] || 0;
+
+        // Get model info
+        const models = await getIntelligenceModels();
+        const model = models.find((m) => m.id === modelId);
+
+        if (model) {
+          // Format: provider/model/0/tokenId (0 means unpublished)
+          details.push(`${model.provider}/${model.model}/0/${tokenId}`);
+        }
+      }
+    }
+
+    const accessId = await createIntelligenceAccessRecord({
       accessIdentifier: generatedAccessId,
       accountId,
       tokenHash,
-      status: input.status,
+      status: 'unpublished',
       accessType: input.accessType,
       maxTokens: input.maxTokens,
-      prompt: input.prompt,
-      primaryModel: undefined,
-      fallbackModel: undefined,
+      details,
     });
 
     revalidatePath('/intelligence/access');
     revalidatePath('/intelligence/access/add');
+    revalidatePath(`/intelligence/access/${accessId}`);
     revalidatePath('/intelligence/logs');
 
-    return {
-      error: null,
-      generatedAccessId,
-      generatedToken,
-    };
+    redirect(`/intelligence/access/${accessId}`);
   } catch (error) {
+    if ((error as { digest?: string })?.digest?.includes('NEXT_REDIRECT')) {
+      throw error;
+    }
     return {
       error: error instanceof Error ? error.message : 'Failed to create access',
       generatedAccessId: null,
-      generatedToken: null,
     };
   }
 }
@@ -251,4 +289,41 @@ export async function deleteIntelligenceModelAction(formData: FormData) {
   revalidatePath('/intelligence/access');
   revalidatePath('/intelligence/access/add');
   redirect('/intelligence/models');
+}
+
+export async function publishIntelligenceAccessAction(
+  _prevState: PublishIntelligenceAccessActionState,
+  formData: FormData
+): Promise<PublishIntelligenceAccessActionState> {
+  const accountId = await getCurrentIntelligenceAccountId();
+  const accessId = parseAccessIdFormData(formData);
+  const resetKey = formData.get('reset_key') === 'true';
+  const previousKey = formData.get('previous_key') as string | null;
+  const newAccessKey = formData.get('new_access_key') as string | null;
+
+  try {
+    const result = await publishIntelligenceAccess({
+      accessId,
+      accountId,
+      accessKey: newAccessKey || generateAccessToken(),
+      resetKey,
+      previousKey: previousKey || undefined,
+    });
+
+    revalidatePath('/intelligence/access');
+    revalidatePath(`/intelligence/access/${accessId}`);
+    revalidatePath('/intelligence/logs');
+
+    return {
+      error: null,
+      success: 'Access published successfully',
+      generatedAccessKey: result.newAccessKey,
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'Failed to publish access',
+      success: null,
+      generatedAccessKey: null,
+    };
+  }
 }

@@ -108,7 +108,7 @@ export interface StoredModelConfig {
 export type AccessType = 'open' | 'hybrid' | 'closed';
 
 export interface IntelligenceAccessRecord {
-  id: number;
+  id: string;
   key_hash: string;
   type: AccessType;
   available_to: unknown;
@@ -774,39 +774,15 @@ export async function createIntelligenceAccessRecord(input: {
   accessIdentifier: string;
   accountId: string;
   tokenHash: string;
-  status: 'dev' | 'prod' | 'hold';
+  status: 'dev' | 'prod' | 'hold' | 'unpublished';
   accessType: 'open' | 'hybrid' | 'closed';
   maxTokens: number | null;
-  prompt?: string | null;
-  primaryModel?: { provider: string; model: string; apiKey: string | null; tokenId: number | null } | null;
-  fallbackModel?: { provider: string; model: string; apiKey: string | null; tokenId: number | null } | null;
-}): Promise<void> {
+  details: string[];
+}): Promise<number> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
 
-  // Build model strings array
-  const models: string[] = [];
-  if (input.primaryModel) {
-    models.push(buildModelString(
-      input.primaryModel.provider,
-      input.primaryModel.model,
-      input.primaryModel.apiKey,
-      input.primaryModel.tokenId
-    ));
-  }
-  if (input.fallbackModel) {
-    models.push(buildModelString(
-      input.fallbackModel.provider,
-      input.fallbackModel.model,
-      input.fallbackModel.apiKey,
-      input.fallbackModel.tokenId
-    ));
-  }
-
-  // Build details object with unencrypted prompt and models with encrypted keys
-  const details = buildDetailsObject(input.prompt || null, models);
-
-  await db.query(
+  const result = await db.query<{ id: number | string }>(
     `
       INSERT INTO "intelligence_access" (
         account_id,
@@ -819,18 +795,21 @@ export async function createIntelligenceAccessRecord(input: {
         status
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING id
     `,
     [
       input.accountId,
       input.tokenHash,
       input.accessType,
       [],
-      JSON.stringify(details),
+      JSON.stringify(input.details),
       input.maxTokens,
       0,
       input.status,
     ]
   );
+
+  return normalizeNumericId(result.rows[0].id);
 }
 
 export async function updateIntelligenceAccessRecord(input: {
@@ -1261,13 +1240,13 @@ export function parseAccessFormData(formData: FormData) {
 
   const status = parseOptionalString(formData.get('access_status')) || 'prod';
 
-  if (!['dev', 'prod', 'hold'].includes(status)) {
-    throw new Error('Access status must be one of: dev, prod, hold');
+  if (!['dev', 'prod', 'hold', 'unpublished'].includes(status)) {
+    throw new Error('Access status must be one of: dev, prod, hold, unpublished');
   }
 
   return {
     accessType: accessType as 'open' | 'hybrid' | 'closed',
-    status: status as 'dev' | 'prod' | 'hold',
+    status: status as 'dev' | 'prod' | 'hold' | 'unpublished',
     primaryModelId,
     fallbackModelId,
     primaryAccessKey,
@@ -1292,4 +1271,130 @@ export function parseRechargeFormData(formData: FormData) {
     accessId: parseRequiredInteger(formData.get('access_id'), 'Access ID'),
     amount,
   };
+}
+
+export async function publishIntelligenceAccess(input: {
+  accessId: number;
+  accountId: string;
+  accessKey: string;
+  resetKey?: boolean;
+  previousKey?: string;
+}): Promise<{ newTokenHash: string; newAccessKey: string }> {
+  await ensureIntelligenceTables();
+  const db = getIntelligenceDbPool();
+
+  // Get the access record
+  const access = await getIntelligenceAccessById(input.accountId, input.accessId);
+
+  if (!access) {
+    throw new Error('Access record not found');
+  }
+
+  // Parse details array
+  const details = Array.isArray(access.details) ? access.details : [];
+
+  if (details.length === 0) {
+    throw new Error('No details to publish');
+  }
+
+  // If not resetting key, verify the previous key
+  if (!input.resetKey && input.previousKey) {
+    const previousHash = hashAccessToken(input.previousKey);
+    if (previousHash !== access.key_hash) {
+      throw new Error('Invalid previous access key');
+    }
+  }
+
+  // Generate new access key if resetting, otherwise use the provided one
+  const newAccessKey = input.resetKey ? generateAccessToken() : input.accessKey;
+  const newTokenHash = hashAccessToken(newAccessKey);
+
+  // Process details array to encrypt keys
+  const updatedDetails: string[] = [];
+
+  for (const detail of details) {
+    if (!detail || detail === '') {
+      updatedDetails.push(detail);
+      continue;
+    }
+
+    // Check if it's a model string (provider/model/0/tokenId)
+    if (detail.includes('/')) {
+      const parts = detail.split('/');
+      if (parts.length === 4) {
+        const [provider, model, keyPlaceholder, tokenIdStr] = parts;
+        const tokenId = parseInt(tokenIdStr, 10);
+
+        if (keyPlaceholder === '0' && tokenId > 0) {
+          // Get the API key from accessTokens table
+          const token = await getAccessTokenById(input.accountId, tokenId);
+          if (!token) {
+            throw new Error(`Token with ID ${tokenId} not found`);
+          }
+
+          // Encrypt the API key using the new access key
+          const encryptedKey = encryptValue(token.key, newAccessKey);
+
+          // Update the detail with encrypted key
+          updatedDetails.push(`${provider}/${model}/${encryptedKey}/${tokenId}`);
+        } else {
+          // Already published or no token, keep as is
+          updatedDetails.push(detail);
+        }
+      } else {
+        updatedDetails.push(detail);
+      }
+    } else {
+      // It's a prompt or other string, keep as is
+      updatedDetails.push(detail);
+    }
+  }
+
+  // Update the access record with new token hash, encrypted details, and status
+  await db.query(
+    `
+      UPDATE "intelligence_access"
+      SET
+        key_hash = $1,
+        details = $2,
+        status = 'prod',
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $3 AND account_id = $4
+    `,
+    [newTokenHash, JSON.stringify(updatedDetails), input.accessId, input.accountId]
+  );
+
+  return {
+    newTokenHash,
+    newAccessKey,
+  };
+}
+
+export function parseDetailsArray(details: unknown): string[] {
+  if (!details) {
+    return [];
+  }
+  if (Array.isArray(details)) {
+    return details.filter((item): item is string => typeof item === 'string');
+  }
+  return [];
+}
+
+export function isAccessPublished(details: unknown): boolean {
+  const detailsArray = parseDetailsArray(details);
+  if (detailsArray.length === 0) {
+    return false;
+  }
+
+  // Check if any model string has '0' as the key placeholder
+  for (const detail of detailsArray) {
+    if (detail && detail.includes('/')) {
+      const parts = detail.split('/');
+      if (parts.length === 4 && parts[2] === '0') {
+        return false; // Has unpublished key
+      }
+    }
+  }
+
+  return true;
 }

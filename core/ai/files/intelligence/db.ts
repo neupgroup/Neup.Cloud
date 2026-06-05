@@ -72,7 +72,7 @@ export async function ensureIntelligenceTables(): Promise<void> {
 
       await db.query(`
         CREATE TABLE IF NOT EXISTS "intelligence_access" (
-          id BIGSERIAL PRIMARY KEY,
+          id TEXT PRIMARY KEY,
           account_id TEXT NOT NULL,
           key_hash TEXT NOT NULL UNIQUE,
           type TEXT NOT NULL DEFAULT 'open',
@@ -81,8 +81,10 @@ export async function ensureIntelligenceTables(): Promise<void> {
           max_tokens INTEGER,
           token_balance DOUBLE PRECISION NOT NULL DEFAULT 0,
           status TEXT NOT NULL DEFAULT 'prod',
+          created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          CONSTRAINT intelligence_access_type_check CHECK (type IN ('open', 'hybrid', 'closed'))
+          CONSTRAINT intelligence_access_type_check CHECK (type IN ('open', 'hybrid', 'closed')),
+          CONSTRAINT intelligence_access_status_check CHECK (status IN ('dev', 'prod', 'hold', 'unpublished'))
         )
       `);
 
@@ -139,7 +141,7 @@ export async function ensureIntelligenceTables(): Promise<void> {
       await db.query(`
         CREATE TABLE IF NOT EXISTS "intelligence_log" (
           id BIGSERIAL PRIMARY KEY,
-          access_id BIGINT NOT NULL REFERENCES "intelligence_access" (id) ON DELETE CASCADE,
+          access_id TEXT NOT NULL REFERENCES "intelligence_access" (id) ON DELETE CASCADE,
           details JSONB NOT NULL DEFAULT '{}'::jsonb,
           "from" TEXT,
           balance_used DOUBLE PRECISION,
