@@ -814,10 +814,11 @@ export async function createIntelligenceAccessRecord(input: {
 export async function updateIntelligenceAccessRecord(input: {
   accessId: string;
   accountId: string;
-  status: 'dev' | 'prod' | 'hold';
+  status: 'dev' | 'prod' | 'hold' | 'unpublished';
   accessType: 'open' | 'hybrid' | 'closed';
   maxTokens: number | null;
   details: unknown;
+  keyHash?: string;
 }): Promise<void> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
@@ -828,25 +829,29 @@ export async function updateIntelligenceAccessRecord(input: {
     throw new Error('Access record not found');
   }
 
+  // Build dynamic query based on whether keyHash is provided
+  const updates: string[] = ['type = $1', 'details = $2', 'max_tokens = $3', 'status = $4', 'updated_at = CURRENT_TIMESTAMP'];
+  const values: unknown[] = [
+    input.accessType,
+    input.details,
+    input.maxTokens,
+    input.status,
+  ];
+
+  if (input.keyHash !== undefined) {
+    updates.push(`key_hash = $${values.length + 1}`);
+    values.push(input.keyHash);
+  }
+
+  values.push(input.accessId, input.accountId);
+
   await db.query(
     `
       UPDATE "intelligence_access"
-      SET
-        type = $1,
-        details = $2,
-        max_tokens = $3,
-        status = $4,
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $5 AND account_id = $6
+      SET ${updates.join(', ')}
+      WHERE id = $${values.length - 1} AND account_id = $${values.length}
     `,
-    [
-      input.accessType,
-      input.details,
-      input.maxTokens,
-      input.status,
-      input.accessId,
-      input.accountId,
-    ]
+    values
   );
 }
 

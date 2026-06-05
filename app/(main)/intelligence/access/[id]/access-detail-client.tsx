@@ -2,14 +2,18 @@
 
 import { useActionState, useState } from 'react';
 import Link from 'next/link';
-import { Save, Trash2, Lock, Unlock, KeyRound, Copy, AlertCircle, Settings } from 'lucide-react';
+import { Save, Trash2, Lock, Unlock, KeyRound, Copy, AlertCircle, Edit, Plus, Trash } from 'lucide-react';
 
 import {
   deleteIntelligenceAccessAction,
   publishIntelligenceAccessAction,
+  updateIntelligenceAccessConfigAction,
   updateIntelligenceAccessStatusAction,
+  resetIntelligenceAccessKeyAction,
   type PublishIntelligenceAccessActionState,
+  type UpdateIntelligenceAccessConfigActionState,
   type UpdateIntelligenceAccessStatusActionState,
+  type ResetIntelligenceAccessKeyActionState,
 } from '@/services/intelligence/intelligence-service';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,7 +25,27 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+interface TokenOption {
+  id: number;
+  account_id: string;
+  name: string;
+}
+
+interface ModelOption {
+  id: number;
+  title: string;
+  provider: string;
+  model: string;
+  description: string | null;
+}
 
 interface AccessDetailProps {
   accountId: string;
@@ -35,6 +59,8 @@ interface AccessDetailProps {
     details: string[];
     published: boolean;
   };
+  tokens: TokenOption[];
+  models: ModelOption[];
 }
 
 const initialPublishState: PublishIntelligenceAccessActionState = {
@@ -48,12 +74,52 @@ const initialStatusState: UpdateIntelligenceAccessStatusActionState = {
   success: null,
 };
 
-export default function AccessDetailClient({ accountId, access }: AccessDetailProps) {
+const initialConfigState: UpdateIntelligenceAccessConfigActionState = {
+  error: null,
+  success: null,
+};
+
+const initialResetKeyState: ResetIntelligenceAccessKeyActionState = {
+  error: null,
+  success: null,
+  generatedAccessKey: null,
+};
+
+export default function AccessDetailClient({ accountId, access, tokens, models }: AccessDetailProps) {
   const [publishState, publishAction, isPublishing] = useActionState(publishIntelligenceAccessAction, initialPublishState);
   const [statusState, statusAction, isUpdatingStatus] = useActionState(updateIntelligenceAccessStatusAction, initialStatusState);
+  const [configState, configAction, isUpdatingConfig] = useActionState(updateIntelligenceAccessConfigAction, initialConfigState);
+  const [resetKeyState, resetKeyAction, isResettingKey] = useActionState(resetIntelligenceAccessKeyAction, initialResetKeyState);
   const [previousKey, setPreviousKey] = useState('');
+  const [accessKeyForEdit, setAccessKeyForEdit] = useState('');
   const [copied, setCopied] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(access.status);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Parse existing details
+  const existingPrompt = access.type === 'closed' ? (access.details[0] || '') : '';
+  const existingModelBlocks = access.details.slice(access.type === 'closed' ? 1 : 1).filter((d) => d && d.includes('/')).map((block) => {
+    const parts = block.split('/');
+    return {
+      provider: parts[0] || '',
+      model: parts[1] || '',
+      encrypted: parts[2] || '0',
+      tokenId: parts[3] || '0',
+    };
+  });
+
+  const [editPrompt, setEditPrompt] = useState(existingPrompt);
+  const [editMaxTokens, setEditMaxTokens] = useState(access.maxTokens?.toString() || '');
+  const [editModelBlocks, setEditModelBlocks] = useState(existingModelBlocks.map((block) => {
+    const model = models.find((m) => m.provider === block.provider && m.model === block.model);
+    return {
+      modelId: model?.id.toString() || '',
+      tokenId: block.tokenId !== '0' ? block.tokenId : '',
+    };
+  }));
+
+  // For display purposes
+  const displayPrompt = existingPrompt;
+  const displayModelBlocks = access.details.slice(access.type === 'closed' ? 1 : 1).filter((d) => d && d.includes('/'));
 
   const handleCopy = async (text: string) => {
     await navigator.clipboard.writeText(text);
@@ -61,9 +127,70 @@ export default function AccessDetailClient({ accountId, access }: AccessDetailPr
     window.setTimeout(() => setCopied(false), 2000);
   };
 
-  // Parse details to show what will be published
-  const prompt = access.details[0] || '';
-  const modelBlocks = access.details.slice(1).filter((d) => d && d.includes('/'));
+  const handleDownload = (accessKey: string, accessId: string) => {
+    const blob = new Blob([accessKey], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `access-token-${accessId}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleStatusClick = async () => {
+    // Only allow status change for published access
+    if (access.status === 'unpublished' || !access.published) {
+      return;
+    }
+
+    // Cycle through statuses: prod -> dev -> hold -> prod
+    const statusCycle: Record<string, 'dev' | 'prod' | 'hold'> = {
+      prod: 'dev',
+      dev: 'hold',
+      hold: 'prod',
+    };
+
+    const newStatus = statusCycle[access.status] || 'prod';
+
+    // Create a FormData and submit the status change
+    const formData = new FormData();
+    formData.append('access_id', String(access.id));
+    formData.append('status', newStatus);
+
+    await statusAction(formData);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'dev':
+        return 'text-blue-600';
+      case 'prod':
+        return 'text-emerald-600';
+      case 'hold':
+        return 'text-red-600';
+      case 'unpublished':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'unpublished':
+        return 'Unpublished (No access key generated)';
+      case 'prod':
+        return 'Production';
+      case 'dev':
+        return 'Development';
+      case 'hold':
+        return 'Hold';
+      default:
+        return status;
+    }
+  };
 
   return (
     <div className="grid gap-6">
@@ -139,13 +266,18 @@ export default function AccessDetailClient({ accountId, access }: AccessDetailPr
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Status</p>
-              <p className="text-sm">
-                {access.status === 'unpublished' ? (
-                  <span className="text-amber-600 font-semibold">Unpublished (No access key generated)</span>
-                ) : (
-                  <span className="text-emerald-600 font-semibold capitalize">{access.status}</span>
-                )}
-              </p>
+              <button
+                type="button"
+                onClick={handleStatusClick}
+                disabled={access.status === 'unpublished' || !access.published || isUpdatingStatus}
+                className={`text-sm font-semibold ${getStatusColor(access.status)} ${
+                  access.status !== 'unpublished' && access.published
+                    ? 'cursor-pointer hover:underline'
+                    : 'cursor-not-allowed'
+                } disabled:opacity-50`}
+              >
+                {getStatusLabel(access.status)}
+              </button>
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Token Balance</p>
@@ -161,20 +293,20 @@ export default function AccessDetailClient({ accountId, access }: AccessDetailPr
           <CardDescription>View the configuration for this access record</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-          {prompt && (
+          {access.type === 'closed' && displayPrompt && (
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-2">Prompt</p>
               <div className="rounded-xl border border-border/70 bg-muted/30 p-3 text-sm">
-                {prompt}
+                {displayPrompt}
               </div>
             </div>
           )}
 
-          {modelBlocks.length > 0 && (
+          {displayModelBlocks.length > 0 && (
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-2">Model Blocks</p>
               <div className="grid gap-2">
-                {modelBlocks.map((block, index) => {
+                {displayModelBlocks.map((block, index) => {
                   const parts = block.split('/');
                   const isUnpublished = parts[2] === '0';
                   return (
@@ -198,6 +330,290 @@ export default function AccessDetailClient({ accountId, access }: AccessDetailPr
           )}
         </CardContent>
       </Card>
+
+      {configState.error && (
+        <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+          {configState.error}
+        </div>
+      )}
+
+      {configState.success && (
+        <div className="rounded-xl border border-emerald-300/60 bg-emerald-50/70 p-4 text-sm text-emerald-900">
+          {configState.success}
+        </div>
+      )}
+
+      {access.published && access.status !== 'unpublished' && isEditing && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 font-headline">
+              <Edit className="h-5 w-5 text-primary" />
+              Edit Configuration
+            </CardTitle>
+            <CardDescription>
+              Modify the configuration. Requires access key for verification.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {resetKeyState.generatedAccessKey && (
+              <div className="rounded-xl border-2 border-emerald-400 bg-emerald-50/80 p-5">
+                <div className="flex items-start gap-3 mb-3">
+                  <KeyRound className="h-6 w-6 text-emerald-700 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-base font-bold text-emerald-900 mb-1">New Access Key Generated</p>
+                    <p className="text-sm text-emerald-800 leading-relaxed">
+                      This key can only be copied or downloaded just this time. This is shown just once - if you refresh the page, it's gone. 
+                      It's not even stored on the server, so keep it confidential and download or save it in a secure place.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(resetKeyState.generatedAccessKey!)}
+                  className="w-full rounded-xl border-2 border-emerald-400 bg-white p-4 text-left font-mono text-sm break-all text-emerald-950 transition hover:border-emerald-600 hover:bg-emerald-50 mb-3"
+                >
+                  {resetKeyState.generatedAccessKey}
+                </button>
+                <div className="flex gap-3">
+                  <Button 
+                    type="button" 
+                    onClick={() => handleCopy(resetKeyState.generatedAccessKey!)}
+                    className="flex-1"
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    {copied ? 'Copied!' : 'Copy Key'}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={() => handleDownload(resetKeyState.generatedAccessKey!, access.id)}
+                    className="flex-1"
+                  >
+                    <Save className="mr-2 h-4 w-4" />
+                    Download Key
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {configState.error && (
+              <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+                {configState.error}
+              </div>
+            )}
+
+            {configState.success && (
+              <div className="rounded-xl border border-emerald-300/60 bg-emerald-50/70 p-4 text-sm text-emerald-900">
+                {configState.success}
+              </div>
+            )}
+
+            {resetKeyState.error && (
+              <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+                {resetKeyState.error}
+              </div>
+            )}
+
+            {resetKeyState.success && (
+              <div className="rounded-xl border border-emerald-300/60 bg-emerald-50/70 p-4 text-sm text-emerald-900">
+                {resetKeyState.success}
+              </div>
+            )}
+
+            <form action={configAction} className="grid gap-4">
+              <input type="hidden" name="access_id" value={String(access.id)} />
+
+              {access.type === 'closed' && (
+                <div className="grid gap-2">
+                  <Label htmlFor="edit_prompt">Prompt</Label>
+                  <Textarea
+                    id="edit_prompt"
+                    name="prompt"
+                    className="min-h-32"
+                    value={editPrompt}
+                    onChange={(e) => setEditPrompt(e.target.value)}
+                    placeholder="Enter the prompt"
+                  />
+                </div>
+              )}
+
+              {(access.type === 'hybrid' || access.type === 'closed') && (
+                  <div className="grid gap-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">Model Blocks</p>
+                        <p className="text-sm text-muted-foreground">Configure models for this access</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditModelBlocks([...editModelBlocks, { modelId: '', tokenId: '' }])}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Block
+                      </Button>
+                    </div>
+
+                    {editModelBlocks.map((block, index) => (
+                      <div key={index} className="grid gap-4 rounded-2xl border border-border/70 bg-background p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="font-medium text-foreground">
+                              {index === 0 ? 'Primary model block' : `Fallback block ${index}`}
+                            </p>
+                          </div>
+                          {index > 0 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditModelBlocks(editModelBlocks.filter((_, i) => i !== index))}
+                            >
+                              <Trash className="mr-2 h-4 w-4" />
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+
+                        <div className="grid gap-4">
+                          <div className="grid gap-2">
+                            <Label htmlFor={`model_${index}_id`}>Model</Label>
+                            <input type="hidden" name={`model_${index}_id`} value={block.modelId} />
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button type="button" variant="outline" className="justify-between">
+                                  <span className="truncate">
+                                    {block.modelId
+                                      ? models.find((m) => m.id === Number(block.modelId))?.title || 'Select a model'
+                                      : 'Select a model'}
+                                  </span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="max-h-72 w-96 overflow-auto">
+                                {models.map((model) => (
+                                  <DropdownMenuItem
+                                    key={model.id}
+                                    onClick={() => {
+                                      const newBlocks = [...editModelBlocks];
+                                      newBlocks[index].modelId = String(model.id);
+                                      setEditModelBlocks(newBlocks);
+                                    }}
+                                  >
+                                    {model.title} ({model.provider}:{model.model})
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+
+                          {access.type === 'closed' && (
+                            <div className="grid gap-2">
+                              <Label htmlFor={`token_${index}_id`}>Token</Label>
+                              <input type="hidden" name={`token_${index}_id`} value={block.tokenId} />
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button type="button" variant="outline" className="justify-between" disabled={!block.modelId}>
+                                    <span className="truncate">
+                                      {block.tokenId
+                                        ? tokens.find((t) => t.id === Number(block.tokenId))?.name || 'Select a token'
+                                        : 'Select a token'}
+                                    </span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="max-h-72 w-96 overflow-auto">
+                                  {tokens.map((token) => (
+                                    <DropdownMenuItem
+                                      key={token.id}
+                                      onClick={() => {
+                                        const newBlocks = [...editModelBlocks];
+                                        newBlocks[index].tokenId = String(token.id);
+                                        setEditModelBlocks(newBlocks);
+                                      }}
+                                    >
+                                      {token.name}
+                                    </DropdownMenuItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="grid gap-2">
+                  <Label htmlFor="edit_max_tokens">Max Tokens (optional)</Label>
+                  <Input
+                    id="edit_max_tokens"
+                    name="max_tokens"
+                    type="number"
+                    min="1"
+                    value={editMaxTokens}
+                    onChange={(e) => setEditMaxTokens(e.target.value)}
+                    placeholder="Optional"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="access_key_edit">Access Key (required for verification)</Label>
+                  <Input
+                    id="access_key_edit"
+                    name="access_key"
+                    type="password"
+                    value={accessKeyForEdit}
+                    onChange={(e) => setAccessKeyForEdit(e.target.value)}
+                    placeholder="Enter your access key"
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Your access key is required to verify your identity and re-encrypt any API keys
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button type="submit" disabled={isUpdatingConfig || !accessKeyForEdit}>
+                    <Save className="mr-2 h-4 w-4" />
+                    {isUpdatingConfig ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setAccessKeyForEdit('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+
+              <div className="pt-4 border-t">
+                <div className="rounded-xl border border-amber-300/60 bg-amber-50/70 p-4 mb-4">
+                  <p className="text-sm font-semibold text-amber-900 mb-2">Lost Your Access Key?</p>
+                  <p className="text-sm text-amber-800">
+                    Reset your access key if you've lost it. This will generate a new key, set status to unpublished, 
+                    and reset all encrypted API keys. You'll need to publish again with the new key.
+                  </p>
+                </div>
+                <form action={resetKeyAction}>
+                  <input type="hidden" name="access_id" value={String(access.id)} />
+                  <Button 
+                    type="submit" 
+                    variant="destructive" 
+                    disabled={isResettingKey}
+                  >
+                    <KeyRound className="mr-2 h-4 w-4" />
+                    {isResettingKey ? 'Resetting...' : 'Reset Key'}
+                  </Button>
+                </form>
+              </div>
+          </CardContent>
+        </Card>
+      )}
 
       {!access.published && access.status === 'unpublished' && (
         <Card className="border-primary/30">
@@ -263,80 +679,25 @@ export default function AccessDetailClient({ accountId, access }: AccessDetailPr
         </Card>
       )}
 
-      {access.published && access.status !== 'unpublished' && (
-        <Card className="border-emerald-300/30 bg-emerald-50/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 font-headline text-emerald-900">
-              <Unlock className="h-5 w-5" />
-              Access Published
-            </CardTitle>
-            <CardDescription className="text-emerald-800">
-              This access record is published and active. You can now change the status below.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      )}
-
-      {access.published && access.status !== 'unpublished' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 font-headline">
-              <Settings className="h-5 w-5 text-primary" />
-              Manage Status
-            </CardTitle>
-            <CardDescription>
-              Change the status of this access record. Only available after publishing.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form action={statusAction} className="grid gap-4">
-              <input type="hidden" name="access_id" value={String(access.id)} />
-              <div className="grid gap-2">
-                <Label htmlFor="status">Status</Label>
-                <select
-                  id="status"
-                  name="status"
-                  title="Select access status"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                >
-                  <option value="prod">Production - No logging, standard behavior</option>
-                  <option value="dev">Development - Logs requests, responses, and errors</option>
-                  <option value="hold">Hold - Requests are rejected with an error</option>
-                </select>
-              </div>
-              <div className="flex gap-3">
-                <Button type="submit" disabled={isUpdatingStatus || selectedStatus === access.status}>
-                  <Save className="mr-2 h-4 w-4" />
-                  {isUpdatingStatus ? 'Updating...' : 'Update Status'}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card className="border-destructive/30">
-        <CardHeader>
-          <CardTitle className="text-destructive">Delete Access</CardTitle>
-          <CardDescription>
-            This removes the access record and its logs. This action cannot be undone.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form action={deleteIntelligenceAccessAction} className="flex flex-col gap-3 sm:flex-row">
+      {/* Action Buttons */}
+      {!isEditing && (
+        <div className="flex gap-3">
+          {access.published && access.status !== 'unpublished' && (
+            <Button onClick={() => setIsEditing(true)} variant="outline">
+              <Edit className="mr-2 h-4 w-4" />
+              Edit
+            </Button>
+          )}
+          
+          <form action={deleteIntelligenceAccessAction} className="inline">
             <input type="hidden" name="access_id" value={String(access.id)} />
             <Button type="submit" variant="destructive">
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete Access
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/intelligence/access">Back to Access</Link>
+              Delete
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,7 +5,9 @@ import { FilePenLine } from 'lucide-react';
 import { PageTitleBack } from '@/components/page-header';
 import { getCurrentIntelligenceAccountId } from '@/core/ai/files/intelligence/account';
 import {
+  getAccessTokens,
   getIntelligenceAccessById,
+  getIntelligenceModels,
   isAccessPublished,
   parseDetailsArray,
 } from '@/core/ai/files/intelligence/store';
@@ -33,6 +35,11 @@ export default async function IntelligenceAccessDetailPage({
   if (!access) {
     notFound();
   }
+
+  const [tokens, models] = await Promise.all([
+    getAccessTokens(accountId),
+    getIntelligenceModels(),
+  ]);
 
   const detailsArray = parseDetailsArray(access.details);
   const published = isAccessPublished(access.details);
@@ -62,6 +69,8 @@ export default async function IntelligenceAccessDetailPage({
           details: detailsArray,
           published,
         }}
+        tokens={tokens}
+        models={models}
       />
     </div>
   );

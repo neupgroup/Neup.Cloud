@@ -8,8 +8,10 @@ import {
   createAccessTokenRecord,
   createIntelligenceAccessRecord,
   createIntelligenceModelRecord,
+  decryptValue,
   deleteIntelligenceAccessRecord,
   deleteIntelligenceModelRecord,
+  encryptValue,
   generateAccessIdentifier,
   generateAccessToken,
   getAccessTokenById,
@@ -24,9 +26,9 @@ import {
   parseTokenFormData,
   publishIntelligenceAccess,
   rechargeIntelligenceAccessBalance,
+  updateIntelligenceAccessRecord,
   updateIntelligenceAccessStatus,
   updateIntelligenceModelRecord,
-  updateIntelligenceAccessRecord,
 } from '@/core/ai/files/intelligence/store';
 
 export async function createAccessTokenAction(formData: FormData) {
@@ -74,6 +76,17 @@ export interface PublishIntelligenceAccessActionState {
 export interface UpdateIntelligenceAccessStatusActionState {
   error: string | null;
   success: string | null;
+}
+
+export interface UpdateIntelligenceAccessConfigActionState {
+  error: string | null;
+  success: string | null;
+}
+
+export interface ResetIntelligenceAccessKeyActionState {
+  error: string | null;
+  success: string | null;
+  generatedAccessKey: string | null;
 }
 
 export interface UpdateIntelligenceModelActionState {
@@ -385,6 +398,197 @@ export async function updateIntelligenceAccessStatusAction(
     return {
       error: error instanceof Error ? error.message : 'Failed to update status',
       success: null,
+    };
+  }
+}
+
+export async function updateIntelligenceAccessConfigAction(
+  _prevState: UpdateIntelligenceAccessConfigActionState,
+  formData: FormData
+): Promise<UpdateIntelligenceAccessConfigActionState> {
+  const accountId = await getCurrentIntelligenceAccountId();
+  const accessId = parseAccessIdFormData(formData);
+  const accessKey = formData.get('access_key') as string | null;
+  const prompt = formData.get('prompt') as string | null;
+  const maxTokens = formData.get('max_tokens') as string | null;
+
+  if (!accessKey) {
+    return {
+      error: 'Access key is required to update configuration',
+      success: null,
+    };
+  }
+
+  try {
+    // Get the current access
+    const access = await getIntelligenceAccessById(accountId, accessId);
+
+    if (!access) {
+      return {
+        error: 'Access record not found',
+        success: null,
+      };
+    }
+
+    // Verify the access key
+    const keyHash = hashAccessToken(accessKey);
+    if (keyHash !== access.key_hash) {
+      return {
+        error: 'Invalid access key',
+        success: null,
+      };
+    }
+
+    // Parse model blocks from form data
+    const modelBlocks: string[] = [];
+    let index = 0;
+    
+    while (formData.get(`model_${index}_id`)) {
+      const modelId = formData.get(`model_${index}_id`) as string;
+      const tokenId = formData.get(`token_${index}_id`) as string;
+
+      if (modelId && modelId !== '') {
+        const models = await getIntelligenceModels();
+        const model = models.find((m) => m.id === Number(modelId));
+
+        if (model) {
+          if (tokenId && tokenId !== '0' && tokenId !== '') {
+            // Get the API key and encrypt it
+            const token = await getAccessTokenById(accountId, Number(tokenId));
+            if (token) {
+              const encryptedKey = encryptValue(token.key, accessKey);
+              modelBlocks.push(`${model.provider}/${model.model}/${encryptedKey}/${tokenId}`);
+            } else {
+              modelBlocks.push(`${model.provider}/${model.model}/0/${tokenId}`);
+            }
+          } else {
+            modelBlocks.push(`${model.provider}/${model.model}/0/0`);
+          }
+        }
+      }
+
+      index++;
+    }
+
+    // Build new details array
+    const newDetails: string[] = [];
+    
+    if (access.type === 'closed' && prompt) {
+      newDetails.push(prompt);
+    } else if (access.type === 'hybrid') {
+      newDetails.push('');
+    }
+
+    newDetails.push(...modelBlocks);
+
+    // Update the access record
+    await updateIntelligenceAccessRecord({
+      accessId,
+      accountId,
+      status: access.status as 'dev' | 'prod' | 'hold',
+      accessType: access.type as 'open' | 'hybrid' | 'closed',
+      maxTokens: maxTokens ? parseInt(maxTokens, 10) : null,
+      details: JSON.stringify(newDetails),
+    });
+
+    revalidatePath('/intelligence/access');
+    revalidatePath(`/intelligence/access/${accessId}`);
+    revalidatePath('/intelligence/logs');
+
+    return {
+      error: null,
+      success: 'Configuration updated successfully',
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'Failed to update configuration',
+      success: null,
+    };
+  }
+}
+
+export async function resetIntelligenceAccessKeyAction(
+  _prevState: ResetIntelligenceAccessKeyActionState,
+  formData: FormData
+): Promise<ResetIntelligenceAccessKeyActionState> {
+  const accountId = await getCurrentIntelligenceAccountId();
+  const accessId = parseAccessIdFormData(formData);
+
+  try {
+    // Get the current access
+    const access = await getIntelligenceAccessById(accountId, accessId);
+
+    if (!access) {
+      return {
+        error: 'Access record not found',
+        success: null,
+        generatedAccessKey: null,
+      };
+    }
+
+    if (access.status === 'unpublished') {
+      return {
+        error: 'Access is already unpublished',
+        success: null,
+        generatedAccessKey: null,
+      };
+    }
+
+    // Generate new access key
+    const newAccessKey = generateAccessToken();
+    const newKeyHash = hashAccessToken(newAccessKey);
+
+    // Parse details array and reset encrypted keys to 0
+    const details = Array.isArray(access.details) ? access.details : [];
+    const updatedDetails: string[] = [];
+
+    for (const detail of details) {
+      if (!detail || detail === '') {
+        updatedDetails.push(detail);
+        continue;
+      }
+
+      // Check if it's a model string (provider/model/encryptedKey/tokenId)
+      if (detail.includes('/')) {
+        const parts = detail.split('/');
+        if (parts.length === 4) {
+          const [provider, model, , tokenId] = parts;
+          // Reset the encrypted key to 0 (unpublished state)
+          updatedDetails.push(`${provider}/${model}/0/${tokenId}`);
+        } else {
+          updatedDetails.push(detail);
+        }
+      } else {
+        // It's a prompt or other string, keep as is
+        updatedDetails.push(detail);
+      }
+    }
+
+    // Update the access record with new key hash, reset details, and unpublished status
+    await updateIntelligenceAccessRecord({
+      accessId,
+      accountId,
+      status: 'unpublished',
+      accessType: access.type as 'open' | 'hybrid' | 'closed',
+      maxTokens: access.max_tokens,
+      details: JSON.stringify(updatedDetails),
+      keyHash: newKeyHash,
+    });
+
+    revalidatePath('/intelligence/access');
+    revalidatePath(`/intelligence/access/${accessId}`);
+    revalidatePath('/intelligence/logs');
+
+    return {
+      error: null,
+      success: 'Access key reset successfully. Status set to unpublished. You will need to publish again with the new key.',
+      generatedAccessKey: newAccessKey,
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'Failed to reset access key',
+      success: null,
+      generatedAccessKey: null,
     };
   }
 }
