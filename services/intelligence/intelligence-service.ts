@@ -78,38 +78,6 @@ export async function createIntelligenceAccessAction(
   const tokenHash = hashAccessToken(generatedToken);
 
   try {
-    // Build details based on access type
-    let details: unknown = [];
-
-    if (input.accessType === 'open') {
-      details = [];
-    } else if (input.accessType === 'hybrid') {
-      // Format: ["provider/model", "provider/model", ...]
-      const modelDetails: string[] = [];
-      if (input.primaryModelId) {
-        modelDetails.push(`provider/model`); // Will be replaced with actual values
-      }
-      if (input.fallbackModelId) {
-        modelDetails.push(`provider/model`); // Will be replaced with actual values
-      }
-      details = modelDetails.length > 0 ? modelDetails : [];
-    } else if (input.accessType === 'closed') {
-      // Format: ["prompt", "provider/model/enc(key)/tokenId", ...]
-      const modelDetails: string[] = [];
-      if (input.prompt) {
-        modelDetails.push(input.prompt);
-      }
-      if (input.primaryAccessKey) {
-        // Format: provider/model/enc(key)/tokenId
-        // For now, just add placeholder
-        modelDetails.push(`openai/gpt-4/enc(key)/${input.primaryAccessKey}`);
-      }
-      if (input.fallbackAccessKey) {
-        modelDetails.push(`openai/gpt-4/enc(key)/${input.fallbackAccessKey}`);
-      }
-      details = modelDetails.length > 0 ? modelDetails : [];
-    }
-
     await createIntelligenceAccessRecord({
       accessIdentifier: generatedAccessId,
       accountId,
@@ -117,7 +85,9 @@ export async function createIntelligenceAccessAction(
       status: input.status,
       accessType: input.accessType,
       maxTokens: input.maxTokens,
-      details,
+      prompt: input.prompt,
+      primaryModel: undefined,
+      fallbackModel: undefined,
     });
 
     revalidatePath('/intelligence/access');

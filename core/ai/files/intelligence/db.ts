@@ -71,23 +71,7 @@ export async function ensureIntelligenceTables(): Promise<void> {
       `);
 
       await db.query(`
-        DROP TABLE IF EXISTS "intelligence_log" CASCADE
-      `);
-
-      await db.query(`
-        DROP TABLE IF EXISTS "intelligence_fallbacks" CASCADE
-      `);
-
-      await db.query(`
-        DROP TABLE IF EXISTS "intelligenceAccess" CASCADE
-      `);
-
-      await db.query(`
-        DROP TABLE IF EXISTS "intelligence_access" CASCADE
-      `);
-
-      await db.query(`
-        CREATE TABLE "intelligence_access" (
+        CREATE TABLE IF NOT EXISTS "intelligence_access" (
           id BIGSERIAL PRIMARY KEY,
           account_id TEXT NOT NULL,
           key_hash TEXT NOT NULL UNIQUE,
@@ -150,10 +134,6 @@ export async function ensureIntelligenceTables(): Promise<void> {
       await db.query(`
         CREATE INDEX IF NOT EXISTS "intelligence_devlog_access_id_idx"
         ON "intelligence_devlog" (access_id)
-      `);
-
-      await db.query(`
-        DROP TABLE IF EXISTS "intelligence_log" CASCADE
       `);
 
       await db.query(`
