@@ -90,7 +90,6 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
   const [statusState, statusAction, isUpdatingStatus] = useActionState(updateIntelligenceAccessStatusAction, initialStatusState);
   const [configState, configAction, isUpdatingConfig] = useActionState(updateIntelligenceAccessConfigAction, initialConfigState);
   const [resetKeyState, resetKeyAction, isResettingKey] = useActionState(resetIntelligenceAccessKeyAction, initialResetKeyState);
-  const [previousKey, setPreviousKey] = useState('');
   const [accessKeyForEdit, setAccessKeyForEdit] = useState('');
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -687,58 +686,24 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
               Publish Access
             </CardTitle>
             <CardDescription>
-              Generate an access key to make this access record active. Choose to create a new key or keep the original.
+              Generate a new access key and encrypt your API keys to activate this access record.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="new" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="new">Reset & Publish with New Key</TabsTrigger>
-                <TabsTrigger value="original">Publish with Original Key</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="new" className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  This will generate a new random access key, encrypt the API keys, and set the status to production.
-                </p>
-                <form action={publishAction}>
-                  <input type="hidden" name="access_id" value={String(access.id)} />
-                  <input type="hidden" name="reset_key" value="true" />
-                  <input type="hidden" name="new_access_key" value="" />
-                  <Button type="submit" disabled={isPublishing}>
-                    <KeyRound className="mr-2 h-4 w-4" />
-                    {isPublishing ? 'Publishing...' : 'Generate New Key & Publish'}
-                  </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="original" className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Enter the original access key to verify and publish with the same key.
-                </p>
-                <form action={publishAction} className="grid gap-4">
-                  <input type="hidden" name="access_id" value={String(access.id)} />
-                  <input type="hidden" name="reset_key" value="false" />
-                  <div className="grid gap-2">
-                    <Label htmlFor="previous_key">Previous Access Key</Label>
-                    <Input
-                      id="previous_key"
-                      name="previous_key"
-                      type="password"
-                      value={previousKey}
-                      onChange={(e) => setPreviousKey(e.target.value)}
-                      placeholder="Enter the original access key"
-                      required
-                    />
-                  </div>
-                  <input type="hidden" name="new_access_key" value={previousKey} />
-                  <Button type="submit" disabled={isPublishing || !previousKey}>
-                    <KeyRound className="mr-2 h-4 w-4" />
-                    {isPublishing ? 'Publishing...' : 'Verify & Publish'}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
+          <CardContent className="space-y-4">
+            <div className="rounded-xl border border-blue-300/60 bg-blue-50/70 p-4">
+              <p className="text-sm text-blue-900">
+                This will generate a new random access key, encrypt the API keys, and set the status to production.
+              </p>
+            </div>
+            <form action={publishAction}>
+              <input type="hidden" name="access_id" value={String(access.id)} />
+              <input type="hidden" name="reset_key" value="true" />
+              <input type="hidden" name="new_access_key" value="" />
+              <Button type="submit" disabled={isPublishing}>
+                <KeyRound className="mr-2 h-4 w-4" />
+                {isPublishing ? 'Publishing...' : 'Generate Key & Publish'}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       )}
