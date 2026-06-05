@@ -182,9 +182,8 @@ The system supports multiple fallback levels stored in the `details` JSONB field
 
 ### Logging
 
-- **Dev mode**: All requests logged to `intelligence_log` with full details
-- **Dev mode**: Detailed logs to `intelligence_devlog` with headers, bodies, errors
-- **Prod mode**: Minimal or no logging
+- **Dev mode**: All requests logged to `intelligence_log` with full details in `details` and dev info in `dev_details`
+- **Prod mode**: Minimal logging - only usage + token balances in `intelligence_log`
 
 ## Frontend Components
 

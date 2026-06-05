@@ -23,7 +23,7 @@ export default async function IntelligenceBillingPage() {
   const totalInputTokens = logs.reduce((sum, log) => sum + (log.inputTokens || 0), 0);
   const totalOutputTokens = logs.reduce((sum, log) => sum + (log.outputTokens || 0), 0);
   const totalsByCurrency = logs.reduce<Record<string, number>>((accumulator, log) => {
-    if (!log.currency || log.cost === null) {
+    if (!log.currency || log.cost === null || log.cost === undefined) {
       return accumulator;
     }
 

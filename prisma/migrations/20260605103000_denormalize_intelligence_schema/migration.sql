@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS "intelligence_log" (
   details JSONB NOT NULL DEFAULT '{}'::jsonb,
   "from" TEXT,
   balance_used DOUBLE PRECISION,
+  dev_details JSONB,
   logged_on TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

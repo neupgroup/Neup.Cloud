@@ -682,6 +682,7 @@ async function finalizeRequestLog(input: {
   cost: number | null;
   currency: string | null;
   currentBalance: number;
+  devDetails?: Record<string, unknown> | null;
 }) {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
@@ -699,31 +700,37 @@ async function finalizeRequestLog(input: {
 
   const remainingBalance = updateResult.rows[0]?.balance ?? Math.max(input.currentBalance - balanceToDeduct, 0);
 
+  const details = {
+    query: input.query,
+    response: input.responseText,
+    context: buildStoredContext(input.context, {
+      masterPrompt: input.masterPrompt,
+      query: input.query,
+      status: 'success',
+      usageTokens: input.usageTokens,
+      inputTokens: input.inputTokens,
+      outputTokens: input.outputTokens,
+      estimatedCost: input.cost,
+      currency: input.currency,
+    }),
+    modal: input.modal,
+    currency: input.currency,
+    cost: input.cost,
+    inputTokens: input.inputTokens,
+    outputTokens: input.outputTokens,
+    balance: remainingBalance,
+  };
+
   await db.query(
     `
-      INSERT INTO "intelligence_log" (access_id, query, response, context, modal, currency, cost, "inputTokens", "outputTokens", balance)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO "intelligence_log" (access_id, details, balance_used, dev_details)
+      VALUES ($1, $2, $3, $4)
     `,
     [
       input.accessId,
-      input.query,
-      input.responseText,
-      buildStoredContext(input.context, {
-        masterPrompt: input.masterPrompt,
-        query: input.query,
-        status: 'success',
-        usageTokens: input.usageTokens,
-        inputTokens: input.inputTokens,
-        outputTokens: input.outputTokens,
-        estimatedCost: input.cost,
-        currency: input.currency,
-      }),
-      input.modal,
-      input.currency,
-      input.cost,
-      input.inputTokens,
-      input.outputTokens,
-      remainingBalance,
+      JSON.stringify(details),
+      balanceToDeduct,
+      input.devDetails ? JSON.stringify(input.devDetails) : null,
     ]
   );
 }
@@ -737,32 +744,40 @@ async function logFailedRequest(input: {
   errorMessage: string;
   balance: number;
   currency: string | null;
+  devDetails?: Record<string, unknown> | null;
 }) {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
+  
+  const details = {
+    query: input.query,
+    response: `ERROR: ${input.errorMessage}`,
+    context: buildStoredContext(input.context, {
+      masterPrompt: input.masterPrompt,
+      query: input.query,
+      status: 'error',
+      usageTokens: 0,
+      estimatedCost: null,
+      currency: input.currency,
+    }),
+    modal: input.modal,
+    currency: input.currency,
+    cost: null,
+    inputTokens: 0,
+    outputTokens: 0,
+    balance: input.balance,
+  };
+
   await db.query(
     `
-      INSERT INTO "intelligence_log" (access_id, query, response, context, modal, currency, cost, "inputTokens", "outputTokens", balance)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO "intelligence_log" (access_id, details, balance_used, dev_details)
+      VALUES ($1, $2, $3, $4)
     `,
     [
       input.accessId,
-      input.query,
-      `ERROR: ${input.errorMessage}`,
-      buildStoredContext(input.context, {
-        masterPrompt: input.masterPrompt,
-        query: input.query,
-        status: 'error',
-        usageTokens: 0,
-        estimatedCost: null,
-        currency: input.currency,
-      }),
-      input.modal,
-      input.currency,
-      null,
+      JSON.stringify(details),
       0,
-      0,
-      input.balance,
+      input.devDetails ? JSON.stringify(input.devDetails) : null,
     ]
   );
 }
@@ -1089,6 +1104,22 @@ async function handleRequest(request: NextRequest) {
 
       after(async () => {
         try {
+          const devDetails = devModeEnabled ? {
+            accountId: accountIdForDevLog,
+            accessId: accessIdForDevLog,
+            requestId,
+            requestMethod: request.method,
+            requestUrl: request.url,
+            requestHeaders,
+            requestBody: parsedBodyForDevLog,
+            requestQuery: parsedQueryForDevLog,
+            requestContext: parsedContextForDevLog,
+            responseStatus: 200,
+            responseBody: { status: 'pass', response: modelResult.responseText },
+            errorMessage: null,
+            errorStack: null,
+          } : null;
+
           if (devModeEnabled) {
             await logDevRequest({
               accountId: accountIdForDevLog,
@@ -1120,6 +1151,7 @@ async function handleRequest(request: NextRequest) {
               cost: estimatedCost.cost,
               currency: estimatedCost.currency,
               currentBalance: Number(legacyAccess.balance),
+              devDetails,
             });
           }
         } catch (error) {
@@ -1160,6 +1192,23 @@ async function handleRequest(request: NextRequest) {
           errorStack: null,
         });
       }
+      
+      const devDetails = devModeEnabled ? {
+        accountId: accountIdForDevLog,
+        accessId: accessIdForDevLog,
+        requestId,
+        requestMethod: request.method,
+        requestUrl: request.url,
+        requestHeaders,
+        requestBody: parsedBodyForDevLog,
+        requestQuery: parsedQueryForDevLog,
+        requestContext: parsedContextForDevLog,
+        responseStatus: 500,
+        responseBody: { status: 'fail', error: lastErrorMessage },
+        errorMessage: lastErrorMessage,
+        errorStack: null,
+      } : null;
+
       if (isPromptRequest && legacyAccess) {
         await logFailedRequest({
           accessId: legacyAccess.id,
@@ -1170,6 +1219,7 @@ async function handleRequest(request: NextRequest) {
           errorMessage: lastErrorMessage,
           balance: Number(legacyAccess.balance),
           currency: usableCandidates[0]?.modelConfig.currency || null,
+          devDetails,
         });
       }
     } catch (logError) {

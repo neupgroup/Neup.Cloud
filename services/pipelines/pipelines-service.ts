@@ -451,31 +451,36 @@ async function finalizeRequestLog(input: {
 
   const remainingBalance = updateResult.rows[0]?.balance ?? Math.max(input.currentBalance - balanceToDeduct, 0);
 
+  const details = {
+    query: input.query,
+    response: input.responseText,
+    context: buildStoredContext(input.context, {
+      guider: input.masterPrompt,
+      query: input.query,
+      status: 'success',
+      usageTokens: input.usageTokens,
+      inputTokens: input.inputTokens,
+      outputTokens: input.outputTokens,
+      estimatedCost: input.cost,
+      currency: input.currency,
+    }),
+    modal: input.modal,
+    currency: input.currency,
+    cost: input.cost,
+    inputTokens: input.inputTokens,
+    outputTokens: input.outputTokens,
+    balance: remainingBalance,
+  };
+
   await db.query(
     `
-      INSERT INTO "intelligence_log" (access_id, query, response, context, modal, currency, cost, "inputTokens", "outputTokens", balance)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO "intelligence_log" (access_id, details, balance_used)
+      VALUES ($1, $2, $3)
     `,
     [
       input.accessId,
-      input.query,
-      input.responseText,
-      buildStoredContext(input.context, {
-        guider: input.masterPrompt,
-        query: input.query,
-        status: 'success',
-        usageTokens: input.usageTokens,
-        inputTokens: input.inputTokens,
-        outputTokens: input.outputTokens,
-        estimatedCost: input.cost,
-        currency: input.currency,
-      }),
-      input.modal,
-      input.currency,
-      input.cost,
-      input.inputTokens,
-      input.outputTokens,
-      remainingBalance,
+      JSON.stringify(details),
+      balanceToDeduct,
     ]
   );
 
@@ -494,29 +499,35 @@ async function logFailedRequest(input: {
 }) {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
+  
+  const details = {
+    query: input.query,
+    response: `ERROR: ${input.errorMessage}`,
+    context: buildStoredContext(input.context, {
+      guider: input.masterPrompt,
+      query: input.query,
+      status: 'error',
+      usageTokens: 0,
+      estimatedCost: null,
+      currency: input.currency,
+    }),
+    modal: input.modal,
+    currency: input.currency,
+    cost: null,
+    inputTokens: 0,
+    outputTokens: 0,
+    balance: input.balance,
+  };
+
   await db.query(
     `
-      INSERT INTO "intelligence_log" (access_id, query, response, context, modal, currency, cost, "inputTokens", "outputTokens", balance)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO "intelligence_log" (access_id, details, balance_used)
+      VALUES ($1, $2, $3)
     `,
     [
       input.accessId,
-      input.query,
-      `ERROR: ${input.errorMessage}`,
-      buildStoredContext(input.context, {
-        guider: input.masterPrompt,
-        query: input.query,
-        status: 'error',
-        usageTokens: 0,
-        estimatedCost: null,
-        currency: input.currency,
-      }),
-      input.modal,
-      input.currency,
-      null,
+      JSON.stringify(details),
       0,
-      0,
-      input.balance,
     ]
   );
 }

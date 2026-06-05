@@ -52,13 +52,13 @@ export default async function IntelligenceLogsPage({
 
             return {
               id: log.id,
-              accountId: log.account_id,
+              accountId: String(log.account_id ?? log.access_id),
               accessId: log.access_id,
-              model: log.modal,
+              model: log.modal || null,
               currency: log.currency || parsedContext.currency,
-              cost: log.cost,
-              inputTokens: log.inputTokens,
-              outputTokens: log.outputTokens,
+              cost: log.cost ?? null,
+              inputTokens: log.inputTokens ?? null,
+              outputTokens: log.outputTokens ?? null,
               query: (parsedContext.query || log.query || '').trim(),
               guider: parsedContext.guider.trim(),
               context: parsedContext.displayContext.trim(),

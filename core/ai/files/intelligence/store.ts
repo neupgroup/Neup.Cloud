@@ -125,7 +125,18 @@ export interface IntelligenceLogRecord {
   details: Record<string, unknown>;
   from: string | null;
   balance_used: number | null;
+  dev_details?: Record<string, unknown> | null;
   logged_on: string;
+  // Computed/helper properties for backwards compatibility
+  account_id?: number;  // alias for access_id
+  inputTokens?: number;
+  outputTokens?: number;
+  cost?: number | null;
+  currency?: string | null;
+  query?: string;
+  response?: string;
+  context?: string;
+  modal?: string;
 }
 
 export interface PaginatedIntelligenceLogsResult {
@@ -192,6 +203,7 @@ interface IntelligenceLogRow {
   details: unknown;
   from: string | null;
   balance_used: number | string | null;
+  dev_details?: unknown;
   logged_on: string;
 }
 
@@ -527,6 +539,7 @@ export async function getIntelligenceLogs(accountId: string): Promise<Intelligen
         il.details,
         il."from",
         il.balance_used,
+        il.dev_details,
         il.logged_on
       FROM "intelligence_log" il
       INNER JOIN "intelligence_access" ia
@@ -540,10 +553,21 @@ export async function getIntelligenceLogs(accountId: string): Promise<Intelligen
   return result.rows.map((row) => ({
     id: normalizeNumericId(row.id),
     access_id: normalizeNumericId(row.access_id),
+    account_id: normalizeNumericId(row.access_id), // alias
     details: row.details,
     from: row.from,
     balance_used: row.balance_used === null ? null : Number(row.balance_used),
+    dev_details: row.dev_details as Record<string, unknown> | null | undefined,
     logged_on: row.logged_on,
+    // Extract commonly used fields from details for backwards compatibility
+    inputTokens: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).inputTokens as number : undefined,
+    outputTokens: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).outputTokens as number : undefined,
+    cost: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).cost as number | null : undefined,
+    currency: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).currency as string | null : undefined,
+    query: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).query as string : undefined,
+    response: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).response as string : undefined,
+    context: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).context as string : undefined,
+    modal: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).modal as string : undefined,
   }));
 }
 
@@ -579,6 +603,7 @@ export async function getPaginatedIntelligenceLogs(
         il.details,
         il."from",
         il.balance_used,
+        il.dev_details,
         il.logged_on
       FROM "intelligence_log" il
       INNER JOIN "intelligence_access" ia
@@ -595,10 +620,21 @@ export async function getPaginatedIntelligenceLogs(
     logs: logsResult.rows.map((row) => ({
       id: normalizeNumericId(row.id),
       access_id: normalizeNumericId(row.access_id),
+      account_id: normalizeNumericId(row.access_id), // alias
       details: row.details,
       from: row.from,
       balance_used: row.balance_used === null ? null : Number(row.balance_used),
+      dev_details: row.dev_details as Record<string, unknown> | null | undefined,
       logged_on: row.logged_on,
+      // Extract commonly used fields from details for backwards compatibility
+      inputTokens: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).inputTokens as number : undefined,
+      outputTokens: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).outputTokens as number : undefined,
+      cost: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).cost as number | null : undefined,
+      currency: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).currency as string | null : undefined,
+      query: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).query as string : undefined,
+      response: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).response as string : undefined,
+      context: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).context as string : undefined,
+      modal: typeof row.details === 'object' && row.details !== null ? (row.details as Record<string, unknown>).modal as string : undefined,
     })),
     totalCount,
     totalPages,
@@ -885,6 +921,7 @@ export async function logIntelligenceUsage(input: {
   details: Record<string, unknown>;
   from: string | null;
   balanceUsed: number;
+  devDetails?: Record<string, unknown> | null;
 }): Promise<void> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
@@ -895,11 +932,12 @@ export async function logIntelligenceUsage(input: {
         access_id,
         details,
         "from",
-        balance_used
+        balance_used,
+        dev_details
       )
-      VALUES ($1, $2, $3, $4)
+      VALUES ($1, $2, $3, $4, $5)
     `,
-    [input.accessId, input.details, input.from, input.balanceUsed]
+    [input.accessId, input.details, input.from, input.balanceUsed, input.devDetails || null]
   );
 }
 
@@ -1001,6 +1039,32 @@ export async function createIntelligenceDevLog(input: IntelligenceDevLogInput): 
       input.errorStack,
     ]
   );
+}
+
+// Alias for backwards compatibility
+export const insertIntelligenceDevLog = createIntelligenceDevLog;
+
+export function parseLogContext(contextString: string | undefined | null): {
+  guider: string;
+  query: string;
+  displayContext: string;
+  currency: string | null;
+} {
+  if (!contextString) {
+    return { guider: '', query: '', displayContext: '', currency: null };
+  }
+
+  try {
+    const parsed = JSON.parse(contextString);
+    return {
+      guider: parsed.masterPrompt || parsed.guider || '',
+      query: parsed.query || '',
+      displayContext: typeof parsed.context === 'string' ? parsed.context : JSON.stringify(parsed.context || ''),
+      currency: parsed.currency || null,
+    };
+  } catch {
+    return { guider: '', query: '', displayContext: contextString, currency: null };
+  }
 }
 
 export async function getPaginatedIntelligenceDevLogs(

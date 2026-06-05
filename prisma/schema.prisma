@@ -188,6 +188,7 @@ model IntelligenceLog {
   details     Json
   from        String?  @db.Text
   balanceUsed Float?   @map("balance_used")
+  devDetails  Json?    @map("dev_details")
   loggedOn    DateTime @default(now()) @map("logged_on") @db.Timestamp(6)
 
   @@map("intelligence_log")
