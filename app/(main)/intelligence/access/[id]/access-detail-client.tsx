@@ -94,6 +94,13 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
   const [accessKeyForEdit, setAccessKeyForEdit] = useState('');
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  const [testAccessKey, setTestAccessKey] = useState('');
+  const [testPrompt, setTestPrompt] = useState('');
+  const [testContext, setTestContext] = useState('');
+  const [testResponse, setTestResponse] = useState<string | null>(null);
+  const [testLoading, setTestLoading] = useState(false);
+  const [testError, setTestError] = useState<string | null>(null);
 
   // Parse existing details
   const existingPrompt = access.type === 'closed' ? (access.details[0] || '') : '';
@@ -137,6 +144,63 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const generateCurlCommand = () => {
+    const baseUrl = window.location.origin;
+    let curlCommand = `curl -X POST ${baseUrl}/bridge/api.v1/intelligence/getResponse \\\n`;
+    curlCommand += `  -H "Content-Type: application/json" \\\n`;
+    curlCommand += `  -d '{\n`;
+    curlCommand += `    "accessId": "${access.id}",\n`;
+    curlCommand += `    "accessKey": "${testAccessKey || 'YOUR_ACCESS_KEY'}",\n`;
+    
+    if (access.type === 'hybrid') {
+      curlCommand += `    "prompt": "${testPrompt || 'YOUR_PROMPT'}",\n`;
+    }
+    
+    curlCommand += `    "context": "${testContext || 'YOUR_CONTEXT'}"\n`;
+    curlCommand += `  }'`;
+    
+    return curlCommand;
+  };
+
+  const handleTest = async () => {
+    setTestLoading(true);
+    setTestError(null);
+    setTestResponse(null);
+
+    try {
+      const baseUrl = window.location.origin;
+      const body: Record<string, string> = {
+        accessId: access.id,
+        accessKey: testAccessKey,
+        context: testContext,
+      };
+
+      if (access.type === 'hybrid') {
+        body.prompt = testPrompt;
+      }
+
+      const response = await fetch(`${baseUrl}/bridge/api.v1/intelligence/getResponse`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setTestError(data.error || `HTTP ${response.status}: ${response.statusText}`);
+      } else {
+        setTestResponse(JSON.stringify(data, null, 2));
+      }
+    } catch (error) {
+      setTestError(error instanceof Error ? error.message : 'An unknown error occurred');
+    } finally {
+      setTestLoading(false);
+    }
   };
 
   const handleStatusClick = async () => {
@@ -679,9 +743,133 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
         </Card>
       )}
 
+      {/* Test Section */}
+      {isTesting && access.type !== 'open' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 font-headline">
+              <AlertCircle className="h-5 w-5 text-primary" />
+              Test Intelligence Access
+            </CardTitle>
+            <CardDescription>
+              Test your intelligence access endpoint with sample data. Values are not stored.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Curl Command Display */}
+            <div>
+              <Label className="mb-2 block">cURL Command</Label>
+              <div className="rounded-xl border border-border/70 bg-muted/30 p-4">
+                <pre className="text-xs font-mono whitespace-pre-wrap break-all text-foreground">
+                  {generateCurlCommand()}
+                </pre>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleCopy(generateCurlCommand())}
+                className="mt-2"
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                {copied ? 'Copied!' : 'Copy cURL'}
+              </Button>
+            </div>
+
+            {/* Test Form */}
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="test_access_key">Access Key *</Label>
+                <Input
+                  id="test_access_key"
+                  type="password"
+                  value={testAccessKey}
+                  onChange={(e) => setTestAccessKey(e.target.value)}
+                  placeholder="Enter your access key"
+                />
+              </div>
+
+              {access.type === 'hybrid' && (
+                <div className="grid gap-2">
+                  <Label htmlFor="test_prompt">Prompt *</Label>
+                  <Textarea
+                    id="test_prompt"
+                    value={testPrompt}
+                    onChange={(e) => setTestPrompt(e.target.value)}
+                    placeholder="Enter your prompt"
+                    className="min-h-24"
+                  />
+                </div>
+              )}
+
+              <div className="grid gap-2">
+                <Label htmlFor="test_context">Context *</Label>
+                <Textarea
+                  id="test_context"
+                  value={testContext}
+                  onChange={(e) => setTestContext(e.target.value)}
+                  placeholder="Enter your context or question"
+                  className="min-h-32"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  onClick={handleTest}
+                  disabled={testLoading || !testAccessKey || !testContext || (access.type === 'hybrid' && !testPrompt)}
+                >
+                  {testLoading ? 'Testing...' : 'Run Test'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsTesting(false);
+                    setTestAccessKey('');
+                    setTestPrompt('');
+                    setTestContext('');
+                    setTestResponse(null);
+                    setTestError(null);
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+
+            {/* Response Display */}
+            {testError && (
+              <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4">
+                <p className="text-sm font-semibold text-destructive mb-2">Error</p>
+                <pre className="text-xs font-mono whitespace-pre-wrap break-all text-destructive">
+                  {testError}
+                </pre>
+              </div>
+            )}
+
+            {testResponse && (
+              <div className="rounded-xl border border-emerald-300/60 bg-emerald-50/70 p-4">
+                <p className="text-sm font-semibold text-emerald-900 mb-2">Response</p>
+                <pre className="text-xs font-mono whitespace-pre-wrap break-all text-emerald-950">
+                  {testResponse}
+                </pre>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Action Buttons */}
       {!isEditing && (
         <div className="flex gap-3">
+          {access.published && access.status !== 'unpublished' && access.type !== 'open' && (
+            <Button onClick={() => setIsTesting(true)} variant="outline" disabled={isTesting}>
+              <AlertCircle className="mr-2 h-4 w-4" />
+              Test
+            </Button>
+          )}
+          
           {access.published && access.status !== 'unpublished' && (
             <Button onClick={() => setIsEditing(true)} variant="outline">
               <Edit className="mr-2 h-4 w-4" />
