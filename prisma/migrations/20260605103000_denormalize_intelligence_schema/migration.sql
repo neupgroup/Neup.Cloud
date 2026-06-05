@@ -3,7 +3,7 @@
 
 -- Drop old tables and views that are no longer needed
 DROP TABLE IF EXISTS "intelligence_fallbacks" CASCADE;
-DROP VIEW IF EXISTS "intelligence_access" CASCADE;
+DROP TABLE IF EXISTS "intelligence_access" CASCADE;
 
 -- Create new denormalized intelligence_access table
 CREATE TABLE "intelligence_access" (
@@ -19,7 +19,7 @@ CREATE TABLE "intelligence_access" (
   CONSTRAINT intelligence_access_type_check CHECK (type IN ('open', 'hybrid', 'closed'))
 );
 
-CREATE INDEX "intelligence_access_key_hash_idx" ON "intelligence_access" (key_hash);
+CREATE INDEX IF NOT EXISTS "intelligence_access_key_hash_idx" ON "intelligence_access" (key_hash);
 
 -- Drop old intelligenceLog table and recreate with new schema
 DROP TABLE IF EXISTS "intelligenceLog" CASCADE;
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS "intelligenceLog" (
   logged_on TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX "intelligenceLog_access_id_idx" ON "intelligenceLog" (access_id);
+CREATE INDEX IF NOT EXISTS "intelligenceLog_access_id_idx" ON "intelligenceLog" (access_id);
 
 -- Ensure accessTokens table exists
 CREATE TABLE IF NOT EXISTS "accessTokens" (
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS "accessTokens" (
   "key" TEXT NOT NULL
 );
 
-CREATE INDEX "accessTokens_account_id_idx" ON "accessTokens" (account_id);
+CREATE INDEX IF NOT EXISTS "accessTokens_account_id_idx" ON "accessTokens" (account_id);
 
 -- Ensure intelligence_models table exists
 CREATE TABLE IF NOT EXISTS "intelligence_models" (
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS "intelligence_models" (
   "outputPrice" DOUBLE PRECISION NOT NULL DEFAULT 0
 );
 
-CREATE UNIQUE INDEX "intelligence_models_provider_model_unique" ON "intelligence_models" (provider, model);
+CREATE UNIQUE INDEX IF NOT EXISTS "intelligence_models_provider_model_unique" ON "intelligence_models" (provider, model);
 
 -- Ensure intelligence_settings table exists
 CREATE TABLE IF NOT EXISTS "intelligence_settings" (
@@ -87,8 +87,8 @@ CREATE TABLE IF NOT EXISTS "intelligence_devlog" (
   created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX "intelligence_devlog_account_id_idx" ON "intelligence_devlog" (account_id);
-CREATE INDEX "intelligence_devlog_access_id_idx" ON "intelligence_devlog" (access_id);
+CREATE INDEX IF NOT EXISTS "intelligence_devlog_account_id_idx" ON "intelligence_devlog" (account_id);
+CREATE INDEX IF NOT EXISTS "intelligence_devlog_access_id_idx" ON "intelligence_devlog" (access_id);
 
 -- Ensure openflow_usage_log table exists
 CREATE TABLE IF NOT EXISTS "openflow_usage_log" (
@@ -100,5 +100,5 @@ CREATE TABLE IF NOT EXISTS "openflow_usage_log" (
   used_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX "openflow_usage_log_account_id_idx" ON "openflow_usage_log" (account_id);
-CREATE INDEX "openflow_usage_log_used_at_idx" ON "openflow_usage_log" (used_at);
+CREATE INDEX IF NOT EXISTS "openflow_usage_log_account_id_idx" ON "openflow_usage_log" (account_id);
+CREATE INDEX IF NOT EXISTS "openflow_usage_log_used_at_idx" ON "openflow_usage_log" (used_at);
