@@ -75,15 +75,7 @@ export async function ensureIntelligenceTables(): Promise<void> {
       `);
 
       await db.query(`
-        DROP TABLE IF EXISTS "intelligenceLog" CASCADE
-      `);
-
-      await db.query(`
         DROP TABLE IF EXISTS "intelligence_fallbacks" CASCADE
-      `);
-
-      await db.query(`
-        DROP VIEW IF EXISTS "intelligence_access" CASCADE
       `);
 
       await db.query(`
@@ -91,12 +83,17 @@ export async function ensureIntelligenceTables(): Promise<void> {
       `);
 
       await db.query(`
+        DROP TABLE IF EXISTS "intelligence_access" CASCADE
+      `);
+
+      await db.query(`
         CREATE TABLE "intelligence_access" (
           id BIGSERIAL PRIMARY KEY,
+          account_id TEXT NOT NULL,
           key_hash TEXT NOT NULL UNIQUE,
           type TEXT NOT NULL DEFAULT 'open',
           available_to JSONB NOT NULL DEFAULT '[]'::jsonb,
-          details JSONB NOT NULL DEFAULT '[]'::jsonb,
+          details JSONB NOT NULL DEFAULT '{}'::jsonb,
           max_tokens INTEGER,
           token_balance DOUBLE PRECISION NOT NULL DEFAULT 0,
           status TEXT NOT NULL DEFAULT 'prod',
@@ -106,8 +103,8 @@ export async function ensureIntelligenceTables(): Promise<void> {
       `);
 
       await db.query(`
-        CREATE INDEX IF NOT EXISTS "intelligence_access_key_hash_idx"
-        ON "intelligence_access" (key_hash)
+        CREATE INDEX IF NOT EXISTS "intelligence_access_account_id_idx"
+        ON "intelligence_access" (account_id)
       `);
 
       await db.query(`
@@ -153,40 +150,6 @@ export async function ensureIntelligenceTables(): Promise<void> {
       await db.query(`
         CREATE INDEX IF NOT EXISTS "intelligence_devlog_access_id_idx"
         ON "intelligence_devlog" (access_id)
-      `);
-
-      await db.query(`
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1
-            FROM pg_constraint
-            WHERE conname = 'intelligenceAccess_primaryAccessKey_fkey'
-          ) THEN
-            ALTER TABLE "intelligenceAccess"
-            ADD CONSTRAINT "intelligenceAccess_primaryAccessKey_fkey"
-            FOREIGN KEY ("primaryAccessKey")
-            REFERENCES "accessTokens" (id)
-            ON DELETE SET NULL;
-          END IF;
-        END $$;
-      `);
-
-      await db.query(`
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1
-            FROM pg_constraint
-            WHERE conname = 'intelligenceAccess_fallbackAccessKey_fkey'
-          ) THEN
-            ALTER TABLE "intelligenceAccess"
-            ADD CONSTRAINT "intelligenceAccess_fallbackAccessKey_fkey"
-            FOREIGN KEY ("fallbackAccessKey")
-            REFERENCES "accessTokens" (id)
-            ON DELETE SET NULL;
-          END IF;
-        END $$;
       `);
 
       await db.query(`

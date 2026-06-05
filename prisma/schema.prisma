@@ -168,15 +168,17 @@ model IntelligenceModel {
 
 model IntelligenceAccess {
   id          BigInt   @id @default(autoincrement())
-  keyHash     String   @map("key_hash") @db.Text
+  accountId   String   @map("account_id") @db.Text
+  keyHash     String   @unique @map("key_hash") @db.Text
   type        String   @db.Text
   availableTo Json     @map("available_to")
-  details     Json
+  details     Json     @default("{}")
   maxTokens   Int?     @map("max_tokens")
   tokenBalance Float   @map("token_balance") @default(0)
   status      String   @default("prod") @db.Text
   updatedAt   DateTime @map("updated_at") @updatedAt @db.Timestamp(6)
 
+  @@index([accountId], map: "intelligence_access_account_id_idx")
   @@map("intelligence_access")
 }
 

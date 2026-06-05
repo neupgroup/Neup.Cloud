@@ -1,6 +1,65 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, createCipheriv, createDecipheriv } from 'node:crypto';
 
 import { ensureIntelligenceTables, getIntelligenceDbPool } from '@/core/ai/files/intelligence/db';
+
+// Encryption helpers for keys in details
+const ENCRYPTION_KEY = process.env.INTELLIGENCE_ENCRYPTION_KEY || 'default-key-change-in-production-32b';
+const ALGORITHM = 'aes-256-cbc';
+
+function encryptKey(key: string): string {
+  const iv = randomBytes(16);
+  const cipher = createCipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY).slice(0, 32), iv);
+  let encrypted = cipher.update(key, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return `${iv.toString('hex')}:${encrypted}`;
+}
+
+function decryptKey(encryptedKey: string): string {
+  const [ivHex, encrypted] = encryptedKey.split(':');
+  const iv = Buffer.from(ivHex, 'hex');
+  const decipher = createDecipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY).slice(0, 32), iv);
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
+
+// Helper to build model string: "provider/model/encrypted_key/token_id"
+export function buildModelString(provider: string, model: string, apiKey: string | null, tokenId: number | null): string {
+  const encryptedKey = apiKey ? encryptKey(apiKey) : 'none';
+  const tokenIdStr = tokenId ? String(tokenId) : 'none';
+  return `${provider}/${model}/${encryptedKey}/${tokenIdStr}`;
+}
+
+// Helper to parse model string: "provider/model/encrypted_key/token_id"
+export function parseModelString(modelStr: string): { provider: string; model: string; apiKey: string | null; tokenId: number | null } {
+  const [provider, model, encryptedKey, tokenIdStr] = modelStr.split('/');
+  return {
+    provider,
+    model,
+    apiKey: encryptedKey !== 'none' ? decryptKey(encryptedKey) : null,
+    tokenId: tokenIdStr !== 'none' ? parseInt(tokenIdStr, 10) : null,
+  };
+}
+
+// Helper to build details object
+export function buildDetailsObject(prompt: string | null, models: string[]): object {
+  return {
+    prompt: prompt || '',
+    models,
+  };
+}
+
+// Helper to parse details object
+export function parseDetailsObject(details: unknown): { prompt: string | null; models: string[] } {
+  if (!details || typeof details !== 'object') {
+    return { prompt: null, models: [] };
+  }
+  const obj = details as Record<string, unknown>;
+  return {
+    prompt: typeof obj.prompt === 'string' ? obj.prompt : null,
+    models: Array.isArray(obj.models) ? obj.models.filter((m): m is string => typeof m === 'string') : [],
+  };
+}
 
 const intlWithSupportedValues = Intl as typeof Intl & {
   supportedValuesOf?: (key: string) => string[];
@@ -682,14 +741,39 @@ export async function createIntelligenceAccessRecord(input: {
   status: 'dev' | 'prod' | 'hold';
   accessType: 'open' | 'hybrid' | 'closed';
   maxTokens: number | null;
-  details: unknown;
+  prompt?: string | null;
+  primaryModel?: { provider: string; model: string; apiKey: string | null; tokenId: number | null } | null;
+  fallbackModel?: { provider: string; model: string; apiKey: string | null; tokenId: number | null } | null;
 }): Promise<void> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
 
+  // Build model strings array
+  const models: string[] = [];
+  if (input.primaryModel) {
+    models.push(buildModelString(
+      input.primaryModel.provider,
+      input.primaryModel.model,
+      input.primaryModel.apiKey,
+      input.primaryModel.tokenId
+    ));
+  }
+  if (input.fallbackModel) {
+    models.push(buildModelString(
+      input.fallbackModel.provider,
+      input.fallbackModel.model,
+      input.fallbackModel.apiKey,
+      input.fallbackModel.tokenId
+    ));
+  }
+
+  // Build details object with unencrypted prompt and models with encrypted keys
+  const details = buildDetailsObject(input.prompt || null, models);
+
   await db.query(
     `
       INSERT INTO "intelligence_access" (
+        account_id,
         key_hash,
         type,
         available_to,
@@ -698,13 +782,14 @@ export async function createIntelligenceAccessRecord(input: {
         token_balance,
         status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     `,
     [
+      input.accountId,
       input.tokenHash,
       input.accessType,
-      '[]'::unknown,
-      input.details,
+      [],
+      JSON.stringify(details),
       input.maxTokens,
       0,
       input.status,
@@ -992,6 +1077,77 @@ export async function getPaginatedIntelligenceDevLogs(
     pageSize: normalizedPageSize,
   };
 }
+
+// Helper functions for parsing form data
+function parseRequiredString(value: FormDataEntryValue | null, fieldName: string): string {
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new Error(`${fieldName} is required`);
+  }
+  return value.trim();
+}
+
+function parseOptionalString(value: FormDataEntryValue | null): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (typeof value !== 'string') {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed === '' ? null : trimmed;
+}
+
+function parseRequiredInteger(value: FormDataEntryValue | null, fieldName: string): number {
+  const str = parseRequiredString(value, fieldName);
+  const num = parseInt(str, 10);
+  if (isNaN(num)) {
+    throw new Error(`${fieldName} must be a valid integer`);
+  }
+  return num;
+}
+
+function parseOptionalInteger(value: FormDataEntryValue | null): number | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (typeof value !== 'string') {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (trimmed === '') {
+    return null;
+  }
+  const num = parseInt(trimmed, 10);
+  return isNaN(num) ? null : num;
+}
+
+function parseRequiredDecimal(value: FormDataEntryValue | null, fieldName: string): number {
+  const str = parseRequiredString(value, fieldName);
+  const num = parseFloat(str);
+  if (isNaN(num)) {
+    throw new Error(`${fieldName} must be a valid number`);
+  }
+  return num;
+}
+
+function parseRateToPer1000(value: FormDataEntryValue | null, fieldName: string): number {
+  const num = parseRequiredDecimal(value, fieldName);
+  if (num < 0) {
+    throw new Error(`${fieldName} must be non-negative`);
+  }
+  return num;
+}
+
+function parseCurrency(value: FormDataEntryValue | null): string {
+  const currency = parseOptionalString(value);
+  if (!currency) {
+    return 'USD';
+  }
+  const upperCurrency = currency.toUpperCase();
+  // You can add currency validation here if needed
+  return upperCurrency;
+}
+
 export function parseTokenFormData(formData: FormData) {
   return {
     name: parseRequiredString(formData.get('name'), 'Token name'),

@@ -14,6 +14,10 @@ import {
   getIntelligenceAccesses,
   getIntelligenceModels,
   hashAccessToken,
+  buildModelString,
+  buildDetailsObject,
+  parseDetailsObject,
+  parseModelString,
   type IntelligenceAccessRecord,
   type StoredModelConfig,
 } from '@/core/ai/files/intelligence/store';
@@ -315,6 +319,10 @@ async function upsertPipelinePromptRecord(
     const db = getIntelligenceDbPool();
     const refreshedTokenHash = hashAccessToken(generateAccessToken());
 
+    // Get access tokens to retrieve API keys
+    const availableTokens = await getAccessTokens(accountId);
+    const tokenMap = new Map(availableTokens.map((token) => [token.id, token.key]));
+
     const modelIds = Array.from(
       new Set([primaryModelId, fallbackModelId].filter((value): value is number => value !== null))
     );
@@ -323,69 +331,79 @@ async function upsertPipelinePromptRecord(
     const primaryModel = primaryModelId !== null ? selectedModels.get(primaryModelId) ?? null : null;
     const fallbackModel = fallbackModelId !== null ? selectedModels.get(fallbackModelId) ?? null : null;
 
-    const toStoredConfig = (model: typeof primaryModel): StoredModelConfig | null =>
-      model
-        ? {
-            id: model.id,
-            title: model.title,
-            provider: model.provider,
-            model: model.model,
-            description: model.description,
-            currency: model.currency,
-            inputRate: model.inputRate,
-            outputRate: model.outputRate,
-            inputCostPer1000Tokens: model.inputCostPer1000Tokens,
-            outputCostPer1000Tokens: model.outputCostPer1000Tokens,
-            price: model.price,
-          }
-        : null;
-
     if (modelIds.length !== 0 && (primaryModelId !== null && !primaryModel || fallbackModelId !== null && !fallbackModel)) {
       throw new Error('One or more selected models do not exist');
     }
 
+    // Build model strings array with encrypted keys
+    const modelStrings: string[] = [];
+    if (primaryModel && primaryAccessKey) {
+      const apiKey = tokenMap.get(primaryAccessKey) ?? null;
+      modelStrings.push(buildModelString(primaryModel.provider, primaryModel.model, apiKey, primaryAccessKey));
+    }
+    if (fallbackModel && fallbackAccessKey) {
+      const apiKey = tokenMap.get(fallbackAccessKey) ?? null;
+      modelStrings.push(buildModelString(fallbackModel.provider, fallbackModel.model, apiKey, fallbackAccessKey));
+    }
+
+    // Build details object with unencrypted prompt and models with encrypted keys
+    const details = buildDetailsObject(normalizeText(input.masterPrompt) || null, modelStrings);
+
     await db.query(
       `
-        UPDATE "intelligenceAccess"
+        UPDATE "intelligence_access"
         SET
-          prompt_id = $1,
-          token_hash = $2,
-          "primaryModel" = $3,
-          "fallbackModel" = $4,
-          "primaryModelConfig" = $5::jsonb,
-          "fallbackModelConfig" = $6::jsonb,
-          "primaryAccessKey" = $7,
-          "fallbackAccessKey" = $8,
-          "maxTokens" = $9,
-          "defPrompt" = $10
-        WHERE id = $11 AND account_id = $12
+          key_hash = $1,
+          details = $2::jsonb,
+          max_tokens = $3,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = $4 AND account_id = $5
       `,
       [
-        promptIdentifier,
         refreshedTokenHash,
-        primaryModel ? `${primaryModel.provider}:${primaryModel.model}` : null,
-        fallbackModel ? `${fallbackModel.provider}:${fallbackModel.model}` : null,
-        primaryModel ? JSON.stringify(toStoredConfig(primaryModel)) : null,
-        fallbackModel ? JSON.stringify(toStoredConfig(fallbackModel)) : null,
-        primaryAccessKey,
-        fallbackAccessKey,
+        JSON.stringify(details),
         input.maxTokens,
-        normalizeText(input.masterPrompt) || null,
         existingAccess.id,
         accountId,
       ]
     );
   } else {
+    // Get access tokens to retrieve API keys
+    const availableTokens = await getAccessTokens(accountId);
+    const tokenMap = new Map(availableTokens.map((token) => [token.id, token.key]));
+
+    const modelIds = Array.from(
+      new Set([primaryModelId, fallbackModelId].filter((value): value is number => value !== null))
+    );
+    const selectedModels = new Map(models.map((model) => [model.id, model]));
+
+    const primaryModel = primaryModelId !== null ? selectedModels.get(primaryModelId) ?? null : null;
+    const fallbackModel = fallbackModelId !== null ? selectedModels.get(fallbackModelId) ?? null : null;
+
+    if (modelIds.length !== 0 && (primaryModelId !== null && !primaryModel || fallbackModelId !== null && !fallbackModel)) {
+      throw new Error('One or more selected models do not exist');
+    }
+
     await createIntelligenceAccessRecord({
       accessIdentifier: promptIdentifier,
       accountId,
       tokenHash: hashAccessToken(generateAccessToken()),
-      primaryModelId,
-      fallbackModelId,
-      primaryAccessKey,
-      fallbackAccessKey,
+      status: 'prod',
+      accessType: 'open',
       maxTokens: input.maxTokens,
-      defPrompt: normalizeText(input.masterPrompt) || null,
+      prompt: normalizeText(input.masterPrompt) || null,
+      primaryModel: primaryModel && primaryAccessKey ? {
+        provider: primaryModel.provider,
+        model: primaryModel.model,
+        apiKey: tokenMap.get(primaryAccessKey) ?? null,
+        tokenId: primaryAccessKey,
+      } : null,
+      fallbackModel: fallbackModel && fallbackAccessKey ? {
+        provider: fallbackModel.provider,
+        model: fallbackModel.model,
+        apiKey: tokenMap.get(fallbackAccessKey) ?? null,
+        tokenId: fallbackAccessKey,
+      } : null,
     });
   }
 
@@ -423,10 +441,10 @@ async function finalizeRequestLog(input: {
 
   const updateResult = await db.query<{ balance: number }>(
     `
-      UPDATE "intelligenceAccess"
-      SET balance = GREATEST(balance - $1, 0)
+      UPDATE "intelligence_access"
+      SET token_balance = GREATEST(token_balance - $1, 0)
       WHERE id = $2
-      RETURNING balance
+      RETURNING token_balance AS balance
     `,
     [balanceToDeduct, input.accessId]
   );

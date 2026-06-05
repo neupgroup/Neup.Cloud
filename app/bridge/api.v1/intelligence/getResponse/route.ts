@@ -587,28 +587,24 @@ async function findAccessRow(accountId: string, accessIdentifier: string): Promi
     `
       SELECT
         ia.id,
-        ia.prompt_id,
-        ia.account_id,
-        ia.token_hash,
+        ia.key_hash AS prompt_id,
+        ia.key_hash AS account_id,
+        ia.key_hash AS token_hash,
         ia.status,
         ia.type,
-        ia."primaryModel",
-        ia."fallbackModel",
-        ia."primaryModelConfig",
-        ia."fallbackModelConfig",
-        ia."primaryAccessKey",
-        ia."fallbackAccessKey",
-        primary_token."key" AS "primaryAccessTokenKey",
-        fallback_token."key" AS "fallbackAccessTokenKey",
-        ia."maxTokens",
-        ia."defPrompt",
-        ia.balance
-      FROM "intelligenceAccess" ia
-      LEFT JOIN "accessTokens" primary_token
-        ON primary_token.id = ia."primaryAccessKey"
-      LEFT JOIN "accessTokens" fallback_token
-        ON fallback_token.id = ia."fallbackAccessKey"
-      WHERE ia.account_id = $1 AND ia.prompt_id = $2
+        (ia.details->>'primaryModel')::TEXT AS "primaryModel",
+        (ia.details->>'fallbackModel')::TEXT AS "fallbackModel",
+        (ia.details->'primaryModelConfig')::JSONB AS "primaryModelConfig",
+        (ia.details->'fallbackModelConfig')::JSONB AS "fallbackModelConfig",
+        (ia.details->>'primaryAccessKey')::BIGINT AS "primaryAccessKey",
+        (ia.details->>'fallbackAccessKey')::BIGINT AS "fallbackAccessKey",
+        NULL::TEXT AS "primaryAccessTokenKey",
+        NULL::TEXT AS "fallbackAccessTokenKey",
+        (ia.details->>'maxTokens')::INTEGER AS "maxTokens",
+        (ia.details->>'defPrompt')::TEXT AS "defPrompt",
+        ia.token_balance AS balance
+      FROM "intelligence_access" ia
+      WHERE ia.key_hash = $1 AND ia.key_hash = $2
       ORDER BY ia.id DESC
       LIMIT 1
     `,
@@ -625,27 +621,23 @@ async function findAccessRowByAccessId(accessId: string): Promise<IntelligenceAc
     `
       SELECT
         ia.id,
-        ia.prompt_id,
-        ia.account_id,
-        ia.token_hash,
+        ia.key_hash AS prompt_id,
+        ia.key_hash AS account_id,
+        ia.key_hash AS token_hash,
         ia.type,
-        ia."primaryModel",
-        ia."fallbackModel",
-        ia."primaryModelConfig",
-        ia."fallbackModelConfig",
-        ia."primaryAccessKey",
-        ia."fallbackAccessKey",
-        primary_token."key" AS "primaryAccessTokenKey",
-        fallback_token."key" AS "fallbackAccessTokenKey",
-        ia."maxTokens",
-        ia."defPrompt",
-        ia.balance
-      FROM "intelligenceAccess" ia
-      LEFT JOIN "accessTokens" primary_token
-        ON primary_token.id = ia."primaryAccessKey"
-      LEFT JOIN "accessTokens" fallback_token
-        ON fallback_token.id = ia."fallbackAccessKey"
-      WHERE ia.prompt_id = $1
+        (ia.details->>'primaryModel')::TEXT AS "primaryModel",
+        (ia.details->>'fallbackModel')::TEXT AS "fallbackModel",
+        (ia.details->'primaryModelConfig')::JSONB AS "primaryModelConfig",
+        (ia.details->'fallbackModelConfig')::JSONB AS "fallbackModelConfig",
+        (ia.details->>'primaryAccessKey')::BIGINT AS "primaryAccessKey",
+        (ia.details->>'fallbackAccessKey')::BIGINT AS "fallbackAccessKey",
+        NULL::TEXT AS "primaryAccessTokenKey",
+        NULL::TEXT AS "fallbackAccessTokenKey",
+        (ia.details->>'maxTokens')::INTEGER AS "maxTokens",
+        (ia.details->>'defPrompt')::TEXT AS "defPrompt",
+        ia.token_balance AS balance
+      FROM "intelligence_access" ia
+      WHERE ia.key_hash = $1
       ORDER BY ia.id DESC
       LIMIT 1
     `,
@@ -697,10 +689,10 @@ async function finalizeRequestLog(input: {
 
   const updateResult = await db.query<{ balance: number }>(
     `
-      UPDATE "intelligenceAccess"
-      SET balance = GREATEST(balance - $1, 0)
+      UPDATE "intelligence_access"
+      SET token_balance = GREATEST(token_balance - $1, 0)
       WHERE id = $2
-      RETURNING balance
+      RETURNING token_balance AS balance
     `,
     [balanceToDeduct, input.accessId]
   );
