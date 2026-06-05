@@ -125,10 +125,11 @@ function successResponse(response: string | unknown, status = 200) {
 }
 
 function errorResponse(errorCode: string, message?: string, status = 400) {
+  void message;
   return NextResponse.json(
     {
       success: false,
-      error: message || errorCode,
+      error: errorCode,
     },
     {
       status,
