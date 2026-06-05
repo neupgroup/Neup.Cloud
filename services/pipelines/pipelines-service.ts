@@ -474,12 +474,13 @@ async function finalizeRequestLog(input: {
 
   await db.query(
     `
-      INSERT INTO "intelligence_log" (access_id, details, balance_used)
-      VALUES ($1, $2, $3)
+      INSERT INTO "intelligence_log" (access_id, details, type, balance)
+      VALUES ($1, $2, $3, $4)
     `,
     [
       input.accessId,
       JSON.stringify(details),
+      'discharge',
       balanceToDeduct,
     ]
   );
@@ -521,12 +522,13 @@ async function logFailedRequest(input: {
 
   await db.query(
     `
-      INSERT INTO "intelligence_log" (access_id, details, balance_used)
-      VALUES ($1, $2, $3)
+      INSERT INTO "intelligence_log" (access_id, details, type, balance)
+      VALUES ($1, $2, $3, $4)
     `,
     [
       input.accessId,
       JSON.stringify(details),
+      'discharge',
       0,
     ]
   );

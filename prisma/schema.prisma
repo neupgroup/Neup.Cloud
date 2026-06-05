@@ -187,17 +187,19 @@ model IntelligenceAccess {
 }
 
 model IntelligenceLog {
-  id          BigInt   @id @default(autoincrement())
-  accessId    String   @map("access_id") @db.Text
-  details     Json
-  from        String?  @db.Text
-  balanceUsed Float?   @map("balance_used")
-  devDetails  Json?    @map("dev_details")
-  loggedOn    DateTime @default(now()) @map("logged_on") @db.Timestamp(6)
+  id         BigInt   @id @default(autoincrement())
+  accessId   String   @map("access_id") @db.Text
+  details    Json
+  from       String?  @db.Text
+  type       String   @default("discharge") @db.Text
+  balance    Float?
+  devDetails Json?    @map("dev_details")
+  loggedOn   DateTime @default(now()) @map("logged_on") @db.Timestamp(6)
 
   access IntelligenceAccess @relation(fields: [accessId], references: [id], onDelete: Cascade)
 
   @@index([accessId], map: "intelligence_log_access_id_idx")
+  @@index([type], map: "intelligence_log_type_idx")
   @@map("intelligence_log")
 }
 

@@ -144,7 +144,8 @@ export async function ensureIntelligenceTables(): Promise<void> {
           access_id TEXT NOT NULL REFERENCES "intelligence_access" (id) ON DELETE CASCADE,
           details JSONB NOT NULL DEFAULT '{}'::jsonb,
           "from" TEXT,
-          balance_used DOUBLE PRECISION,
+          type TEXT NOT NULL DEFAULT 'discharge',
+          balance DOUBLE PRECISION,
           dev_details JSONB,
           logged_on TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
         )

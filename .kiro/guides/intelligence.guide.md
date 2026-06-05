@@ -87,16 +87,23 @@ Stores reusable model configurations.
 
 #### `intelligence_log`
 
-Usage logs with denormalized details.
+Transaction-based usage logs with denormalized details.
 
 | Column | Type | Description |
 |--------|------|-------------|
 | `id` | BIGSERIAL | Auto-incrementing primary key |
-| `access_id` | BIGINT | Foreign key to `intelligence_access.id` |
+| `access_id` | TEXT | Foreign key to `intelligence_access.id` |
 | `details` | JSONB | `{ prompt: "...", context: "...", output: "..." }` |
 | `from` | TEXT | Final token/model key identifier (provider/model/key_id) |
-| `balance_used` | DOUBLE PRECISION | Amount of balance deducted |
+| `type` | TEXT | Transaction type: `recharge`, `discharge`, or `transaction` |
+| `balance` | DOUBLE PRECISION | Amount involved in the transaction |
+| `dev_details` | JSONB | Development/debugging information |
 | `logged_on` | TIMESTAMP(6) | Timestamp of the log |
+
+**Transaction Types:**
+- `recharge`: Balance addition (positive value)
+- `discharge`: Balance deduction (negative value, stored as positive)
+- `transaction`: Other balance adjustments
 
 #### `intelligence_settings`
 
@@ -159,8 +166,8 @@ The access record is called via the `/bridge/api.v1/intelligence/getResponse` en
      - Extract: `provider/model/enc(key)/tokenId`
      - Fallback chain: Try 1st, then 2nd, then 3rd, etc.
 
-4. **Step 4**: Deduct balance based on input/output tokens generated
-5. **Step 5**: Log to `intelligence_log` with denormalized details
+4. **Step 4**: Log the usage to `intelligence_log` with type='discharge' and deduct balance
+5. **Step 5**: Update balance in `intelligence_access` table
 
 ### Model Fallback Mechanism
 
@@ -174,16 +181,31 @@ The system supports multiple fallback levels stored in the `details` JSONB field
 
 ### Balance Management
 
-- Each access record has a `token_balance` field (default: 0)
-- When a request is made, the cost is calculated and deducted
+The system now uses a transaction-based logging approach for better auditability:
+
+- Each access record has a `token_balance` field that reflects the current balance
+- **All balance changes are logged** in `intelligence_log` with a transaction type:
+  - `recharge`: Balance added (positive amount)
+  - `discharge`: Balance used/deducted (negative amount)
+  - `transaction`: Other balance adjustments (can be positive or negative)
+- When a request is made:
+  1. Cost is calculated based on input/output tokens
+  2. Transaction is logged to `intelligence_log` with type='discharge'
+  3. Balance is updated in `intelligence_access` table
+- When recharging:
+  1. Transaction is logged to `intelligence_log` with type='recharge'
+  2. Balance is updated in `intelligence_access` table
+- The system can recalculate balance from logs using `calculateBalanceFromLogs()`
 - Users can recharge balances via `/intelligence/logs/recharge?accessId=<id>`
-- Balance tracking is stored per access record
+- Balance tracking provides full audit trail in `intelligence_log`
 - Logs include `balance_used` field showing amount deducted
 
 ### Logging
 
 - **Dev mode**: All requests logged to `intelligence_log` with full details in `details` and dev info in `dev_details`
 - **Prod mode**: Minimal logging - only usage + token balances in `intelligence_log`
+- **All balance changes** are logged with transaction type (`recharge`, `discharge`, or `transaction`)
+- Balance can be recalculated from logs for audit purposes
 
 ## Frontend Components
 
@@ -220,10 +242,12 @@ The system supports multiple fallback levels stored in the `details` JSONB field
 | `createIntelligenceAccessRecord(input)` | Create new access record |
 | `updateIntelligenceAccessRecord(input)` | Update existing record |
 | `deleteIntelligenceAccessRecord(input)` | Delete access record |
-| `rechargeIntelligenceAccessBalance(input)` | Add balance to access record |
-| `logIntelligenceUsage(input)` | Log usage with details |
-| `deductBalance(input)` | Deduct balance from access |
-| `getIntelligenceLogs(accountId)` | Fetch usage logs |
+| `rechargeIntelligenceAccessBalance(input)` | Recharge balance and log transaction |
+| `logIntelligenceUsage(input)` | Log usage with transaction type and details |
+| `deductBalance(input)` | Deduct balance from access (deprecated - use log-based approach) |
+| `calculateBalanceFromLogs(accessId)` | Calculate current balance from transaction logs |
+| `syncBalanceFromLogs(accessId, accountId)` | Sync balance in access table from logs |
+| `getIntelligenceLogs(accountId)` | Fetch usage logs with transaction types |
 
 ### Service Functions (in `intelligence-service.ts`)
 

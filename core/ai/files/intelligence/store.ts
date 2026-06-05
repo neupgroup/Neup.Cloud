@@ -119,12 +119,15 @@ export interface IntelligenceAccessRecord {
   updated_at: string;
 }
 
+export type IntelligenceLogType = 'recharge' | 'discharge' | 'transaction';
+
 export interface IntelligenceLogRecord {
   id: number;
   access_id: string;
   details: Record<string, unknown>;
   from: string | null;
-  balance_used: number | null;
+  type: IntelligenceLogType;
+  balance: number | null;
   dev_details?: Record<string, unknown> | null;
   logged_on: string;
   // Computed/helper properties for backwards compatibility
@@ -201,7 +204,8 @@ interface IntelligenceLogRow {
   access_id: string;
   details: unknown;
   from: string | null;
-  balance_used: number | string | null;
+  type: string;
+  balance: number | string | null;
   dev_details?: unknown;
   logged_on: string;
 }
@@ -537,7 +541,8 @@ export async function getIntelligenceLogs(accountId: string): Promise<Intelligen
         il.access_id,
         il.details,
         il."from",
-        il.balance_used,
+        il.type,
+        il.balance,
         il.dev_details,
         il.logged_on
       FROM "intelligence_log" il
@@ -552,9 +557,10 @@ export async function getIntelligenceLogs(accountId: string): Promise<Intelligen
   return result.rows.map((row) => ({
     id: normalizeNumericId(row.id),
     access_id: row.access_id,
-    details: row.details,
+    details: (typeof row.details === 'object' && row.details !== null ? row.details : {}) as Record<string, unknown>,
     from: row.from,
-    balance_used: row.balance_used === null ? null : Number(row.balance_used),
+    type: row.type as IntelligenceLogType,
+    balance: row.balance === null ? null : Number(row.balance),
     dev_details: row.dev_details as Record<string, unknown> | null | undefined,
     logged_on: row.logged_on,
     // Extract commonly used fields from details for backwards compatibility
@@ -600,7 +606,8 @@ export async function getPaginatedIntelligenceLogs(
         il.access_id,
         il.details,
         il."from",
-        il.balance_used,
+        il.type,
+        il.balance,
         il.dev_details,
         il.logged_on
       FROM "intelligence_log" il
@@ -618,9 +625,10 @@ export async function getPaginatedIntelligenceLogs(
     logs: logsResult.rows.map((row) => ({
       id: normalizeNumericId(row.id),
       access_id: row.access_id,
-      details: row.details,
+      details: (typeof row.details === 'object' && row.details !== null ? row.details : {}) as Record<string, unknown>,
       from: row.from,
-      balance_used: row.balance_used === null ? null : Number(row.balance_used),
+      type: row.type as IntelligenceLogType,
+      balance: row.balance === null ? null : Number(row.balance),
       dev_details: row.dev_details as Record<string, unknown> | null | undefined,
       logged_on: row.logged_on,
       // Extract commonly used fields from details for backwards compatibility
@@ -883,6 +891,20 @@ export async function rechargeIntelligenceAccessBalance(input: {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
 
+  // First, log the recharge transaction
+  await logIntelligenceUsage({
+    accessId: input.accessId,
+    details: {
+      recharge_amount: input.amount,
+      timestamp: new Date().toISOString(),
+    },
+    from: 'manual_recharge',
+    type: 'recharge',
+    balance: input.amount,
+    devDetails: null,
+  });
+
+  // Then update the balance in intelligence_access
   const result = await db.query(
     `
       UPDATE "intelligence_access"
@@ -903,7 +925,8 @@ export async function logIntelligenceUsage(input: {
   accessId: string;
   details: Record<string, unknown>;
   from: string | null;
-  balanceUsed: number;
+  type: IntelligenceLogType;
+  balance: number;
   devDetails?: Record<string, unknown> | null;
 }): Promise<void> {
   await ensureIntelligenceTables();
@@ -915,12 +938,13 @@ export async function logIntelligenceUsage(input: {
         access_id,
         details,
         "from",
-        balance_used,
+        type,
+        balance,
         dev_details
       )
-      VALUES ($1, $2, $3, $4, $5)
+      VALUES ($1, $2, $3, $4, $5, $6)
     `,
-    [input.accessId, input.details, input.from, input.balanceUsed, input.devDetails || null]
+    [input.accessId, input.details, input.from, input.type, input.balance, input.devDetails || null]
   );
 }
 
@@ -940,6 +964,49 @@ export async function deductBalance(input: {
       WHERE id = $2
     `,
     [input.amount, input.accessId]
+  );
+}
+
+export async function calculateBalanceFromLogs(accessId: string): Promise<number> {
+  await ensureIntelligenceTables();
+  const db = getIntelligenceDbPool();
+
+  const result = await db.query<{ calculated_balance: string }>(
+    `
+      SELECT COALESCE(
+        SUM(
+          CASE 
+            WHEN type = 'recharge' THEN balance
+            WHEN type = 'discharge' THEN -balance
+            WHEN type = 'transaction' THEN balance
+            ELSE 0
+          END
+        ), 0
+      )::text AS calculated_balance
+      FROM "intelligence_log"
+      WHERE access_id = $1
+    `,
+    [accessId]
+  );
+
+  return Number(result.rows[0]?.calculated_balance || 0);
+}
+
+export async function syncBalanceFromLogs(accessId: string, accountId: string): Promise<void> {
+  await ensureIntelligenceTables();
+  const db = getIntelligenceDbPool();
+
+  const calculatedBalance = await calculateBalanceFromLogs(accessId);
+
+  await db.query(
+    `
+      UPDATE "intelligence_access"
+      SET
+        token_balance = $1,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2 AND account_id = $3
+    `,
+    [calculatedBalance, accessId, accountId]
   );
 }
 
