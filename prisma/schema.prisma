@@ -14,20 +14,20 @@ enum ApplicationServerMapStatus {
 }
 
 model Server {
-  id           String    @id @db.Text
-  name         String    @db.Text
-  username     String    @db.Text
-  type         String    @db.Text
-  provider     String    @db.Text
-  moreDetails   String?   @map("moreDetails") @db.Text
-  publicIp     String    @map("publicIp") @db.Text
-  privateIp    String?   @map("privateIp") @db.Text
-  privateKey   String?   @map("privateKey") @db.Text
-  publicKey    String?   @map("publicKey") @db.Text
-  proxyHandler String?   @map("proxyHandler") @db.Text
-  loadBalancer String?   @map("loadBalancer") @db.Text
-  createdAt    DateTime  @map("createdAt") @db.Timestamp(6)
-  updatedAt    DateTime  @map("updatedAt") @db.Timestamp(6)
+  id                    String                 @id @db.Text
+  name                  String                 @db.Text
+  username              String                 @db.Text
+  type                  String                 @db.Text
+  provider              String                 @db.Text
+  moreDetails           String?                @map("moreDetails") @db.Text
+  publicIp              String                 @map("publicIp") @db.Text
+  privateIp             String?                @map("privateIp") @db.Text
+  privateKey            String?                @map("privateKey") @db.Text
+  publicKey             String?                @map("publicKey") @db.Text
+  proxyHandler          String?                @map("proxyHandler") @db.Text
+  loadBalancer          String?                @map("loadBalancer") @db.Text
+  createdAt             DateTime               @map("createdAt") @db.Timestamp(6)
+  updatedAt             DateTime               @map("updatedAt") @db.Timestamp(6)
   applicationServerMaps ApplicationServerMap[]
 
   @@map("servers")
@@ -61,18 +61,18 @@ model SavedCommand {
 }
 
 model Application {
-  id            String   @id @db.Text
-  name          String   @db.Text
-  appIcon       String?  @map("appIcon") @db.Text
-  location      String   @db.Text
-  language      String   @db.Text
-  repository    String?  @db.Text
-  networkAccess String[] @default([])
+  id            String                 @id @db.Text
+  name          String                 @db.Text
+  appIcon       String?                @map("appIcon") @db.Text
+  location      String                 @db.Text
+  language      String                 @db.Text
+  repository    String?                @db.Text
+  networkAccess String[]               @default([])
   commands      Json?
   information   Json?
-  owner         String   @db.Text
-  createdAt     DateTime @map("createdAt") @db.Timestamp(6)
-  updatedAt     DateTime @map("updatedAt") @db.Timestamp(6)
+  owner         String                 @db.Text
+  createdAt     DateTime               @map("createdAt") @db.Timestamp(6)
+  updatedAt     DateTime               @map("updatedAt") @db.Timestamp(6)
   environments  Json?
   files         Json?
   serverMaps    ApplicationServerMap[]
@@ -112,7 +112,7 @@ model EnvironmentVariable {
   key             String   @db.Text
   value           String   @db.Text
   targetType      String   @map("targetType") @db.Text
-  selectedTargets String[] @map("selectedTargets") @default([])
+  selectedTargets String[] @default([]) @map("selectedTargets")
   isConfidential  Boolean  @map("isConfidential")
   protectValue    Boolean  @map("protectValue")
   createdAt       DateTime @map("createdAt") @db.Timestamp(6)
@@ -153,53 +153,53 @@ model AccessToken {
 }
 
 model IntelligenceModel {
-  id                BigInt @id @default(autoincrement())
-  title             String @db.Text
-  provider          String @db.Text
-  model             String @db.Text
-  description       String? @db.Text
-  currency          String @default("USD") @db.Text
-  inputPrice        Float  @map("inputPrice")
-  outputPrice       Float  @map("outputPrice")
+  id          BigInt  @id @default(autoincrement())
+  title       String  @db.Text
+  provider    String  @db.Text
+  model       String  @db.Text
+  description String? @db.Text
+  currency    String  @default("USD") @db.Text
+  inputPrice  Float   @map("inputPrice")
+  outputPrice Float   @map("outputPrice")
 
   @@unique([provider, model], map: "intelligence_models_provider_model_unique")
   @@map("intelligence_models")
 }
 
 model IntelligenceAccess {
-  id          BigInt   @id @default(autoincrement())
-  accountId   String   @map("account_id") @db.Text
-  keyHash     String   @unique @map("key_hash") @db.Text
-  type        String   @db.Text
-  availableTo Json     @map("available_to")
-  details     Json     @default("{}")
-  maxTokens   Int?     @map("max_tokens")
-  tokenBalance Float   @map("token_balance") @default(0)
-  status      String   @default("prod") @db.Text
-  updatedAt   DateTime @map("updated_at") @updatedAt @db.Timestamp(6)
+  id           BigInt   @id @default(autoincrement())
+  accountId    String   @map("account_id") @db.Text
+  keyHash      String   @unique @map("key_hash") @db.Text
+  type         String   @db.Text
+  availableTo  Json     @map("available_to")
+  details      Json     @default("{}")
+  maxTokens    Int?     @map("max_tokens")
+  tokenBalance Float    @default(0) @map("token_balance")
+  status       String   @default("prod") @db.Text
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
 
   @@index([accountId], map: "intelligence_access_account_id_idx")
   @@map("intelligence_access")
 }
 
 model IntelligenceLog {
-  id           BigInt   @id @default(autoincrement())
-  accessId     BigInt   @map("access_id")
-  details      Json
-  from         String?  @db.Text
-  balanceUsed  Float?   @map("balance_used")
-  loggedOn     DateTime @map("logged_on") @default(now()) @db.Timestamp(6)
+  id          BigInt   @id @default(autoincrement())
+  accessId    BigInt   @map("access_id")
+  details     Json
+  from        String?  @db.Text
+  balanceUsed Float?   @map("balance_used")
+  loggedOn    DateTime @default(now()) @map("logged_on") @db.Timestamp(6)
 
-  @@map("intelligenceLog")
+  @@map("intelligence_log")
 }
 
 model OpenFlowUsageLog {
-  id              BigInt   @id @default(autoincrement())
-  accountId       String   @map("account_id") @db.Text
-  tokenLast4      String   @map("token_last4") @db.Text
-  modelUsed       String   @map("model_used") @db.Text
-  provider        String   @db.Text
-  usedAt          DateTime @default(now()) @map("used_at") @db.Timestamp(6)
+  id         BigInt   @id @default(autoincrement())
+  accountId  String   @map("account_id") @db.Text
+  tokenLast4 String   @map("token_last4") @db.Text
+  modelUsed  String   @map("model_used") @db.Text
+  provider   String   @db.Text
+  usedAt     DateTime @default(now()) @map("used_at") @db.Timestamp(6)
 
   @@index([accountId], map: "openflow_usage_log_account_id_idx")
   @@index([usedAt], map: "openflow_usage_log_used_at_idx")
@@ -229,16 +229,16 @@ model PipelineLog {
 }
 
 model Database {
-  id             String    @id @db.Text
-  title          String    @db.Text
-  description    String    @db.Text
-  connectionType String @map("connectionType") @db.Text
-  connectionStatus String @default("connected") @map("connectionStatus") @db.Text
-  credentails    String    @db.Text
-  authConfig     Json
-  lastValidatedAt DateTime? @map("lastValidatedAt") @db.Timestamp(6)
-  createdAt      DateTime  @default(now()) @map("createdAt") @db.Timestamp(6)
-  updatedAt      DateTime  @updatedAt @map("updatedAt") @db.Timestamp(6)
+  id               String    @id @db.Text
+  title            String    @db.Text
+  description      String    @db.Text
+  connectionType   String    @map("connectionType") @db.Text
+  connectionStatus String    @default("connected") @map("connectionStatus") @db.Text
+  credentails      String    @db.Text
+  authConfig       Json
+  lastValidatedAt  DateTime? @map("lastValidatedAt") @db.Timestamp(6)
+  createdAt        DateTime  @default(now()) @map("createdAt") @db.Timestamp(6)
+  updatedAt        DateTime  @updatedAt @map("updatedAt") @db.Timestamp(6)
 
   @@map("databases")
 }
@@ -283,12 +283,12 @@ model AuthzCapability {
 }
 
 model AuthzRoleCapability {
-  id                   String  @id @default(uuid()) @db.Text
-  roleId               String  @map("role_id") @db.Text
-  capabilityId         String  @map("capability_id") @db.Text
-  scope                String? @db.Text
-  denormalizedCapability Json? @map("denormalized_capability")
-  roleName             String? @map("role_name") @db.Text
+  id                     String  @id @default(uuid()) @db.Text
+  roleId                 String  @map("role_id") @db.Text
+  capabilityId           String  @map("capability_id") @db.Text
+  scope                  String? @db.Text
+  denormalizedCapability Json?   @map("denormalized_capability")
+  roleName               String? @map("role_name") @db.Text
 
   @@map("authz_role_capability")
 }

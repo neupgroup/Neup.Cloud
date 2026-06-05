@@ -453,7 +453,7 @@ async function finalizeRequestLog(input: {
 
   await db.query(
     `
-      INSERT INTO "intelligenceLog" (access_id, query, response, context, modal, currency, cost, "inputTokens", "outputTokens", balance)
+      INSERT INTO "intelligence_log" (access_id, query, response, context, modal, currency, cost, "inputTokens", "outputTokens", balance)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     `,
     [
@@ -496,7 +496,7 @@ async function logFailedRequest(input: {
   const db = getIntelligenceDbPool();
   await db.query(
     `
-      INSERT INTO "intelligenceLog" (access_id, query, response, context, modal, currency, cost, "inputTokens", "outputTokens", balance)
+      INSERT INTO "intelligence_log" (access_id, query, response, context, modal, currency, cost, "inputTokens", "outputTokens", balance)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     `,
     [

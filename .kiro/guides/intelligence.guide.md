@@ -85,7 +85,7 @@ Stores reusable model configurations.
 | `inputPrice` | DOUBLE PRECISION | Cost per 1M input tokens |
 | `outputPrice` | DOUBLE PRECISION | Cost per 1M output tokens |
 
-#### `intelligenceLog`
+#### `intelligence_log`
 
 Usage logs with denormalized details.
 
@@ -160,7 +160,7 @@ The access record is called via the `/bridge/api.v1/intelligence/getResponse` en
      - Fallback chain: Try 1st, then 2nd, then 3rd, etc.
 
 4. **Step 4**: Deduct balance based on input/output tokens generated
-5. **Step 5**: Log to `intelligenceLog` with denormalized details
+5. **Step 5**: Log to `intelligence_log` with denormalized details
 
 ### Model Fallback Mechanism
 
@@ -182,7 +182,7 @@ The system supports multiple fallback levels stored in the `details` JSONB field
 
 ### Logging
 
-- **Dev mode**: All requests logged to `intelligenceLog` with full details
+- **Dev mode**: All requests logged to `intelligence_log` with full details
 - **Dev mode**: Detailed logs to `intelligence_devlog` with headers, bodies, errors
 - **Prod mode**: Minimal or no logging
 
@@ -308,7 +308,7 @@ The new schema replaces the normalized design with a denormalized one:
 
 2. **New Tables**:
    - `intelligence_access` (new denormalized table)
-   - Updated `intelligenceLog` with denormalized `details` JSONB
+   - Updated `intelligence_log` with denormalized `details` JSONB
 
 3. **Key Changes**:
    - Single table for all access types

@@ -24,7 +24,7 @@ CREATE INDEX IF NOT EXISTS "intelligence_access_key_hash_idx" ON "intelligence_a
 -- Drop old intelligenceLog table and recreate with new schema
 DROP TABLE IF EXISTS "intelligenceLog" CASCADE;
 
-CREATE TABLE IF NOT EXISTS "intelligenceLog" (
+CREATE TABLE IF NOT EXISTS "intelligence_log" (
   id BIGSERIAL PRIMARY KEY,
   access_id BIGINT NOT NULL REFERENCES "intelligence_access" (id) ON DELETE CASCADE,
   details JSONB NOT NULL DEFAULT '{}'::jsonb,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS "intelligenceLog" (
   logged_on TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS "intelligenceLog_access_id_idx" ON "intelligenceLog" (access_id);
+CREATE INDEX IF NOT EXISTS "intelligence_log_access_id_idx" ON "intelligence_log" (access_id);
 
 -- Ensure accessTokens table exists
 CREATE TABLE IF NOT EXISTS "accessTokens" (

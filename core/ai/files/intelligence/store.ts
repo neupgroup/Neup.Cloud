@@ -528,7 +528,7 @@ export async function getIntelligenceLogs(accountId: string): Promise<Intelligen
         il."from",
         il.balance_used,
         il.logged_on
-      FROM "intelligenceLog" il
+      FROM "intelligence_log" il
       INNER JOIN "intelligence_access" ia
         ON ia.id = il.access_id
       WHERE ia.account_id = $1
@@ -559,7 +559,7 @@ export async function getPaginatedIntelligenceLogs(
   const countResult = await db.query<{ count: string }>(
     `
       SELECT COUNT(*)::text AS count
-      FROM "intelligenceLog" il
+      FROM "intelligence_log" il
       INNER JOIN "intelligence_access" ia
         ON ia.id = il.access_id
       WHERE ia.account_id = $1
@@ -580,7 +580,7 @@ export async function getPaginatedIntelligenceLogs(
         il."from",
         il.balance_used,
         il.logged_on
-      FROM "intelligenceLog" il
+      FROM "intelligence_log" il
       INNER JOIN "intelligence_access" ia
         ON ia.id = il.access_id
       WHERE ia.account_id = $1
@@ -891,7 +891,7 @@ export async function logIntelligenceUsage(input: {
 
   await db.query(
     `
-      INSERT INTO "intelligenceLog" (
+      INSERT INTO "intelligence_log" (
         access_id,
         details,
         "from",

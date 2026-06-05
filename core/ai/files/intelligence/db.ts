@@ -71,7 +71,7 @@ export async function ensureIntelligenceTables(): Promise<void> {
       `);
 
       await db.query(`
-        DROP TABLE IF EXISTS "intelligenceLog" CASCADE
+        DROP TABLE IF EXISTS "intelligence_log" CASCADE
       `);
 
       await db.query(`
@@ -153,11 +153,11 @@ export async function ensureIntelligenceTables(): Promise<void> {
       `);
 
       await db.query(`
-        DROP TABLE IF EXISTS "intelligenceLog" CASCADE
+        DROP TABLE IF EXISTS "intelligence_log" CASCADE
       `);
 
       await db.query(`
-        CREATE TABLE IF NOT EXISTS "intelligenceLog" (
+        CREATE TABLE IF NOT EXISTS "intelligence_log" (
           id BIGSERIAL PRIMARY KEY,
           access_id BIGINT NOT NULL REFERENCES "intelligence_access" (id) ON DELETE CASCADE,
           details JSONB NOT NULL DEFAULT '{}'::jsonb,
