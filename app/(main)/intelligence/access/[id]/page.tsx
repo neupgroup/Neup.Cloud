@@ -17,28 +17,10 @@ import {
   getIntelligenceModels,
 } from '@/core/ai/files/intelligence/store';
 import AccessEditForm from '@/app/(main)/intelligence/access/[id]/access-edit-form';
-import { PromptTestPanel } from '../../prompts/[id]/prompt-test-panel';
 
 export const metadata: Metadata = {
   title: 'Edit Intelligence Access, Neup.Cloud',
 };
-
-function findMatchingModelId(
-  availableModels: Array<{ id: number; provider: string; model: string }>,
-  currentValue: string | null
-): number | null {
-  if (!currentValue) {
-    return null;
-  }
-
-  const normalized = currentValue.trim().toLowerCase();
-  const match = availableModels.find((model) => {
-    const identifier = `${model.provider}:${model.model}`.toLowerCase();
-    return identifier === normalized || model.model.toLowerCase() === normalized;
-  });
-
-  return match?.id ?? null;
-}
 
 export default async function IntelligenceAccessDetailPage({
   params,
@@ -63,13 +45,8 @@ export default async function IntelligenceAccessDetailPage({
     notFound();
   }
 
-  const initialPrimaryModelId =
-    access.primaryModelConfig?.id ||
-    findMatchingModelId(models, access.primaryModel);
-  const initialFallbackModelId =
-    access.fallbackModelConfig?.id ||
-    findMatchingModelId(models, access.fallbackModel);
   const requestUrl = 'http://localhost:25683/bridge/api.v1/intelligence/getResponse';
+  const accessType = access.type;
 
   return (
     <div className="grid gap-8">
@@ -80,7 +57,7 @@ export default async function IntelligenceAccessDetailPage({
             Edit Intelligence Access
           </span>
         }
-        description={`Editing access #${access.id} with access ID ${access.prompt_id}.`}
+        description={`Editing access #${access.id} (Type: ${accessType}).`}
         backHref="/intelligence/access"
       />
 
@@ -95,12 +72,27 @@ export default async function IntelligenceAccessDetailPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <PromptTestPanel
-            requestUrl={requestUrl}
-            initialPromptId={access.prompt_id}
-            initialAccessKey="xxxxxxx"
-            initialContext=""
-          />
+          <div className="grid gap-4 text-sm text-muted-foreground">
+            <div>
+              <p className="font-medium text-foreground">Request URL</p>
+              <p className="font-mono break-all">{requestUrl}</p>
+            </div>
+            <div>
+              <p className="font-medium text-foreground">Access Type</p>
+              <p>{accessType}</p>
+            </div>
+            <div>
+              <p className="font-medium text-foreground">Expected Payload</p>
+              <pre className="overflow-auto rounded-xl bg-muted p-3 text-xs text-foreground">
+                {`{
+  "accessId": "${access.key_hash.substring(0, 16)}...",
+  "accessKey": "YOUR_ACCESS_KEY",
+  "query": "Your query here",
+  "context": "Optional context"
+}`}
+              </pre>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -117,16 +109,14 @@ export default async function IntelligenceAccessDetailPage({
           model: model.model,
         }))}
         initialValues={{
-          accessIdentifier: access.prompt_id,
-          balance: access.balance,
-          currency: access.primaryModelConfig?.currency || access.fallbackModelConfig?.currency || 'USD',
-          primaryModelId: initialPrimaryModelId,
-          fallbackModelId: initialFallbackModelId,
-          primaryAccessKey: access.primaryAccessKey,
-          fallbackAccessKey: access.fallbackAccessKey,
-          maxTokens: access.maxTokens,
-          guider: access.defPrompt,
-          tokenHash: access.token_hash,
+          accessId: access.id,
+          keyHash: access.key_hash,
+          type: access.type,
+          availableTo: access.available_to,
+          details: access.details,
+          maxTokens: access.max_tokens,
+          tokenBalance: access.token_balance,
+          status: access.status,
         }}
       />
     </div>

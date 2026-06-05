@@ -46,38 +46,27 @@ export interface StoredModelConfig {
   price: Record<string, unknown>;
 }
 
+export type AccessType = 'open' | 'hybrid' | 'closed';
+
 export interface IntelligenceAccessRecord {
   id: number;
-  prompt_id: string;
-  account_id: string;
-  token_hash: string;
-  primaryModel: string | null;
-  fallbackModel: string | null;
-  primaryModelConfig: StoredModelConfig | null;
-  fallbackModelConfig: StoredModelConfig | null;
-  primaryAccessKey: number | null;
-  fallbackAccessKey: number | null;
-  primaryAccessTokenName: string | null;
-  fallbackAccessTokenName: string | null;
-  maxTokens: number | null;
-  defPrompt: string | null;
-  balance: number;
+  key_hash: string;
+  type: AccessType;
+  available_to: unknown;
+  details: unknown;
+  max_tokens: number | null;
+  token_balance: number;
+  status: string;
+  updated_at: string;
 }
 
 export interface IntelligenceLogRecord {
   id: number;
   access_id: number;
-  query: string | null;
-  response: string | null;
-  context: string | null;
-  modal: string | null;
-  currency: string | null;
-  cost: number | null;
-  inputTokens: number | null;
-  outputTokens: number | null;
-  balance: number | null;
-  prompt_id: string;
-  account_id: string;
+  details: Record<string, unknown>;
+  from: string | null;
+  balance_used: number | null;
+  logged_on: string;
 }
 
 export interface PaginatedIntelligenceLogsResult {
@@ -119,17 +108,6 @@ export interface IntelligenceSettingsRecord {
   dev_mode: boolean;
 }
 
-interface IntelligenceModelRow {
-  id: number | string;
-  title: string;
-  provider: string;
-  model: string;
-  description: string | null;
-  currency: string | null;
-  inputPrice: number | string | null;
-  outputPrice: number | string | null;
-}
-
 interface AccessTokenRow {
   id: number | string;
   account_id: string;
@@ -139,53 +117,28 @@ interface AccessTokenRow {
 
 interface IntelligenceAccessRow {
   id: number | string;
-  account_id: string;
   key_hash: string;
   type: string;
   available_to: unknown;
   details: unknown;
-  max_token: number | string | null;
-  created_at: string;
+  max_tokens: number | string | null;
+  token_balance: number | string;
+  status: string;
   updated_at: string;
 }
 
 interface IntelligenceLogRow {
   id: number | string;
   access_id: number | string;
-  query: string | null;
-  response: string | null;
-  context: string | null;
-  modal: string | null;
-  currency: string | null;
-  cost: number | string | null;
-  inputTokens: number | string | null;
-  outputTokens: number | string | null;
-  balance: number | null;
-  prompt_id: string;
-  account_id: string;
+  details: unknown;
+  from: string | null;
+  balance_used: number | string | null;
+  logged_on: string;
 }
 
 interface IntelligenceSettingsRow {
   account_id: string;
   dev_mode: boolean;
-}
-
-interface IntelligenceDevLogRow {
-  id: number | string;
-  account_id: string | null;
-  access_id: string | null;
-  request_id: string;
-  request_method: string;
-  request_url: string;
-  request_headers: unknown;
-  request_body: unknown;
-  request_query: unknown;
-  request_context: unknown;
-  response_status: number | string | null;
-  response_body: unknown;
-  error_message: string | null;
-  error_stack: string | null;
-  created_at: string;
 }
 
 export interface IntelligenceDevLogInput {
@@ -236,35 +189,39 @@ export function maskSecret(value: string): string {
   return `${value.slice(0, 4)}...${value.slice(-4)}`;
 }
 
-function parseOptionalString(value: FormDataEntryValue | null): string | null {
-  const normalized = String(value || '').trim();
-  return normalized ? normalized : null;
+export function encryptValue(value: string, accessKey: string): string {
+  if (!value.trim()) {
+    return '';
+  }
+
+  const accessKeyHash = createHash('sha256').update(accessKey).digest('hex');
+  const encrypted = value.split('').map((char, index) => {
+    const keyChar = accessKeyHash[index % accessKeyHash.length];
+    const encryptedChar = String.fromCharCode(char.charCodeAt(0) ^ keyChar.charCodeAt(0));
+    return encryptedChar;
+  }).join('');
+
+  return `enc_${Buffer.from(encrypted, 'utf-8').toString('base64')}`;
 }
 
-function parseRequiredString(value: FormDataEntryValue | null, label: string): string {
-  const normalized = String(value || '').trim();
-
-  if (!normalized) {
-    throw new Error(`${label} is required`);
+export function decryptValue(encryptedValue: string, accessKey: string): string {
+  if (!encryptedValue.trim() || !encryptedValue.startsWith('enc_')) {
+    return encryptedValue;
   }
 
-  return normalized;
-}
+  try {
+    const encrypted = Buffer.from(encryptedValue.substring(4), 'base64').toString('utf-8');
+    const accessKeyHash = createHash('sha256').update(accessKey).digest('hex');
+    const decrypted = encrypted.split('').map((char, index) => {
+      const keyChar = accessKeyHash[index % accessKeyHash.length];
+      const decryptedChar = String.fromCharCode(char.charCodeAt(0) ^ keyChar.charCodeAt(0));
+      return decryptedChar;
+    }).join('');
 
-function parseOptionalInteger(value: FormDataEntryValue | null): number | null {
-  const normalized = String(value || '').trim();
-
-  if (!normalized) {
-    return null;
+    return decrypted;
+  } catch {
+    return '';
   }
-
-  const parsed = Number(normalized);
-
-  if (!Number.isFinite(parsed)) {
-    throw new Error('Expected a valid number');
-  }
-
-  return Math.trunc(parsed);
 }
 
 function normalizeNumericId(value: number | string | null | undefined): number {
@@ -284,91 +241,6 @@ function normalizeOptionalNumber(value: unknown): number | null {
 
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
-}
-
-function parseRequiredInteger(value: FormDataEntryValue | null, label: string): number {
-  const parsed = parseOptionalInteger(value);
-
-  if (parsed === null) {
-    throw new Error(`${label} is required`);
-  }
-
-  return parsed;
-}
-
-function parseRequiredDecimal(value: FormDataEntryValue | null, label: string): number {
-  const normalized = String(value || '').trim();
-
-  if (!normalized) {
-    throw new Error(`${label} is required`);
-  }
-
-  const parsed = Number(normalized);
-
-  if (!Number.isFinite(parsed) || parsed < 0) {
-    throw new Error(`${label} must be a valid number`);
-  }
-
-  return parsed;
-}
-
-function parseCurrency(value: FormDataEntryValue | null): string {
-  const normalized = parseRequiredString(value, 'Currency').toUpperCase();
-
-  if (!/^[A-Z]{3}$/.test(normalized)) {
-    throw new Error('Currency must be a 3-letter code like USD');
-  }
-
-  if (!supportedCurrencyCodes.has(normalized)) {
-    throw new Error(`Currency "${normalized}" is not recognized`);
-  }
-
-  return normalized;
-}
-
-function parseRateToPer1000(
-  value: FormDataEntryValue | null,
-  label: string
-): { rate: string; costPer1000Tokens: number } {
-  const normalized = parseRequiredString(value, label);
-  const fractionMatch = normalized.match(/^\s*([0-9]*\.?[0-9]+)\s*\/\s*([0-9]*\.?[0-9]+)\s*$/);
-
-  if (fractionMatch) {
-    const numerator = Number(fractionMatch[1]);
-    const denominator = Number(fractionMatch[2]);
-
-    if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || denominator <= 0) {
-      throw new Error(`${label} must be a valid fraction like 1.23/10000000`);
-    }
-
-    return {
-      rate: `${numerator}/${denominator}`,
-      costPer1000Tokens: Number(((numerator / denominator) * 1000).toFixed(12)),
-    };
-  }
-
-  const parsed = Number(normalized);
-
-  if (!Number.isFinite(parsed) || parsed < 0) {
-    throw new Error(`${label} must be a valid number or fraction`);
-  }
-
-  return {
-    rate: normalized,
-    costPer1000Tokens: parsed,
-  };
-}
-
-function readPriceString(source: Record<string, unknown>, keys: string[]): string | null {
-  for (const key of keys) {
-    const value = source[key];
-
-    if (typeof value === 'string' && value.trim()) {
-      return value.trim();
-    }
-  }
-
-  return null;
 }
 
 export async function getAccessTokens(accountId: string): Promise<AccessTokenRecord[]> {
@@ -419,58 +291,19 @@ export async function getAccessTokenById(accountId: string, tokenId: number): Pr
   };
 }
 
-function normalizeModelPrice(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return {};
-  }
-
-  return value as Record<string, unknown>;
-}
-
-function normalizeStoredModelConfig(value: unknown): StoredModelConfig | null {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return null;
-  }
-
-  const record = value as Record<string, unknown>;
-  const id = Number(record.id);
-  const title = typeof record.title === 'string' ? record.title : '';
-  const provider = typeof record.provider === 'string' ? record.provider : '';
-  const model = typeof record.model === 'string' ? record.model : '';
-
-  if (!title || !provider || !model) {
-    return null;
-  }
-
-  return {
-    id: Number.isFinite(id) ? id : 0,
-    title,
-    provider,
-    model,
-    description: typeof record.description === 'string' ? record.description : null,
-    currency:
-      typeof record.currency === 'string' && record.currency.trim()
-        ? record.currency.trim().toUpperCase()
-        : 'USD',
-    inputCostPer1000Tokens:
-      normalizeOptionalNumber(record.inputCostPer1000Tokens) ??
-      normalizeOptionalNumber(record.inputPrice) ??
-      0,
-    outputCostPer1000Tokens:
-      normalizeOptionalNumber(record.outputCostPer1000Tokens) ??
-      normalizeOptionalNumber(record.outputPrice) ??
-      0,
-  };
-}
-
-function toModelIdentifier(model: Pick<StoredModelConfig, 'provider' | 'model'>): string {
-  return `${model.provider}:${model.model}`;
-}
-
 export async function getIntelligenceModels(): Promise<IntelligenceModelRecord[]> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
-  const result = await db.query<IntelligenceModelRow>(
+  const result = await db.query<{
+    id: number | string;
+    title: string;
+    provider: string;
+    model: string;
+    description: string | null;
+    currency: string | null;
+    inputPrice: number | string | null;
+    outputPrice: number | string | null;
+  }>(
     `
       SELECT id, title, provider, model, description, currency, "inputPrice", "outputPrice"
       FROM "intelligence_models"
@@ -487,19 +320,24 @@ export async function getIntelligenceModels(): Promise<IntelligenceModelRecord[]
     currency: row.currency || 'USD',
     inputRate: `${normalizeOptionalNumber(row.inputPrice) ?? 0}/1000`,
     outputRate: `${normalizeOptionalNumber(row.outputPrice) ?? 0}/1000`,
-    inputCostPer1000Tokens:
-      normalizeOptionalNumber(row.inputPrice) ??
-      0,
-    outputCostPer1000Tokens:
-      normalizeOptionalNumber(row.outputPrice) ??
-      0,
+    inputCostPer1000Tokens: normalizeOptionalNumber(row.inputPrice) ?? 0,
+    outputCostPer1000Tokens: normalizeOptionalNumber(row.outputPrice) ?? 0,
   }));
 }
 
 export async function getIntelligenceModelById(modelId: number): Promise<IntelligenceModelRecord | null> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
-  const result = await db.query<IntelligenceModelRow>(
+  const result = await db.query<{
+    id: number | string;
+    title: string;
+    provider: string;
+    model: string;
+    description: string | null;
+    currency: string | null;
+    inputPrice: number | string | null;
+    outputPrice: number | string | null;
+  }>(
     `
       SELECT id, title, provider, model, description, currency, "inputPrice", "outputPrice"
       FROM "intelligence_models"
@@ -524,12 +362,8 @@ export async function getIntelligenceModelById(modelId: number): Promise<Intelli
     currency: row.currency || 'USD',
     inputRate: `${normalizeOptionalNumber(row.inputPrice) ?? 0}/1000`,
     outputRate: `${normalizeOptionalNumber(row.outputPrice) ?? 0}/1000`,
-    inputCostPer1000Tokens:
-      normalizeOptionalNumber(row.inputPrice) ??
-      0,
-    outputCostPer1000Tokens:
-      normalizeOptionalNumber(row.outputPrice) ??
-      0,
+    inputCostPer1000Tokens: normalizeOptionalNumber(row.inputPrice) ?? 0,
+    outputCostPer1000Tokens: normalizeOptionalNumber(row.outputPrice) ?? 0,
   };
 }
 
@@ -538,7 +372,7 @@ export async function getIntelligenceAccesses(accountId: string): Promise<Intell
   const db = getIntelligenceDbPool();
   const result = await db.query<IntelligenceAccessRow>(
     `
-      SELECT id, account_id, key_hash, type, available_to, details, max_token, created_at, updated_at
+      SELECT id, key_hash, type, available_to, details, max_tokens, token_balance, status, updated_at
       FROM "intelligence_access"
       WHERE account_id = $1
       ORDER BY id DESC
@@ -548,37 +382,28 @@ export async function getIntelligenceAccesses(accountId: string): Promise<Intell
 
   return result.rows.map((row) => ({
     id: normalizeNumericId(row.id),
-    prompt_id: String(row.id),
-    account_id: row.account_id,
-    token_hash: row.key_hash,
-    primaryModel: null,
-    fallbackModel: null,
-    primaryModelConfig: null,
-    fallbackModelConfig: null,
-    primaryAccessKey: null,
-    fallbackAccessKey: null,
-    primaryAccessTokenName: null,
-    fallbackAccessTokenName: null,
-    maxTokens: row.max_token === null ? null : normalizeNumericId(row.max_token),
-    defPrompt: null,
-    balance: 0,
+    key_hash: row.key_hash,
+    type: row.type as AccessType,
+    available_to: row.available_to,
+    details: row.details,
+    max_tokens: row.max_tokens === null ? null : normalizeNumericId(row.max_tokens),
+    token_balance: row.token_balance === null ? 0 : Number(row.token_balance),
+    status: row.status,
+    updated_at: row.updated_at,
   }));
 }
 
-export async function getIntelligenceAccessById(
-  accountId: string,
-  accessId: number
-): Promise<IntelligenceAccessRecord | null> {
+export async function getIntelligenceAccessById(accountId: string, accessId: number): Promise<IntelligenceAccessRecord | null> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
   const result = await db.query<IntelligenceAccessRow>(
     `
-      SELECT id, account_id, key_hash, type, available_to, details, max_token, created_at, updated_at
+      SELECT id, key_hash, type, available_to, details, max_tokens, token_balance, status, updated_at
       FROM "intelligence_access"
-      WHERE account_id = $1 AND id = $2
+      WHERE id = $1
       LIMIT 1
     `,
-    [accountId, accessId]
+    [accessId]
   );
 
   const row = result.rows[0];
@@ -589,20 +414,46 @@ export async function getIntelligenceAccessById(
 
   return {
     id: normalizeNumericId(row.id),
-    prompt_id: String(row.id),
-    account_id: row.account_id,
-    token_hash: row.key_hash,
-    primaryModel: null,
-    fallbackModel: null,
-    primaryModelConfig: null,
-    fallbackModelConfig: null,
-    primaryAccessKey: null,
-    fallbackAccessKey: null,
-    primaryAccessTokenName: null,
-    fallbackAccessTokenName: null,
-    maxTokens: row.max_token === null ? null : normalizeNumericId(row.max_token),
-    defPrompt: null,
-    balance: 0,
+    key_hash: row.key_hash,
+    type: row.type as AccessType,
+    available_to: row.available_to,
+    details: row.details,
+    max_tokens: row.max_tokens === null ? null : normalizeNumericId(row.max_tokens),
+    token_balance: row.token_balance === null ? 0 : Number(row.token_balance),
+    status: row.status,
+    updated_at: row.updated_at,
+  };
+}
+
+export async function getIntelligenceAccessByHash(accountId: string, keyHash: string): Promise<IntelligenceAccessRecord | null> {
+  await ensureIntelligenceTables();
+  const db = getIntelligenceDbPool();
+  const result = await db.query<IntelligenceAccessRow>(
+    `
+      SELECT id, key_hash, type, available_to, details, max_tokens, token_balance, status, updated_at
+      FROM "intelligence_access"
+      WHERE key_hash = $1
+      LIMIT 1
+    `,
+    [keyHash]
+  );
+
+  const row = result.rows[0];
+
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: normalizeNumericId(row.id),
+    key_hash: row.key_hash,
+    type: row.type as AccessType,
+    available_to: row.available_to,
+    details: row.details,
+    max_tokens: row.max_tokens === null ? null : normalizeNumericId(row.max_tokens),
+    token_balance: row.token_balance === null ? 0 : Number(row.token_balance),
+    status: row.status,
+    updated_at: row.updated_at,
   };
 }
 
@@ -614,19 +465,12 @@ export async function getIntelligenceLogs(accountId: string): Promise<Intelligen
       SELECT
         il.id,
         il.access_id,
-        il.query,
-        il.response,
-        il.context,
-        il.modal,
-        il.currency,
-        il.cost,
-        il."inputTokens",
-        il."outputTokens",
-        il.balance,
-        ia.prompt_id,
-        ia.account_id
+        il.details,
+        il."from",
+        il.balance_used,
+        il.logged_on
       FROM "intelligenceLog" il
-      INNER JOIN "intelligenceAccess" ia
+      INNER JOIN "intelligence_access" ia
         ON ia.id = il.access_id
       WHERE ia.account_id = $1
       ORDER BY il.id DESC
@@ -635,12 +479,12 @@ export async function getIntelligenceLogs(accountId: string): Promise<Intelligen
   );
 
   return result.rows.map((row) => ({
-    ...row,
     id: normalizeNumericId(row.id),
     access_id: normalizeNumericId(row.access_id),
-    cost: normalizeOptionalNumber(row.cost),
-    inputTokens: normalizeOptionalNumber(row.inputTokens),
-    outputTokens: normalizeOptionalNumber(row.outputTokens),
+    details: row.details,
+    from: row.from,
+    balance_used: row.balance_used === null ? null : Number(row.balance_used),
+    logged_on: row.logged_on,
   }));
 }
 
@@ -657,7 +501,7 @@ export async function getPaginatedIntelligenceLogs(
     `
       SELECT COUNT(*)::text AS count
       FROM "intelligenceLog" il
-      INNER JOIN "intelligenceAccess" ia
+      INNER JOIN "intelligence_access" ia
         ON ia.id = il.access_id
       WHERE ia.account_id = $1
     `,
@@ -673,19 +517,12 @@ export async function getPaginatedIntelligenceLogs(
       SELECT
         il.id,
         il.access_id,
-        il.query,
-        il.response,
-        il.context,
-        il.modal,
-        il.currency,
-        il.cost,
-        il."inputTokens",
-        il."outputTokens",
-        il.balance,
-        ia.prompt_id,
-        ia.account_id
+        il.details,
+        il."from",
+        il.balance_used,
+        il.logged_on
       FROM "intelligenceLog" il
-      INNER JOIN "intelligenceAccess" ia
+      INNER JOIN "intelligence_access" ia
         ON ia.id = il.access_id
       WHERE ia.account_id = $1
       ORDER BY il.id DESC
@@ -697,12 +534,12 @@ export async function getPaginatedIntelligenceLogs(
 
   return {
     logs: logsResult.rows.map((row) => ({
-      ...row,
       id: normalizeNumericId(row.id),
       access_id: normalizeNumericId(row.access_id),
-      cost: normalizeOptionalNumber(row.cost),
-      inputTokens: normalizeOptionalNumber(row.inputTokens),
-      outputTokens: normalizeOptionalNumber(row.outputTokens),
+      details: row.details,
+      from: row.from,
+      balance_used: row.balance_used === null ? null : Number(row.balance_used),
+      logged_on: row.logged_on,
     })),
     totalCount,
     totalPages,
@@ -842,205 +679,46 @@ export async function createIntelligenceAccessRecord(input: {
   accessIdentifier: string;
   accountId: string;
   tokenHash: string;
-  accessType: 'open' | 'model_key_def' | 'prompt_def';
-  primaryModelId: number | null;
-  fallbackModelId: number | null;
-  primaryAccessKey: number | null;
-  fallbackAccessKey: number | null;
+  status: 'dev' | 'prod' | 'hold';
+  accessType: 'open' | 'hybrid' | 'closed';
   maxTokens: number | null;
-  defPrompt: string | null;
-  fallbackEntries: Array<{
-    modelId: number | null;
-    keyId: number | null;
-    index: number;
-    details: Record<string, unknown>;
-  }>;
+  details: unknown;
 }): Promise<void> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
 
-  const tokenIds = Array.from(
-    new Set([input.primaryAccessKey, input.fallbackAccessKey].filter((value): value is number => value !== null))
-  );
-
-  if (tokenIds.length > 0) {
-    const tokenCheck = await db.query<{ id: number | string; account_id: string }>(
-      `
-        SELECT id, account_id
-        FROM "accessTokens"
-        WHERE id = ANY($1::bigint[])
-      `,
-      [tokenIds]
-    );
-
-    if (tokenCheck.rows.length !== tokenIds.length) {
-      throw new Error('One or more selected access tokens do not exist');
-    }
-
-    const mismatched = tokenCheck.rows.find((row) => row.account_id !== input.accountId);
-    if (mismatched) {
-      throw new Error('Selected access tokens must belong to the same account_id as the access record');
-    }
-  }
-
-  const modelIds = Array.from(
-    new Set([input.primaryModelId, input.fallbackModelId].filter((value): value is number => value !== null))
-  );
-  let modelRows = new Map<number, StoredModelConfig>();
-
-  if (modelIds.length > 0) {
-    const modelResult = await db.query<IntelligenceModelRow>(
-      `
-        SELECT id, title, provider, model, description, currency, "inputPrice", "outputPrice"
-        FROM "intelligence_models"
-        WHERE id = ANY($1::bigint[])
-      `,
-      [modelIds]
-    );
-
-    if (modelResult.rows.length !== modelIds.length) {
-      throw new Error('One or more selected models do not exist');
-    }
-
-    modelRows = new Map(
-      modelResult.rows.map((row) => [
-        normalizeNumericId(row.id),
-        {
-          id: normalizeNumericId(row.id),
-          title: row.title,
-          provider: row.provider,
-          model: row.model,
-          description: row.description,
-          currency: row.currency || 'USD',
-          inputRate: `${normalizeOptionalNumber(row.inputPrice) ?? 0}/1000`,
-          outputRate: `${normalizeOptionalNumber(row.outputPrice) ?? 0}/1000`,
-          inputCostPer1000Tokens: normalizeOptionalNumber(row.inputPrice) ?? 0,
-          outputCostPer1000Tokens: normalizeOptionalNumber(row.outputPrice) ?? 0,
-          price: {
-            currency: row.currency || 'USD',
-            inputRate: `${normalizeOptionalNumber(row.inputPrice) ?? 0}/1000`,
-            outputRate: `${normalizeOptionalNumber(row.outputPrice) ?? 0}/1000`,
-            inputCostPer1000Tokens: normalizeOptionalNumber(row.inputPrice) ?? 0,
-            outputCostPer1000Tokens: normalizeOptionalNumber(row.outputPrice) ?? 0,
-          },
-        },
-      ])
-    );
-  }
-
-  const primaryModelConfig = input.primaryModelId !== null ? modelRows.get(input.primaryModelId) ?? null : null;
-  const fallbackModelConfig = input.fallbackModelId !== null ? modelRows.get(input.fallbackModelId) ?? null : null;
-
   await db.query(
     `
-      INSERT INTO "intelligenceAccess" (
-        prompt_id,
-        account_id,
-        token_hash,
+      INSERT INTO "intelligence_access" (
+        key_hash,
         type,
-        "primaryModel",
-        "fallbackModel",
-        "primaryModelConfig",
-        "fallbackModelConfig",
-        "primaryAccessKey",
-        "fallbackAccessKey",
-        "maxTokens",
-        "defPrompt",
-        balance
+        available_to,
+        details,
+        max_tokens,
+        token_balance,
+        status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $9, $10, $11, $12, $13)
-      ON CONFLICT (account_id, prompt_id)
-      DO UPDATE SET
-        token_hash = EXCLUDED.token_hash,
-        type = EXCLUDED.type,
-        "primaryModel" = EXCLUDED."primaryModel",
-        "fallbackModel" = EXCLUDED."fallbackModel",
-        "primaryModelConfig" = EXCLUDED."primaryModelConfig",
-        "fallbackModelConfig" = EXCLUDED."fallbackModelConfig",
-        "primaryAccessKey" = EXCLUDED."primaryAccessKey",
-        "fallbackAccessKey" = EXCLUDED."fallbackAccessKey",
-        "maxTokens" = EXCLUDED."maxTokens",
-        "defPrompt" = EXCLUDED."defPrompt",
-        balance = EXCLUDED.balance
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
     `,
     [
-      input.accessIdentifier,
-      input.accountId,
       input.tokenHash,
       input.accessType,
-      primaryModelConfig ? toModelIdentifier(primaryModelConfig) : null,
-      fallbackModelConfig ? toModelIdentifier(fallbackModelConfig) : null,
-      primaryModelConfig ? JSON.stringify(primaryModelConfig) : null,
-      fallbackModelConfig ? JSON.stringify(fallbackModelConfig) : null,
-      input.primaryAccessKey,
-      input.fallbackAccessKey,
+      '[]'::unknown,
+      input.details,
       input.maxTokens,
-      input.defPrompt,
       0,
+      input.status,
     ]
   );
-
-  await db.query(
-    `
-      DELETE FROM "intelligence_fallbacks"
-      WHERE access_id = (
-        SELECT id
-        FROM "intelligenceAccess"
-        WHERE account_id = $1 AND prompt_id = $2
-        LIMIT 1
-      )
-    `,
-    [input.accountId, input.accessIdentifier]
-  );
-
-  const accessLookup = await db.query<{ id: string }>(
-    `
-      SELECT id
-      FROM "intelligenceAccess"
-      WHERE account_id = $1 AND prompt_id = $2
-      LIMIT 1
-    `,
-    [input.accountId, input.accessIdentifier]
-  );
-
-  const accessRowId = accessLookup.rows[0]?.id;
-
-  if (!accessRowId) {
-    throw new Error('Failed to locate access record after creation');
-  }
-
-  for (const entry of input.fallbackEntries) {
-    await db.query(
-      `
-        INSERT INTO "intelligence_fallbacks" (
-          access_id,
-          dependent_model_id,
-          dependent_key_id,
-          "index",
-          details
-        )
-        VALUES ($1, $2, $3, $4, $5::jsonb)
-      `,
-      [
-        accessRowId,
-        entry.modelId,
-        entry.keyId,
-        entry.index,
-        JSON.stringify(entry.details || {}),
-      ]
-    );
-  }
 }
 
 export async function updateIntelligenceAccessRecord(input: {
   accessId: number;
   accountId: string;
-  primaryModelId: number | null;
-  fallbackModelId: number | null;
-  primaryAccessKey: number | null;
-  fallbackAccessKey: number | null;
+  status: 'dev' | 'prod' | 'hold';
+  accessType: 'open' | 'hybrid' | 'closed';
   maxTokens: number | null;
-  defPrompt: string | null;
+  details: unknown;
 }): Promise<void> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
@@ -1051,117 +729,26 @@ export async function updateIntelligenceAccessRecord(input: {
     throw new Error('Access record not found');
   }
 
-  const tokenIds = Array.from(
-    new Set([input.primaryAccessKey, input.fallbackAccessKey].filter((value): value is number => value !== null))
+  await db.query(
+    `
+      UPDATE "intelligence_access"
+      SET
+        type = $1,
+        details = $2,
+        max_tokens = $3,
+        status = $4,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $5 AND account_id = $6
+    `,
+    [
+      input.accessType,
+      input.details,
+      input.maxTokens,
+      input.status,
+      input.accessId,
+      input.accountId,
+    ]
   );
-
-  if (tokenIds.length > 0) {
-    const tokenCheck = await db.query<{ id: number | string; account_id: string }>(
-      `
-        SELECT id, account_id
-        FROM "accessTokens"
-        WHERE id = ANY($1::bigint[])
-      `,
-      [tokenIds]
-    );
-
-    if (tokenCheck.rows.length !== tokenIds.length) {
-      throw new Error('One or more selected access tokens do not exist');
-    }
-
-    const mismatched = tokenCheck.rows.find((row) => row.account_id !== input.accountId);
-    if (mismatched) {
-      throw new Error('Selected access tokens must belong to the same account_id as the access record');
-    }
-  }
-
-  const modelIds = Array.from(
-    new Set([input.primaryModelId, input.fallbackModelId].filter((value): value is number => value !== null))
-  );
-  let modelRows = new Map<number, StoredModelConfig>();
-
-  if (modelIds.length > 0) {
-    const modelResult = await db.query<IntelligenceModelRow>(
-      `
-        SELECT id, title, provider, model, description, currency, "inputPrice", "outputPrice"
-        FROM "intelligence_models"
-        WHERE id = ANY($1::bigint[])
-      `,
-      [modelIds]
-    );
-
-    if (modelResult.rows.length !== modelIds.length) {
-      throw new Error('One or more selected models do not exist');
-    }
-
-    modelRows = new Map(
-      modelResult.rows.map((row) => [
-        normalizeNumericId(row.id),
-        {
-          id: normalizeNumericId(row.id),
-          title: row.title,
-          provider: row.provider,
-          model: row.model,
-          description: row.description,
-          currency: row.currency || 'USD',
-          inputRate: `${normalizeOptionalNumber(row.inputPrice) ?? 0}/1000`,
-          outputRate: `${normalizeOptionalNumber(row.outputPrice) ?? 0}/1000`,
-          inputCostPer1000Tokens: normalizeOptionalNumber(row.inputPrice) ?? 0,
-          outputCostPer1000Tokens: normalizeOptionalNumber(row.outputPrice) ?? 0,
-          price: {
-            currency: row.currency || 'USD',
-            inputRate: `${normalizeOptionalNumber(row.inputPrice) ?? 0}/1000`,
-            outputRate: `${normalizeOptionalNumber(row.outputPrice) ?? 0}/1000`,
-            inputCostPer1000Tokens: normalizeOptionalNumber(row.inputPrice) ?? 0,
-            outputCostPer1000Tokens: normalizeOptionalNumber(row.outputPrice) ?? 0,
-          },
-        },
-      ])
-    );
-  }
-
-  const primaryModelConfig = input.primaryModelId !== null ? modelRows.get(input.primaryModelId) ?? null : null;
-  const fallbackModelConfig = input.fallbackModelId !== null ? modelRows.get(input.fallbackModelId) ?? null : null;
-
-  try {
-    const result = await db.query(
-      `
-        UPDATE "intelligenceAccess"
-        SET
-          "primaryModel" = $1,
-          "fallbackModel" = $2,
-          "primaryModelConfig" = $3::jsonb,
-          "fallbackModelConfig" = $4::jsonb,
-          "primaryAccessKey" = $5,
-          "fallbackAccessKey" = $6,
-          "maxTokens" = $7,
-          "defPrompt" = $8
-        WHERE id = $9 AND account_id = $10
-      `,
-      [
-        primaryModelConfig ? toModelIdentifier(primaryModelConfig) : null,
-        fallbackModelConfig ? toModelIdentifier(fallbackModelConfig) : null,
-        primaryModelConfig ? JSON.stringify(primaryModelConfig) : null,
-        fallbackModelConfig ? JSON.stringify(fallbackModelConfig) : null,
-        input.primaryAccessKey,
-        input.fallbackAccessKey,
-        input.maxTokens,
-        input.defPrompt,
-        input.accessId,
-        input.accountId,
-      ]
-    );
-
-    if (result.rowCount === 0) {
-      throw new Error('Access record not found');
-    }
-  } catch (error) {
-    if ((error as { code?: string })?.code === '23505') {
-      throw new Error('Another access record already uses this access ID');
-    }
-
-    throw error;
-  }
 }
 
 export async function deleteIntelligenceAccessRecord(input: {
@@ -1173,7 +760,7 @@ export async function deleteIntelligenceAccessRecord(input: {
 
   const result = await db.query(
     `
-      DELETE FROM "intelligenceAccess"
+      DELETE FROM "intelligence_access"
       WHERE id = $1 AND account_id = $2
     `,
     [input.accessId, input.accountId]
@@ -1186,18 +773,19 @@ export async function deleteIntelligenceAccessRecord(input: {
 
 export async function rechargeIntelligenceAccessBalance(input: {
   accessId: number;
-  amount: number;
   accountId: string;
+  amount: number;
 }): Promise<void> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
 
-  const result = await db.query<{ balance: number }>(
+  const result = await db.query(
     `
-      UPDATE "intelligenceAccess"
-      SET balance = balance + $1
+      UPDATE "intelligence_access"
+      SET
+        token_balance = token_balance + $1,
+        updated_at = CURRENT_TIMESTAMP
       WHERE id = $2 AND account_id = $3
-      RETURNING balance
     `,
     [input.amount, input.accessId, input.accountId]
   );
@@ -1207,10 +795,51 @@ export async function rechargeIntelligenceAccessBalance(input: {
   }
 }
 
-export async function getIntelligenceSettings(accountId: string): Promise<IntelligenceSettingsRecord> {
+export async function logIntelligenceUsage(input: {
+  accessId: number;
+  details: Record<string, unknown>;
+  from: string | null;
+  balanceUsed: number;
+}): Promise<void> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
 
+  await db.query(
+    `
+      INSERT INTO "intelligenceLog" (
+        access_id,
+        details,
+        "from",
+        balance_used
+      )
+      VALUES ($1, $2, $3, $4)
+    `,
+    [input.accessId, input.details, input.from, input.balanceUsed]
+  );
+}
+
+export async function deductBalance(input: {
+  accessId: number;
+  amount: number;
+}): Promise<void> {
+  await ensureIntelligenceTables();
+  const db = getIntelligenceDbPool();
+
+  await db.query(
+    `
+      UPDATE "intelligence_access"
+      SET
+        token_balance = token_balance - $1,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+    `,
+    [input.amount, input.accessId]
+  );
+}
+
+export async function getIntelligenceSettings(accountId: string): Promise<IntelligenceSettingsRecord | null> {
+  await ensureIntelligenceTables();
+  const db = getIntelligenceDbPool();
   const result = await db.query<IntelligenceSettingsRow>(
     `
       SELECT account_id, dev_mode
@@ -1221,10 +850,19 @@ export async function getIntelligenceSettings(accountId: string): Promise<Intell
     [accountId]
   );
 
-  return result.rows[0] || { account_id: accountId, dev_mode: false };
+  const row = result.rows[0];
+
+  if (!row) {
+    return null;
+  }
+
+  return {
+    account_id: row.account_id,
+    dev_mode: row.dev_mode,
+  };
 }
 
-export async function setIntelligenceDevMode(accountId: string, devMode: boolean): Promise<void> {
+export async function updateIntelligenceSettings(accountId: string, devMode: boolean): Promise<void> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
 
@@ -1233,13 +871,13 @@ export async function setIntelligenceDevMode(accountId: string, devMode: boolean
       INSERT INTO "intelligence_settings" (account_id, dev_mode)
       VALUES ($1, $2)
       ON CONFLICT (account_id)
-      DO UPDATE SET dev_mode = EXCLUDED.dev_mode, updated_at = CURRENT_TIMESTAMP
+      DO UPDATE SET dev_mode = EXCLUDED.dev_mode
     `,
     [accountId, devMode]
   );
 }
 
-export async function insertIntelligenceDevLog(input: IntelligenceDevLogInput): Promise<void> {
+export async function createIntelligenceDevLog(input: IntelligenceDevLogInput): Promise<void> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
 
@@ -1260,7 +898,7 @@ export async function insertIntelligenceDevLog(input: IntelligenceDevLogInput): 
         error_message,
         error_stack
       )
-      VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8::jsonb, $9::jsonb, $10, $11::jsonb, $12, $13)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
     `,
     [
       input.accountId,
@@ -1269,40 +907,15 @@ export async function insertIntelligenceDevLog(input: IntelligenceDevLogInput): 
       input.requestMethod,
       input.requestUrl,
       JSON.stringify(input.requestHeaders),
-      JSON.stringify(input.requestBody),
+      input.requestBody ? JSON.stringify(input.requestBody) : null,
       JSON.stringify(input.requestQuery),
-      JSON.stringify(input.requestContext),
+      input.requestContext ? JSON.stringify(input.requestContext) : null,
       input.responseStatus,
-      JSON.stringify(input.responseBody),
+      input.responseBody ? JSON.stringify(input.responseBody) : null,
       input.errorMessage,
       input.errorStack,
     ]
   );
-}
-
-function normalizeDevLogObject(value: unknown): Record<string, unknown> | null {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return null;
-  }
-
-  return value as Record<string, unknown>;
-}
-
-function normalizeDevLogQuery(value: unknown): Record<string, string> {
-  const normalized = normalizeDevLogObject(value);
-
-  if (!normalized) {
-    return {};
-  }
-
-  return Object.entries(normalized).reduce<Record<string, string>>((accumulator, [key, entryValue]) => {
-    if (entryValue === null || entryValue === undefined) {
-      return accumulator;
-    }
-
-    accumulator[key] = String(entryValue);
-    return accumulator;
-  }, {});
 }
 
 export async function getPaginatedIntelligenceDevLogs(
@@ -1314,7 +927,6 @@ export async function getPaginatedIntelligenceDevLogs(
   const db = getIntelligenceDbPool();
   const requestedPage = Math.max(1, Math.trunc(page || 1));
   const normalizedPageSize = Math.max(1, Math.trunc(pageSize || 10));
-
   const countResult = await db.query<{ count: string }>(
     `
       SELECT COUNT(*)::text AS count
@@ -1364,12 +976,12 @@ export async function getPaginatedIntelligenceDevLogs(
       request_id: row.request_id,
       request_method: row.request_method,
       request_url: row.request_url,
-      request_headers: normalizeDevLogObject(row.request_headers) || {},
-      request_body: normalizeDevLogObject(row.request_body),
-      request_query: normalizeDevLogQuery(row.request_query),
-      request_context: normalizeDevLogObject(row.request_context),
+      request_headers: row.request_headers,
+      request_body: row.request_body,
+      request_query: row.request_query,
+      request_context: row.request_context,
       response_status: row.response_status === null ? null : Number(row.response_status),
-      response_body: normalizeDevLogObject(row.response_body),
+      response_body: row.response_body,
       error_message: row.error_message,
       error_stack: row.error_stack,
       created_at: row.created_at,
@@ -1380,7 +992,6 @@ export async function getPaginatedIntelligenceDevLogs(
     pageSize: normalizedPageSize,
   };
 }
-
 export function parseTokenFormData(formData: FormData) {
   return {
     name: parseRequiredString(formData.get('name'), 'Token name'),
@@ -1415,63 +1026,34 @@ export function parseModelIdFormData(formData: FormData) {
 }
 
 export function parseAccessFormData(formData: FormData) {
-  const modelEntriesRaw = formData.get('model_entries');
-  let fallbackEntries: Array<{
-    modelId: number | null;
-    keyId: number | null;
-    index: number;
-    details: Record<string, unknown>;
-  }> = [];
+  const primaryModelId = parseOptionalInteger(formData.get('primary_model_id'));
+  const fallbackModelId = parseOptionalInteger(formData.get('fallback_model_id'));
+  const primaryAccessKey = parseOptionalInteger(formData.get('primary_access_key'));
+  const fallbackAccessKey = parseOptionalInteger(formData.get('fallback_access_key'));
+  const maxTokens = parseOptionalInteger(formData.get('max_tokens'));
+  const prompt = parseOptionalString(formData.get('prompt') ?? formData.get('def_prompt'));
 
-  if (typeof modelEntriesRaw === 'string' && modelEntriesRaw.trim()) {
-    try {
-      const parsed = JSON.parse(modelEntriesRaw);
-      if (Array.isArray(parsed)) {
-        fallbackEntries = parsed.map((entry, index) => ({
-          modelId:
-            entry?.modelId === null || entry?.modelId === undefined || entry?.modelId === ''
-              ? null
-              : Number.isFinite(Number(entry?.modelId))
-                ? Number(entry.modelId)
-                : null,
-          keyId:
-            entry?.keyId === null || entry?.keyId === undefined || entry?.keyId === ''
-              ? null
-              : Number.isFinite(Number(entry?.keyId))
-                ? Number(entry.keyId)
-                : null,
-          index:
-            entry?.index === null || entry?.index === undefined || entry?.index === ''
-              ? index
-              : Number.isFinite(Number(entry?.index))
-                ? Number(entry.index)
-                : index,
-          details:
-            entry && typeof entry.details === 'object' && entry.details !== null
-              ? (entry.details as Record<string, unknown>)
-              : {},
-        }));
-      }
-    } catch {
-      throw new Error('Model entries are invalid');
-    }
+  const accessType = parseOptionalString(formData.get('access_type')) || 'open';
+
+  if (!['open', 'hybrid', 'closed'].includes(accessType)) {
+    throw new Error('Access type must be one of: open, hybrid, closed');
   }
 
-  const accessType = parseOptionalString(formData.get('access_type')) || 'prompt_def';
+  const status = parseOptionalString(formData.get('access_status')) || 'prod';
 
-  if (!['open', 'model_key_def', 'prompt_def'].includes(accessType)) {
-    throw new Error('Access type must be one of: open, model_key_def, prompt_def');
+  if (!['dev', 'prod', 'hold'].includes(status)) {
+    throw new Error('Access status must be one of: dev, prod, hold');
   }
 
   return {
-    accessType: accessType as 'open' | 'model_key_def' | 'prompt_def',
-    primaryModelId: parseOptionalInteger(formData.get('primary_model_id')),
-    fallbackModelId: parseOptionalInteger(formData.get('fallback_model_id')),
-    primaryAccessKey: parseOptionalInteger(formData.get('primary_access_key')),
-    fallbackAccessKey: parseOptionalInteger(formData.get('fallback_access_key')),
-    maxTokens: parseOptionalInteger(formData.get('max_tokens')),
-    prompt: parseOptionalString(formData.get('prompt') ?? formData.get('def_prompt')),
-    fallbackEntries,
+    accessType: accessType as 'open' | 'hybrid' | 'closed',
+    status: status as 'dev' | 'prod' | 'hold',
+    primaryModelId,
+    fallbackModelId,
+    primaryAccessKey,
+    fallbackAccessKey,
+    maxTokens,
+    prompt,
   };
 }
 
@@ -1490,62 +1072,4 @@ export function parseRechargeFormData(formData: FormData) {
     accessId: parseRequiredInteger(formData.get('access_id'), 'Access ID'),
     amount,
   };
-}
-
-export function parseLogContext(context: string | null): {
-  displayContext: string;
-  guider: string;
-  query: string;
-  usageTokens: number | null;
-  status: string | null;
-  estimatedCost: number | null;
-  currency: string | null;
-} {
-  if (!context) {
-    return {
-      displayContext: '',
-      guider: '',
-      query: '',
-      usageTokens: null,
-      status: null,
-      estimatedCost: null,
-      currency: null,
-    };
-  }
-
-  try {
-    const parsed = JSON.parse(context);
-    const usageTokens = Number(parsed?.usageTokens);
-    const contextValue = parsed?.context ?? parsed?.requestContext;
-    const displayContext = typeof contextValue === 'string'
-      ? contextValue
-      : contextValue !== undefined
-        ? JSON.stringify(contextValue)
-        : '';
-
-    return {
-      displayContext,
-      guider:
-        typeof parsed?.guider === 'string'
-          ? parsed.guider
-          : typeof parsed?.masterPrompt === 'string'
-            ? parsed.masterPrompt
-            : '',
-      query: typeof parsed?.query === 'string' ? parsed.query : '',
-      usageTokens: Number.isFinite(usageTokens) ? usageTokens : null,
-      status: typeof parsed?.status === 'string' ? parsed.status : null,
-      estimatedCost: Number.isFinite(Number(parsed?.estimatedCost)) ? Number(parsed?.estimatedCost) : null,
-      currency: typeof parsed?.currency === 'string' && parsed.currency.trim() ? parsed.currency.trim().toUpperCase() : null,
-    };
-  } catch {
-    return {
-      displayContext: context,
-      guider: '',
-      query: '',
-      usageTokens: null,
-      status: null,
-      estimatedCost: null,
-      currency: null,
-    };
-  }
 }

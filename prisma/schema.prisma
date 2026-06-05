@@ -168,30 +168,25 @@ model IntelligenceModel {
 
 model IntelligenceAccess {
   id          BigInt   @id @default(autoincrement())
-  accountId   String   @map("account_id") @db.Text
   keyHash     String   @map("key_hash") @db.Text
   type        String   @db.Text
   availableTo Json     @map("available_to")
   details     Json
-  maxToken    Int?     @map("max_token")
-  createdAt   DateTime @map("created_at") @default(now()) @db.Timestamp(6)
+  maxTokens   Int?     @map("max_tokens")
+  tokenBalance Float   @map("token_balance") @default(0)
+  status      String   @default("prod") @db.Text
   updatedAt   DateTime @map("updated_at") @updatedAt @db.Timestamp(6)
 
   @@map("intelligence_access")
 }
 
 model IntelligenceLog {
-  id           BigInt  @id @default(autoincrement())
-  accessId     BigInt  @map("access_id")
-  query        String? @db.Text
-  response     String? @db.Text
-  context      String? @db.Text
-  modal        String? @db.Text
-  currency     String? @db.Text
-  cost         Float?
-  inputTokens  BigInt? @map("inputTokens")
-  outputTokens BigInt? @map("outputTokens")
-  balance      Float?
+  id           BigInt   @id @default(autoincrement())
+  accessId     BigInt   @map("access_id")
+  details      Json
+  from         String?  @db.Text
+  balanceUsed  Float?   @map("balance_used")
+  loggedOn     DateTime @map("logged_on") @default(now()) @db.Timestamp(6)
 
   @@map("intelligenceLog")
 }

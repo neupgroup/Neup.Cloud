@@ -3,7 +3,7 @@ import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 
 import { ensureIntelligenceTables, getIntelligenceDbPool } from '@/core/ai/files/intelligence/db';
 import { invokeModel } from '@/core/ai/files/intelligence/model-client';
-import { getIntelligenceSettings, insertIntelligenceDevLog } from '@/core/ai/files/intelligence/store';
+import { insertIntelligenceDevLog } from '@/core/ai/files/intelligence/store';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,7 +16,7 @@ const RESPONSE_HEADERS = {
 };
 
 interface ParsedInput {
-  promptId: string;
+  accessId: string;
   accessKey: string;
   openFlowCandidates: Array<{
     provider: string;
@@ -34,6 +34,7 @@ interface IntelligenceAccessRow {
   prompt_id: string;
   account_id: string;
   token_hash: string;
+  status: string;
   type: string;
   primaryModel: string | null;
   fallbackModel: string | null;
@@ -104,7 +105,7 @@ const RESERVED_QUERY_KEYS = new Set([
   'input',
   'text',
   'message',
-  'promptId',
+  'accessId',
   'accessKey',
 ]);
 
@@ -253,6 +254,10 @@ function buildPrompt(
 
 function normalizeModelName(value: string | null | undefined): string {
   return (value || '').trim();
+}
+
+function shouldLogAccessStatus(status: string | null | undefined): boolean {
+  return (status || '').trim().toLowerCase() === 'dev';
 }
 
 function parseOpenFlowCandidates(value: unknown): Array<{ provider: string; model: string; apiKey: string }> {
@@ -536,7 +541,11 @@ async function parseInput(request: NextRequest): Promise<ParsedInput> {
       ? (body as Record<string, unknown>)
       : {};
 
-  const promptId = String(parsedBody?.promptId || queryParameters.get('promptId') || '').trim();
+  const accessId = String(
+    parsedBody?.accessId ||
+    queryParameters.get('accessId') ||
+    ''
+  ).trim();
   const accessKey = String(parsedBody?.accessKey || queryParameters.get('accessKey') || '').trim();
   const openFlowCandidates = parseOpenFlowCandidates(parsedBody?.model);
   const userQuery = String(
@@ -561,7 +570,7 @@ async function parseInput(request: NextRequest): Promise<ParsedInput> {
   );
 
   return {
-    promptId,
+    accessId,
     accessKey,
     openFlowCandidates,
     parameters,
@@ -581,6 +590,7 @@ async function findAccessRow(accountId: string, accessIdentifier: string): Promi
         ia.prompt_id,
         ia.account_id,
         ia.token_hash,
+        ia.status,
         ia.type,
         ia."primaryModel",
         ia."fallbackModel",
@@ -608,7 +618,7 @@ async function findAccessRow(accountId: string, accessIdentifier: string): Promi
   return result.rows[0] || null;
 }
 
-async function findAccessRowByPromptId(promptId: string): Promise<IntelligenceAccessRow | null> {
+async function findAccessRowByAccessId(accessId: string): Promise<IntelligenceAccessRow | null> {
   await ensureIntelligenceTables();
   const db = getIntelligenceDbPool();
   const result = await db.query<IntelligenceAccessRow>(
@@ -639,19 +649,10 @@ async function findAccessRowByPromptId(promptId: string): Promise<IntelligenceAc
       ORDER BY ia.id DESC
       LIMIT 1
     `,
-    [promptId]
+    [accessId]
   );
 
   return result.rows[0] || null;
-}
-
-async function shouldLogDevRequest(accountId: string | null): Promise<boolean> {
-  if (!accountId) {
-    return false;
-  }
-
-  const settings = await getIntelligenceSettings(accountId);
-  return Boolean(settings.dev_mode);
 }
 
 async function logDevRequest(input: {
@@ -795,7 +796,7 @@ async function handleRequest(request: NextRequest) {
     input = await parseInput(request);
     traceStep('request_parsed', {
       requestId,
-      promptId: input.promptId || null,
+      accessId: input.accessId || null,
       accessKeyPresent: Boolean(input.accessKey),
       hasOpenFlowModels: input.openFlowCandidates.length > 0,
       parameterKeys: Object.keys(input.parameters),
@@ -813,35 +814,44 @@ async function handleRequest(request: NextRequest) {
       requestId,
       error: error instanceof Error ? error.message : 'Invalid request body',
     });
-    await logDevRequest({
-      accountId: null,
-      accessId: null,
-      requestId,
-      requestMethod: request.method,
-      requestUrl: request.url,
-      requestHeaders,
-      requestBody: null,
-      requestQuery: Object.fromEntries(request.nextUrl.searchParams.entries()),
-      requestContext: null,
-      responseStatus: 400,
-      responseBody: {
-        status: 'fail',
-        error: error instanceof Error ? error.message : 'Invalid request body',
-      },
-      errorMessage: error instanceof Error ? error.message : 'Invalid request body',
-      errorStack: error instanceof Error ? error.stack ?? null : null,
-    });
     return errorResponse(error instanceof Error ? error.message : 'Invalid request body', 400);
   }
 
-  accountIdForDevLog = null;
-  accessIdForDevLog = input.promptId || null;
-  devModeEnabled = await shouldLogDevRequest(accountIdForDevLog);
-  traceStep('dev_mode_state', {
+  const isOpenFlowRequest = input.openFlowCandidates.length > 0;
+  const isPromptRequest = Boolean(input.accessId || input.accessKey);
+
+  if (isOpenFlowRequest && isPromptRequest) {
+    return errorResponse('Use either accessId/accessKey or model array, not both.', 400);
+  }
+
+  const access = isPromptRequest ? await findAccessRowByAccessId(input.accessId) : null;
+
+  if (isPromptRequest && !input.accessId) {
+    return errorResponse('accessId is required for prompt-based requests.', 400);
+  }
+
+  if (isPromptRequest && !input.accessKey) {
+    return errorResponse('accessKey is required for prompt-based requests.', 400);
+  }
+
+  if (isPromptRequest && !access) {
+    return errorResponse('No intelligence access was found for this accessId.', 404);
+  }
+
+  accountIdForDevLog = access?.account_id || null;
+  accessIdForDevLog = access?.prompt_id || input.accessId || null;
+  devModeEnabled = shouldLogAccessStatus(access?.status);
+  traceStep('access_status_state', {
     requestId,
     accountId: accountIdForDevLog,
+    accessId: accessIdForDevLog,
+    status: access?.status || null,
     devModeEnabled,
   });
+
+  if (access?.status?.trim().toLowerCase() === 'hold') {
+    return errorResponse('This access is on hold.', 403);
+  }
 
   if (devModeEnabled) {
     await logDevRequest({
@@ -861,27 +871,6 @@ async function handleRequest(request: NextRequest) {
     });
   }
 
-  const isOpenFlowRequest = input.openFlowCandidates.length > 0;
-  const isPromptRequest = Boolean(input.promptId || input.accessKey);
-
-  if (isOpenFlowRequest && isPromptRequest) {
-    return errorResponse('Use either promptId/accessKey or model array, not both.', 400);
-  }
-
-  const access = isPromptRequest ? await findAccessRowByPromptId(input.promptId) : null;
-
-  if (isPromptRequest && !input.promptId) {
-    return errorResponse('promptId is required for prompt-based requests.', 400);
-  }
-
-  if (isPromptRequest && !input.accessKey) {
-    return errorResponse('accessKey is required for prompt-based requests.', 400);
-  }
-
-  if (isPromptRequest && !access) {
-    return errorResponse('No intelligence prompt was found for this promptId.', 404);
-  }
-
   if (isPromptRequest && access && !tokenMatchesHash(input.accessKey, access.token_hash)) {
     return errorResponse('Invalid accessKey for this intelligence prompt.', 401);
   }
@@ -898,7 +887,7 @@ async function handleRequest(request: NextRequest) {
   const fallbackModelConfig = normalizeStoredModelConfig(legacyAccess?.fallbackModelConfig);
   traceStep('model_context', {
     requestId,
-    requestedModel: input.promptId || null,
+    requestedModel: input.accessId || null,
     primaryModel,
     fallbackModel,
     directModelCount: input.openFlowCandidates.length,
@@ -955,7 +944,7 @@ async function handleRequest(request: NextRequest) {
       }))
     : legacyAccess?.type === 'model_key_def'
     ? [
-        modelMatchesRequest(input.promptId, primaryModelConfig, primaryModel)
+        modelMatchesRequest(input.accessId, primaryModelConfig, primaryModel)
           ? {
               provider: primaryModelConfig?.provider || null,
               model: primaryModelConfig?.model || primaryModel,
@@ -970,7 +959,7 @@ async function handleRequest(request: NextRequest) {
               source: 'primary' as const,
             }
           : null,
-        modelMatchesRequest(input.promptId, fallbackModelConfig, fallbackModel)
+        modelMatchesRequest(input.accessId, fallbackModelConfig, fallbackModel)
           ? {
               provider: fallbackModelConfig?.provider || null,
               model: fallbackModelConfig?.model || fallbackModel,
@@ -988,7 +977,7 @@ async function handleRequest(request: NextRequest) {
       ].filter(Boolean)
     : isPromptRequest
     ? [
-        modelMatchesRequest(input.promptId, primaryModelConfig, primaryModel)
+        modelMatchesRequest(input.accessId, primaryModelConfig, primaryModel)
           ? {
               provider: primaryModelConfig?.provider || null,
               model: primaryModelConfig?.model || primaryModel,
@@ -1003,7 +992,7 @@ async function handleRequest(request: NextRequest) {
               source: 'primary' as const,
             }
           : null,
-        modelMatchesRequest(input.promptId, fallbackModelConfig, fallbackModel)
+        modelMatchesRequest(input.accessId, fallbackModelConfig, fallbackModel)
           ? {
               provider: fallbackModelConfig?.provider || null,
               model: fallbackModelConfig?.model || fallbackModel,
@@ -1022,14 +1011,14 @@ async function handleRequest(request: NextRequest) {
     : [];
   traceStep('model_candidates_built', {
     requestId,
-    requestedModel: input.promptId || null,
+    requestedModel: input.accessId || null,
     directModelCount: input.openFlowCandidates.length,
     candidateCount: modelCandidates.length,
     candidateIdentifiers: modelCandidates.map((candidate) => candidate?.identifier).filter(Boolean),
   });
 
   if (modelCandidates.length === 0) {
-    return errorResponse(isOpenFlowRequest ? 'No valid open flow models were provided.' : 'No model candidates found for this promptId.', 400);
+    return errorResponse(isOpenFlowRequest ? 'No valid open flow models were provided.' : 'No model candidates found for this accessId.', 400);
   }
 
   const usableCandidates = modelCandidates.filter(

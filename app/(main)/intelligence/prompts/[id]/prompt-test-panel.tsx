@@ -6,39 +6,52 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
+type AccessType = 'open' | 'hybrid' | 'closed';
+
 type PromptTestPanelProps = {
   requestUrl: string;
-  initialPromptId: string;
-  initialAccessKey: string;
+  accessType: AccessType;
+  accessId: string;
+  accessKey: string;
   initialContext: string;
+  initialPrompt?: string;
+  initialModel?: string;
+  initialModelKey?: string;
 };
 
 export function PromptTestPanel({
   requestUrl,
-  initialPromptId,
-  initialAccessKey,
+  accessType,
+  accessId,
+  accessKey,
   initialContext,
+  initialPrompt = '',
+  initialModel = '',
+  initialModelKey = '',
 }: PromptTestPanelProps) {
   const [context, setContext] = useState(initialContext);
+  const [prompt, setPrompt] = useState(initialPrompt);
+  const [model, setModel] = useState(initialModel);
+  const [modelKey, setModelKey] = useState(initialModelKey);
   const [response, setResponse] = useState('');
   const [error, setError] = useState('');
   const [isPending, setIsPending] = useState(false);
-  const query = 'who are you?';
 
-  const requestBody = useMemo(
-    () =>
-      JSON.stringify(
-        {
-          promptId: initialPromptId,
-          accessKey: initialAccessKey,
-          context,
-          query,
-        },
-        null,
-        2
-      ),
-    [context, initialAccessKey, initialPromptId]
-  );
+  const requestBody = useMemo(() => {
+    const payload: Record<string, unknown> = {
+      accessId,
+      accessKey,
+      context,
+    };
+
+    if (accessType === 'hybrid' || accessType === 'closed') {
+      payload.prompt = prompt;
+    }
+
+    return JSON.stringify(payload, null, 2);
+  }, [accessId, accessKey, accessType, context, prompt]);
+
+  const curlBody = useMemo(() => requestBody, [requestBody]);
 
   const handleRunTest = async () => {
     setError('');
@@ -98,10 +111,23 @@ export function PromptTestPanel({
         />
       </div>
 
+      {(accessType === 'hybrid' || accessType === 'closed') && (
+        <div className="grid gap-2">
+          <Label htmlFor="test_prompt">Prompt</Label>
+          <Textarea
+            id="test_prompt"
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+            className="min-h-28"
+            placeholder="Prompt passed at runtime (for hybrid/closed types)"
+          />
+        </div>
+      )}
+
       <div className="grid gap-2">
         <Label>Example Curl</Label>
         <pre className="overflow-x-auto rounded-xl border border-border/70 bg-muted/30 p-4 text-sm whitespace-pre-wrap">
-          {`curl "${requestUrl}" \\\n  -X POST \\\n  -H "Content-Type: application/json" \\\n  -d '${requestBody}'`}
+          {`curl "${requestUrl}" \\\n  -X POST \\\n  -H "Content-Type: application/json" \\\n  -d '${curlBody}'`}
         </pre>
       </div>
 

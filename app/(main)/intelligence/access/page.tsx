@@ -31,7 +31,7 @@ export default async function IntelligenceAccessPage() {
             Intelligence Access
           </span>
         }
-        description="Manage access IDs, primary source-of-truth prompts, linked provider tokens, and model configuration for your signed-in account."
+        description="Manage access IDs, type configuration, and token balances for your signed-in account."
       />
 
       <Card className="border-primary/15 bg-gradient-to-br from-primary/5 via-background to-background">
@@ -43,7 +43,7 @@ export default async function IntelligenceAccessPage() {
             Access records live here
           </CardTitle>
           <CardDescription className="max-w-2xl text-base">
-            Use this section to manage `intelligenceAccess` as the primary source of truth for prompt IDs, access IDs, access keys, model wiring, and access type.
+            Use this section to manage `intelligence_access` records with denormalized configuration for models, tokens, and prompts.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 sm:flex-row">
@@ -65,25 +65,24 @@ export default async function IntelligenceAccessPage() {
         </CardHeader>
         <CardContent className="grid gap-4 text-sm text-muted-foreground">
           <div>
-            <p className="font-medium text-foreground">`prompt_def`</p>
-            <p>Send `promptId` and `accessKey`. The stored prompt, model, and key are used. Include `query` and optional `context` in the body when you want extra runtime details.</p>
-          </div>
-          <div>
-            <p className="font-medium text-foreground">`model_key_def`</p>
-            <p>Send `promptId`, `accessKey`, `query`, and `context`. The access record defines the model and key wiring, while the request supplies the prompt text at runtime.</p>
-          </div>
-          <div>
             <p className="font-medium text-foreground">`open`</p>
-            <p>Send `promptId`, `accessKey`, `query`, `context`, and a `model` array. Each item should look like `&lt;provider&gt;/&lt;model&gt;@@@&lt;apiKey&gt;`.</p>
+            <p>Send `accessId` and `accessKey`. Basic validation only. User passes full model config at runtime.</p>
+          </div>
+          <div>
+            <p className="font-medium text-foreground">`hybrid`</p>
+            <p>Send `accessId`, `accessKey`, `query`, and `context`. Models are stored in access record. Fallback chain: try 1st, then 2nd, then 3rd, etc.</p>
+          </div>
+          <div>
+            <p className="font-medium text-foreground">`closed`</p>
+            <p>Send `accessId`, `accessKey`, `query`, and `context`. Prompt and models are stored (encrypted). Fallback chain works same as hybrid.</p>
           </div>
           <div>
             <p className="font-medium text-foreground">Example POST body</p>
             <pre className="overflow-auto rounded-xl bg-muted p-3 text-xs text-foreground">{`{
-  "promptId": "ACC-123",
+  "accessId": "acc_abc123",
   "accessKey": "token-here",
   "query": "Write a short summary",
-  "context": "optional context",
-  "model": ["openai/gpt-4o@@@sk-...", "anthropic/claude-3-5-sonnet@@@sk-..."]
+  "context": "optional context"
 }`}</pre>
           </div>
         </CardContent>
@@ -99,77 +98,74 @@ export default async function IntelligenceAccessPage() {
         <CardContent>
           {accesses.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No access records yet. Add one to connect models, tokens, and a generated access ID.
+              No access records yet. Add one to create access configuration.
             </p>
           ) : (
             <div className="grid gap-4">
-              {accesses.map((access) => {
-                const currency = access.primaryModelConfig?.currency || access.fallbackModelConfig?.currency || 'USD';
-
-                return (
-                  <Card key={access.id} className="border-border/70">
-                    <CardHeader className="gap-3">
-                      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                        <div className="space-y-2">
-                          <CardTitle className="font-headline">
-                            {access.prompt_id}
-                          </CardTitle>
-                          <CardDescription>Generated access ID for this record.</CardDescription>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          <Badge variant="secondary">ID {access.id}</Badge>
-                          <Badge variant="outline">
-                            <Coins className="mr-1 h-3.5 w-3.5" />
-                            Balance {access.balance.toFixed(6)} {currency}
-                          </Badge>
-                        </div>
+              {accesses.map((access) => (
+                <Card key={access.id} className="border-border/70">
+                  <CardHeader className="gap-3">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                      <div className="space-y-2">
+                        <CardTitle className="font-headline">
+                          {access.key_hash.substring(0, 16)}...
+                        </CardTitle>
+                        <CardDescription>Access record #{access.id}</CardDescription>
                       </div>
-                    </CardHeader>
-                    <CardContent className="grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
-                      <div>
-                        <p className="font-medium text-foreground">Primary</p>
-                        <p>{access.primaryModelConfig?.title || access.primaryModel || 'Not set'}</p>
-                        <p>{access.primaryModelConfig ? `${access.primaryModelConfig.provider}:${access.primaryModelConfig.model}` : null}</p>
-                        <p>{access.primaryAccessTokenName || 'No token selected'}</p>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary">ID {access.id}</Badge>
+                        <Badge variant="outline">
+                          Type {access.type}
+                        </Badge>
+                        <Badge variant="outline">
+                          Status {access.status || 'prod'}
+                        </Badge>
+                        <Badge variant="outline">
+                          <Coins className="mr-1 h-3.5 w-3.5" />
+                          Balance {access.token_balance.toFixed(6)}
+                        </Badge>
                       </div>
-                      <div>
-                        <p className="font-medium text-foreground">Fallback</p>
-                        <p>{access.fallbackModelConfig?.title || access.fallbackModel || 'Not set'}</p>
-                        <p>{access.fallbackModelConfig ? `${access.fallbackModelConfig.provider}:${access.fallbackModelConfig.model}` : null}</p>
-                        <p>{access.fallbackAccessTokenName || 'No token selected'}</p>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
+                    <div>
+                      <p className="font-medium text-foreground">Type</p>
+                      <p>{access.type}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {access.type === 'open' ? 'User provides model/key at runtime' : access.type === 'hybrid' ? 'Models stored, keys at runtime' : 'Prompt, models, and keys stored (encrypted)'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Max Tokens</p>
+                      <p>{access.max_tokens ?? 'Default provider limit'}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Key Hash</p>
+                      <p className="font-mono break-all">{maskSecret(access.key_hash)}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Updated</p>
+                      <p>{new Date(access.updated_at).toLocaleString()}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <div className="flex flex-col gap-3 sm:flex-row">
+                        <Button variant="outline" asChild>
+                          <Link href={`/intelligence/access/${access.id}`}>
+                            Edit Access
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button variant="outline" asChild>
+                          <Link href={`/intelligence/logs/recharge?accessId=${access.id}`}>
+                            Recharge This Balance
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
                       </div>
-                      <div>
-                        <p className="font-medium text-foreground">Access Token Hash</p>
-                        <p className="font-mono">{maskSecret(access.token_hash)}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">Max Tokens</p>
-                        <p>{access.maxTokens ?? 'Default provider limit'}</p>
-                      </div>
-                      <div className="md:col-span-2">
-                        <p className="font-medium text-foreground">Guider</p>
-                        <p className="whitespace-pre-wrap">{access.defPrompt || 'No guider configured.'}</p>
-                      </div>
-                      <div className="md:col-span-2">
-                        <div className="flex flex-col gap-3 sm:flex-row">
-                          <Button variant="outline" asChild>
-                            <Link href={`/intelligence/access/${access.id}`}>
-                              Edit Access
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                          </Button>
-                          <Button variant="outline" asChild>
-                            <Link href={`/intelligence/logs/recharge?accessId=${access.id}`}>
-                              Recharge This Balance
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </CardContent>

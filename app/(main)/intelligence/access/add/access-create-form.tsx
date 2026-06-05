@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useMemo, useState } from 'react';
+import { useActionState, useState } from 'react';
 import Link from 'next/link';
 import { Copy, KeyRound, Plus, Trash2 } from 'lucide-react';
 
@@ -45,12 +45,19 @@ interface ModelRow {
   tokenInput: string;
 }
 
-type AccessType = 'open' | 'model_key_def' | 'prompt_def';
+type AccessType = 'open' | 'hybrid' | 'closed';
+type AccessStatus = 'dev' | 'prod' | 'hold';
 
 const accessTypeOptions: Array<{ value: AccessType; label: string; description: string }> = [
-  { value: 'prompt_def', label: 'Prompt Access', description: 'Model, key, and prompt are all defined in advance.' },
-  { value: 'model_key_def', label: 'Model Key Defined', description: 'Model and key are defined; the user passes prompt and context at runtime.' },
-  { value: 'open', label: 'Open Access', description: 'The user passes a set of [model, key] at runtime. No prompt is stored here.' },
+  { value: 'open', label: 'Open Access', description: 'User provides model/key at runtime. No stored configuration.' },
+  { value: 'hybrid', label: 'Hybrid Access', description: 'Models are stored. Keys provided at runtime. Prompt optional.' },
+  { value: 'closed', label: 'Closed Access', description: 'Prompt, models, and keys are stored (encrypted).' },
+];
+
+const accessStatusOptions: Array<{ value: AccessStatus; label: string; description: string }> = [
+  { value: 'prod', label: 'Production', description: 'No logging, standard behavior.' },
+  { value: 'dev', label: 'Development', description: 'Logs requests, responses, and errors.' },
+  { value: 'hold', label: 'Hold', description: 'Requests are rejected with an error.' },
 ];
 
 const initialState: CreateIntelligenceAccessActionState = {
@@ -76,24 +83,17 @@ export default function AccessCreateForm({
 }) {
   const [state, formAction, isPending] = useActionState(createIntelligenceAccessAction, initialState);
   const [copied, setCopied] = useState(false);
-  const modelOptions = useMemo(
-    () =>
-      models.map((model) => ({
-        id: model.id,
-        label: buildModelLabel(model),
-      })),
-    [models]
-  );
-  const tokenOptions = useMemo(
-    () =>
-      tokens.map((token) => ({
-        id: token.id,
-        label: buildTokenLabel(token),
-      })),
-    [tokens]
-  );
+  const modelOptions = models.map((model) => ({
+    id: model.id,
+    label: buildModelLabel(model),
+  }));
+  const tokenOptions = tokens.map((token) => ({
+    id: token.id,
+    label: buildTokenLabel(token),
+  }));
   const [rows, setRows] = useState<ModelRow[]>([{ modelInput: '', tokenInput: '' }]);
-  const [accessType, setAccessType] = useState<AccessType>('prompt_def');
+  const [accessType, setAccessType] = useState<AccessType>('open');
+  const [accessStatus, setAccessStatus] = useState<AccessStatus>('prod');
   const [prompt, setPrompt] = useState('');
 
   const getModelLabel = (id: string) => modelOptions.find((option) => String(option.id) === id)?.label || 'Select a model';
@@ -129,19 +129,6 @@ export default function AccessCreateForm({
   const removeRow = (index: number) => {
     setRows((current) => current.filter((_, rowIndex) => rowIndex !== index));
   };
-
-  const serializedEntries = rowState
-    .filter((row) => row.index > 0 && (row.modelId !== null || row.tokenId !== null))
-    .map((row) => ({
-      modelId: row.modelId,
-      keyId: row.tokenId,
-      index: row.index,
-      details: {
-        label: row.modelInput,
-        tokenLabel: row.tokenInput,
-        role: row.index === 0 ? 'primary' : 'fallback',
-      },
-    }));
 
   const primaryRow = rowState[0];
   const secondaryRow = rowState[1] ?? null;
@@ -206,13 +193,21 @@ export default function AccessCreateForm({
         <CardHeader className="space-y-3">
           <CardTitle className="text-2xl font-headline">Access creation form</CardTitle>
           <CardDescription className="max-w-2xl text-base">
-            Add a primary model row and any number of additional model/key rows. The first row is stored as the primary source of truth; the rest are saved as indexed fallbacks.
+            Configure access type, models, and tokens. For 'closed' access, models and keys will be encrypted.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form action={formAction} className="grid gap-5">
+            <input type="hidden" name="primary_model_id" value={primaryRow?.modelId !== null ? String(primaryRow.modelId) : ''} />
+            <input type="hidden" name="fallback_model_id" value={secondaryRow?.modelId != null ? String(secondaryRow.modelId) : ''} />
+            <input type="hidden" name="primary_access_key" value={primaryRow?.tokenId !== null ? String(primaryRow.tokenId) : ''} />
+            <input type="hidden" name="fallback_access_key" value={secondaryRow?.tokenId != null ? String(secondaryRow.tokenId) : ''} />
+            <input type="hidden" name="access_type" value={accessType} />
+            <input type="hidden" name="access_status" value={accessStatus} />
+            <input type="hidden" name="def_prompt" value={accessType === 'closed' ? prompt : ''} />
+
             <div className="grid gap-2">
-              <Label>What is the type of access you're trying to open?</Label>
+              <Label>What type of access are you creating?</Label>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button type="button" variant="outline" className="justify-between">
@@ -233,20 +228,36 @@ export default function AccessCreateForm({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <input type="hidden" name="primary_model_id" value={primaryRow?.modelId !== null ? String(primaryRow.modelId) : ''} />
-            <input type="hidden" name="fallback_model_id" value={secondaryRow?.modelId != null ? String(secondaryRow.modelId) : ''} />
-            <input type="hidden" name="primary_access_key" value={primaryRow?.tokenId !== null ? String(primaryRow.tokenId) : ''} />
-            <input type="hidden" name="fallback_access_key" value={secondaryRow?.tokenId != null ? String(secondaryRow.tokenId) : ''} />
-            <input type="hidden" name="access_type" value={accessType} />
-            <input type="hidden" name="def_prompt" value={accessType === 'prompt_def' ? prompt : ''} />
-            <input type="hidden" name="model_entries" value={JSON.stringify(serializedEntries)} />
 
-            {accessType !== 'open' && (
+            <div className="grid gap-2">
+              <Label>Access status</Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" className="justify-between">
+                    <span className="truncate">
+                      {accessStatusOptions.find((option) => option.value === accessStatus)?.label || 'Select status'}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-96">
+                  {accessStatusOptions.map((option) => (
+                    <DropdownMenuItem key={option.value} onClick={() => setAccessStatus(option.value)}>
+                      <div className="grid gap-0.5">
+                        <span>{option.label}</span>
+                        <span className="text-xs text-muted-foreground">{option.description}</span>
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {(accessType === 'hybrid' || accessType === 'closed') && (
               <div className="grid gap-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-foreground">Model blocks</p>
-                    <p className="text-sm text-muted-foreground">Row 1 is primary. Row 2 and beyond are saved to `intelligence_fallbacks` with an index.</p>
+                    <p className="text-sm text-muted-foreground">Row 1 is primary. Row 2 and beyond are fallbacks.</p>
                   </div>
                   <Button type="button" variant="outline" onClick={addRow}>
                     <Plus className="mr-2 h-4 w-4" />
@@ -264,7 +275,7 @@ export default function AccessCreateForm({
                         <p className="text-sm text-muted-foreground">
                           {index === 0
                             ? 'This is the main source of truth.'
-                            : 'This row will be persisted in the fallback index table.'}
+                            : 'This row will be used as fallback if primary fails.'}
                         </p>
                       </div>
                       {index > 0 && (
@@ -302,54 +313,56 @@ export default function AccessCreateForm({
                         </DropdownMenu>
                       </div>
 
-                      <div className="grid gap-2">
-                        <Label htmlFor={`token_input_${index}`}>Token</Label>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              id={`token_input_${index}`}
-                              type="button"
-                              variant="outline"
-                              className="justify-between"
-                              disabled={!row.modelInput}
-                            >
-                              <span className="truncate">{getTokenLabel(row.tokenInput)}</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="max-h-72 w-96 overflow-auto">
-                            {tokenOptions.map((option) => (
-                              <DropdownMenuItem
-                                key={option.id}
-                                onClick={() => setRowValue(index, 'tokenInput', String(option.id))}
+                      {(accessType === 'closed') && (
+                        <div className="grid gap-2">
+                          <Label htmlFor={`token_input_${index}`}>Token (for encryption)</Label>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                id={`token_input_${index}`}
+                                type="button"
+                                variant="outline"
+                                className="justify-between"
+                                disabled={!row.modelInput}
                               >
-                                {option.label}
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                                <span className="truncate">{getTokenLabel(row.tokenInput)}</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="max-h-72 w-96 overflow-auto">
+                              {tokenOptions.map((option) => (
+                                <DropdownMenuItem
+                                  key={option.id}
+                                  onClick={() => setRowValue(index, 'tokenInput', String(option.id))}
+                                >
+                                  {option.label}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
-            {accessType === 'prompt_def' && (
+            {accessType === 'closed' && (
               <div className="grid gap-2">
-                <Label htmlFor="prompt">Prompt</Label>
+                <Label htmlFor="prompt">Prompt (stored encrypted)</Label>
                 <Textarea
                   id="prompt"
                   name="prompt"
                   className="min-h-40"
                   value={prompt}
                   onChange={(event) => setPrompt(event.target.value)}
-                  placeholder="Define the prompt that will be stored with this access record."
+                  placeholder="Define the prompt that will be encrypted and stored with this access record."
                 />
               </div>
             )}
 
             <div className="grid gap-2">
-              <Label htmlFor="max_tokens">Max Tokens</Label>
+              <Label htmlFor="max_tokens">Max Tokens (optional)</Label>
               <Input id="max_tokens" name="max_tokens" type="number" min="1" placeholder="Optional" />
             </div>
 

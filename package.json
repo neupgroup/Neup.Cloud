@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --experimental-https -p 25683",
+    "dev": "next dev --turbopack --experimental-https --port 25683",
     "genkit:dev": "genkit start -- tsx ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch ai/dev.ts",
     "postinstall": "patch-package",
-    "build": "cp -R ../components ./components && cp -R ../logica ./logica && npx prisma generate && npx next build",
-    "start": "next start -p 25683",
+    "build": "npx prisma generate && npx next build",
+    "start": "next start --port 25683",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },

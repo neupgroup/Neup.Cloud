@@ -32,7 +32,7 @@ export default async function IntelligenceAccessAddPage() {
             Add Intelligence Access
           </span>
         }
-        description="Create a new access record with a fixed prompt and dynamic runtime inputs."
+        description="Create a new access record with a specific type: open, hybrid, or closed."
         backHref="/intelligence/access"
       />
 
@@ -47,7 +47,7 @@ export default async function IntelligenceAccessAddPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            The software generates the access token for you, shows it once for copying, and stores only its hash in the database. Use the prompt as the fixed instruction layer when the access type requires it.
+            Select a type and configure access. The access token is shown once for copying and stored as a hash. Use the details field to store models and encrypted keys based on your access type.
           </p>
         </CardContent>
       </Card>

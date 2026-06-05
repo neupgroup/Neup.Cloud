@@ -73,12 +73,6 @@ const intelligenceCards = [
     href: '/intelligence/logs/recharge',
   },
   {
-    title: 'Settings',
-    description: 'Enable dev mode to capture full request and error logs for debugging.',
-    icon: ShieldAlert,
-    href: '/intelligence/settings',
-  },
-  {
     title: 'Devlog',
     description: 'Review the complete request audit trail, including invalid and failed requests.',
     icon: BugPlay,

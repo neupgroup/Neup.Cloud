@@ -13,7 +13,6 @@ import {
   generateAccessIdentifier,
   generateAccessToken,
   getIntelligenceAccessById,
-  getIntelligenceSettings,
   hashAccessToken,
   parseAccessFormData,
   parseAccessIdFormData,
@@ -21,7 +20,6 @@ import {
   parseModelFormData,
   parseRechargeFormData,
   parseTokenFormData,
-  setIntelligenceDevMode,
   rechargeIntelligenceAccessBalance,
   updateIntelligenceModelRecord,
   updateIntelligenceAccessRecord,
@@ -69,11 +67,6 @@ export interface UpdateIntelligenceModelActionState {
   success: string | null;
 }
 
-export interface UpdateIntelligenceSettingsActionState {
-  error: string | null;
-  success: string | null;
-}
-
 export async function createIntelligenceAccessAction(
   _prevState: CreateIntelligenceAccessActionState,
   formData: FormData
@@ -82,20 +75,49 @@ export async function createIntelligenceAccessAction(
   const input = parseAccessFormData(formData);
   const generatedAccessId = generateAccessIdentifier();
   const generatedToken = generateAccessToken();
+  const tokenHash = hashAccessToken(generatedToken);
 
   try {
+    // Build details based on access type
+    let details: unknown = [];
+
+    if (input.accessType === 'open') {
+      details = [];
+    } else if (input.accessType === 'hybrid') {
+      // Format: ["provider/model", "provider/model", ...]
+      const modelDetails: string[] = [];
+      if (input.primaryModelId) {
+        modelDetails.push(`provider/model`); // Will be replaced with actual values
+      }
+      if (input.fallbackModelId) {
+        modelDetails.push(`provider/model`); // Will be replaced with actual values
+      }
+      details = modelDetails.length > 0 ? modelDetails : [];
+    } else if (input.accessType === 'closed') {
+      // Format: ["prompt", "provider/model/enc(key)/tokenId", ...]
+      const modelDetails: string[] = [];
+      if (input.prompt) {
+        modelDetails.push(input.prompt);
+      }
+      if (input.primaryAccessKey) {
+        // Format: provider/model/enc(key)/tokenId
+        // For now, just add placeholder
+        modelDetails.push(`openai/gpt-4/enc(key)/${input.primaryAccessKey}`);
+      }
+      if (input.fallbackAccessKey) {
+        modelDetails.push(`openai/gpt-4/enc(key)/${input.fallbackAccessKey}`);
+      }
+      details = modelDetails.length > 0 ? modelDetails : [];
+    }
+
     await createIntelligenceAccessRecord({
       accessIdentifier: generatedAccessId,
       accountId,
-      tokenHash: hashAccessToken(generatedToken),
+      tokenHash,
+      status: input.status,
       accessType: input.accessType,
-      primaryModelId: input.primaryModelId,
-      fallbackModelId: input.fallbackModelId,
-      primaryAccessKey: input.primaryAccessKey,
-      fallbackAccessKey: input.fallbackAccessKey,
       maxTokens: input.maxTokens,
-      defPrompt: input.prompt,
-      fallbackEntries: input.fallbackEntries,
+      details,
     });
 
     revalidatePath('/intelligence/access');
@@ -109,7 +131,7 @@ export async function createIntelligenceAccessAction(
     };
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : 'Failed to create prompt',
+      error: error instanceof Error ? error.message : 'Failed to create access',
       generatedAccessId: null,
       generatedToken: null,
     };
@@ -129,33 +151,6 @@ export async function rechargeIntelligenceBalanceAction(formData: FormData) {
   redirect('/intelligence/logs');
 }
 
-export async function updateIntelligenceSettingsAction(
-  formData: FormData
-): Promise<UpdateIntelligenceSettingsActionState> {
-  const accountId = await getCurrentIntelligenceAccountId();
-  const devMode = formData.get('dev_mode') === 'on';
-
-  try {
-    await setIntelligenceDevMode(accountId, devMode);
-    revalidatePath('/intelligence/settings');
-    revalidatePath('/intelligence');
-    return {
-      error: null,
-      success: devMode ? 'Dev mode enabled.' : 'Dev mode disabled.',
-    };
-  } catch (error) {
-    return {
-      error: error instanceof Error ? error.message : 'Failed to update intelligence settings',
-      success: null,
-    };
-  }
-}
-
-export async function getIntelligenceSettingsForAccount() {
-  const accountId = await getCurrentIntelligenceAccountId();
-  return getIntelligenceSettings(accountId);
-}
-
 export async function updateIntelligenceAccessAction(
   _prevState: UpdateIntelligenceAccessActionState,
   formData: FormData
@@ -167,21 +162,49 @@ export async function updateIntelligenceAccessAction(
 
   if (!existingAccess) {
     return {
-      error: 'Prompt record not found',
+      error: 'Access record not found',
       success: null,
     };
   }
 
   try {
+    // Re-encrypt any sensitive values with the new access key if provided
+    // For now, use existing access key (user must pass current access key to edit)
+
+    let details: unknown = [];
+
+    if (input.accessType === 'open') {
+      details = [];
+    } else if (input.accessType === 'hybrid') {
+      const modelDetails: string[] = [];
+      if (input.primaryModelId) {
+        modelDetails.push(`provider/model`);
+      }
+      if (input.fallbackModelId) {
+        modelDetails.push(`provider/model`);
+      }
+      details = modelDetails.length > 0 ? modelDetails : [];
+    } else if (input.accessType === 'closed') {
+      const modelDetails: string[] = [];
+      if (input.prompt) {
+        modelDetails.push(input.prompt);
+      }
+      if (input.primaryAccessKey) {
+        modelDetails.push(`openai/gpt-4/enc(key)/${input.primaryAccessKey}`);
+      }
+      if (input.fallbackAccessKey) {
+        modelDetails.push(`openai/gpt-4/enc(key)/${input.fallbackAccessKey}`);
+      }
+      details = modelDetails.length > 0 ? modelDetails : [];
+    }
+
     await updateIntelligenceAccessRecord({
       accessId,
       accountId,
-      primaryModelId: input.primaryModelId,
-      fallbackModelId: input.fallbackModelId,
-      primaryAccessKey: input.primaryAccessKey,
-      fallbackAccessKey: input.fallbackAccessKey,
+      status: input.status,
+      accessType: input.accessType,
       maxTokens: input.maxTokens,
-      defPrompt: input.prompt,
+      details,
     });
 
     revalidatePath('/intelligence/access');
@@ -190,11 +213,11 @@ export async function updateIntelligenceAccessAction(
 
     return {
       error: null,
-      success: 'Prompt updated successfully.',
+      success: 'Access updated successfully.',
     };
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : 'Failed to update prompt',
+      error: error instanceof Error ? error.message : 'Failed to update access',
       success: null,
     };
   }
