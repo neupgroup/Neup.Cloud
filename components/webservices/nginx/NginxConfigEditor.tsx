@@ -62,6 +62,8 @@ interface ProxySettings {
 interface PathRule {
     id: string;
     path: string;
+    clientMaxBodySizeEnabled?: boolean;
+    clientMaxBodySize?: string;
     action: 'proxy' | 'alias' | 'return-404' | 'redirect-301' | 'redirect-302' | 'redirect-307' | 'redirect-308';
     proxyTarget?: 'remote-server' | 'local-port';
     serverId?: string;
@@ -88,6 +90,8 @@ interface DomainBlock {
     domainId: string;
     domainName: string;
     subdomain: string;
+    clientMaxBodySizeEnabled?: boolean;
+    clientMaxBodySize?: string;
     httpsRedirection: boolean;
     sslEnabled: boolean;
     sslCertificateFile?: string;
@@ -111,6 +115,45 @@ type DomainMode = 'none' | 'domain';
 interface NginxConfigEditorProps {
     configId?: string;
 }
+
+const isValidClientMaxBodySize = (value?: string) => {
+    const trimmed = value?.trim();
+    return !trimmed || /^\d+[kKmMgG]?$/.test(trimmed);
+};
+
+const getClientMaxBodySizeKbValue = (value?: string) => {
+    const trimmed = value?.trim();
+    if (!trimmed) return '';
+
+    const match = trimmed.match(/^(\d+)([kKmMgG])?$/);
+    if (!match) return '';
+
+    const amount = Number(match[1]);
+    const unit = match[2]?.toLowerCase();
+
+    if (unit === 'm') return String(amount * 1024);
+    if (unit === 'g') return String(amount * 1024 * 1024);
+    if (!unit) return String(Math.ceil(amount / 1024));
+
+    return String(amount);
+};
+
+const getBodySizeLabel = (baseLabel: string, value?: string) => {
+    const kbValue = getClientMaxBodySizeKbValue(value);
+    if (!kbValue) return baseLabel;
+
+    const mbValue = Number(kbValue) / 1024;
+    const display = Number.isInteger(mbValue) ? String(mbValue) : mbValue.toFixed(2);
+
+    return `${baseLabel} (${display}MB)`;
+};
+
+const formatKbClientMaxBodySize = (value: string) => {
+    const digitsOnly = value.replace(/\D/g, '');
+    if (digitsOnly === '0') return '0';
+
+    return digitsOnly ? `${digitsOnly}K` : '';
+};
 
 export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) {
     const router = useRouter();
@@ -529,6 +572,18 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
         }));
     };
 
+    const updateDomainBlockClientBodySizeEnabled = (id: string, enabled: boolean) => {
+        setDomainBlocks(domainBlocks.map(b =>
+            b.id === id
+                ? {
+                    ...b,
+                    clientMaxBodySizeEnabled: enabled,
+                    clientMaxBodySize: enabled ? b.clientMaxBodySize : '',
+                }
+                : b
+        ));
+    };
+
     const handleDomainSelect = (value: string) => {
         if (value.startsWith('unlisted-')) {
             // Handle unlisted domain
@@ -644,6 +699,26 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                 });
                 return { ...b, pathRules: updatedRules };
             }
+            return b;
+        }));
+    };
+
+    const updatePathRuleClientBodySizeEnabled = (blockId: string, ruleId: string, enabled: boolean) => {
+        setDomainBlocks(domainBlocks.map(b => {
+            if (b.id === blockId) {
+                const updatedRules = b.pathRules.map(rule =>
+                    rule.id === ruleId
+                        ? {
+                            ...rule,
+                            clientMaxBodySizeEnabled: enabled,
+                            clientMaxBodySize: enabled ? rule.clientMaxBodySize : '',
+                        }
+                        : rule
+                );
+
+                return { ...b, pathRules: updatedRules };
+            }
+
             return b;
         }));
     };
@@ -839,6 +914,24 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                 return;
             }
 
+            if (block.clientMaxBodySizeEnabled && !block.clientMaxBodySize?.trim()) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Validation Error',
+                    description: `Custom body size for ${block.domainName || block.subdomain || 'server block'} must be set in KB.`,
+                });
+                return;
+            }
+
+            if (block.clientMaxBodySizeEnabled && !isValidClientMaxBodySize(block.clientMaxBodySize)) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Validation Error',
+                    description: `Custom body size for ${block.domainName || block.subdomain || 'server block'} must be a KB number.`,
+                });
+                return;
+            }
+
             for (const rule of block.pathRules) {
                 if (!rule.path) {
                     toast({
@@ -862,6 +955,24 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                         variant: 'destructive',
                         title: 'Validation Error',
                         description: `Path "${rule.path}" with alias mode must have a filesystem path specified.`,
+                    });
+                    return;
+                }
+
+                if (rule.clientMaxBodySizeEnabled && !rule.clientMaxBodySize?.trim()) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Validation Error',
+                        description: `Custom body size for path "${rule.path}" must be set in KB.`,
+                    });
+                    return;
+                }
+
+                if (rule.clientMaxBodySizeEnabled && !isValidClientMaxBodySize(rule.clientMaxBodySize)) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Validation Error',
+                        description: `Custom body size for path "${rule.path}" must be a KB number.`,
                     });
                     return;
                 }
@@ -1511,6 +1622,36 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                                         disabled={!block.sslEnabled}
                                                     />
                                                 </div>
+                                                <div className="space-y-3 p-3 bg-muted/40 rounded-lg border">
+                                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">More Options</Label>
+                                                    <div className="flex items-center space-x-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            id={`custom-body-size-${block.id}`}
+                                                            checked={block.clientMaxBodySizeEnabled ?? Boolean(block.clientMaxBodySize?.trim())}
+                                                            onChange={(e) => updateDomainBlockClientBodySizeEnabled(block.id, e.target.checked)}
+                                                            className="h-4 w-4 rounded border-gray-300"
+                                                        />
+                                                        <label htmlFor={`custom-body-size-${block.id}`} className="text-sm font-medium cursor-pointer">
+                                                            Custom Body Size
+                                                        </label>
+                                                    </div>
+                                                    {(block.clientMaxBodySizeEnabled ?? Boolean(block.clientMaxBodySize?.trim())) && (
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor={`client-max-body-size-${block.id}`} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                                                {getBodySizeLabel('MAX BODY SIZE', block.clientMaxBodySize)}
+                                                            </Label>
+                                                            <Input
+                                                                id={`client-max-body-size-${block.id}`}
+                                                                value={getClientMaxBodySizeKbValue(block.clientMaxBodySize)}
+                                                                onChange={(e) => updateDomainBlock(block.id, 'clientMaxBodySize', formatKbClientMaxBodySize(e.target.value))}
+                                                                placeholder="Size in KB"
+                                                                inputMode="numeric"
+                                                                className="h-9 max-w-[220px] font-mono bg-background"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 {block.sslEnabled && (
                                                     <div className="pl-1 pt-2 space-y-2 animate-in slide-in-from-top-2">
                                                         <div className={`flex items-center justify-between p-3 bg-muted/40 rounded-lg border ${!block.sslCertificateFile ? 'border-amber-500/50 bg-amber-500/5' : ''}`}>
@@ -1592,6 +1733,36 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                                                 placeholder="/"
                                                                 className="h-9 font-mono bg-background"
                                                             />
+                                                        </div>
+
+                                                        <div className="space-y-3 pt-2">
+                                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">More Options</Label>
+                                                            <div className="flex items-center space-x-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    id={`path-custom-body-size-${rule.id}`}
+                                                                    checked={rule.clientMaxBodySizeEnabled ?? Boolean(rule.clientMaxBodySize?.trim())}
+                                                                    onChange={(e) => updatePathRuleClientBodySizeEnabled(block.id, rule.id, e.target.checked)}
+                                                                    className="h-4 w-4 rounded border-gray-300"
+                                                                />
+                                                                <label htmlFor={`path-custom-body-size-${rule.id}`} className="text-sm font-medium cursor-pointer">
+                                                                    Custom Body Size
+                                                                </label>
+                                                            </div>
+                                                            {(rule.clientMaxBodySizeEnabled ?? Boolean(rule.clientMaxBodySize?.trim())) && (
+                                                                <div className="space-y-2">
+                                                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                                                        {getBodySizeLabel('PATH MAX BODY SIZE', rule.clientMaxBodySize)}
+                                                                    </Label>
+                                                                    <Input
+                                                                        value={getClientMaxBodySizeKbValue(rule.clientMaxBodySize)}
+                                                                        onChange={(e) => updatePathRule(block.id, rule.id, 'clientMaxBodySize', formatKbClientMaxBodySize(e.target.value))}
+                                                                        placeholder="Size in KB"
+                                                                        inputMode="numeric"
+                                                                        className="h-9 max-w-[220px] font-mono bg-background"
+                                                                    />
+                                                                </div>
+                                                            )}
                                                         </div>
 
                                                         {/* Primary Action */}

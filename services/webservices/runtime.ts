@@ -294,11 +294,19 @@ function parsePathRulesFromServerBlock(serverBlockContent: string) {
     const rule: any = {
       id: `rule-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
       path,
+      clientMaxBodySizeEnabled: false,
+      clientMaxBodySize: '',
       action: 'proxy',
       proxySettings: {
         customHeaders: [],
       },
     };
+
+    const clientMaxBodySizeMatch = blockContent.match(/client_max_body_size\s+([^;]+);/);
+    if (clientMaxBodySizeMatch) {
+      rule.clientMaxBodySizeEnabled = true;
+      rule.clientMaxBodySize = clientMaxBodySizeMatch[1].trim();
+    }
 
     if (blockContent.includes('return 404;')) {
       rule.action = 'return-404';
@@ -346,6 +354,16 @@ function parsePathRulesFromServerBlock(serverBlockContent: string) {
   }
 
   return rules;
+}
+
+function parseServerClientMaxBodySize(serverBlockContent: string) {
+  const firstLocationIndex = serverBlockContent.search(/(^|\n)\s*location\s+/);
+  const topLevelServerContent = firstLocationIndex >= 0
+    ? serverBlockContent.slice(0, firstLocationIndex)
+    : serverBlockContent;
+  const clientMaxBodySizeMatch = topLevelServerContent.match(/client_max_body_size\s+([^;]+);/);
+
+  return clientMaxBodySizeMatch ? clientMaxBodySizeMatch[1].trim() : '';
 }
 
 function splitDomainAndSubdomain(serverName: string) {
@@ -422,6 +440,7 @@ async function parseNginxConfig(configContent: string, currentServerIp: string) 
     const sslCertPath = sslCertMatch ? sslCertMatch[1].trim() : '';
     const sslFileName = sslCertPath ? (sslCertPath.split('/').pop() || sslCertPath) : undefined;
     const pathRules = parsePathRulesFromServerBlock(serverBlock);
+    const clientMaxBodySize = parseServerClientMaxBodySize(serverBlock);
 
     const existing = blockMap.get(serverName);
     const base = existing || (() => {
@@ -434,9 +453,16 @@ async function parseNginxConfig(configContent: string, currentServerIp: string) 
         httpsRedirection: false,
         sslEnabled: false,
         sslCertificateFile: undefined,
+        clientMaxBodySizeEnabled: false,
+        clientMaxBodySize: '',
         pathRules: [],
       };
     })();
+
+    if (clientMaxBodySize) {
+      base.clientMaxBodySizeEnabled = true;
+      base.clientMaxBodySize = clientMaxBodySize;
+    }
 
     if (has80 && httpsRedirect) {
       base.httpsRedirection = true;
@@ -484,6 +510,8 @@ async function parseNginxConfig(configContent: string, currentServerIp: string) 
     value.sslEnabled = blocks[0].sslEnabled;
     value.httpsRedirection = blocks[0].httpsRedirection;
     value.sslCertificateFile = blocks[0].sslCertificateFile;
+    value.clientMaxBodySizeEnabled = blocks[0].clientMaxBodySizeEnabled;
+    value.clientMaxBodySize = blocks[0].clientMaxBodySize;
   }
 
   return value;

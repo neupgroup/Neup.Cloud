@@ -24,6 +24,8 @@ export interface ProxySettings {
 export interface PathRule {
     id: string;
     path: string;
+    clientMaxBodySizeEnabled?: boolean;
+    clientMaxBodySize?: string;
     action: 'proxy' | 'alias' | 'return-404' | 'redirect-301' | 'redirect-302' | 'redirect-307' | 'redirect-308';
     proxyTarget?: 'remote-server' | 'local-port';
     serverId?: string;
@@ -52,6 +54,8 @@ export interface DomainBlock {
     domainName: string;
     subdomain?: string;
     domainPath?: string;
+    clientMaxBodySizeEnabled?: boolean;
+    clientMaxBodySize?: string;
     httpsRedirection: boolean;
     sslEnabled: boolean;
     sslCertificateFile?: string; // e.g. "example.com.pem", "my-cert.pem"

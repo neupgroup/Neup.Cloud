@@ -71,6 +71,25 @@ function buildSslPaths(sslCertificateFile: string) {
   };
 }
 
+function renderClientMaxBodySize(enabled: boolean | undefined, value: string | undefined, indent = '    '): string {
+  const trimmed = value?.trim();
+  const shouldRender = enabled ?? Boolean(trimmed);
+
+  if (!shouldRender) {
+    return '';
+  }
+
+  if (!trimmed) {
+    return '';
+  }
+
+  if (!/^\d+[kKmMgG]?$/.test(trimmed)) {
+    throw new Error(`Invalid client_max_body_size value "${trimmed}". Use values like 100M, 20m, 512K, or 0.`);
+  }
+
+  return `${indent}client_max_body_size ${trimmed};\n`;
+}
+
 function renderLocationRules(normalizedRules: PathRule[]): string {
   let locations = '';
 
@@ -79,6 +98,7 @@ function renderLocationRules(normalizedRules: PathRule[]): string {
     locations += `
     location ${rule.path} {
 `;
+    locations += renderClientMaxBodySize(rule.clientMaxBodySizeEnabled, rule.clientMaxBodySize, '        ');
 
     if (rule.action === 'return-404') {
       locations += '        return 404;\n';
@@ -126,6 +146,7 @@ export function generateNginxConfigFromContext(config: NginxConfiguration): Gene
     const normalizedRules = (block.pathRules || []).map(normalizePathRule);
     const serverName = buildServerName(block.subdomain, block.domainName);
     const renderedLocations = renderLocationRules(normalizedRules);
+    const renderedClientMaxBodySize = renderClientMaxBodySize(block.clientMaxBodySizeEnabled, block.clientMaxBodySize);
 
     if (block.sslEnabled) {
       if (!block.sslCertificateFile) {
@@ -143,6 +164,7 @@ server {
     listen 80;
     listen [::]:80;
     server_name ${serverName};
+${renderedClientMaxBodySize}
     return 301 https://$host$request_uri;
 }
 `;
@@ -152,6 +174,7 @@ server {
     listen 80;
     listen [::]:80;
     server_name ${serverName};
+${renderedClientMaxBodySize}
 ${renderedLocations}}
 `;
       }
@@ -161,6 +184,7 @@ server {
     listen 443 ssl;
     listen [::]:443 ssl;
     server_name ${serverName};
+${renderedClientMaxBodySize}
 
     ssl_certificate ${certPath};
     ssl_certificate_key ${keyPath};
@@ -177,6 +201,7 @@ server {
     listen 80;
     listen [::]:80;
     server_name ${serverName};
+${renderedClientMaxBodySize}
 `;
 
     nginxConfig += renderedLocations;
