@@ -6,7 +6,14 @@ export const metadata: Metadata = {
     title: "Applications, Neup.Cloud",
 };
 
-export default function Page() {
-    return <ApplicationsPage />;
+export default async function Page({
+    searchParams,
+}: {
+    searchParams?: Promise<{ selectedServer?: string }>;
+}) {
+    const resolvedSearchParams = searchParams ? await searchParams : {};
+    const selectedServerId = resolvedSearchParams.selectedServer?.trim() || null;
+
+    return <ApplicationsPage selectedServerId={selectedServerId} />;
 }
  

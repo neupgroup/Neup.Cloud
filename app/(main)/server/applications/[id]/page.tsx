@@ -23,14 +23,28 @@ function getSupervisorBadgeClasses(state: string) {
   return 'border-slate-500/20 bg-slate-500/10 text-slate-700';
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const pageData = await getApplicationDetailPageData(params);
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ selectedServer?: string }>;
+}): Promise<Metadata> {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const pageData = await getApplicationDetailPageData(params, resolvedSearchParams.selectedServer?.trim() || null);
   const name = 'notFound' in pageData ? null : pageData.supervisor ? pageData.processName : pageData.application?.name;
   return { title: name ? `${name}, Neup.Cloud` : 'Neup.Cloud' };
 }
 
-export default async function ApplicationDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const pageData = await getApplicationDetailPageData(params);
+export default async function ApplicationDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ selectedServer?: string }>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const pageData = await getApplicationDetailPageData(params, resolvedSearchParams.selectedServer?.trim() || null);
 
   if ('notFound' in pageData && pageData.notFound) notFound();
 

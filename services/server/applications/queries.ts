@@ -26,11 +26,11 @@ const toneMap: Record<Exclude<ApplicationStatusFilter, 'all'>, string> = {
   notRunning: 'gray',
 };
 
-async function buildAllItems(): Promise<ApplicationItem[]> {
-  const serverId = await getSelectedServerId();
-  if (!serverId) return [];
+async function buildAllItems(serverId?: string | null): Promise<ApplicationItem[]> {
+  const selectedServerId = serverId ?? await getSelectedServerId();
+  if (!selectedServerId) return [];
 
-  const syncResult = await syncWithServer(serverId);
+  const syncResult = await syncWithServer(selectedServerId);
 
   const registered: ApplicationItem[] = syncResult.applications.map((application) => ({
     id: application.id,
@@ -73,12 +73,13 @@ function filterBySource(items: ApplicationItem[], source: ApplicationSource): Ap
 
 export async function getApplicationItems(
   source: ApplicationSource = 'all',
-  statusFilter: ApplicationStatusFilter | ApplicationStatusFilter[] = 'all'
+  statusFilter: ApplicationStatusFilter | ApplicationStatusFilter[] = 'all',
+  selectedServerId?: string | null
 ): Promise<ApplicationItem[]> {
-  const all = await buildAllItems();
+  const all = await buildAllItems(selectedServerId);
   return filterByStatus(filterBySource(all, source), statusFilter);
 }
 
-export async function getRunningApplications(): Promise<ApplicationItem[]> {
-  return getApplicationItems('all', 'running');
+export async function getRunningApplications(selectedServerId?: string | null): Promise<ApplicationItem[]> {
+  return getApplicationItems('all', 'running', selectedServerId);
 }

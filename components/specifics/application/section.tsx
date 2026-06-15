@@ -15,6 +15,7 @@ export type ApplicationSectionProps = {
   title?: string;
   description?: string;
   emptyMessage?: string;
+  selectedServerId?: string | null;
   /** If true, returns null when there are no items (useful for dashboard widgets) */
   hideWhenEmpty?: boolean;
 };
@@ -26,6 +27,7 @@ export function ApplicationSection({
   title,
   description,
   emptyMessage,
+  selectedServerId,
   hideWhenEmpty = false,
 }: ApplicationSectionProps) {
   const [items, setItems] = useState<ApplicationItem[]>([]);
@@ -39,7 +41,7 @@ export function ApplicationSection({
     const fetch = async () => {
       setIsLoading(true);
       try {
-        const result = await getApplicationItems(source, statusFilter);
+        const result = await getApplicationItems(source, statusFilter, selectedServerId ?? undefined);
         if (!cancelled) {
           setItems(result);
           setHasLoadedOnce(true);
@@ -54,7 +56,7 @@ export function ApplicationSection({
 
     void fetch();
     return () => { cancelled = true; };
-  }, [source, statusFilter]);
+  }, [source, statusFilter, selectedServerId]);
 
   if (!isLoading && items.length === 0 && hideWhenEmpty) return null;
 

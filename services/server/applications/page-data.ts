@@ -9,15 +9,16 @@ import * as Python from '@/services/core/python';
 
 import { getApplication } from './crud';
 import { getProcessDetails, getSupervisorProcesses } from './process-management';
-import { getSelectedServerId, getSelectedServerName } from './session';
 import { getApplicationServerMapData } from './server-map';
+import { getServerById } from '@/services/server/data';
 
-export async function getApplicationDetailPageData(params: Promise<{ id: string }>) {
+export async function getApplicationDetailPageData(
+  params: Promise<{ id: string }>,
+  selectedServerId?: string | null
+) {
   const { id } = await params;
-  const [serverName, serverId] = await Promise.all([
-    getSelectedServerName(),
-    getSelectedServerId(),
-  ]);
+  const serverId = selectedServerId;
+  const serverName = serverId ? (await getServerById(serverId))?.name ?? null : null;
 
   if (id.startsWith('supervisor_')) {
     const processName = id.slice('supervisor_'.length);

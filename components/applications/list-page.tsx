@@ -1,6 +1,6 @@
 import { ApplicationSection } from '@/components/specifics/application/section';
 
-export function ApplicationsPage() {
+export function ApplicationsPage({ selectedServerId }: { selectedServerId?: string | null }) {
   return (
     <ApplicationSection
       showAddButton
@@ -8,6 +8,7 @@ export function ApplicationsPage() {
       statusFilter="all"
       title="Applications"
       description="Manage and monitor your deployed applications."
+      selectedServerId={selectedServerId}
     />
   );
 }
