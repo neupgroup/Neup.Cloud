@@ -2,8 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import Cookies from 'universal-cookie';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Server,
   Activity,
@@ -26,9 +25,13 @@ import { SystemHealthCard } from "@/components/system-health-card";
 import { ServerNameLink } from "@/components/server-name-link";
 import { CommandLogList, CommandLogListSkeleton } from '@/app/(main)/server/commands/command-log-card';
 import { ApplicationSection } from '@/components/specifics/application/section';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/core/server-context';
 
 export default function Home() {
   const router = useRouter();
+  const pathname = usePathname();
+  const selectedServerId = useSelectedServerId();
   const [userFirstName, setUserFirstName] = useState<string>("User");
   const [loading, setLoading] = useState(true);
   const [serverId, setServerId] = useState<string | null>(null);
@@ -49,21 +52,15 @@ export default function Home() {
   useEffect(() => { document.title = 'Homepage, Neup.Cloud'; }, []);
 
   useEffect(() => {
-    const cookies = new Cookies(null, { path: '/' });
-    const id = cookies.get('selected_server');
-    const name = cookies.get('selected_server_name');
-    setServerId(id);
-    if (typeof name === 'string' && name.trim()) {
-      setUserFirstName(name.split(' ')[0]);
-    }
+    setServerId(selectedServerId);
 
     const init = async () => {
       try {
         const servers = await getServers();
         setAllServers(servers);
 
-        if (id) {
-          await fetchServerDashboardData(id);
+        if (selectedServerId) {
+          await fetchServerDashboardData(selectedServerId);
         }
       } catch (err) {
         console.error("Initialization failed", err);
@@ -75,10 +72,10 @@ export default function Home() {
     init();
 
     const interval = setInterval(() => {
-      if (id) fetchStats(id);
+      if (selectedServerId) fetchStats(selectedServerId);
     }, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedServerId]);
 
   const fetchServerDashboardData = async (id: string) => {
     setLogsLoading(true);
@@ -88,7 +85,12 @@ export default function Home() {
         getCommandLog({ serverId: id, limit: 5, offset: 0 })
       ]);
 
-      if (info) setServerInfo(info);
+      if (info) {
+        setServerInfo(info);
+        if (typeof info.name === 'string' && info.name.trim()) {
+          setUserFirstName(info.name.split(' ')[0]);
+        }
+      }
       setActivityLogs(activity);
 
       fetchStats(id);
@@ -117,9 +119,7 @@ export default function Home() {
     if (id === serverId) return; // Already selected
     await selectServer(id, name);
     setServerId(id);
-    setLoading(true);
-    await fetchServerDashboardData(id);
-    setLoading(false);
+    router.replace(withSelectedServerQuery(pathname, id), { scroll: false });
     // Optionally close the list or reset search
     // setShowAllServers(false);
   };

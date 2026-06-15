@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Cookies from 'universal-cookie';
 import { getServer } from '@/services/server/server-service';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/core/hooks/use-toast';
@@ -18,18 +17,19 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PageTitle } from '@/components/page-header';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 
 export default function WebServicesPage() {
     const router = useRouter();
     const { toast } = useToast();
+    const selectedServerId = useSelectedServerId();
     const [loading, setLoading] = useState(true);
     const [serverId, setServerId] = useState<string | null>(null);
     const [server, setServer] = useState<any>(null);
 
     useEffect(() => {
         const fetchServer = async () => {
-            const cookies = new Cookies(null, { path: '/' });
-            const id = cookies.get('selected_server');
+            const id = selectedServerId;
 
             if (!id) {
                 toast({
@@ -60,7 +60,7 @@ export default function WebServicesPage() {
         };
 
         fetchServer();
-    }, [router, toast]);
+    }, [router, toast, selectedServerId]);
 
     if (loading) {
         return (

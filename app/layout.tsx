@@ -59,27 +59,32 @@ import { Toaster } from "@/components/ui/toaster"
 import './globals.css';
 import { ProgressBar } from '@/components/progress-bar';
 import NProgress from 'nprogress';
-import Cookies from 'universal-cookie';
 import { getServer } from '@/services/server/server-service';
 
 import { findLongestMatch } from '@/services/core/findLongestMatch';
+import { ServerQueryPreserver } from '@/components/server-query-preserver';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/core/server-context';
 
 function NavLink({
   href,
   children,
   currentPath,
   allPaths,
+  selectedServerId,
   onClick
 }: {
   href: string;
   children: React.ReactNode;
   currentPath: string;
   allPaths: string[];
+  selectedServerId: string | null;
   onClick?: () => void;
 }) {
   // Find the longest matching path from all available paths
   const longestMatch = findLongestMatch(currentPath, allPaths);
   const isActive = longestMatch === href;
+  const nextHref = withSelectedServerQuery(href, selectedServerId);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (currentPath !== href) {
@@ -92,7 +97,7 @@ function NavLink({
 
   return (
     <Link
-      href={href}
+      href={nextHref}
       onClick={handleClick}
       className={cn(
         'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold hover:bg-muted hover:text-primary',
@@ -105,7 +110,7 @@ function NavLink({
 }
 
 
-function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData }: { currentPath: string, onLinkClick?: () => void, isServerSelected: boolean, serverData: any }) {
+function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData, selectedServerId }: { currentPath: string, onLinkClick?: () => void, isServerSelected: boolean, serverData: any, selectedServerId: string | null }) {
   const navLinks = [
     { href: "/", label: "Dashboard", icon: Home },
   ];
@@ -182,7 +187,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
     <nav className="flex flex-col gap-4">
       <div className="space-y-2">
         {navLinks.map(({ href, label, icon: Icon }) => (
-          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} onClick={onLinkClick}>
+          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} selectedServerId={selectedServerId} onClick={onLinkClick}>
             <Icon className="h-4 w-4" />
             <span>{label}</span>
           </NavLink>
@@ -195,7 +200,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
             Server
           </div>
           {serverLinks.map(({ href, label, icon: Icon }) => (
-            <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} onClick={onLinkClick}>
+            <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} selectedServerId={selectedServerId} onClick={onLinkClick}>
               <Icon className="h-4 w-4" />
               <span>{label}</span>
             </NavLink>
@@ -208,7 +213,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
           Intelligence
         </div>
         {intelligenceLinks.map(({ href, label, icon: Icon }) => (
-          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} onClick={onLinkClick}>
+          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} selectedServerId={selectedServerId} onClick={onLinkClick}>
             <Icon className="h-4 w-4" />
             <span>{label}</span>
           </NavLink>
@@ -220,7 +225,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
           Pipeline
         </div>
         {pipelineLinks.map(({ href, label, icon: Icon }) => (
-          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} onClick={onLinkClick}>
+          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} selectedServerId={selectedServerId} onClick={onLinkClick}>
             <Icon className="h-4 w-4" />
             <span>{label}</span>
           </NavLink>
@@ -232,7 +237,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
           Domains
         </div>
         {domainLinks.map(({ href, label, icon: Icon }) => (
-          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} onClick={onLinkClick}>
+          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} selectedServerId={selectedServerId} onClick={onLinkClick}>
             <Icon className="h-4 w-4" />
             <span>{label}</span>
           </NavLink>
@@ -244,7 +249,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
           Security
         </div>
         {securityLinks.map(({ href, label, icon: Icon }) => (
-          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} onClick={onLinkClick}>
+          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} selectedServerId={selectedServerId} onClick={onLinkClick}>
             <Icon className="h-4 w-4" />
             <span>{label}</span>
           </NavLink>
@@ -256,7 +261,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
           Account
         </div>
         {accountLinks.map(({ href, label, icon: Icon }) => (
-          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} onClick={onLinkClick}>
+          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} selectedServerId={selectedServerId} onClick={onLinkClick}>
             <Icon className="h-4 w-4" />
             <span>{label}</span>
           </NavLink>
@@ -309,20 +314,19 @@ function Header({ isMobileMenuOpen, toggleMobileMenu }: { isMobileMenuOpen: bool
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const selectedServerId = useSelectedServerId();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isServerSelected, setIsServerSelected] = useState(false);
   const [serverData, setServerData] = useState<any>(null);
   const isPlainRoute = pathname === '/pipeline/editor' || pathname.startsWith('/pipeline/editor/');
 
   useEffect(() => {
-    const cookies = new Cookies(null, { path: '/' });
     const checkCookie = async () => {
-      const serverCookie = cookies.get('selected_server');
-      setIsServerSelected(!!serverCookie);
+      setIsServerSelected(!!selectedServerId);
 
-      if (serverCookie) {
+      if (selectedServerId) {
         try {
-          const data = await getServer(serverCookie);
+          const data = await getServer(selectedServerId);
           setServerData(data);
         } catch (error) {
           console.error('Failed to fetch server data:', error);
@@ -332,7 +336,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       }
     };
     checkCookie();
-  }, [pathname]);
+  }, [pathname, selectedServerId]);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -365,6 +369,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased bg-[#fafafa]">
+        <ServerQueryPreserver />
         {isPlainRoute ? (
           <div className="min-h-screen w-full bg-[#f3f5f7] text-foreground">{children}</div>
         ) : (
@@ -377,7 +382,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             )}>
               <ScrollArea className="h-full">
                 <div className="p-4 sm:p-6">
-                  <MainNavContent currentPath={pathname} onLinkClick={closeMobileMenu} isServerSelected={isServerSelected} serverData={serverData} />
+                  <MainNavContent currentPath={pathname} onLinkClick={closeMobileMenu} isServerSelected={isServerSelected} serverData={serverData} selectedServerId={selectedServerId} />
                 </div>
               </ScrollArea>
             </div>
@@ -386,7 +391,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <aside className="hidden h-[calc(100vh-4rem)] flex-col border-r bg-background lg:sticky lg:top-16 lg:flex">
                 <ScrollArea className="flex-1">
                   <div className="p-6">
-                    <MainNavContent currentPath={pathname} isServerSelected={isServerSelected} serverData={serverData} />
+                    <MainNavContent currentPath={pathname} isServerSelected={isServerSelected} serverData={serverData} selectedServerId={selectedServerId} />
                   </div>
                 </ScrollArea>
               </aside>

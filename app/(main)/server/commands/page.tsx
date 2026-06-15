@@ -41,6 +41,7 @@ import { type SavedCommand } from '@/services/saved-commands/types';
 import { cn } from '@/core/utils';
 import { CommandLogList, CommandLogListSkeleton } from './command-log-card';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 
 type ServerType = {
   id: string;
@@ -118,6 +119,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const selectedServerFromUrl = useSelectedServerId();
 
   const [servers, setServers] = useState<ServerType[]>([]);
   const [savedCommands, setSavedCommands] = useState<SavedCommand[]>([]);
@@ -136,18 +138,10 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
   const [isRunningCustom, setIsRunningCustom] = useState(false);
 
   useEffect(() => {
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
-      return undefined;
-    };
-
-    const serverIdCookie = getCookie('selected_server');
-    if (serverIdCookie) {
-      setSelectedServer(serverIdCookie);
+    if (selectedServerFromUrl) {
+      setSelectedServer(selectedServerFromUrl);
     }
-  }, []);
+  }, [selectedServerFromUrl]);
 
   useEffect(() => {
     const query = searchParams.get('query');
@@ -200,6 +194,16 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
   const handleSearchChange = (val: string) => {
     setSearchQuery(val);
     updateUrlParams({ query: val, page: 1 }, 'replace');
+  };
+
+  const handleSelectedServerChange = (nextServerId: string) => {
+    setSelectedServer(nextServerId);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('selectedServer', nextServerId);
+
+    const queryString = params.toString();
+    router.replace(queryString ? `?${queryString}` : '?', { scroll: false });
   };
 
   const fetchAllData = useCallback(async () => {
@@ -705,7 +709,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
 
             <div className="grid gap-2">
               <Label htmlFor="server-select">Server</Label>
-              <Select onValueChange={setSelectedServer} value={selectedServer}>
+              <Select onValueChange={handleSelectedServerChange} value={selectedServer}>
                 <SelectTrigger id="server-select">
                   <SelectValue placeholder="Select a server" />
                 </SelectTrigger>

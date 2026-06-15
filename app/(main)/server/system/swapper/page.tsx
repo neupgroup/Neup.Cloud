@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -41,10 +40,14 @@ function getSwapSizeFromDetails(moreDetails?: string | null) {
     return 2048;
 }
 
-export default async function SwapperPage() {
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
-    const serverName = cookieStore.get('selected_server_name')?.value;
+export default async function SwapperPage({
+    searchParams,
+}: {
+    searchParams?: Promise<{ selectedServer?: string }>;
+}) {
+    const resolvedSearchParams = searchParams ? await searchParams : {};
+    const serverId = resolvedSearchParams.selectedServer?.trim() || null;
+    const serverName = serverId ? (await getServer(serverId))?.name ?? null : null;
 
     if (!serverId) {
         return (

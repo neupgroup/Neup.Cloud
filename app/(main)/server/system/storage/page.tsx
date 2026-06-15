@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -7,15 +6,20 @@ import { Card } from '@/components/ui/card';
 import { PageTitleBack } from '@/components/page-header';
 import { Server } from 'lucide-react';
 import StorageClient from './storage-client';
+import { getServer } from '@/services/server/server-service';
 
 export const metadata: Metadata = {
     title: 'Storage, Neup.Cloud',
 };
 
-export default async function StoragePage() {
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
-    const serverName = cookieStore.get('selected_server_name')?.value;
+export default async function StoragePage({
+    searchParams,
+}: {
+    searchParams?: Promise<{ selectedServer?: string }>;
+}) {
+    const resolvedSearchParams = searchParams ? await searchParams : {};
+    const serverId = resolvedSearchParams.selectedServer?.trim() || null;
+    const serverName = serverId ? (await getServer(serverId))?.name ?? null : null;
 
     if (!serverId) {
         return (

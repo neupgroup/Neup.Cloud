@@ -4,17 +4,21 @@ import { Card } from "@/components/ui/card";
 import NetworkStatusClient from "./network-status-client";
 import { Network, Server } from "lucide-react";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import Link from "next/link";
+import { getServer } from "@/services/server/server-service";
 
 export const metadata: Metadata = {
   title: "Network Details | Server Status | Neup.Cloud",
 };
 
-export default async function StatusNetworkPage() {
-  const cookieStore = await cookies();
-  const serverId = cookieStore.get("selected_server")?.value;
-  const serverName = cookieStore.get("selected_server_name")?.value;
+export default async function StatusNetworkPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ selectedServer?: string }>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const serverId = resolvedSearchParams.selectedServer?.trim() || null;
+  const serverName = serverId ? (await getServer(serverId))?.name ?? null : null;
 
   return (
     <div className="space-y-6">
@@ -42,7 +46,7 @@ export default async function StatusNetworkPage() {
           </Button>
         </Card>
       ) : (
-        <NetworkStatusClient serverId={serverId} />
+        <NetworkStatusClient serverId={serverId ?? undefined} />
       )}
     </div>
   );

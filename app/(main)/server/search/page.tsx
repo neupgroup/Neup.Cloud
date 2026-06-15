@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import Cookies from 'universal-cookie';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -16,6 +15,8 @@ import { cn } from '@/core/utils';
 import { searchFilesOnServer } from '@/services/server/server-file-service';
 import type { FileSearchResult } from '@/services/server/server-file-types';
 import { ExternalLink, FileSearch, FolderOpen, Loader2, Shield, ShieldOff } from 'lucide-react';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useServerName } from '@/core/hooks/use-server-name';
 
 function formatBytes(bytes: number | null) {
   if (!bytes || bytes <= 0) return '-';
@@ -50,12 +51,13 @@ export default function ServerSearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const selectedServerId = useSelectedServerId();
+  const serverName = useServerName();
 
   const rootMode = searchParams.get('rootMode') === 'true';
   const initialBasePath = searchParams.get('path') || '/home';
 
   const [serverId, setServerId] = useState<string | null>(null);
-  const [serverName, setServerName] = useState<string | null>(null);
   const [serverReady, setServerReady] = useState(false);
 
   const [basePath, setBasePath] = useState(initialBasePath);
@@ -74,13 +76,9 @@ export default function ServerSearchPage() {
   }, []);
 
   useEffect(() => {
-    const cookies = new Cookies(null, { path: '/' });
-    const selectedServer = cookies.get('selected_server');
-    const selectedServerName = cookies.get('selected_server_name');
-    setServerId(selectedServer ?? null);
-    setServerName(selectedServerName ?? null);
+    setServerId(selectedServerId);
     setServerReady(true);
-  }, []);
+  }, [selectedServerId]);
 
   useEffect(() => {
     setBasePath(initialBasePath);

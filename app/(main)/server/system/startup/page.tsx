@@ -1,5 +1,4 @@
 import React, { Suspense } from 'react';
-import { cookies } from 'next/headers';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -10,15 +9,20 @@ import { Button } from '@/components/ui/button';
 import { Server } from 'lucide-react';
 import StartupClient from './startup-client';
 import { PageTitle } from '@/components/page-header';
+import { getServer } from '@/services/server/server-service';
 
 export const metadata: Metadata = {
   title: 'Startup Programs, Neup.Cloud',
 };
 
-export default async function StartupPage() {
-  const cookieStore = await cookies();
-  const serverId = cookieStore.get('selected_server')?.value;
-  const serverName = cookieStore.get('selected_server_name')?.value;
+export default async function StartupPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ selectedServer?: string }>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const serverId = resolvedSearchParams.selectedServer?.trim() || null;
+  const serverName = serverId ? (await getServer(serverId))?.name ?? null : null;
 
   return (
     <div className="space-y-6">

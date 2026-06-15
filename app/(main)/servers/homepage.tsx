@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { getServers, selectServer } from "@/services/server/server-service";
 import type { Server } from "@/services/server/types";
 import { Loader2, ServerIcon, ArrowRight } from "lucide-react";
+import { withSelectedServerQuery } from "@/core/server-context";
 
 export default function ServersHomepage() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function ServersHomepage() {
     setSwitchingId(id);
     await selectServer(id, name);
     setSwitchingId(null);
-    router.push("/server");
+    router.push(withSelectedServerQuery("/server/home", id));
   };
 
   return (

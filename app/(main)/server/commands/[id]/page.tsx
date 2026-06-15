@@ -39,11 +39,13 @@ import { getSavedCommands, deleteSavedCommand, executeSavedCommand } from '@/ser
 import type { SavedCommand } from '@/services/saved-commands/types';
 import { useToast } from '@/core/hooks/use-toast';
 import { PageTitleBack } from '@/components/page-header';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 
 export default function CommandDetailPage({ params }: { params: { id: string } }) {
     const { id } = params;
     const router = useRouter();
     const { toast } = useToast();
+    const selectedServerFromUrl = useSelectedServerId();
 
     // State
     const [command, setCommand] = useState<SavedCommand | null>(null);
@@ -73,14 +75,8 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
                 }
                 setServers(serversData as { id: string, name: string, type: string }[]);
 
-                const getCookie = (name: string) => {
-                    const value = `; ${document.cookie}`;
-                    const parts = value.split(`; ${name}=`);
-                    if (parts.length === 2) return parts.pop()?.split(';').shift();
-                };
-                const serverIdCookie = getCookie('selected_server');
-                if (serverIdCookie) {
-                    setSelectedServer(serverIdCookie);
+                if (selectedServerFromUrl) {
+                    setSelectedServer(selectedServerFromUrl);
                 }
 
             } catch (error) {
@@ -90,7 +86,7 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
             }
         }
         fetchData();
-    }, [id, toast]);
+    }, [id, toast, selectedServerFromUrl]);
 
     // Handle Delete
     const handleDelete = async () => {

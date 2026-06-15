@@ -7,22 +7,26 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Database, Plus, Server, Settings, Activity, ShieldCheck, CheckCircle, AlertCircle, HardDrive, Trash2, ExternalLink, ChevronRight } from "lucide-react";
-import { cookies } from "next/headers";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { PageTitle } from "@/components/page-header";
 import type { Metadata } from 'next';
 import { Badge } from "@/components/ui/badge";
 import { checkDatabaseInstallation, listAllDatabases, type DatabaseInstallation, type DatabaseInstance } from '@/services/database/database-runtime';
+import { getServer } from '@/services/server/server-service';
 
 export const metadata: Metadata = {
     title: 'Databases | Neup.Cloud',
 };
 
-export default async function DatabasePage() {
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
-    const serverName = cookieStore.get('selected_server_name')?.value;
+export default async function DatabasePage({
+    searchParams,
+}: {
+    searchParams?: Promise<{ selectedServer?: string }>;
+}) {
+    const resolvedSearchParams = searchParams ? await searchParams : {};
+    const serverId = resolvedSearchParams.selectedServer?.trim() || null;
+    const serverName = serverId ? (await getServer(serverId))?.name ?? null : null;
 
     let installation: DatabaseInstallation | null = null;
     let databaseInstances: DatabaseInstance[] = [];

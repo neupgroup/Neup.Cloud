@@ -3,16 +3,20 @@ import { ShieldAlert } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-
-import { cookies } from "next/headers";
+import { getServer } from "@/services/server/server-service";
 
 export const metadata: Metadata = {
     title: 'Firewall | Neup.Cloud',
 };
 
-export default async function FirewallPage() {
-    const cookieStore = await cookies();
-    const serverName = cookieStore.get('selected_server_name')?.value;
+export default async function FirewallPage({
+    searchParams,
+}: {
+    searchParams?: Promise<{ selectedServer?: string }>;
+}) {
+    const resolvedSearchParams = searchParams ? await searchParams : {};
+    const serverId = resolvedSearchParams.selectedServer?.trim() || null;
+    const serverName = serverId ? (await getServer(serverId))?.name ?? null : null;
 
     return (
         <div className="space-y-6">

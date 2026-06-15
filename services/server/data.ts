@@ -2,18 +2,48 @@ import { prisma } from '@/services/prisma';
 import { createId } from '@/core/create-id';
 import { stripSensitiveServerMetadata } from '@/services/server/server-metadata';
 
-export function toPublicServer(server: Awaited<ReturnType<typeof prisma.server.findUnique>> extends infer T ? Exclude<T, null> : never) {
+export function toPublicServer<
+  T extends {
+    privateKey?: string | null;
+    moreDetails?: string | null;
+  }
+>(server: T): Omit<T, 'privateKey' | 'moreDetails'> & { moreDetails: string | null } {
   const { privateKey, moreDetails, ...publicServer } = server;
   return {
     ...publicServer,
     moreDetails: stripSensitiveServerMetadata(moreDetails),
-  };
+  } as Omit<T, 'privateKey' | 'moreDetails'> & { moreDetails: string | null };
 }
 
 export async function getServers() {
   return prisma.server.findMany({
     orderBy: { name: 'asc' },
   });
+}
+
+export async function getServersWithRunningApplications() {
+  const servers = await prisma.server.findMany({
+    include: {
+      applicationServerMaps: {
+        orderBy: [{ application: { name: 'asc' } }],
+        select: {
+          id: true,
+          status: true,
+          isPrimary: true,
+          application: {
+            select: {
+              id: true,
+              name: true,
+              appIcon: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { name: 'asc' },
+  });
+
+  return servers.map(toPublicServer);
 }
 
 export async function getServerById(id: string) {

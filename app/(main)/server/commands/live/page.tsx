@@ -5,19 +5,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { getServer } from '@/services/server/server-service';
 import { endLiveSession, executeLiveCommand, initLiveSession } from '@/services/server/live-command';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useServerName } from '@/core/hooks/use-server-name';
 
 interface HistoryItem {
   time: string;
   type: 'command' | 'output';
   content: string;
-}
-
-function getCookie(name: string) {
-  if (typeof document === 'undefined') return undefined;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
-  return undefined;
 }
 
 function getOrCreateSessionId(storageKey: string) {
@@ -33,15 +27,15 @@ function getOrCreateSessionId(storageKey: string) {
 }
 
 export default function LiveConsolePage() {
-  const serverId = useMemo(() => getCookie('selected_server'), []);
-  const cookieServerName = useMemo(() => getCookie('selected_server_name'), []);
+  const serverId = useSelectedServerId();
+  const resolvedServerName = useServerName();
 
   const sessionId = useMemo(() => {
     const key = `neup:commands:live-session-id:${serverId ?? 'local'}`;
     return getOrCreateSessionId(key);
   }, [serverId]);
 
-  const [serverName, setServerName] = useState(cookieServerName || 'Mock Server');
+  const [serverName, setServerName] = useState(resolvedServerName || 'Mock Server');
 
   const [input, setInput] = useState('');
   const [cwd, setCwd] = useState('~');
@@ -54,17 +48,20 @@ export default function LiveConsolePage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (cookieServerName) return;
-    if (!serverId) return;
+    if (resolvedServerName) {
+      setServerName(resolvedServerName);
+      return;
+    }
+    if (!serverId || resolvedServerName) return;
     getServer(serverId)
       .then((server) => {
         if (server?.name) setServerName(server.name);
       })
       .catch(() => {});
-  }, [cookieServerName, serverId]);
+  }, [resolvedServerName, serverId]);
 
   useEffect(() => {
-    initLiveSession(sessionId, serverId);
+    initLiveSession(sessionId, serverId ?? undefined);
     inputRef.current?.focus();
   }, [sessionId, serverId]);
 
@@ -113,7 +110,7 @@ export default function LiveConsolePage() {
     setHistory((prev) => [...prev, { time: timestamp, type: 'command', content: command }]);
 
     try {
-      const result = await executeLiveCommand(sessionId, serverId, command);
+      const result = await executeLiveCommand(sessionId, serverId ?? undefined, command);
       setCwd(result.cwd);
       const outTime = new Date().toLocaleTimeString();
       if (result.output) {

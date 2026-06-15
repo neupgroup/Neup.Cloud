@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import Cookies from 'universal-cookie';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -71,6 +70,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useServerName } from '@/core/hooks/use-server-name';
 
 function formatBytes(bytes: number, decimals = 2) {
   if (bytes === 0) return '0 Bytes';
@@ -1152,8 +1153,9 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
 }
 
 export default function FilesPage() {
+  const selectedServerId = useSelectedServerId();
+  const serverName = useServerName();
   const [serverId, setServerId] = useState<string | null>(null);
-  const [serverName, setServerName] = useState<string | null>(null);
   const [serverReady, setServerReady] = useState(false);
 
   useEffect(() => {
@@ -1161,13 +1163,9 @@ export default function FilesPage() {
   }, []);
 
   useEffect(() => {
-    const cookies = new Cookies(null, { path: '/' });
-    const selectedServer = cookies.get('selected_server');
-    const selectedServerName = cookies.get('selected_server_name');
-    setServerId(selectedServer ?? null);
-    setServerName(selectedServerName ?? null);
+    setServerId(selectedServerId);
     setServerReady(true);
-  }, []);
+  }, [selectedServerId]);
 
   if (!serverReady) {
     return (

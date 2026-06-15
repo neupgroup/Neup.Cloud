@@ -4,7 +4,6 @@
 
 
 import { revalidatePath } from 'next/cache';
-import { cookies } from 'next/headers';
 import { promisify } from 'node:util';
 import { execFile as execFileCallback } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
@@ -15,6 +14,7 @@ import {
   deleteServer as deleteServerRecord,
   getServerById,
   getServers as getServersData,
+  getServersWithRunningApplications as getServersWithRunningApplicationsData,
   toPublicServer,
   updateServer as updateServerRecord,
 } from '@/services/server/data';
@@ -27,6 +27,18 @@ import {
 } from '@/services/server/server-runtime';
 import { runCommandOnServer } from '@/services/server/ssh';
 import { getServerExpiration, getServerSshPassphrase } from '@/services/server/server-metadata';
+import type { Server } from '@/services/server/types';
+
+type ServerApplicationMap = {
+  id: string;
+  status: 'started' | 'stopped' | 'inactive';
+  isPrimary: boolean;
+  application: {
+    id: string;
+    name: string;
+    appIcon?: string | null;
+  };
+};
 const execFile = promisify(execFileCallback);
 
 function isServerExpired(moreDetails?: string | null) {
@@ -120,23 +132,28 @@ export async function selectServer(serverId: string, serverName: string) {
     throw new Error('This server is expired and cannot be selected.');
   }
 
-  // Only use cookies and revalidatePath in server context
-  const cookieStore = await cookies();
-  cookieStore.set('selected_server', serverId);
-  cookieStore.set('selected_server_name', serverName);
   revalidatePath('/');
   revalidatePath('/server/list');
-  return { success: true };
+  return { success: true, serverId, serverName };
 }
 
-export async function getServers() {
+export async function getServers(): Promise<Server[]> {
   const servers = await getServersData();
-  return servers.map(toPublicServer);
+  return servers.map((server: Parameters<typeof toPublicServer>[0]) => toPublicServer(server) as Server);
 }
 
-export async function getServer(id: string) {
+export async function getServersWithRunningApplications(): Promise<Array<Server & {
+  applicationServerMaps?: ServerApplicationMap[];
+}>> {
+  const servers = await getServersWithRunningApplicationsData();
+  return servers as Array<Server & {
+    applicationServerMaps?: ServerApplicationMap[];
+  }>;
+}
+
+export async function getServer(id: string): Promise<Server | null> {
   const server = await getServerById(id);
-  return server ? toPublicServer(server) : null;
+  return server ? (toPublicServer(server) as Server) : null;
 }
 
 export async function getServerForRunner(id: string) {
