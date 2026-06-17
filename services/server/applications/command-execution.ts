@@ -3,7 +3,6 @@
 import { executeCommand } from '@/services/saved-commands/saved-commands-service';
 
 import { getApplication } from './crud';
-import { getSelectedServerId } from './session';
 import { upsertApplicationServerStatus } from './server-map';
 
 function sanitizeStageName(value: string) {
@@ -17,13 +16,14 @@ function sanitizeStageName(value: string) {
 export async function executeApplicationCommand(
   applicationId: string,
   command: string,
+  selectedServerId: string | null | undefined,
   commandName?: string,
   displayCommand?: string
 ) {
   const app = await getApplication(applicationId);
   if (!app) throw new Error('Application not found');
 
-  const serverId = await getSelectedServerId();
+  const serverId = selectedServerId?.trim() || null;
   if (!serverId) {
     throw new Error('No server selected. Please select a server first.');
   }

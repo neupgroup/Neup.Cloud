@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import {
   createServer as createServerRecord,
   deleteServer as deleteServerRecord,
+  getServerByIdentifier,
   getServerById,
   getServers as getServersData,
   getServersWithRunningApplications as getServersWithRunningApplicationsData,
@@ -152,7 +153,7 @@ export async function getServersWithRunningApplications(): Promise<Array<Server 
 }
 
 export async function getServer(id: string): Promise<Server | null> {
-  const server = await getServerById(id);
+  const server = await getServerByIdentifier(id);
   return server ? (toPublicServer(server) as Server) : null;
 }
 

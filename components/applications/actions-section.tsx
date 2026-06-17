@@ -1,4 +1,5 @@
 import { useToast } from '@/core/hooks/use-toast';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 import { useState } from "react";
 
 import { executeApplicationCommand } from "@/services/server/applications/service";
@@ -10,6 +11,7 @@ export interface ActionsSectionProps {
 
 export function useActionsSection(application: any) {
     const { toast } = useToast();
+    const selectedServerId = useSelectedServerId();
     const [executing, setExecuting] = useState<string | null>(null);
 
     if (!application.commands) return { customCommands: [], executing, handleExecute: () => {} };
@@ -23,7 +25,7 @@ export function useActionsSection(application: any) {
     const handleExecute = async (name: string, command: string) => {
         setExecuting(name);
         try {
-            await executeApplicationCommand(application.id, command, name);
+            await executeApplicationCommand(application.id, command, selectedServerId, name);
             toast({
                 title: "Action Started",
                 description: `Running custom action ${name}...`,

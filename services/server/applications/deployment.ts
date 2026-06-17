@@ -5,13 +5,12 @@ import { revalidatePath } from 'next/cache';
 import { executeCommand } from '@/services/saved-commands/saved-commands-service';
 
 import { getApplication } from './crud';
-import { getSelectedServerId } from './session';
 
-export async function deployConfiguration(applicationId: string) {
+export async function deployConfiguration(applicationId: string, selectedServerId: string | null | undefined) {
   const app = await getApplication(applicationId);
   if (!app) throw new Error('Application not found');
 
-  const serverId = await getSelectedServerId();
+  const serverId = selectedServerId?.trim() || null;
   if (!serverId) throw new Error('No server selected. Please select a server first.');
 
   const location = app.location;

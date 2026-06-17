@@ -1,7 +1,5 @@
 'use server';
 
-import { cookies } from 'next/headers';
-
 import { getApplication } from './_data';
 import { getSupervisorProcesses } from './processes';
 import { findBestSupervisorProcessForApplication } from './_utils';
@@ -29,7 +27,7 @@ function mapSupervisorStateToProcessStatus(state?: string): AppStatusResult['pro
   return 'unknown';
 }
 
-export async function checkApplicationStatus(applicationId: string): Promise<AppStatusResult> {
+export async function checkApplicationStatus(applicationId: string, selectedServerId?: string | null): Promise<AppStatusResult> {
   const app = await getApplication(applicationId);
   const now = new Date().toISOString();
 
@@ -37,8 +35,7 @@ export async function checkApplicationStatus(applicationId: string): Promise<App
     return { processStatus: 'unknown', availability: 'unknown', uptime: 'N/A', metrics: {}, lastChecked: now };
   }
 
-  const cookieStore = await cookies();
-  const serverId = cookieStore.get('selected_server')?.value;
+  const serverId = selectedServerId?.trim() || null;
 
   if (!serverId) {
     return { processStatus: 'unknown', availability: 'unknown', uptime: 'N/A', metrics: {}, lastChecked: now, details: 'No server selected' };

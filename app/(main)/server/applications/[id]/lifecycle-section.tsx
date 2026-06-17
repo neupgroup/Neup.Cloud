@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { Card } from "@/components/ui/card";
 import { useToast } from '@/core/hooks/use-toast';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 import { cn } from "@/core/utils";
 import { executeApplicationCommand } from "@/services/server/applications/service";
 
@@ -16,6 +17,7 @@ interface LifecycleSectionProps {
 
 export function LifecycleSection({ application, runningCommandName = null }: LifecycleSectionProps) {
   const { toast } = useToast();
+  const selectedServerId = useSelectedServerId();
   const [executing, setExecuting] = useState<string | null>(null);
 
   if (!application.commands) return null;
@@ -71,7 +73,7 @@ export function LifecycleSection({ application, runningCommandName = null }: Lif
   const handleExecute = async (name: string, command: string, displayCommand: string) => {
     setExecuting(name);
     try {
-      await executeApplicationCommand(application.id, command, name, displayCommand);
+      await executeApplicationCommand(application.id, command, selectedServerId, name, displayCommand);
       toast({
         title: "Command Started",
         description: `Executing ${name}...`,

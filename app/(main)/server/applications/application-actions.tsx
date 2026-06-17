@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/core/hooks/use-toast';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/core/server-context';
 import { Edit, Trash, Key, UploadCloud, Loader2, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -26,6 +28,7 @@ interface ApplicationActionsProps {
 export function ApplicationActions({ applicationId }: ApplicationActionsProps) {
     const { toast } = useToast();
     const router = useRouter();
+    const selectedServerId = useSelectedServerId();
     const [isDeleting, setIsDeleting] = useState(false);
     const [isDeploying, setIsDeploying] = useState(false);
 
@@ -35,13 +38,13 @@ export function ApplicationActions({ applicationId }: ApplicationActionsProps) {
         } catch {
             // ignore
         }
-        router.push(`/server/applications/${applicationId}`);
+        router.push(withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId));
     };
 
     const handleDeploy = async () => {
         setIsDeploying(true);
         try {
-            await deployConfiguration(applicationId);
+            await deployConfiguration(applicationId, selectedServerId);
             toast({
                 title: "Configuration Deployed",
                 description: "Environment variables and config files have been updated on the server.",
@@ -66,7 +69,7 @@ export function ApplicationActions({ applicationId }: ApplicationActionsProps) {
                 title: "Application deleted",
                 description: "The application has been stopped and removed.",
             });
-            router.push('/server/applications');
+            router.push(withSelectedServerQuery('/server/applications', selectedServerId));
         } catch (error) {
             console.error(error);
             toast({

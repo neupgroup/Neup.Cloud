@@ -18,6 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { PageTitle } from '@/components/page-header';
 import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/core/server-context';
 
 export default function WebServicesPage() {
     const router = useRouter();
@@ -95,7 +96,7 @@ export default function WebServicesPage() {
 
                 <div className="grid gap-4 md:grid-cols-2">
                     <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                        <Link href="/server/webservices/configure">
+                        <Link href={withSelectedServerQuery('/server/webservices/configure', selectedServerId)}>
                             <div className="p-4 flex items-center gap-4">
                                 <div className="p-2 bg-primary/10 rounded-lg shrink-0">
                                     <Settings className="h-5 w-5 text-primary" />
@@ -112,7 +113,7 @@ export default function WebServicesPage() {
                     </Card>
 
                     <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                        <Link href="/server/webservices/certificates">
+                        <Link href={withSelectedServerQuery('/server/webservices/certificates', selectedServerId)}>
                             <div className="p-4 flex items-center gap-4">
                                 <div className="p-2 bg-primary/10 rounded-lg shrink-0">
                                     <FileKey className="h-5 w-5 text-primary" />
@@ -139,7 +140,7 @@ export default function WebServicesPage() {
                 {server.proxyHandler === 'Nginx' ? (
                     <div className="grid gap-4">
                         <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                            <Link href="/server/webservices/nginx">
+                            <Link href={withSelectedServerQuery('/server/webservices/nginx', selectedServerId)}>
                                 <div className="p-4 flex items-center gap-4">
                                     <div className="p-2 bg-primary/10 rounded-lg shrink-0">
                                         <Globe className="h-5 w-5 text-primary" />
@@ -155,7 +156,7 @@ export default function WebServicesPage() {
                             </Link>
                         </Card>
                         <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                            <Link href="/server/commands">
+                            <Link href={withSelectedServerQuery('/server/commands', selectedServerId)}>
                                 <div className="p-4 flex items-center gap-4">
                                     <div className="p-2 bg-primary/10 rounded-lg shrink-0">
                                         <Server className="h-5 w-5 text-primary" />
@@ -173,7 +174,7 @@ export default function WebServicesPage() {
                     </div>
                 ) : (
                     <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                        <Link href="/server/commands">
+                        <Link href={withSelectedServerQuery('/server/commands', selectedServerId)}>
                             <div className="p-4 flex items-center gap-4">
                                 <div className="p-2 bg-primary/10 rounded-lg shrink-0">
                                     <Server className="h-5 w-5 text-primary" />

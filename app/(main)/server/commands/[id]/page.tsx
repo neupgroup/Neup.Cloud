@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -40,6 +40,7 @@ import type { SavedCommand } from '@/services/saved-commands/types';
 import { useToast } from '@/core/hooks/use-toast';
 import { PageTitleBack } from '@/components/page-header';
 import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { resolveSelectedServerValue, withSelectedServerQuery } from '@/core/server-context';
 
 export default function CommandDetailPage({ params }: { params: { id: string } }) {
     const { id } = params;
@@ -58,6 +59,10 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
     const [isRunning, setIsRunning] = useState(false);
     const [selectedServer, setSelectedServer] = useState<string>('');
     const [runtimeVariableValues, setRuntimeVariableValues] = useState<Record<string, string>>({});
+    const effectiveSelectedServer = useMemo(
+        () => resolveSelectedServerValue(selectedServer || selectedServerFromUrl, servers) ?? '',
+        [selectedServer, selectedServerFromUrl, servers]
+    );
 
     // Fetch initial data
     useEffect(() => {
@@ -76,7 +81,7 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
                 setServers(serversData as { id: string, name: string, type: string }[]);
 
                 if (selectedServerFromUrl) {
-                    setSelectedServer(selectedServerFromUrl);
+                    setSelectedServer(resolveSelectedServerValue(selectedServerFromUrl, serversData as { id: string, name: string, type: string }[]) ?? '');
                 }
 
             } catch (error) {
@@ -96,7 +101,7 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
         try {
             await deleteSavedCommand(id);
             toast({ title: 'Command Deleted', description: 'The command has been permanently deleted.' });
-            router.push('/server/commands');
+            router.push(withSelectedServerQuery('/server/commands', selectedServerFromUrl), { scroll: false });
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete command.' });
             setIsDeleting(false);
@@ -110,7 +115,7 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
 
         if (command.variables && command.variables.length > 0) {
             setIsRunDialogOpen(true);
-        } else if (!selectedServer) {
+        } else if (!effectiveSelectedServer) {
             setIsRunDialogOpen(true);
         } else {
             handleRunCommandDirect();
@@ -121,7 +126,7 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
         if (!command) return;
         setIsRunning(true);
         try {
-            await executeSavedCommand(selectedServer, command.id, {});
+            await executeSavedCommand(effectiveSelectedServer, command.id, {});
             toast({ title: 'Execution Started', description: `Running "${command.name}" on the selected server. Check history for output.` });
             if (isRunDialogOpen) setIsRunDialogOpen(false);
         } catch (e: any) {
@@ -133,10 +138,10 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
 
     // Handle Run from Dialog
     const handleRunFromDialog = async () => {
-        if (!command || !selectedServer) return;
+        if (!command || !effectiveSelectedServer) return;
         setIsRunning(true);
         try {
-            await executeSavedCommand(selectedServer, command.id, runtimeVariableValues);
+            await executeSavedCommand(effectiveSelectedServer, command.id, runtimeVariableValues);
             toast({ title: 'Execution Started', description: `Running "${command.name}" on the selected server. Check history for output.` });
             setIsRunDialogOpen(false);
         } catch (e: any) {
@@ -161,7 +166,7 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
                 <h2 className="text-xl font-semibold mb-2">Command Not Found</h2>
                 <p className="text-muted-foreground mb-4">The command you are looking for does not exist or has been deleted.</p>
                 <Button asChild variant="outline">
-                    <Link href="/server/commands">Back to Commands</Link>
+                    <Link href={withSelectedServerQuery('/server/commands', selectedServerFromUrl)}>Back to Commands</Link>
                 </Button>
             </div>
         )
@@ -173,7 +178,7 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
             <PageTitleBack
                 title={command.name}
                 description={command.description || 'No description provided.'}
-                backHref="/server/commands"
+                backHref={withSelectedServerQuery('/server/commands', selectedServerFromUrl)}
             />
 
             {/* 2. Command Block (Card) */}
@@ -237,7 +242,7 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
 
                         <div className="grid gap-2">
                             <Label htmlFor="server-select">Server</Label>
-                            <Select onValueChange={setSelectedServer} value={selectedServer}>
+                            <Select onValueChange={setSelectedServer} value={effectiveSelectedServer}>
                                 <SelectTrigger id="server-select">
                                     <SelectValue placeholder="Select a server" />
                                 </SelectTrigger>
@@ -256,7 +261,7 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
                     </div>
                     <DialogFooter>
                         <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
-                        <Button onClick={handleRunFromDialog} disabled={!selectedServer || isRunning}>
+                        <Button onClick={handleRunFromDialog} disabled={!effectiveSelectedServer || isRunning}>
                             {isRunning ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Executing...</> : 'Run on Server'}
                         </Button>
                     </DialogFooter>

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 import { cn } from "@/core/utils";
 import { AppStatusResult, checkApplicationStatus } from "@/services/server/applications/status-actions";
 
@@ -13,6 +14,7 @@ interface StatusDashboardProps {
 }
 
 export function StatusDashboard({ applicationId }: StatusDashboardProps) {
+  const selectedServerId = useSelectedServerId();
   const [status, setStatus] = useState<AppStatusResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +22,7 @@ export function StatusDashboard({ applicationId }: StatusDashboardProps) {
   const fetchStatus = async () => {
     setIsLoading(true);
     try {
-      const result = await checkApplicationStatus(applicationId);
+      const result = await checkApplicationStatus(applicationId, selectedServerId);
       setStatus(result);
       setError(null);
     } catch (err) {
@@ -37,7 +39,7 @@ export function StatusDashboard({ applicationId }: StatusDashboardProps) {
       void fetchStatus();
     }, 30000);
     return () => clearInterval(interval);
-  }, [applicationId]);
+  }, [applicationId, selectedServerId]);
 
   const renderProcessStatus = () => {
     if (isLoading && !status) return <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Checking...</div>;

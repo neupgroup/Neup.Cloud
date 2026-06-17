@@ -4,9 +4,18 @@ import { cookies } from 'next/headers';
 import { executeCommand } from '@/services/server/commands/server-command-service';
 import { executeQuickCommand } from '@/services/server/commands/server-command-service';
 
-export async function getCertificates() {
+async function resolveSelectedServerId(selectedServerId?: string | null) {
+    const explicitServerId = selectedServerId?.trim();
+    if (explicitServerId) {
+        return explicitServerId;
+    }
+
     const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+    return cookieStore.get('selected_server')?.value ?? null;
+}
+
+export async function getCertificates(selectedServerId?: string | null) {
+    const serverId = await resolveSelectedServerId(selectedServerId);
 
     if (!serverId) {
         throw new Error("No server selected");
@@ -81,9 +90,8 @@ export async function getCertificates() {
     return certs;
 }
 
-export async function getCertificate(fileName: string) {
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+export async function getCertificate(fileName: string, selectedServerId?: string | null) {
+    const serverId = await resolveSelectedServerId(selectedServerId);
 
     if (!serverId) {
         throw new Error("No server selected");
@@ -149,9 +157,8 @@ export async function getCertificate(fileName: string) {
     };
 }
 
-export async function deleteCertificate(fileName: string) {
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+export async function deleteCertificate(fileName: string, selectedServerId?: string | null) {
+    const serverId = await resolveSelectedServerId(selectedServerId);
 
     if (!serverId) {
         throw new Error("No server selected");
@@ -204,9 +211,8 @@ export async function deleteCertificate(fileName: string) {
     return { success: true, output: result.output };
 }
 
-export async function reissueCertificate(fileName: string, domain: string) {
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+export async function reissueCertificate(fileName: string, domain: string, selectedServerId?: string | null) {
+    const serverId = await resolveSelectedServerId(selectedServerId);
 
     if (!serverId) {
         throw new Error("No server selected");

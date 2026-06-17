@@ -23,8 +23,8 @@ export async function getApplicationDetailPageData(
   if (id.startsWith('supervisor_')) {
     const processName = id.slice('supervisor_'.length);
     const [processDetails, supervisorProcesses] = await Promise.all([
-      getProcessDetails('supervisor', processName),
-      getSupervisorProcesses(),
+      getProcessDetails('supervisor', processName, serverId),
+      getSupervisorProcesses(serverId),
     ]);
     const summary = Array.isArray(supervisorProcesses)
       ? supervisorProcesses.find((process: any) => process.name === processName)

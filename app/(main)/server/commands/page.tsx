@@ -42,6 +42,7 @@ import { cn } from '@/core/utils';
 import { CommandLogList, CommandLogListSkeleton } from './command-log-card';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
 import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { resolveSelectedServerValue, withSelectedServerQuery } from '@/core/server-context';
 
 type ServerType = {
   id: string;
@@ -136,12 +137,16 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
   const [runtimeVariableValues, setRuntimeVariableValues] = useState<Record<string, string>>({});
   const [customCommand, setCustomCommand] = useState<string>('');
   const [isRunningCustom, setIsRunningCustom] = useState(false);
+  const effectiveSelectedServer = useMemo(
+    () => resolveSelectedServerValue(selectedServer || selectedServerFromUrl, servers) ?? '',
+    [selectedServer, selectedServerFromUrl, servers]
+  );
 
   useEffect(() => {
-    if (selectedServerFromUrl) {
-      setSelectedServer(selectedServerFromUrl);
+    if (selectedServerFromUrl && servers.length > 0) {
+      setSelectedServer(resolveSelectedServerValue(selectedServerFromUrl, servers) ?? '');
     }
-  }, [selectedServerFromUrl]);
+  }, [selectedServerFromUrl, servers]);
 
   useEffect(() => {
     const query = searchParams.get('query');
@@ -235,7 +240,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
         return;
       }
 
-      if (!selectedServer) {
+      if (!effectiveSelectedServer) {
         setHistoryLogs([]);
         setIsHistoryLoading(false);
         return;
@@ -246,7 +251,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
       }
 
       try {
-        const logs = await getServerLogs(selectedServer);
+        const logs = await getServerLogs(effectiveSelectedServer);
         setHistoryLogs(logs as CommandHistoryItem[]);
       } catch {
         if (showError) {
@@ -262,7 +267,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
         }
       }
     },
-    [mode, selectedServer, toast]
+    [effectiveSelectedServer, mode, toast]
   );
 
   useEffect(() => {
@@ -274,7 +279,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
 
     void fetchHistoryLogs({ showLoader: true, showError: true });
 
-    if (!selectedServer) {
+    if (!effectiveSelectedServer) {
       return;
     }
 
@@ -283,7 +288,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [mode, selectedServer, fetchHistoryLogs]);
+  }, [mode, effectiveSelectedServer, fetchHistoryLogs]);
 
   const openRunDialog = (e: React.MouseEvent, command: SavedCommand) => {
     e.stopPropagation();
@@ -295,12 +300,12 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
       return;
     }
 
-    if (!selectedServer) {
+    if (!effectiveSelectedServer) {
       setIsRunDialogOpen(true);
       return;
     }
 
-    void handleRunCommandDirect(command, selectedServer, {});
+    void handleRunCommandDirect(command, effectiveSelectedServer, {});
   };
 
   const handleRunCommandDirect = async (
@@ -324,7 +329,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
   };
 
   const handleRunCommand = async () => {
-    if (!commandToRun || !selectedServer) {
+    if (!commandToRun || !effectiveSelectedServer) {
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -335,7 +340,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
 
     setIsRunning(true);
     try {
-      await executeSavedCommand(selectedServer, commandToRun.id, runtimeVariableValues);
+      await executeSavedCommand(effectiveSelectedServer, commandToRun.id, runtimeVariableValues);
       toast({
         title: 'Execution Started',
         description: `Running "${commandToRun.name}" on the selected server. Check history for output.`,
@@ -355,14 +360,14 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
       return;
     }
 
-    if (!selectedServer) {
+    if (!effectiveSelectedServer) {
       toast({ variant: 'destructive', title: 'Error', description: 'Please select a server first.' });
       return;
     }
 
     setIsRunningCustom(true);
     try {
-      await runCustomCommandOnServer(selectedServer, customCommand);
+      await runCustomCommandOnServer(effectiveSelectedServer, customCommand);
       toast({ title: 'Command Executed', description: 'Custom command has been executed. Check history for output.' });
       setCustomCommand('');
       void fetchHistoryLogs();
@@ -448,7 +453,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
     return `on ${format(date, 'yyyy MMMM')} by User`;
   };
 
-  const selectedServerName = servers.find((s) => s.id === selectedServer)?.name || 'Server';
+  const selectedServerName = servers.find((s) => s.id === effectiveSelectedServer)?.name || 'Server';
   const showDashboard = mode === 'dashboard';
   const showSavedCommands = mode === 'dashboard' || mode === 'saved';
   const showHistory = mode === 'dashboard' || mode === 'history';
@@ -478,7 +483,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
         />
       </div>
 
-      {showDashboard && selectedServer && (
+      {showDashboard && effectiveSelectedServer && (
         <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm">
           <div className="p-4 space-y-4">
             <Textarea
@@ -531,7 +536,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
                   className={cn(
                     'p-4 min-w-0 w-full transition-colors hover:bg-muted/50 group flex items-start gap-4 cursor-pointer border-b border-border'
                   )}
-                  onClick={() => router.push('/server/commands/create?mode=command')}
+                  onClick={() => router.push(withSelectedServerQuery('/server/commands/create?mode=command', effectiveSelectedServer))}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between mb-0 h-8">
@@ -565,7 +570,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
                           'p-4 min-w-0 w-full transition-colors hover:bg-muted/50 group flex items-start gap-4 cursor-pointer',
                           showRowBorder && 'border-b border-border'
                         )}
-                        onClick={() => router.push(`/server/commands/${item.id}`)}
+                        onClick={() => router.push(withSelectedServerQuery(`/server/commands/${item.id}`, effectiveSelectedServer))}
                       >
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between mb-1">
@@ -615,11 +620,11 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
 
               {showDashboard && (
                 <div className="flex justify-start">
-                  <Button variant="outline" asChild>
-                    <Link href={savedCommandsHref}>View more</Link>
-                  </Button>
-                </div>
-              )}
+                    <Button variant="outline" asChild>
+                      <Link href={withSelectedServerQuery(savedCommandsHref, effectiveSelectedServer)}>View more</Link>
+                    </Button>
+                  </div>
+                )}
             </>
           )}
 
@@ -648,7 +653,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
               {showDashboard ? (
                 <div className="flex justify-start p-0">
                   <Button variant="outline" asChild>
-                    <Link href={historyHref}>View more</Link>
+                    <Link href={withSelectedServerQuery(historyHref, effectiveSelectedServer)}>View more</Link>
                   </Button>
                 </div>
               ) : (
@@ -709,7 +714,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
 
             <div className="grid gap-2">
               <Label htmlFor="server-select">Server</Label>
-              <Select onValueChange={handleSelectedServerChange} value={selectedServer}>
+              <Select onValueChange={handleSelectedServerChange} value={effectiveSelectedServer}>
                 <SelectTrigger id="server-select">
                   <SelectValue placeholder="Select a server" />
                 </SelectTrigger>
@@ -732,7 +737,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
                 Cancel
               </Button>
             </DialogClose>
-            <Button onClick={handleRunCommand} disabled={!selectedServer || isRunning}>
+            <Button onClick={handleRunCommand} disabled={!effectiveSelectedServer || isRunning}>
               {isRunning ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

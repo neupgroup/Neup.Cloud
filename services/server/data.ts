@@ -1,5 +1,6 @@
 import { prisma } from '@/services/prisma';
 import { createId } from '@/core/create-id';
+import { getServerSelectionCandidates } from '@/core/server-context';
 import { stripSensitiveServerMetadata } from '@/services/server/server-metadata';
 
 export function toPublicServer<
@@ -49,6 +50,24 @@ export async function getServersWithRunningApplications() {
 export async function getServerById(id: string) {
   return prisma.server.findUnique({
     where: { id },
+  });
+}
+
+export async function getServerByIdentifier(identifier: string) {
+  const candidates = getServerSelectionCandidates(identifier);
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  return prisma.server.findFirst({
+    where: {
+      OR: candidates.flatMap((candidate) => ([
+        { id: candidate },
+        { publicIp: candidate },
+        { privateIp: candidate },
+        { name: candidate },
+      ])),
+    },
   });
 }
 

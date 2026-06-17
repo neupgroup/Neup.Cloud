@@ -18,6 +18,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { deleteSupervisorOnlyProcess, stopSupervisorOnlyProcess } from '@/services/server/applications/service';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 import { useToast } from '@/core/hooks/use-toast';
 
 interface SupervisorOnlyActionsProps {
@@ -27,13 +28,14 @@ interface SupervisorOnlyActionsProps {
 export function SupervisorOnlyActions({ processName }: SupervisorOnlyActionsProps) {
     const router = useRouter();
     const { toast } = useToast();
+    const selectedServerId = useSelectedServerId();
     const [isStopping, setIsStopping] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleStop = async () => {
         setIsStopping(true);
         try {
-            await stopSupervisorOnlyProcess(processName);
+            await stopSupervisorOnlyProcess(processName, selectedServerId);
             toast({
                 title: 'Process stopped',
                 description: `${processName} has been stopped.`,
@@ -53,7 +55,7 @@ export function SupervisorOnlyActions({ processName }: SupervisorOnlyActionsProp
     const handleDelete = async () => {
         setIsDeleting(true);
         try {
-            await deleteSupervisorOnlyProcess(processName);
+            await deleteSupervisorOnlyProcess(processName, selectedServerId);
             toast({
                 title: 'Removed from Supervisor',
                 description: `${processName} has been removed from Supervisor.`,

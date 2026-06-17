@@ -1,10 +1,10 @@
 import { runCommandOnServer } from '@/services/server/ssh';
 import { createServerLog } from '@/services/logs/server';
-import { getServerById } from '@/services/server/data';
+import { getServerByIdentifier } from '@/services/server/data';
 import { getServerSshPassphrase } from '@/services/server/server-metadata';
 
 export async function getServerForRunner(id: string) {
-  return getServerById(id);
+  return getServerByIdentifier(id);
 }
 
 export async function getRamUsage(serverId: string) {

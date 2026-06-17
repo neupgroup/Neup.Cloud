@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import Cookies from 'universal-cookie';
 import { getCommandLog, type CommandLog } from '@/services/logs/command-log';
 import { CommandLogList, CommandLogListSkeleton } from '@/app/(main)/server/commands/command-log-card';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 
 /** A command is considered "running" if it has status "pending" and was started
  *  less than 20 minutes ago. Anything older is treated as cancelled/timed-out. */
@@ -36,11 +36,10 @@ export function ApplicationCommandLogs({
 }: ApplicationCommandLogsProps) {
   const [logs, setLogs] = useState<CommandLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const selectedServerId = useSelectedServerId();
 
   const fetchLogs = useCallback(async () => {
-    const cookies = new Cookies(null, { path: '/' });
-    const serverId = cookies.get('selected_server');
-    if (!serverId) {
+    if (!selectedServerId) {
       setLogs([]);
       onRunningCommandChange?.(null);
       setIsLoading(false);
@@ -48,13 +47,13 @@ export function ApplicationCommandLogs({
     }
 
     try {
-      const result = await getCommandLog({ serverId, source: `application:${applicationId}`, limit: 3, offset: 0 });
+      const result = await getCommandLog({ serverId: selectedServerId, source: `application:${applicationId}`, limit: 3, offset: 0 });
       setLogs(result);
       onRunningCommandChange?.(getRunningCommandName(result));
     } finally {
       setIsLoading(false);
     }
-  }, [applicationId, onRunningCommandChange]);
+  }, [applicationId, onRunningCommandChange, selectedServerId]);
 
   useEffect(() => {
     void fetchLogs();

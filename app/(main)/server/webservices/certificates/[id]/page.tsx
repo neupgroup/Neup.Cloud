@@ -11,6 +11,8 @@ import { AlertCircle, Calendar, CheckCircle2, Copy, FileText, Globe, Key, Refres
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { deleteCertificate, getCertificate, reissueCertificate } from '@/services/webservices/certificates-service';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/core/server-context';
 
 interface CertificateDetails {
     fileName: string;
@@ -31,6 +33,7 @@ export default function CertificateDetailsPage() {
     const router = useRouter();
     const id = decodeURIComponent(params.id as string);
     const { toast } = useToast();
+    const selectedServerId = useSelectedServerId();
 
     const [cert, setCert] = useState<CertificateDetails | null>(null);
     const [loading, setLoading] = useState(true);
@@ -42,7 +45,7 @@ export default function CertificateDetailsPage() {
         async function load() {
             setLoading(true);
             try {
-                const data = await getCertificate(id);
+                const data = await getCertificate(id, selectedServerId);
                 if (!data) {
                     setError('Certificate not found');
                 } else {
@@ -55,7 +58,7 @@ export default function CertificateDetailsPage() {
             }
         }
         load();
-    }, [id]);
+    }, [id, selectedServerId]);
 
     const handleDelete = async () => {
         if (!cert) return;
@@ -66,9 +69,9 @@ export default function CertificateDetailsPage() {
 
         setDeleting(true);
         try {
-            await deleteCertificate(cert.fileName);
+            await deleteCertificate(cert.fileName, selectedServerId);
             toast({ title: 'Certificate deleted successfully' });
-            router.push('/server/webservices/certificates');
+            router.push(withSelectedServerQuery('/server/webservices/certificates', selectedServerId));
         } catch (err: any) {
             toast({ variant: 'destructive', title: 'Error deleting certificate', description: err.message });
         } finally {
@@ -81,10 +84,10 @@ export default function CertificateDetailsPage() {
 
         setReissuing(true);
         try {
-            await reissueCertificate(cert.fileName, cert.commonName);
+            await reissueCertificate(cert.fileName, cert.commonName, selectedServerId);
             toast({ title: 'Certificate reissued successfully', description: `Certificate for ${cert.commonName} has been reissued.` });
             // Reload the certificate data to show updated validity dates
-            const updated = await getCertificate(id);
+            const updated = await getCertificate(id, selectedServerId);
             if (updated) {
                 setCert(updated);
             }
@@ -146,7 +149,7 @@ export default function CertificateDetailsPage() {
             <PageTitleBack
                 title={cert.commonName}
                 description={`Certificate details for ${cert.fileName}`}
-                backHref="/server/webservices/certificates"
+                backHref={withSelectedServerQuery('/server/webservices/certificates', selectedServerId)}
             >
                 <div className="flex items-center gap-3">
                     <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-white text-sm font-semibold ${status.color}`}>

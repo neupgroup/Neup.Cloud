@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/core/hooks/use-toast';
-import { formatDistanceToNow } from 'date-fns';
 import { AlertCircle, Calendar, CheckCircle2, FileKey, RefreshCw, Shield, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getCertificates } from '@/services/webservices/certificates-service';
 import { CreateCertificateDialog } from './create-dialog';
 import Link from 'next/link';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/core/server-context';
 
 interface Certificate {
     fileName: string;
@@ -23,6 +24,7 @@ interface Certificate {
 
 export default function CertificatesPage() {
     const { toast } = useToast();
+    const selectedServerId = useSelectedServerId();
     const [certificates, setCertificates] = useState<Certificate[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -31,7 +33,7 @@ export default function CertificatesPage() {
         setLoading(true);
         setError(null);
         try {
-            const data = await getCertificates();
+            const data = await getCertificates(selectedServerId);
             setCertificates(data);
         } catch (err: any) {
             setError(err.message || "Failed to load certificates");
@@ -47,7 +49,7 @@ export default function CertificatesPage() {
 
     useEffect(() => {
         fetchCertificates();
-    }, []);
+    }, [selectedServerId]);
 
     const getStatus = (validUntil: string | null) => {
         if (!validUntil) return { label: 'Unknown', color: 'text-gray-500', icon: AlertCircle };
@@ -66,10 +68,10 @@ export default function CertificatesPage() {
             <PageTitleBack
                 title="SSL Certificates"
                 description="Manage SSL certificates installed on your Nginx server."
-                backHref="/server/webservices"
+                backHref={withSelectedServerQuery('/server/webservices', selectedServerId)}
             >
                 <div className="flex gap-2">
-                    <CreateCertificateDialog onSuccess={fetchCertificates} serverId={null} />
+                    <CreateCertificateDialog onSuccess={fetchCertificates} serverId={selectedServerId} />
                     <Button variant="outline" onClick={fetchCertificates} disabled={loading}>
                         <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                         Refresh
@@ -107,7 +109,7 @@ export default function CertificatesPage() {
                         const StatusIcon = status.icon;
 
                         return (
-                            <Link href={`/server/webservices/certificates/${encodeURIComponent(cert.fileName)}`} key={cert.fileName}>
+                            <Link href={withSelectedServerQuery(`/server/webservices/certificates/${encodeURIComponent(cert.fileName)}`, selectedServerId)} key={cert.fileName}>
                                 <Card className="overflow-hidden hover:border-primary/50 transition-colors cursor-pointer group">
                                     <div className="p-6 space-y-4">
                                         <div className="flex items-start justify-between">

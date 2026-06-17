@@ -8,7 +8,6 @@ import * as Git from '@/services/core/github';
 import { executeCommand } from '@/services/saved-commands/saved-commands-service';
 
 import { getApplication } from './crud';
-import { getSelectedServerId } from './session';
 
 const execAsync = promisify(rawExec);
 
@@ -35,12 +34,13 @@ export async function generateRepositoryKeys() {
 
 export async function performGitOperation(
   applicationId: string,
+  selectedServerId: string | null | undefined,
   operation: 'clone' | 'pull' | 'pull-force' | 'reset-main'
 ) {
   const app = await getApplication(applicationId);
   if (!app) throw new Error('Application not found');
 
-  const serverId = await getSelectedServerId();
+  const serverId = selectedServerId?.trim() || null;
   if (!serverId) throw new Error('No server selected');
 
   let repoUrl = app.repository;

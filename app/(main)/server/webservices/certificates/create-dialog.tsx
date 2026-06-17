@@ -24,7 +24,7 @@ interface CreateCertificateDialogProps {
     onSuccess: () => void;
 }
 
-export function CreateCertificateDialog({ onSuccess }: CreateCertificateDialogProps) {
+export function CreateCertificateDialog({ serverId: serverIdFromProps, onSuccess }: CreateCertificateDialogProps) {
     const { toast } = useToast();
     const [open, setOpen] = useState(false);
 
@@ -48,6 +48,10 @@ export function CreateCertificateDialog({ onSuccess }: CreateCertificateDialogPr
 
     // Helper to get cookie client side
     const getServerId = () => {
+        if (serverIdFromProps) {
+            return serverIdFromProps;
+        }
+
         const value = `; ${document.cookie}`;
         const parts = value.split(`; selected_server=`);
         if (parts.length === 2) return parts.pop()?.split(';').shift();

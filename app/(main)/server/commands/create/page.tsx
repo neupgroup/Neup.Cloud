@@ -17,6 +17,8 @@ import { useToast } from '@/core/hooks/use-toast';
 import { createSavedCommand } from '@/services/server/commands/server-command-service';
 import { VARIABLE_REGEX } from '@/services/saved-commands/types';
 import { serializeCommandSetCommands } from '@/services/server/commands/serialize';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/core/server-context';
 
 type CreateMode = 'command' | 'set';
 
@@ -49,6 +51,7 @@ function CreateCommandPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const selectedServerId = useSelectedServerId();
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -59,9 +62,9 @@ function CreateCommandPageContent() {
   useEffect(() => {
     const currentMode = searchParams.get('mode');
     if (currentMode !== 'command' && currentMode !== 'set') {
-      router.replace('/server/commands/create?mode=command', { scroll: false });
+      router.replace(withSelectedServerQuery('/server/commands/create?mode=command', selectedServerId), { scroll: false });
     }
-  }, [router, searchParams]);
+  }, [router, searchParams, selectedServerId]);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -84,7 +87,7 @@ function CreateCommandPageContent() {
   }, [commandBody, mode, steps]);
 
   const setMode = (nextMode: CreateMode) => {
-    router.replace(`/server/commands/create?mode=${nextMode}`, { scroll: false });
+    router.replace(withSelectedServerQuery(`/server/commands/create?mode=${nextMode}`, selectedServerId), { scroll: false });
   };
 
   const updateStep = (id: string, field: keyof StepDraft, value: string | boolean) => {
@@ -137,7 +140,7 @@ function CreateCommandPageContent() {
         title: 'Command Created',
         description: `The command "${title.trim()}" has been saved successfully.`,
       });
-      router.push('/server/commands');
+      router.push(withSelectedServerQuery('/server/commands', selectedServerId), { scroll: false });
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -199,7 +202,7 @@ function CreateCommandPageContent() {
         title: 'Command Set Created',
         description: `The command set "${title.trim()}" has been saved successfully.`,
       });
-      router.push('/server/commands');
+      router.push(withSelectedServerQuery('/server/commands', selectedServerId), { scroll: false });
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -216,7 +219,7 @@ function CreateCommandPageContent() {
       <PageTitleBack
         title={mode === 'command' ? 'Create Command' : 'Create Command Set'}
         description="Fill in the fields below to continue."
-        backHref="/server/commands"
+        backHref={withSelectedServerQuery('/server/commands', selectedServerId)}
       />
 
       <div className="grid gap-4">
@@ -454,7 +457,7 @@ function CreateCommandPageContent() {
 
       <div className="flex flex-wrap items-center justify-start gap-3">
         <Button variant="outline" asChild disabled={isSaving}>
-          <Link href="/server/commands">Cancel</Link>
+          <Link href={withSelectedServerQuery('/server/commands', selectedServerId)}>Cancel</Link>
         </Button>
         <Button
           onClick={mode === 'command' ? submitCommand : submitCommandSet}
@@ -476,24 +479,30 @@ function CreateCommandPageContent() {
   );
 }
 
+function CreateCommandFallback() {
+  const selectedServerId = useSelectedServerId();
+
+  return (
+    <div className="grid gap-6">
+      <PageTitleBack
+        title="Create Command"
+        description="Fill in the fields below to continue."
+        backHref={withSelectedServerQuery('/server/commands', selectedServerId)}
+      />
+      <Card className="p-6">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Loading form...
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 export default function CreateCommandPage() {
   return (
     <Suspense
-      fallback={
-        <div className="grid gap-6">
-          <PageTitleBack
-            title="Create Command"
-            description="Fill in the fields below to continue."
-            backHref="/server/commands"
-          />
-          <Card className="p-6">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Loading form...
-            </div>
-          </Card>
-        </div>
-      }
+      fallback={<CreateCommandFallback />}
     >
       <CreateCommandPageContent />
     </Suspense>

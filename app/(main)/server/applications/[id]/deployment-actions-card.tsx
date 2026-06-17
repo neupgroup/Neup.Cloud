@@ -3,6 +3,7 @@
 
 import { Card } from "@/components/ui/card";
 import { useToast } from '@/core/hooks/use-toast';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 import { cn } from "@/core/utils";
 import { FileText, UploadCloud, Key, Loader2 } from "lucide-react";
 import { useRouter } from 'next/navigation';
@@ -17,6 +18,7 @@ interface DeploymentActionsCardProps {
 
 export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpenFiles }: DeploymentActionsCardProps) {
     const { toast } = useToast();
+    const selectedServerId = useSelectedServerId();
     const router = useRouter();
     const [isDeploying, setIsDeploying] = useState(false);
 
@@ -28,7 +30,7 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
     const handleDeploy = async () => {
         setIsDeploying(true);
         try {
-            await deployConfiguration(applicationId);
+            await deployConfiguration(applicationId, selectedServerId);
             toast({
                 title: "Configuration Deployed",
                 description: "Environment variables and config files have been updated on the server.",

@@ -1,4 +1,5 @@
 import { useToast } from '@/core/hooks/use-toast';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 import { useState } from "react";
 
 import { performGitOperation } from '@/services/server/applications/service';
@@ -9,12 +10,13 @@ export interface RepoControlsProps {
 
 export function useRepoControls(applicationId: string) {
     const { toast } = useToast();
+    const selectedServerId = useSelectedServerId();
     const [loading, setLoading] = useState<string | null>(null);
 
     const handleAction = async (operation: 'clone' | 'pull' | 'pull-force' | 'reset-main') => {
         setLoading(operation);
         try {
-            await performGitOperation(applicationId, operation);
+            await performGitOperation(applicationId, selectedServerId, operation);
             toast({
                 title: "Operation Started",
                 description: `Git operation '${operation}' has been dispatched.`,

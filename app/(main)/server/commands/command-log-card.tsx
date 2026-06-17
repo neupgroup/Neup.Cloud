@@ -9,6 +9,8 @@ import { cn } from '@/core/utils';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { getAccountName } from '@/services/account';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/core/server-context';
 
 export type CommandLogItem = {
   id: string;
@@ -78,6 +80,7 @@ function getDisplayName(command: string, commandName?: string) {
 export function CommandLogCard({ log }: { log: CommandLogItem }) {
   const sourceInfo = getSourceInfo(log);
   const [userName, setUserName] = useState<string | null>(null);
+  const selectedServerId = useSelectedServerId();
 
   useEffect(() => {
     getAccountName().then(setUserName);
@@ -100,7 +103,7 @@ export function CommandLogCard({ log }: { log: CommandLogItem }) {
                 {getDisplayName(log.command, log.commandName)}
                 {sourceInfo && (
                   <Link
-                    href={sourceInfo.href}
+                    href={withSelectedServerQuery(sourceInfo.href, selectedServerId)}
                     onClick={(e) => e.stopPropagation()}
                     className="text-muted-foreground hover:text-primary transition-colors"
                     title={sourceInfo.label}
@@ -140,6 +143,7 @@ export function CommandLogCard({ log }: { log: CommandLogItem }) {
 
 export function CommandLogList({ logs, showSourceLink = true }: { logs: CommandLogItem[]; showSourceLink?: boolean }) {
   const [userName, setUserName] = useState<string | null>(null);
+  const selectedServerId = useSelectedServerId();
 
   useEffect(() => {
     getAccountName().then(setUserName);
@@ -160,7 +164,7 @@ export function CommandLogList({ logs, showSourceLink = true }: { logs: CommandL
                       {getDisplayName(log.command, log.commandName)}
                       {showSourceLink && sourceInfo && (
                         <Link
-                          href={sourceInfo.href}
+                          href={withSelectedServerQuery(sourceInfo.href, selectedServerId)}
                           onClick={(e) => e.stopPropagation()}
                           className="text-muted-foreground hover:text-primary transition-colors"
                           title={sourceInfo.label}

@@ -4,17 +4,16 @@ import { revalidatePath } from 'next/cache';
 
 import { executeCommand, executeQuickCommand } from '@/services/saved-commands/saved-commands-service';
 
-import { getSelectedServerId } from './session';
 import { getRunningProcesses as getRunningProcessesForServer, getSupervisorProcesses as getSupervisorProcessesForServer } from './processes';
 
-export async function getRunningProcesses() {
-  const serverId = await getSelectedServerId();
+export async function getRunningProcesses(selectedServerId?: string | null) {
+  const serverId = selectedServerId?.trim() || null;
   if (!serverId) throw new Error('No server selected');
   return getRunningProcessesForServer(serverId);
 }
 
-export async function getSupervisorProcesses() {
-  const serverId = await getSelectedServerId();
+export async function getSupervisorProcesses(selectedServerId?: string | null) {
+  const serverId = selectedServerId?.trim() || null;
   if (!serverId) throw new Error('No server selected');
   return getSupervisorProcessesForServer(serverId);
 }
@@ -41,8 +40,8 @@ export async function restartSupervisorProcess(serverId: string, name: string) {
   return { success: true, output: result.output };
 }
 
-export async function stopSupervisorOnlyProcess(name: string) {
-  const serverId = await getSelectedServerId();
+export async function stopSupervisorOnlyProcess(name: string, selectedServerId?: string | null) {
+  const serverId = selectedServerId?.trim() || null;
   if (!serverId) throw new Error('No server selected');
 
   const result = await executeQuickCommand(serverId, `sudo supervisorctl stop '${name}' || true`);
@@ -55,8 +54,8 @@ export async function stopSupervisorOnlyProcess(name: string) {
   return { success: true, output: result.output };
 }
 
-export async function deleteSupervisorOnlyProcess(name: string) {
-  const serverId = await getSelectedServerId();
+export async function deleteSupervisorOnlyProcess(name: string, selectedServerId?: string | null) {
+  const serverId = selectedServerId?.trim() || null;
   if (!serverId) throw new Error('No server selected');
 
   const command = `
@@ -149,8 +148,8 @@ export async function rebootSystem(serverId: string) {
   return { success: true, message: 'Reboot initiated.' };
 }
 
-export async function getProcessDetails(provider: string, name: string) {
-  const serverId = await getSelectedServerId();
+export async function getProcessDetails(provider: string, name: string, selectedServerId?: string | null) {
+  const serverId = selectedServerId?.trim() || null;
   if (!serverId) throw new Error('No server selected');
 
   if (provider === 'supervisor') {
