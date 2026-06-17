@@ -49,6 +49,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/core/server-context';
 
 interface ProxySettings {
     setHost?: boolean;
@@ -159,6 +161,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
     const router = useRouter();
     const searchParams = useSearchParams();
     const { toast } = useToast();
+    const selectedServerFromUrl = useSelectedServerId();
     const [loading, setLoading] = useState(true);
     const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
     const [selectedServerName, setSelectedServerName] = useState<string>('');
@@ -294,18 +297,8 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                 }));
                 setDomains(domainOptions);
 
-                // Pre-select server logic
-                let targetServerId = searchParams.get('serverId');
-
-                if (!targetServerId) {
-                    // Check cookie if not in URL
-                    const getCookie = (name: string) => {
-                        const value = `; ${document.cookie}`;
-                        const parts = value.split(`; ${name}=`);
-                        if (parts.length === 2) return parts.pop()?.split(';').shift();
-                    };
-                    targetServerId = getCookie('selected_server') || null;
-                }
+                // Pre-select server from URL-driven context first.
+                let targetServerId = selectedServerFromUrl;
 
                 if (!targetServerId && serverOptions.length === 1) {
                     // Auto-select if only one server exists
@@ -346,7 +339,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
         };
 
         fetchData();
-    }, [toast, configId]);
+    }, [toast, configId, selectedServerFromUrl]);
 
     // Load existing configuration
     useEffect(() => {
@@ -1171,7 +1164,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                     title: 'Success',
                     description: result.message || 'Configuration deleted from server successfully.',
                 });
-                router.push('/server/webservices/nginx');
+                router.push(withSelectedServerQuery('/server/webservices/nginx', selectedServerId));
             } else {
                 toast({
                     variant: 'destructive',
@@ -1345,7 +1338,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                 <PageTitleBack
                     title="Nginx Configuration"
                     description="Configure your Nginx server step by step"
-                    backHref="/server/webservices/nginx"
+                    backHref={withSelectedServerQuery('/server/webservices/nginx', selectedServerId)}
                 />
             </div>
 

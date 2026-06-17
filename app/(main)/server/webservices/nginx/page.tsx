@@ -12,6 +12,8 @@ import { cn } from '@/core/utils';
 import { restartNginxService } from './restart-action';
 import { testNginxConfiguration } from './test-action';
 import { useToast } from '@/core/hooks/use-toast';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/core/server-context';
 
 export default function NginxConfigurationsPage() {
     const [configurations, setConfigurations] = useState<WebServiceConfig[]>([]);
@@ -19,6 +21,7 @@ export default function NginxConfigurationsPage() {
     const [restarting, setRestarting] = useState(false);
     const [testing, setTesting] = useState(false);
     const { toast } = useToast();
+    const selectedServerId = useSelectedServerId();
 
     const handleTest = async () => {
         setTesting(true);
@@ -194,7 +197,7 @@ export default function NginxConfigurationsPage() {
             <PageTitleBack
                 title="Nginx Configurations"
                 description="Manage your Nginx server configurations"
-                backHref="/server/webservices"
+                backHref={withSelectedServerQuery('/server/webservices', selectedServerId)}
             />
 
             {/* Actions Card Set */}
@@ -205,7 +208,7 @@ export default function NginxConfigurationsPage() {
                 </div>
                 <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
                     {/* Create New Row */}
-                    <Link href="/server/webservices/nginx/new" className="block">
+                    <Link href={withSelectedServerQuery('/server/webservices/nginx/new', selectedServerId)} className="block">
                         <div className={cn(
                             "p-4 min-w-0 w-full transition-colors hover:bg-muted/50 flex items-center gap-4 text-primary",
                             "border-b border-border"
@@ -264,7 +267,7 @@ export default function NginxConfigurationsPage() {
                 </div>
                 <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
                     {/* Default SSL Configuration */}
-                    <Link href="/server/webservices/nginx/default" className="block">
+                    <Link href={withSelectedServerQuery('/server/webservices/nginx/default', selectedServerId)} className="block">
                         <div className={cn(
                             "p-4 min-w-0 w-full transition-colors hover:bg-muted/50 flex items-center gap-4 text-orange-600 dark:text-orange-500",
                             configurations.length > 0 && "border-b border-border"
@@ -281,7 +284,7 @@ export default function NginxConfigurationsPage() {
 
                     {/* Existing Configurations */}
                     {configurations.map((config, index) => (
-                        <Link key={config.id} href={`/server/webservices/nginx/${config.id}`} className="block">
+                        <Link key={config.id} href={withSelectedServerQuery(`/server/webservices/nginx/${config.id}`, selectedServerId)} className="block">
                             <div className={cn(
                                 "p-4 min-w-0 w-full transition-colors hover:bg-muted/50",
                                 index < configurations.length - 1 && "border-b border-border"
