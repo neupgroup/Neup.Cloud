@@ -4,11 +4,13 @@ import Link from 'next/link';
 import { FolderOpen, Network, ScrollText, AlertCircle } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
+import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
 import { cn } from "@/core/utils";
 import { useSystemSection, SystemSectionProps } from '@/components/applications/system-section';
 
 export function SystemSection({ application }: SystemSectionProps) {
   const { portsDescription, outputLogPath, errorLogPath } = useSystemSection(application);
+  const withSelectedServer = useSelectedServerHref();
 
   const InfoRow = ({
     icon: Icon,
@@ -83,7 +85,7 @@ export function SystemSection({ application }: SystemSectionProps) {
           icon={FolderOpen}
           title="File Manager"
           description={`Browse files at ${application.location}`}
-          href={`/server/files?path=${encodeURIComponent(application.location)}`}
+          href={withSelectedServer(`/server/files?path=${encodeURIComponent(application.location)}`)}
           openInNewTab
         />
 
@@ -91,7 +93,7 @@ export function SystemSection({ application }: SystemSectionProps) {
           icon={ScrollText}
           title="Terminal Output"
           description={outputLogPath}
-          href={`/server/viewer?path=${encodeURIComponent(outputLogPath)}&type=text`}
+          href={withSelectedServer(`/server/viewer?path=${encodeURIComponent(outputLogPath)}&type=text`)}
           openInNewTab
         />
 
@@ -99,7 +101,7 @@ export function SystemSection({ application }: SystemSectionProps) {
           icon={AlertCircle}
           title="Error Log"
           description={errorLogPath}
-          href={`/server/viewer?path=${encodeURIComponent(errorLogPath)}&type=text`}
+          href={withSelectedServer(`/server/viewer?path=${encodeURIComponent(errorLogPath)}&type=text`)}
           openInNewTab
         />
 

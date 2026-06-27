@@ -14,6 +14,7 @@ import type { Metadata } from 'next';
 import { Badge } from "@/components/ui/badge";
 import { checkDatabaseInstallation, listAllDatabases, type DatabaseInstallation, type DatabaseInstance } from '@/services/database/database-runtime';
 import { getServer } from '@/services/server/server-service';
+import { withSelectedServerQuery } from "@/core/server-context";
 
 export const metadata: Metadata = {
     title: 'Databases | Neup.Cloud',
@@ -125,7 +126,7 @@ export default async function DatabasePage({
 
                         <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm">
                             {/* Create Database Item */}
-                            <Link href="/server/database/create" className="block">
+                            <Link href={withSelectedServerQuery('/server/database/create', serverId)} className="block">
                                 <div className="p-4 min-w-0 w-full transition-colors hover:bg-muted/50 border-b border-dashed border-border">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -155,7 +156,7 @@ export default async function DatabasePage({
                                     {databaseInstances.map((db, idx) => (
                                         <Link
                                             key={`${db.engine}-${db.name}-${idx}`}
-                                            href={`/server/database/${db.engine}-${db.name}`}
+                                            href={withSelectedServerQuery(`/server/database/${db.engine}-${db.name}`, serverId)}
                                             className="block"
                                         >
                                             <div className={`p-4 min-w-0 w-full transition-colors hover:bg-muted/50 ${idx !== databaseInstances.length - 1 ? 'border-b border-border' : ''}`}>

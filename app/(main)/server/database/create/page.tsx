@@ -1,13 +1,18 @@
-import { cookies } from 'next/headers';
 import { DatabaseCreateForm } from './database-create-form';
 import { PageTitleBack } from '@/components/page-header';
 import { Database } from 'lucide-react';
 import { checkDatabaseInstallation } from '@/services/database/database-runtime';
+import { getServer } from '@/services/server/server-service';
+import { withSelectedServerQuery } from '@/core/server-context';
 
-export default async function CreateDatabasePage() {
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
-    const serverName = cookieStore.get('selected_server_name')?.value;
+export default async function CreateDatabasePage({
+    searchParams,
+}: {
+    searchParams?: Promise<{ selectedServer?: string }>;
+}) {
+    const resolvedSearchParams = searchParams ? await searchParams : {};
+    const serverId = resolvedSearchParams.selectedServer?.trim() || null;
+    const serverName = serverId ? (await getServer(serverId))?.name ?? null : null;
 
     let installationStatus = null;
     if (serverId) {
@@ -36,10 +41,10 @@ export default async function CreateDatabasePage() {
                         "Select a server to create a database."
                     )
                 }
-                backHref="/server/database"
+                backHref={withSelectedServerQuery('/server/database', serverId)}
             />
 
-            <DatabaseCreateForm serverId={serverId} initialInstallation={installationStatus} />
+            <DatabaseCreateForm serverId={serverId ?? undefined} initialInstallation={installationStatus} />
         </div>
     );
 }

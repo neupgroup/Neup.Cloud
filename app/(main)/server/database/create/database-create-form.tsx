@@ -1,16 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/core/hooks/use-toast';
-import { Loader2, Database, ShieldCheck, Key, User, AlertTriangle, CheckCircle, ArrowRight, Server } from 'lucide-react';
+import { Loader2, Database, ShieldCheck, Key, User, AlertTriangle, CheckCircle, Server } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { type DatabaseInstallation, installDatabaseEngine, checkDatabaseInstallation, createDatabaseInstance } from '@/services/database/database-runtime';
+import { withSelectedServerQuery } from '@/core/server-context';
 
 interface DatabaseCreateFormProps {
     serverId?: string;
@@ -99,7 +100,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                     title: 'Database created',
                     description: result.message,
                 });
-                router.push('/server/database');
+                router.push(withSelectedServerQuery('/server/database', serverId));
             } else {
                 toast({
                     variant: 'destructive',
@@ -308,7 +309,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                 <Button
                     type="button"
                     variant="ghost"
-                    onClick={() => router.push('/server/database')}
+                    onClick={() => router.push(withSelectedServerQuery('/server/database', serverId))}
                     disabled={isLoading}
                 >
                     Cancel
