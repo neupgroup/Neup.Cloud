@@ -14,6 +14,7 @@ import { PageTitleBack } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from '@/core/hooks/use-toast';
+import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
 
 import { executeDatabaseQuery } from '@/services/database/database-runtime';
 
@@ -26,6 +27,7 @@ interface ShellClientProps {
 
 export function ShellClient({ id, dbName, engine, serverId }: ShellClientProps) {
     const { toast } = useToast();
+    const withSelectedServer = useSelectedServerHref();
     const [query, setQuery] = useState('');
     const [isExecuting, setIsExecuting] = useState(false);
     const [result, setResult] = useState<{
@@ -111,7 +113,7 @@ export function ShellClient({ id, dbName, engine, serverId }: ShellClientProps) 
     return (
         <div className="grid gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
             <PageTitleBack
-                backHref={`/server/database/${id}`}
+                backHref={withSelectedServer(`/server/database/${id}`)}
                 title={
                     <span className="flex items-center gap-3">
                         <span className="p-2.5 bg-primary/10 rounded-xl">

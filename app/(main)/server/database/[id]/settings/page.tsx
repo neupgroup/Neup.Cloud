@@ -7,7 +7,6 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Database, Settings, Terminal, Globe, Zap, Activity, Trash2 } from "lucide-react";
-import { cookies } from "next/headers";
 import { Button } from "@/components/ui/button";
 import { PageTitleBack } from "@/components/page-header";
 import type { Metadata } from 'next';
@@ -18,6 +17,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RemoteConnectionSettings } from "./remote-connection-settings";
+import { withSelectedServerQuery } from "@/core/server-context";
+import { parseDatabaseRouteId, resolveSelectedServerId } from "../../route-helpers";
 
 
 export const metadata: Metadata = {
@@ -26,21 +27,18 @@ export const metadata: Metadata = {
 
 type Props = {
     params: Promise<{ id: string }>
+    searchParams?: Promise<{ selectedServer?: string }>;
 }
 
-export default async function DatabaseSettingsPage({ params }: Props) {
+export default async function DatabaseSettingsPage({ params, searchParams }: Props) {
     const { id } = await params;
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+    const serverId = await resolveSelectedServerId(searchParams);
 
     if (!serverId) notFound();
 
-    // Parse ID: Format is "engine-name"
-    const parts = id.split('-');
-    if (parts.length < 2) notFound();
-
-    const engine = parts[0] as 'mariadb' | 'postgres';
-    const dbName = parts.slice(1).join('-');
+    const parsedId = parseDatabaseRouteId(id);
+    if (!parsedId) notFound();
+    const { engine, dbName } = parsedId;
 
     let details = null;
     let settings = null;
@@ -57,7 +55,7 @@ export default async function DatabaseSettingsPage({ params }: Props) {
     return (
         <div className="grid gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
             <PageTitleBack
-                backHref={`/server/database/${id}`}
+                backHref={withSelectedServerQuery(`/server/database/${id}`, serverId)}
                 title={
                     <span className="flex items-center gap-3">
                         <span className="p-2.5 bg-primary/10 rounded-xl">

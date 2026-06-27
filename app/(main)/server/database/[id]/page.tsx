@@ -7,7 +7,6 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Database, Settings, Activity, ShieldCheck, HardDrive, Trash2, Key, Users, Terminal, RefreshCw, ChevronRight, Plus, Download } from "lucide-react";
-import { cookies } from "next/headers";
 import { Button } from "@/components/ui/button";
 import { PageTitleBack } from "@/components/page-header";
 import type { Metadata } from 'next';
@@ -15,6 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { getDatabaseDetails } from '@/services/database/database-runtime';
 import { notFound } from "next/navigation";
 import Link from 'next/link';
+import { withSelectedServerQuery } from "@/core/server-context";
+import { parseDatabaseRouteId, resolveSelectedServerId } from "../route-helpers";
 
 export const metadata: Metadata = {
     title: 'Database Details | Neup.Cloud',
@@ -22,21 +23,18 @@ export const metadata: Metadata = {
 
 type Props = {
     params: Promise<{ id: string }>
+    searchParams?: Promise<{ selectedServer?: string }>;
 }
 
-export default async function DatabaseDetailsPage({ params }: Props) {
+export default async function DatabaseDetailsPage({ params, searchParams }: Props) {
     const { id } = await params;
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+    const serverId = await resolveSelectedServerId(searchParams);
 
     if (!serverId) notFound();
 
-    // Parse ID: Format is "engine-name"
-    const parts = id.split('-');
-    if (parts.length < 2) notFound();
-
-    const engine = parts[0] as 'mariadb' | 'postgres';
-    const dbName = parts.slice(1).join('-');
+    const parsedId = parseDatabaseRouteId(id);
+    if (!parsedId) notFound();
+    const { engine, dbName } = parsedId;
 
     let details = null;
     try {
@@ -50,7 +48,7 @@ export default async function DatabaseDetailsPage({ params }: Props) {
         <div className="grid gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <PageTitleBack
-                    backHref="/server/database"
+                    backHref={withSelectedServerQuery("/server/database", serverId)}
                     title={
                         <span className="flex items-center gap-3">
                             <span className="p-2.5 bg-primary/10 rounded-xl">
@@ -127,7 +125,7 @@ export default async function DatabaseDetailsPage({ params }: Props) {
 
                 <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm">
                     {/* Manage Users */}
-                    <Link href={`/server/database/${id}/users`} className="block">
+                    <Link href={withSelectedServerQuery(`/server/database/${id}/users`, serverId)} className="block">
                         <div className="p-4 min-w-0 w-full transition-colors hover:bg-muted/50 border-b border-border">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -150,7 +148,7 @@ export default async function DatabaseDetailsPage({ params }: Props) {
                     </Link>
 
                     {/* Remote Connection */}
-                    <Link href={`/server/database/${id}/connection`} className="block">
+                    <Link href={withSelectedServerQuery(`/server/database/${id}/connection`, serverId)} className="block">
                         <div className="p-4 min-w-0 w-full transition-colors hover:bg-muted/50 border-b border-border">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -173,7 +171,7 @@ export default async function DatabaseDetailsPage({ params }: Props) {
                     </Link>
 
                     {/* Quick Shell */}
-                    <Link href={`/server/database/${id}/shell`} className="block">
+                    <Link href={withSelectedServerQuery(`/server/database/${id}/shell`, serverId)} className="block">
                         <div className="p-4 min-w-0 w-full transition-colors hover:bg-muted/50 border-b border-border">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -195,7 +193,7 @@ export default async function DatabaseDetailsPage({ params }: Props) {
                     </Link>
 
                     {/* Generate Backup */}
-                    <Link href={`/server/database/${id}/backup`} className="block">
+                    <Link href={withSelectedServerQuery(`/server/database/${id}/backup`, serverId)} className="block">
                         <div className="p-4 min-w-0 w-full transition-colors hover:bg-muted/50 border-b border-border">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -217,7 +215,7 @@ export default async function DatabaseDetailsPage({ params }: Props) {
                     </Link>
 
                     {/* Engine Settings */}
-                    <Link href={`/server/database/${id}/settings`} className="block">
+                    <Link href={withSelectedServerQuery(`/server/database/${id}/settings`, serverId)} className="block">
                         <div className="p-4 min-w-0 w-full transition-colors hover:bg-muted/50">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4 min-w-0 flex-1">

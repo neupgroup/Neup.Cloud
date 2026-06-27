@@ -1,9 +1,9 @@
 
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getDatabaseDetails } from '@/services/database/database-runtime';
 import { UserManageClient } from "./user-manage-client";
 import type { Metadata } from "next";
+import { parseDatabaseRouteId, resolveSelectedServerId } from "../../../route-helpers";
 
 export const metadata: Metadata = {
     title: 'Manage Database User | Neup.Cloud',
@@ -11,20 +11,18 @@ export const metadata: Metadata = {
 
 type Props = {
     params: Promise<{ id: string, userSlug: string }>
+    searchParams?: Promise<{ selectedServer?: string }>;
 }
 
-export default async function ManageUserPage({ params }: Props) {
+export default async function ManageUserPage({ params, searchParams }: Props) {
     const { id, userSlug } = await params;
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+    const serverId = await resolveSelectedServerId(searchParams);
 
     if (!serverId) notFound();
 
-    // Parse DB ID: Format is "engine-name"
-    const dbParts = id.split('-');
-    if (dbParts.length < 2) notFound();
-    const engine = dbParts[0] as 'mariadb' | 'postgres';
-    const dbName = dbParts.slice(1).join('-');
+    const parsedId = parseDatabaseRouteId(id);
+    if (!parsedId) notFound();
+    const { engine, dbName } = parsedId;
 
     // Parse User Slug: Format is "username-host"
     const userParts = userSlug.split('-');

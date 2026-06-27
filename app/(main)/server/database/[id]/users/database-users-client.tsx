@@ -6,11 +6,13 @@ import Link from 'next/link';
 import { cn } from '@/core/utils';
 import { Badge } from "@/components/ui/badge";
 import type { DatabaseUser } from '@/services/database/database-runtime';
+import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
 
 export default function DatabaseUsersClient({ users, dbId }: { users: DatabaseUser[], dbId: string }) {
+    const withSelectedServer = useSelectedServerHref();
 
     // Construct the create URL
-    const createUrl = `/server/database/${dbId}/users/create`;
+    const createUrl = withSelectedServer(`/server/database/${dbId}/users/create`);
 
     return (
         <div className="space-y-6">
@@ -46,7 +48,7 @@ export default function DatabaseUsersClient({ users, dbId }: { users: DatabaseUs
                     users.map((user, index) => (
                         <Link
                             key={`${user.username}-${user.host}`}
-                            href={`/server/database/${dbId}/users/${user.username}`}
+                            href={withSelectedServer(`/server/database/${dbId}/users/${user.username}`)}
                             className="block group"
                         >
                             <div className={cn(

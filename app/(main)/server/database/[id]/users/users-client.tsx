@@ -11,6 +11,7 @@ import { useToast } from '@/core/hooks/use-toast';
 import { UserCreateForm } from "./user-create-form";
 import { deleteDatabaseUser, type DatabaseUser } from '@/services/database/database-runtime';
 import Link from 'next/link';
+import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
 
 interface UsersClientPageProps {
     serverId: string;
@@ -22,6 +23,7 @@ interface UsersClientPageProps {
 export function UsersClientPage({ serverId, engine, dbName, initialUsers }: UsersClientPageProps) {
     const router = useRouter();
     const { toast } = useToast();
+    const withSelectedServer = useSelectedServerHref();
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
     const handleSuccess = () => {
@@ -52,7 +54,7 @@ export function UsersClientPage({ serverId, engine, dbName, initialUsers }: User
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
                     <Button variant="ghost" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
-                        <Link href={`/server/database/${engine}-${dbName}`}>
+                        <Link href={withSelectedServer(`/server/database/${engine}-${dbName}`)}>
                             <ChevronLeft className="h-4 w-4 mr-1" /> Back to Database
                         </Link>
                     </Button>
@@ -98,7 +100,7 @@ export function UsersClientPage({ serverId, engine, dbName, initialUsers }: User
                                             </div>
                                             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" asChild>
-                                                    <Link href={`/server/database/${engine}-${dbName}/users/${user.username}-${user.host || 'local'}`}>
+                                                    <Link href={withSelectedServer(`/server/database/${engine}-${dbName}/users/${user.username}-${user.host || 'local'}`)}>
                                                         <Key className="h-4 w-4" />
                                                     </Link>
                                                 </Button>

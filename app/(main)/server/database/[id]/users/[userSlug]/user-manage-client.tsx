@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
 
 interface UserManageClientProps {
     serverId: string;
@@ -45,6 +46,7 @@ const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
 export function UserManageClient({ serverId, engine, dbName, username, host }: UserManageClientProps) {
     const router = useRouter();
     const { toast } = useToast();
+    const withSelectedServer = useSelectedServerHref();
     const [isLoading, setIsLoading] = useState(false);
     const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(PERMISSION_PRESETS.full);
     const [newPassword, setNewPassword] = useState('');
@@ -119,7 +121,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host }: U
             const res = await deleteDatabaseUser(serverId, engine, dbName, username, host);
             if (res.success) {
                 toast({ title: 'User deleted', description: res.message });
-                router.push(`/server/database/${engine}-${dbName}/users`);
+                router.push(withSelectedServer(`/server/database/${engine}-${dbName}/users`));
             } else {
                 toast({ variant: 'destructive', title: 'Error', description: res.message });
             }
@@ -134,7 +136,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host }: U
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div className="space-y-1">
                 <Button variant="ghost" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
-                    <Link href={`/server/database/${engine}-${dbName}/users`}>
+                    <Link href={withSelectedServer(`/server/database/${engine}-${dbName}/users`)}>
                         <ChevronLeft className="h-4 w-4 mr-1" /> Back to Users
                     </Link>
                 </Button>

@@ -1,34 +1,22 @@
-import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { PageTitle } from "@/components/page-header";
 import { Users } from "lucide-react";
 import DatabaseUsersClient from "./database-users-client";
 import { listDatabaseUsers } from '@/services/database/database-runtime';
+import { parseDatabaseRouteId, resolveSelectedServerId } from "../../route-helpers";
 
-export default async function DatabaseUsersPage(props: { params: Promise<{ id: string }> }) {
+export default async function DatabaseUsersPage(props: { params: Promise<{ id: string }>; searchParams?: Promise<{ selectedServer?: string }> }) {
     const params = await props.params;
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+    const serverId = await resolveSelectedServerId(props.searchParams);
 
     if (!serverId) {
         redirect('/servers');
     }
 
     const { id } = params;
-
-    // Parse engine and dbName from id (format: engine-dbName)
-    // Find first hyphen to split
-    const splitIndex = id.indexOf('-');
-    if (splitIndex === -1) {
-        notFound();
-    }
-
-    const engine = id.substring(0, splitIndex);
-    const dbName = id.substring(splitIndex + 1);
-
-    if (engine !== 'mariadb' && engine !== 'postgres') {
-        notFound();
-    }
+    const parsedId = parseDatabaseRouteId(id);
+    if (!parsedId) notFound();
+    const { engine, dbName } = parsedId;
 
     // Fetch users
     const users = await listDatabaseUsers(serverId, engine as 'mariadb' | 'postgres', dbName);

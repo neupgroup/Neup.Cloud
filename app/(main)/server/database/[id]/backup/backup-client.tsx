@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from '@/core/hooks/use-toast';
 import { generateDatabaseBackup } from '@/services/database/database-runtime';
 import Link from 'next/link';
+import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
 
 interface BackupClientPageProps {
     serverId: string;
@@ -18,6 +19,7 @@ interface BackupClientPageProps {
 
 export function BackupClientPage({ serverId, engine, dbName }: BackupClientPageProps) {
     const { toast } = useToast();
+    const withSelectedServer = useSelectedServerHref();
     const [isGenerating, setIsGenerating] = useState<string | null>(null);
 
     const handleBackup = async (mode: 'full' | 'schema') => {
@@ -64,7 +66,7 @@ export function BackupClientPage({ serverId, engine, dbName }: BackupClientPageP
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
                     <Button variant="ghost" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
-                        <Link href={`/server/database/${engine}-${dbName}`}>
+                        <Link href={withSelectedServer(`/server/database/${engine}-${dbName}`)}>
                             <ChevronLeft className="h-4 w-4 mr-1" /> Back to Database
                         </Link>
                     </Button>

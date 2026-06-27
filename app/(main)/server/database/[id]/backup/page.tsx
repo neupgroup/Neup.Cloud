@@ -1,9 +1,9 @@
 
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { BackupClientPage } from "./backup-client";
 import { getDatabaseDetails } from '@/services/database/database-runtime';
 import type { Metadata } from "next";
+import { parseDatabaseRouteId, resolveSelectedServerId } from "../../route-helpers";
 
 export const metadata: Metadata = {
     title: 'Database Backup | Neup.Cloud',
@@ -11,21 +11,18 @@ export const metadata: Metadata = {
 
 type Props = {
     params: Promise<{ id: string }>
+    searchParams?: Promise<{ selectedServer?: string }>;
 }
 
-export default async function DatabaseBackupPage({ params }: Props) {
+export default async function DatabaseBackupPage({ params, searchParams }: Props) {
     const { id } = await params;
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+    const serverId = await resolveSelectedServerId(searchParams);
 
     if (!serverId) notFound();
 
-    // Parse ID: Format is "engine-name"
-    const parts = id.split('-');
-    if (parts.length < 2) notFound();
-
-    const engine = parts[0] as 'mariadb' | 'postgres';
-    const dbName = parts.slice(1).join('-');
+    const parsedId = parseDatabaseRouteId(id);
+    if (!parsedId) notFound();
+    const { engine, dbName } = parsedId;
 
     try {
         // Verify existence first

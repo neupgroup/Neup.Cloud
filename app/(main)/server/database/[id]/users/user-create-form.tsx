@@ -11,6 +11,7 @@ import { useToast } from '@/core/hooks/use-toast';
 import { Loader2, UserPlus, ShieldCheck, Key, User, Database } from 'lucide-react';
 import { createDatabaseUser } from '@/services/database/database-runtime';
 import { Checkbox } from "@/components/ui/checkbox";
+import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
 
 interface UserCreateFormProps {
     serverId: string;
@@ -42,6 +43,7 @@ const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
 export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCreateFormProps) {
     const { toast } = useToast();
     const router = useRouter();
+    const withSelectedServer = useSelectedServerHref();
     const [isLoading, setIsLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -78,7 +80,7 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
                 setUsername('');
                 setPassword('');
                 onSuccess?.();
-                router.push(`/server/database/${engine}-${dbName}/users`);
+                router.push(withSelectedServer(`/server/database/${engine}-${dbName}/users`));
             } else {
                 toast({
                     variant: 'destructive',

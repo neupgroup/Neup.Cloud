@@ -1,23 +1,22 @@
 
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getDatabaseDetails } from '@/services/database/database-runtime';
 import { UserCreateForm } from "../user-create-form";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, UserPlus } from "lucide-react";
 import Link from "next/link";
+import { withSelectedServerQuery } from "@/core/server-context";
+import { parseDatabaseRouteId, resolveSelectedServerId } from "../../../route-helpers";
 
-export default async function CreateUserPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CreateUserPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams?: Promise<{ selectedServer?: string }> }) {
     const { id } = await params;
-    const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+    const serverId = await resolveSelectedServerId(searchParams);
 
     if (!serverId) notFound();
 
-    const parts = id.split('-');
-    if (parts.length < 2) notFound();
-    const engine = parts[0] as 'mariadb' | 'postgres';
-    const dbName = parts.slice(1).join('-');
+    const parsedId = parseDatabaseRouteId(id);
+    if (!parsedId) notFound();
+    const { engine, dbName } = parsedId;
 
     try {
         await getDatabaseDetails(serverId, engine, dbName);
@@ -29,7 +28,7 @@ export default async function CreateUserPage({ params }: { params: Promise<{ id:
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div className="space-y-1">
                 <Button variant="ghost" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
-                    <Link href={`/server/database/${id}/users`}>
+                    <Link href={withSelectedServerQuery(`/server/database/${id}/users`, serverId)}>
                         <ChevronLeft className="h-4 w-4 mr-1" /> Back to Users
                     </Link>
                 </Button>
