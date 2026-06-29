@@ -2,7 +2,7 @@
 
 import { getServerForRunner } from '@/services/server/server-service';
 import { runCommandOnServer } from '@/services/server/ssh';
-import type { DatabaseDetails, DatabaseUser, OperationResult, BackupResult, QueryResult } from '../_types';
+import type { DatabaseDetails, DatabaseUser, OperationResult, BackupResult, QueryResult } from '../../engine-types';
 
 /**
  * Get detailed information about a PostgreSQL database
@@ -112,6 +112,86 @@ export async function createPostgresDatabase(
         return {
             success: false,
             message: error.message || 'Database creation failed.'
+        };
+    }
+}
+
+/**
+ * Drop a PostgreSQL database
+ */
+export async function dropPostgresDatabase(
+    serverId: string,
+    dbName: string
+): Promise<OperationResult> {
+    const server = await getServerForRunner(serverId);
+    if (!server || !server.username || !server.privateKey) {
+        throw new Error('Server not found or missing credentials.');
+    }
+
+    try {
+        const safeDbName = dbName.replace(/[^a-zA-Z0-9_]/g, '');
+        if (!safeDbName) {
+            throw new Error('Invalid database name.');
+        }
+
+        const existsResult = await runCommandOnServer(
+            server.publicIp,
+            server.username,
+            server.privateKey,
+            `sudo -u postgres psql -t -c "SELECT datname FROM pg_database WHERE datname = '${safeDbName}';"`,
+            undefined,
+            undefined,
+            true
+        );
+
+        if (existsResult.code !== 0) {
+            throw new Error(existsResult.stderr || 'Failed to verify database.');
+        }
+
+        if (!existsResult.stdout.trim()) {
+            return {
+                success: false,
+                message: `Database '${dbName}' does not exist.`
+            };
+        }
+
+        const disconnectResult = await runCommandOnServer(
+            server.publicIp,
+            server.username,
+            server.privateKey,
+            `sudo -u postgres psql -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${safeDbName}' AND pid <> pg_backend_pid();"`,
+            undefined,
+            undefined,
+            true
+        );
+
+        if (disconnectResult.code !== 0) {
+            throw new Error(disconnectResult.stderr || 'Failed to terminate active database sessions.');
+        }
+
+        const dropResult = await runCommandOnServer(
+            server.publicIp,
+            server.username,
+            server.privateKey,
+            `sudo -u postgres psql -d postgres -c "DROP DATABASE \\"${safeDbName}\\";"`,
+            undefined,
+            undefined,
+            true
+        );
+
+        if (dropResult.code !== 0) {
+            throw new Error(dropResult.stderr || 'Failed to drop database.');
+        }
+
+        return {
+            success: true,
+            message: `Database '${dbName}' dropped successfully.`
+        };
+    } catch (error: any) {
+        console.error('Error dropping PostgreSQL database:', error);
+        return {
+            success: false,
+            message: error.message || 'Failed to drop database.'
         };
     }
 }

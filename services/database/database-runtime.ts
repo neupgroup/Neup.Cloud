@@ -29,6 +29,7 @@ import {
 import {
     getMariaDBDetails,
     createMariaDBDatabase,
+    dropMariaDBDatabase,
     listMariaDBUsers,
     createMariaDBUser,
     deleteMariaDBUser,
@@ -42,6 +43,7 @@ import {
 import {
     getPostgresDetails,
     createPostgresDatabase,
+    dropPostgresDatabase,
     listPostgresUsers,
     createPostgresUser,
     deletePostgresUser,
@@ -114,6 +116,21 @@ export async function createDatabaseInstance(
         return createMariaDBDatabase(serverId, dbName, dbUser, dbPass);
     } else {
         return createPostgresDatabase(serverId, dbName, dbUser, dbPass);
+    }
+}
+
+/**
+ * Drop a database instance
+ */
+export async function dropDatabaseInstance(
+    serverId: string,
+    engine: 'mariadb' | 'postgres',
+    dbName: string
+): Promise<OperationResult> {
+    if (engine === 'mariadb') {
+        return dropMariaDBDatabase(serverId, dbName);
+    } else {
+        return dropPostgresDatabase(serverId, dbName);
     }
 }
 

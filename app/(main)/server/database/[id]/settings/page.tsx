@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { RemoteConnectionSettings } from "./remote-connection-settings";
 import { withSelectedServerQuery } from "@/core/server-context";
 import { parseDatabaseRouteId, resolveSelectedServerId } from "../../route-helpers";
+import { DropDatabaseButton } from "./drop-database-button";
 
 
 export const metadata: Metadata = {
@@ -237,9 +238,7 @@ export default async function DatabaseSettingsPage({ params, searchParams }: Pro
                                     Permanently delete this database and all its data
                                 </p>
                             </div>
-                            <Button variant="destructive">
-                                Drop Database
-                            </Button>
+                            <DropDatabaseButton serverId={serverId} engine={engine} dbName={dbName} />
                         </div>
                     </CardContent>
                 </Card>

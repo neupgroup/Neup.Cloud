@@ -2,7 +2,7 @@
 
 import { getServerForRunner } from '@/services/server/server-service';
 import { runCommandOnServer } from '@/services/server/ssh';
-import type { DatabaseDetails, DatabaseUser, OperationResult, BackupResult, QueryResult } from '../_types';
+import type { DatabaseDetails, DatabaseUser, OperationResult, BackupResult, QueryResult } from '../../engine-types';
 
 /**
  * Get detailed information about a MariaDB database
@@ -110,6 +110,72 @@ export async function createMariaDBDatabase(
         return {
             success: false,
             message: error.message || 'Database creation failed.'
+        };
+    }
+}
+
+/**
+ * Drop a MariaDB database
+ */
+export async function dropMariaDBDatabase(
+    serverId: string,
+    dbName: string
+): Promise<OperationResult> {
+    const server = await getServerForRunner(serverId);
+    if (!server || !server.username || !server.privateKey) {
+        throw new Error('Server not found or missing credentials.');
+    }
+
+    try {
+        const safeDbName = dbName.replace(/[^a-zA-Z0-9_]/g, '');
+        if (!safeDbName) {
+            throw new Error('Invalid database name.');
+        }
+
+        const existsResult = await runCommandOnServer(
+            server.publicIp,
+            server.username,
+            server.privateKey,
+            `sudo mysql -N -s -e "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = '${safeDbName}';"`,
+            undefined,
+            undefined,
+            true
+        );
+
+        if (existsResult.code !== 0) {
+            throw new Error(existsResult.stderr || 'Failed to verify database.');
+        }
+
+        if (!existsResult.stdout.trim()) {
+            return {
+                success: false,
+                message: `Database '${dbName}' does not exist.`
+            };
+        }
+
+        const dropResult = await runCommandOnServer(
+            server.publicIp,
+            server.username,
+            server.privateKey,
+            `sudo mysql -e "DROP DATABASE \\\`${safeDbName}\\\`;"`,
+            undefined,
+            undefined,
+            true
+        );
+
+        if (dropResult.code !== 0) {
+            throw new Error(dropResult.stderr || 'Failed to drop database.');
+        }
+
+        return {
+            success: true,
+            message: `Database '${dbName}' dropped successfully.`
+        };
+    } catch (error: any) {
+        console.error('Error dropping MariaDB database:', error);
+        return {
+            success: false,
+            message: error.message || 'Failed to drop database.'
         };
     }
 }
