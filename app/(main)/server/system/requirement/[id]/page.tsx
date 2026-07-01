@@ -1,17 +1,26 @@
 'use client';
 
+/*
+::neup.documentation::system-requirement-detail-page
+
+Displays requirement installation status for the active server and keeps all
+actions bound to the selected server from the URL-backed server context.
+
+::end
+*/
+
 import { useParams } from 'next/navigation';
 import { requirements } from '@/services/server/requirement-list';
 import { PageTitleBack } from '@/components/page-header';
 import { useToast } from '@/core/hooks/use-toast';
 import { useState, useEffect } from 'react';
-import Cookies from 'universal-cookie';
 import { checkRequirementStep, installRequirementStep, uninstallRequirementStep } from '../runner';
 import * as Icons from 'lucide-react';
 import { cn } from '@/core/utils';
 import { Loader2, CheckCircle2, XCircle, Trash2, AlertTriangle } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useServerName } from '@/core/hooks/use-server-name';
+import { useSelectedServerHref, useSelectedServerId } from '@/core/hooks/use-selected-server';
 
 const Icon = ({ name, className }: { name: string, className?: string }) => {
     // @ts-ignore
@@ -64,15 +73,14 @@ export default function RequirementDetailPage() {
 
     const config = requirements.find(r => r.id === id);
     const serverName = useServerName();
+    const serverId = useSelectedServerId();
+    const withSelectedServer = useSelectedServerHref();
 
     const [stepStatus, setStepStatus] = useState<Record<number, 'pending' | 'checking' | 'completed' | 'failed'>>({});
     const [isLoading, setIsLoading] = useState(false);
     const [isInstalling, setIsInstalling] = useState(false);
     const [isUninstalling, setIsUninstalling] = useState(false);
     const [isRepairing, setIsRepairing] = useState(false);
-
-    const cookies = new Cookies(null, { path: '/' });
-    const serverId = cookies.get('selected_server');
 
     useEffect(() => {
         if (config && serverId) {
@@ -266,7 +274,7 @@ export default function RequirementDetailPage() {
                 title={`${config.title} Requirement`}
                 description={config.description}
                 serverName={serverName}
-                backHref="/server/system/requirement"
+                backHref={withSelectedServer("/server/system/requirement")}
             />
 
             {/* Installation Steps - Attached Cards List */}

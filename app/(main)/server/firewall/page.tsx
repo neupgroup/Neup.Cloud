@@ -1,9 +1,19 @@
+/*
+::neup.documentation::server-firewall-page
+
+Server firewall landing page that keeps firewall sub-routes scoped to the
+currently selected server from the URL query context.
+
+::end
+*/
+
 import { PageTitle } from "@/components/page-header";
 import { ShieldAlert } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getServer } from "@/services/server/server-service";
+import { withSelectedServerQuery } from "@/core/server-context";
 
 export const metadata: Metadata = {
     title: 'Firewall | Neup.Cloud',
@@ -38,7 +48,7 @@ export default async function FirewallPage({
                         View and manage allowed ports and network connections.
                     </p>
                     <Button asChild className="mt-4">
-                        <Link href="/server/firewall/network">Manage Network</Link>
+                        <Link href={withSelectedServerQuery("/server/firewall/network", serverId)}>Manage Network</Link>
                     </Button>
                 </div>
 
@@ -48,7 +58,7 @@ export default async function FirewallPage({
                         Manage system accounts and user access for this instance.
                     </p>
                     <Button asChild className="mt-4">
-                        <Link href="/server/firewall/users">Manage Users</Link>
+                        <Link href={withSelectedServerQuery("/server/firewall/users", serverId)}>Manage Users</Link>
                     </Button>
                 </div>
 
@@ -58,7 +68,7 @@ export default async function FirewallPage({
                         Manage SSH keys for secure access to your instance.
                     </p>
                     <Button asChild className="mt-4">
-                        <Link href="/server/firewall/keys">Manage Keys</Link>
+                        <Link href={withSelectedServerQuery("/server/firewall/keys", serverId)}>Manage Keys</Link>
                     </Button>
                 </div>
             </div>

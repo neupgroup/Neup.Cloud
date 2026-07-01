@@ -1,3 +1,16 @@
+/*
+::neup.documentation::mail-config-editor
+
+Reusable mail configuration flow used by the account-level and server-level mail pages.
+
+::private
+
+Supports a configurable page header so different routes can reuse the same domain and port-check workflow.
+
+::private end
+::end
+*/
+
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -20,7 +33,17 @@ import type { Server } from '@/services/server/types';
 import { executeCommand } from '@/services/server/commands/server-command-service';
 import { Loader2, Play } from 'lucide-react';
 
-export default function MailConfigEditor() {
+type MailConfigEditorProps = {
+  backHref?: string;
+  title?: string;
+  description?: string;
+};
+
+export default function MailConfigEditor({
+  backHref = '/server/webservices/nginx',
+  title = 'Mail',
+  description = 'Configure email for your domain in guided steps.',
+}: MailConfigEditorProps) {
   const [domains, setDomains] = useState<ManagedDomain[]>([]);
   const [servers, setServers] = useState<Server[]>([]);
   const [isDomainsLoading, setIsDomainsLoading] = useState(true);
@@ -111,9 +134,9 @@ export default function MailConfigEditor() {
   return (
     <div className="grid gap-6 pb-10">
       <PageTitleBack
-        backHref="/server/webservices/nginx"
-        title="Mail"
-        description="Configure email for your domain in guided steps."
+        backHref={backHref}
+        title={title}
+        description={description}
       />
 
       <Card className="p-6 space-y-5">

@@ -154,6 +154,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
     { href: "/server/status", label: "Status", icon: HeartPulse },
     { href: "/server/applications", label: "Applications", icon: Activity },
     { href: "/server/database", label: "Databases", icon: Database },
+    { href: "/server/mail", label: "Mail", icon: Mail },
     { href: "/server/commands", label: "Commands", icon: Terminal },
     { href: "/server/firewall", label: "Firewall", icon: ShieldAlert },
     { href: "/server/files", label: "File Manager", icon: FolderKanban },

@@ -1,7 +1,20 @@
+/*
+::neup.documentation::server-home-page
+
+Server dashboard entry page for the selected server.
+
+::private
+
+Shows quick links into each major server management area.
+
+::private end
+::end
+*/
+
 "use client";
 
 import Link from 'next/link';
-import { Activity, TerminalSquare, FolderOpen, Rocket, Database, Globe, HardDrive, Shield } from 'lucide-react';
+import { Activity, TerminalSquare, FolderOpen, Rocket, Database, Globe, HardDrive, Shield, Mail } from 'lucide-react';
 import { PageTitle } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,6 +53,26 @@ export default function ServerHomePage() {
                     <CardFooter className="border-t px-6 py-4">
                         <Button asChild className="w-full">
                             <Link href="/server/status">Open Status</Link>
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <Mail className="h-5 w-5 text-muted-foreground" />
+                            <CardTitle>Mail</CardTitle>
+                        </div>
+                        <CardDescription>
+                            Configure domain mail routing and run the outbound SMTP port check on this server.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="text-sm text-muted-foreground">
+                        Uses the guided domain and server selection workflow.
+                    </CardContent>
+                    <CardFooter className="border-t px-6 py-4">
+                        <Button asChild className="w-full">
+                            <Link href="/server/mail">Open Mail</Link>
                         </Button>
                     </CardFooter>
                 </Card>

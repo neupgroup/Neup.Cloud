@@ -1,5 +1,14 @@
 'use client';
 
+/*
+::neup.documentation::server-status-client
+
+Renders live and historical server status views and routes users to the logger
+requirement while preserving the active server selection.
+
+::end
+*/
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -39,6 +48,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { withSelectedServerQuery } from '@/core/server-context';
 
 const CustomTooltip = ({ active, payload, label, unit }: any) => {
     if (active && payload && payload.length) {
@@ -351,7 +361,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
         if (!serverId) return;
 
         if (!statusData?.isTracking) {
-            router.push('/server/system/requirement/system-logger');
+            router.push(withSelectedServerQuery('/server/system/requirement/system-logger', serverId));
             return;
         }
 

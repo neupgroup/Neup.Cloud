@@ -1,5 +1,14 @@
 "use client";
 
+/*
+::neup.documentation::system-requirements-page
+
+Renders the system requirement catalog for the currently selected server and
+preserves the server context when navigating between requirement routes.
+
+::end
+*/
+
 import { PageTitle } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
@@ -8,6 +17,7 @@ import { cn } from '@/core/utils';
 import { requirements } from '@/services/server/requirement-list';
 import * as Icons from 'lucide-react';
 import { useServerName } from '@/core/hooks/use-server-name';
+import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
@@ -35,10 +45,12 @@ const mockRequirements: RequirementItem[] = [
 
 export default function RequirementsPage() {
     const serverName = useServerName();
+    const withSelectedServer = useSelectedServerHref();
+
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             <Button asChild variant="ghost" size="sm" className="w-fit -ml-2 text-muted-foreground hover:text-foreground">
-                <Link href="/server/system">
+                <Link href={withSelectedServer("/server/system")}>
                     <ArrowLeft className="mr-1 h-4 w-4" /> Back to System
                 </Link>
             </Button>
@@ -51,7 +63,7 @@ export default function RequirementsPage() {
 
             <div className="grid gap-6 md:grid-cols-3">
                 {requirements.map((req) => (
-                    <Link key={req.id} href={`/server/system/requirement/${req.id}`} className="group">
+                    <Link key={req.id} href={withSelectedServer(`/server/system/requirement/${req.id}`)} className="group">
                         <Card className="h-full transition-all hover:shadow-md hover:border-primary/50">
                             <CardHeader>
                                 <div className="flex items-center justify-between">

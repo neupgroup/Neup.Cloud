@@ -1,8 +1,16 @@
 'use client';
 
+/*
+::neup.documentation::server-firewall-network-client
+
+Interactive firewall network rules client that manages rule CRUD and preserves
+selected-server navigation when moving to the firewall connectivity test page.
+
+::end
+*/
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import {
     Card,
 } from "@/components/ui/card";
@@ -31,6 +39,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
+import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
 
 function RulesList({ rules, onDelete }: { rules: FirewallRule[], onDelete: (id: number) => void }) {
     if (rules.length === 0) {
@@ -194,6 +203,7 @@ function AddRuleDialog({ onAdd, isOpen, setIsOpen }: { onAdd: (port: string, pro
 export default function NetworkClient({ serverId }: { serverId: string }) {
     const { toast } = useToast();
     const router = useRouter();
+    const withSelectedServer = useSelectedServerHref();
     const [rules, setRules] = useState<FirewallRule[]>([]);
     const [isActive, setIsActive] = useState(false);
     const [defaults, setDefaults] = useState<{ incoming: string, outgoing: string }>({ incoming: 'unknown', outgoing: 'unknown' });
@@ -349,7 +359,7 @@ export default function NetworkClient({ serverId }: { serverId: string }) {
 
                         {/* Test Connectivity Row */}
                         <div
-                            onClick={() => router.push('/server/firewall/network/test')}
+                            onClick={() => router.push(withSelectedServer('/server/firewall/network/test'))}
                             className="p-4 min-w-0 w-full transition-colors hover:bg-muted/50 cursor-pointer flex items-center justify-between group"
                         >
                             <div className="min-w-0 flex-1">
