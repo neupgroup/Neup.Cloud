@@ -2,11 +2,11 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import Cookies from 'universal-cookie';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, AlertTriangle, ArrowLeft, Shield, ShieldOff } from 'lucide-react';
 import { getFileContent, saveFileContent } from '@/services/server/viewer-service';
+import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 import { useToast } from '@/core/hooks/use-toast';
 
 export default function ViewerClient() {
@@ -15,10 +15,9 @@ export default function ViewerClient() {
   const searchParams = useSearchParams();
   const path = searchParams.get('path');
   const type = searchParams.get('type');
+  const serverId = useSelectedServerId();
 
   const { toast } = useToast();
-  const [serverId, setServerId] = useState<string | null>(null);
-  const [serverReady, setServerReady] = useState(false);
   const [content, setContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -27,13 +26,6 @@ export default function ViewerClient() {
 
   const rootMode = searchParams.get('rootMode') === 'true';
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    const cookies = new Cookies(null, { path: '/' });
-    const selectedServer = cookies.get('selected_server');
-    setServerId(selectedServer ?? null);
-    setServerReady(true);
-  }, []);
 
   useEffect(() => {
     const filename = path?.split('/').pop() || 'File';
@@ -109,15 +101,6 @@ export default function ViewerClient() {
   };
 
   if (!path) return <div className="p-8 text-center">No file path specified.</div>;
-
-  if (!serverReady) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        <span className="ml-2 text-muted-foreground">Loading server selection...</span>
-      </div>
-    );
-  }
 
   if (!serverId) {
     return (

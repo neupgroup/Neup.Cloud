@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/core/hooks/use-toast';
+import { withSelectedServerQuery } from '@/core/server-context';
 import { cn } from '@/core/utils';
 import { searchFilesOnServer } from '@/services/server/server-file-service';
 import type { FileSearchResult } from '@/services/server/server-file-types';
@@ -285,8 +286,14 @@ export default function ServerSearchPage() {
                   </TableHeader>
                   <TableBody>
                     {results.map((item) => {
-                      const viewerHref = `/server/viewer?path=${encodeURIComponent(item.path)}&type=${guessViewerType(item.path)}${rootMode ? '&rootMode=true' : ''}`;
-                      const openFilesHref = `/server/files?path=${encodeURIComponent(item.directory)}${rootMode ? '&rootMode=true' : ''}`;
+                      const viewerHref = withSelectedServerQuery(
+                        `/server/viewer?path=${encodeURIComponent(item.path)}&type=${guessViewerType(item.path)}${rootMode ? '&rootMode=true' : ''}`,
+                        selectedServerId
+                      );
+                      const openFilesHref = withSelectedServerQuery(
+                        `/server/files?path=${encodeURIComponent(item.directory)}${rootMode ? '&rootMode=true' : ''}`,
+                        selectedServerId
+                      );
 
                       return (
                         <TableRow

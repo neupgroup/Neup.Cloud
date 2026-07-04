@@ -2,6 +2,10 @@
 
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/webservices/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/webservices/page.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/page.tsx).
+- [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/files/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/files/page.tsx).
+- [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/search/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/search/page.tsx).
+- [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/viewer/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/viewer/page.tsx).
+- [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/viewer/viewer-client.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/viewer/viewer-client.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [core/server-context.ts](/Users/neupkishor/Code/neup.cloud/core/server-context.ts).
 - [ ] Add `::neup.documentation::...::end` documentation to [core/hooks/use-selected-server.ts](/Users/neupkishor/Code/neup.cloud/core/hooks/use-selected-server.ts).
 - [ ] Add `::neup.documentation::...::end` documentation to [core/hooks/use-server-name.ts](/Users/neupkishor/Code/neup.cloud/core/hooks/use-server-name.ts).

@@ -72,6 +72,7 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 import { useServerName } from '@/core/hooks/use-server-name';
+import { withSelectedServerQuery } from '@/core/server-context';
 
 function formatBytes(bytes: number, decimals = 2) {
   if (bytes === 0) return '0 Bytes';
@@ -87,6 +88,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const selectedServerId = useSelectedServerId();
 
   // State
   const [files, setFiles] = useState<FileOrFolder[]>([]);
@@ -244,7 +246,10 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
       else if (codeExts.includes(ext)) type = 'code';
 
       // Relative URL so it respects Next.js `basePath` (e.g. /cloud).
-      return `viewer?path=${encodeURIComponent(fullPath)}&type=${type}${rootMode ? '&rootMode=true' : ''}`;
+      return withSelectedServerQuery(
+        `viewer?path=${encodeURIComponent(fullPath)}&type=${type}${rootMode ? '&rootMode=true' : ''}`,
+        selectedServerId
+      );
     };
 
     if (item.type === 'directory') {
