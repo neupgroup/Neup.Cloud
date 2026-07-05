@@ -44,6 +44,19 @@ import { differenceInDays, differenceInHours, format, formatDistanceToNow } from
 import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 import { resolveSelectedServerValue, withSelectedServerQuery } from '@/core/server-context';
 
+/*
+::neup.documentation::server-commands-page
+::private
+
+The server commands page reads the active server from `selectedServer`, runs
+saved or custom commands through server services, and accepts `pretypecommand`
+to prefill the custom command textarea for flows such as File Manager's Open
+Terminal Here action.
+
+::private end
+::end
+*/
+
 type ServerType = {
   id: string;
   name: string;
@@ -147,6 +160,13 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
       setSelectedServer(resolveSelectedServerValue(selectedServerFromUrl, servers) ?? '');
     }
   }, [selectedServerFromUrl, servers]);
+
+  useEffect(() => {
+    const pretypeCommand = searchParams.get('pretypecommand');
+    if (pretypeCommand !== null) {
+      setCustomCommand(pretypeCommand);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const query = searchParams.get('query');

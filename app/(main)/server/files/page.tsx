@@ -35,6 +35,7 @@ import {
   ShieldOff,
   Download,
   Server,
+  Terminal,
 } from 'lucide-react';
 import {
   browseDirectory,
@@ -73,6 +74,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useSelectedServerId } from '@/core/hooks/use-selected-server';
 import { useServerName } from '@/core/hooks/use-server-name';
 import { withSelectedServerQuery } from '@/core/server-context';
+
+/*
+::neup.documentation::server-files-page
+::private
+
+The server file manager browses the selected server from the `selectedServer`
+URL parameter, manages directory actions, and can open the command terminal in
+a new tab with the current file-manager path prefilled as a `cd <path> && `
+command.
+
+::private end
+::end
+*/
 
 function formatBytes(bytes: number, decimals = 2) {
   if (bytes === 0) return '0 Bytes';
@@ -719,6 +733,11 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
     const newPath = '/' + pathSegments.slice(0, index + 1).join('/');
     router.push(pathname + '?' + createQueryString('path', newPath));
   }
+
+  const terminalHereParams = new URLSearchParams();
+  terminalHereParams.set('selectedServer', selectedServerId || serverId);
+  terminalHereParams.set('pretypecommand', `cd ${currentPath} && `);
+  const terminalHereHref = `/server/commands?${terminalHereParams.toString()}`;
   const breadcrumbSegments = currentPath.split('/').filter(Boolean);
 
   return (
@@ -787,6 +806,10 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
             </button>
 
             <div className="h-px bg-border my-1" />
+
+            <Link href={terminalHereHref} target="_blank" rel="noopener noreferrer" className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
+              <Terminal className="mr-2 h-4 w-4" /> Open Terminal Here
+            </Link>
 
             <button onClick={handleViewModeChange} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
               {viewMode === 'grid' ? (

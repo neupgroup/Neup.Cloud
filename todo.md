@@ -2,7 +2,6 @@
 
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/webservices/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/webservices/page.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/page.tsx).
-- [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/files/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/files/page.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/search/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/search/page.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/viewer/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/viewer/page.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/viewer/viewer-client.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/viewer/viewer-client.tsx).
