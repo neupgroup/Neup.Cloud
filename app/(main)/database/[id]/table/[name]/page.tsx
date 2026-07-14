@@ -6,17 +6,10 @@ import { PageTitleBack } from '@/components/page-header';
 import { getDatabaseById } from '@/services/database/data';
 import { getConnectionTableDataPage } from '@/services/database/explorer';
 import type { DatabaseTableDataPage } from '@/services/database/types';
+import { TableDataClient } from './table-data-client';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 
 export const metadata: Metadata = {
   title: 'Table Data, Neup.Cloud',
@@ -48,16 +41,36 @@ function parsePerPage(value?: string): 10 | 25 | 50 {
   return 10;
 }
 
-function formatCellValue(value: unknown) {
+function normalizeClientCellValue(value: unknown): unknown {
   if (value === null || value === undefined) {
-    return 'NULL';
+    return value;
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (typeof value === 'bigint') {
+    return value.toString();
   }
 
   if (typeof value === 'object') {
-    return JSON.stringify(value);
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch {
+      return String(value);
+    }
   }
 
-  return String(value);
+  return value;
+}
+
+function normalizeClientRows(rows: Record<string, unknown>[]) {
+  return rows.map((row) =>
+    Object.fromEntries(
+      Object.entries(row).map(([key, value]) => [key, normalizeClientCellValue(value)])
+    )
+  );
 }
 
 export default async function DatabaseTableDataPage({ params, searchParams }: Props) {
@@ -90,6 +103,8 @@ export default async function DatabaseTableDataPage({ params, searchParams }: Pr
   const totalRows = data?.totalRows;
   const currentPage = data?.page || page;
   const hasNextPage = data?.hasNextPage ?? false;
+  const columns = data?.columns || [];
+  const rows = normalizeClientRows(data?.rows || []);
 
   const prevHref = `/database/${id}/table/${encodeURIComponent(tableName)}?page=${Math.max(1, currentPage - 1)}&perPage=${perPage}`;
   const nextHref = `/database/${id}/table/${encodeURIComponent(tableName)}?page=${currentPage + 1}&perPage=${perPage}`;
@@ -122,36 +137,12 @@ export default async function DatabaseTableDataPage({ params, searchParams }: Pr
         {errorMessage ? (
           <div className="p-8 text-center text-muted-foreground">{errorMessage}</div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {(data?.columns || []).map((column) => (
-                  <TableHead key={column} className="font-mono text-xs">{column}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(data?.rows || []).length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={Math.max(1, data?.columns.length || 1)} className="text-center text-muted-foreground py-8">
-                    No rows found.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                (data?.rows || []).map((row, rowIndex) => (
-                  <TableRow key={rowIndex}>
-                    {(data?.columns || []).map((column: string) => (
-                      <TableCell key={`${rowIndex}-${column}`} className="align-top">
-                        <div className="max-w-[360px] break-words whitespace-pre-wrap text-xs font-mono">
-                          {formatCellValue(row[column])}
-                        </div>
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <TableDataClient
+            connectionId={connection.id}
+            tableName={tableName}
+            columns={columns}
+            rows={rows}
+          />
         )}
       </Card>
 

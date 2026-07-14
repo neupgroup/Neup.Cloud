@@ -929,6 +929,235 @@ export async function dropConnectionTable(
   }
 }
 
+function buildPostgresRowPredicate(columns: string[], startIndex = 1) {
+  assertColumnNames(columns);
+
+  return columns
+    .map((columnName, index) => `${quotePostgresIdentifierPart(columnName)} IS NOT DISTINCT FROM $${startIndex + index}`)
+    .join(' AND ');
+}
+
+function buildMysqlRowPredicate(columns: string[]) {
+  assertColumnNames(columns);
+
+  return columns
+    .map((columnName) => `${quoteMysqlIdentifierPart(columnName)} <=> ?`)
+    .join(' AND ');
+}
+
+function getRowIdentityColumns(properties: DatabaseTableProperties, row: Record<string, unknown>) {
+  const rowColumns = Object.keys(row).filter((columnName) =>
+    properties.columns.some((column) => column.name === columnName)
+  );
+
+  if (properties.primaryKeyColumns.length > 0) {
+    return properties.primaryKeyColumns.filter((columnName) => rowColumns.includes(columnName));
+  }
+
+  return rowColumns;
+}
+
+function rowsHaveSameValues(
+  columns: string[],
+  originalRow: Record<string, unknown>,
+  updatedRow: Record<string, unknown>
+) {
+  return columns.every((columnName) => {
+    const originalValue = originalRow[columnName];
+    const updatedValue = updatedRow[columnName];
+
+    if (originalValue === updatedValue) {
+      return true;
+    }
+
+    return JSON.stringify(originalValue) === JSON.stringify(updatedValue);
+  });
+}
+
+export async function updateConnectionTableRow(
+  connection: ExternalDatabase,
+  tableName: string,
+  originalRow: Record<string, unknown>,
+  updatedRow: Record<string, unknown>
+) {
+  const properties = await ensureMutableSqlTable(connection, tableName);
+  const editableColumns = Object.keys(updatedRow).filter((columnName) =>
+    properties.columns.some((column) => column.name === columnName)
+  );
+  const identityColumns = getRowIdentityColumns(properties, originalRow);
+
+  if (editableColumns.length === 0) {
+    throw new Error('No editable columns were provided.');
+  }
+
+  if (identityColumns.length === 0) {
+    throw new Error('This row cannot be identified for update.');
+  }
+
+  if (rowsHaveSameValues(editableColumns, originalRow, updatedRow)) {
+    return;
+  }
+
+  if (connection.connectionType === 'postgres') {
+    const auth = connection.authConfig as PostgresAuthConfig;
+    const pool = createPostgresPool(auth);
+    const setClause = editableColumns
+      .map((columnName, index) => `${quotePostgresIdentifierPart(columnName)} = $${index + 1}`)
+      .join(', ');
+    const whereClause = buildPostgresRowPredicate(identityColumns, editableColumns.length + 1);
+    const values = [
+      ...editableColumns.map((columnName) => updatedRow[columnName]),
+      ...identityColumns.map((columnName) => originalRow[columnName]),
+    ];
+
+    try {
+      const countResult = await pool.query<{ count: string }>(
+        `SELECT COUNT(*)::text AS count FROM ${quotePostgresIdentifier(tableName)} WHERE ${whereClause}`,
+        identityColumns.map((columnName) => originalRow[columnName])
+      );
+      const matchingRows = Number(countResult.rows[0]?.count || 0);
+
+      if (matchingRows !== 1) {
+        throw new Error(`Expected to match 1 row, but matched ${matchingRows}.`);
+      }
+
+      const result = await pool.query(
+        `UPDATE ${quotePostgresIdentifier(tableName)} SET ${setClause} WHERE ${whereClause}`,
+        values
+      );
+
+      if (result.rowCount !== 1) {
+        throw new Error(`Expected to update 1 row, but updated ${result.rowCount || 0}.`);
+      }
+    } finally {
+      await pool.end();
+    }
+
+    return;
+  }
+
+  const auth = connection.authConfig as MysqlAuthConfig;
+  const db = await mysql.createConnection({
+    host: auth.host,
+    port: Number(auth.port),
+    database: auth.database,
+    user: auth.username,
+    password: auth.password,
+  });
+  const setClause = editableColumns
+    .map((columnName) => `${quoteMysqlIdentifierPart(columnName)} = ?`)
+    .join(', ');
+  const whereClause = buildMysqlRowPredicate(identityColumns);
+  const values = [
+    ...editableColumns.map((columnName) => updatedRow[columnName]),
+    ...identityColumns.map((columnName) => originalRow[columnName]),
+  ];
+
+  try {
+    const [countRows] = await db.query<RowDataPacket[]>(
+      `SELECT COUNT(*) AS count FROM ${quoteMysqlIdentifier(tableName)} WHERE ${whereClause}`,
+      identityColumns.map((columnName) => originalRow[columnName])
+    );
+    const matchingRows = Number((countRows[0] as { count?: unknown })?.count || 0);
+
+    if (matchingRows !== 1) {
+      throw new Error(`Expected to match 1 row, but matched ${matchingRows}.`);
+    }
+
+    const [result] = await db.query(
+      `UPDATE ${quoteMysqlIdentifier(tableName)} SET ${setClause} WHERE ${whereClause}`,
+      values
+    );
+    const affectedRows = Number((result as { affectedRows?: number }).affectedRows || 0);
+
+    if (affectedRows > 1) {
+      throw new Error(`Expected to update 1 row, but updated ${affectedRows}.`);
+    }
+  } finally {
+    await db.end();
+  }
+}
+
+export async function deleteConnectionTableRow(
+  connection: ExternalDatabase,
+  tableName: string,
+  row: Record<string, unknown>
+) {
+  const properties = await ensureMutableSqlTable(connection, tableName);
+  const identityColumns = getRowIdentityColumns(properties, row);
+
+  if (identityColumns.length === 0) {
+    throw new Error('This row cannot be identified for delete.');
+  }
+
+  if (connection.connectionType === 'postgres') {
+    const auth = connection.authConfig as PostgresAuthConfig;
+    const pool = createPostgresPool(auth);
+    const whereClause = buildPostgresRowPredicate(identityColumns);
+    const values = identityColumns.map((columnName) => row[columnName]);
+
+    try {
+      const countResult = await pool.query<{ count: string }>(
+        `SELECT COUNT(*)::text AS count FROM ${quotePostgresIdentifier(tableName)} WHERE ${whereClause}`,
+        values
+      );
+      const matchingRows = Number(countResult.rows[0]?.count || 0);
+
+      if (matchingRows !== 1) {
+        throw new Error(`Expected to match 1 row, but matched ${matchingRows}.`);
+      }
+
+      const result = await pool.query(
+        `DELETE FROM ${quotePostgresIdentifier(tableName)} WHERE ${whereClause}`,
+        values
+      );
+
+      if (result.rowCount !== 1) {
+        throw new Error(`Expected to delete 1 row, but deleted ${result.rowCount || 0}.`);
+      }
+    } finally {
+      await pool.end();
+    }
+
+    return;
+  }
+
+  const auth = connection.authConfig as MysqlAuthConfig;
+  const db = await mysql.createConnection({
+    host: auth.host,
+    port: Number(auth.port),
+    database: auth.database,
+    user: auth.username,
+    password: auth.password,
+  });
+  const whereClause = buildMysqlRowPredicate(identityColumns);
+  const values = identityColumns.map((columnName) => row[columnName]);
+
+  try {
+    const [countRows] = await db.query<RowDataPacket[]>(
+      `SELECT COUNT(*) AS count FROM ${quoteMysqlIdentifier(tableName)} WHERE ${whereClause}`,
+      values
+    );
+    const matchingRows = Number((countRows[0] as { count?: unknown })?.count || 0);
+
+    if (matchingRows !== 1) {
+      throw new Error(`Expected to match 1 row, but matched ${matchingRows}.`);
+    }
+
+    const [result] = await db.query(
+      `DELETE FROM ${quoteMysqlIdentifier(tableName)} WHERE ${whereClause}`,
+      values
+    );
+    const affectedRows = Number((result as { affectedRows?: number }).affectedRows || 0);
+
+    if (affectedRows !== 1) {
+      throw new Error(`Expected to delete 1 row, but deleted ${affectedRows}.`);
+    }
+  } finally {
+    await db.end();
+  }
+}
+
 function parseMysqlExecutionResult(result: unknown) {
   if (Array.isArray(result)) {
     const rows = (result as RowDataPacket[]).map((row) => row as unknown as Record<string, unknown>);

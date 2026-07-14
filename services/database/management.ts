@@ -8,7 +8,7 @@ import {
   updateDatabaseConnectionStatus,
   getDatabases as getDatabasesData,
 } from '@/services/database/data';
-import type { CreateDatabaseConnectionInput, DatabaseShellQueryResult, ExternalDatabase } from './engine-types';
+import type { CreateDatabaseConnectionInput, DatabaseShellQueryResult, ExternalDatabase } from './types';
 import {
   buildCredentialsSummary,
   normalizeDatabaseConnectionInput,
@@ -17,10 +17,12 @@ import {
 import {
   addConnectionTablePrimaryKey,
   createConnectionTableIndex,
+  deleteConnectionTableRow,
   dropConnectionTable,
   dropConnectionTableColumn,
   dropConnectionTableIndex,
   executeConnectionShellQuery,
+  updateConnectionTableRow,
 } from '@/services/database/explorer';
 
 function revalidateTablePaths(connectionId: string, tableName: string) {
@@ -342,5 +344,64 @@ export async function deleteTableAction(input: {
   return {
     success: true,
     message: `Deleted table "${input.tableName}".`,
+  };
+}
+
+export async function updateTableRowAction(input: {
+  connectionId: string;
+  tableName: string;
+  originalRow: Record<string, unknown>;
+  updatedRow: Record<string, unknown>;
+}): Promise<{ success: boolean; message: string }> {
+  if (!input.connectionId?.trim()) {
+    throw new Error('Connection id is required.');
+  }
+
+  if (!input.tableName?.trim()) {
+    throw new Error('Table name is required.');
+  }
+
+  const connection = await getDatabaseById(input.connectionId);
+
+  if (!connection) {
+    throw new Error('Database connection not found.');
+  }
+
+  await updateConnectionTableRow(connection, input.tableName, input.originalRow, input.updatedRow);
+
+  revalidateTablePaths(connection.id, input.tableName);
+
+  return {
+    success: true,
+    message: 'Row updated.',
+  };
+}
+
+export async function deleteTableRowAction(input: {
+  connectionId: string;
+  tableName: string;
+  row: Record<string, unknown>;
+}): Promise<{ success: boolean; message: string }> {
+  if (!input.connectionId?.trim()) {
+    throw new Error('Connection id is required.');
+  }
+
+  if (!input.tableName?.trim()) {
+    throw new Error('Table name is required.');
+  }
+
+  const connection = await getDatabaseById(input.connectionId);
+
+  if (!connection) {
+    throw new Error('Database connection not found.');
+  }
+
+  await deleteConnectionTableRow(connection, input.tableName, input.row);
+
+  revalidateTablePaths(connection.id, input.tableName);
+
+  return {
+    success: true,
+    message: 'Row deleted.',
   };
 }
