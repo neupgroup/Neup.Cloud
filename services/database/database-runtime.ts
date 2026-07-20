@@ -318,18 +318,37 @@ export async function storeDatabaseBackup(
     };
 }
 
-async function listDatabaseBackupFiles(serverId: string, dbName: string): Promise<DatabaseBackupFile[]> {
+function parseBackupFilename(filename: string, fallbackDbName?: string) {
+    const mode: 'full' | 'schema' | null = filename.endsWith('.structure.sql') ? 'schema' : filename.endsWith('.full.sql') ? 'full' : null;
+    if (!mode) return null;
+
+    if (fallbackDbName) {
+        return { mode, databaseName: fallbackDbName };
+    }
+
+    const suffixLength = mode === 'schema' ? '.structure.sql'.length : '.full.sql'.length;
+    const nameWithoutSuffix = filename.slice(0, -suffixLength);
+    const parts = nameWithoutSuffix.split('.');
+    const databaseName = parts.length >= 4 ? parts.slice(3).join('.') : parts.slice(1).join('.');
+
+    return databaseName ? { mode, databaseName } : null;
+}
+
+async function listDatabaseBackupFiles(serverId: string, dbName?: string): Promise<DatabaseBackupFile[]> {
     const server = await getServerForRunner(serverId);
     if (!server || !server.username || !server.privateKey) {
         throw new Error('Server not found or missing credentials.');
     }
 
-    const safeDbName = safeBackupFilenamePart(dbName);
+    const safeDbName = dbName ? safeBackupFilenamePart(dbName) : null;
     const backupDirectory = `/${server.username}/.neup/backups/database`;
+    const findPattern = safeDbName
+        ? `\\( -name "*.${safeDbName}.full.sql" -o -name "*.${safeDbName}.structure.sql" \\)`
+        : `\\( -name "*.full.sql" -o -name "*.structure.sql" \\)`;
     const command = [
         `BACKUP_DIR=${shellDoubleQuote(backupDirectory)}`,
         'if [ -d "$BACKUP_DIR" ]; then',
-        `sudo find "$BACKUP_DIR" -maxdepth 1 -type f \\( -name "*.${safeDbName}.full.sql" -o -name "*.${safeDbName}.structure.sql" \\) -printf '%T@|%f|%s\\n' 2>/dev/null`,
+        `sudo find "$BACKUP_DIR" -maxdepth 1 -type f ${findPattern} -printf '%T@|%f|%s\\n' 2>/dev/null`,
         'fi',
     ].join('\n');
 
@@ -349,13 +368,14 @@ async function listDatabaseBackupFiles(serverId: string, dbName: string): Promis
         const sizeBytes = Number(sizeValue);
         if (!Number.isFinite(timestamp) || !Number.isFinite(sizeBytes)) continue;
 
-        const mode: 'full' | 'schema' | null = filename.endsWith('.structure.sql') ? 'schema' : filename.endsWith('.full.sql') ? 'full' : null;
-        if (!mode) continue;
+        const parsedFilename = parseBackupFilename(filename, dbName);
+        if (!parsedFilename) continue;
 
         files.push({
             filename,
             path: `${backupDirectory}/${filename}`,
-            mode,
+            databaseName: parsedFilename.databaseName,
+            mode: parsedFilename.mode,
             sizeBytes,
             modifiedAt: new Date(timestamp * 1000).toISOString(),
         });
@@ -369,7 +389,7 @@ async function listDatabaseBackupFiles(serverId: string, dbName: string): Promis
  */
 export async function getDatabaseBackupFiles(
     serverId: string,
-    dbName: string
+    dbName?: string
 ): Promise<DatabaseBackupFile[]> {
     return listDatabaseBackupFiles(serverId, dbName);
 }

@@ -75,6 +75,7 @@ export type StoredBackupResult = OperationResult & {
 export type DatabaseBackupFile = {
     filename: string;
     path: string;
+    databaseName: string;
     mode: 'full' | 'schema';
     sizeBytes: number;
     modifiedAt: string;
