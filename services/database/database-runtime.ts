@@ -15,10 +15,12 @@ import type {
     OperationResult,
     BackupResult,
     StoredBackupResult,
+    DatabaseBackupFile,
     DatabaseBackupSummary,
     QueryResult,
     DatabaseSettings
 } from './engine-types';
+import { buildDatabaseBackupFilename, safeBackupFilenamePart } from './engine-types';
 import { getServerForRunner } from '@/services/server/server-service';
 import { executeCommand, executeQuickCommand } from '@/services/server/commands/server-command-service';
 
@@ -71,6 +73,7 @@ export type {
     OperationResult,
     BackupResult,
     StoredBackupResult,
+    DatabaseBackupFile,
     DatabaseBackupSummary,
     QueryResult,
     DatabaseSettings,
@@ -241,16 +244,8 @@ export async function generateDatabaseBackup(
     }
 }
 
-function safeBackupFilenamePart(value: string) {
-    return value.replace(/[^a-zA-Z0-9_-]/g, '_');
-}
-
 function shellDoubleQuote(value: string) {
     return `"${value.replace(/["\\$`]/g, '\\$&')}"`;
-}
-
-function getCompactDate(date = new Date()) {
-    return date.toISOString().slice(0, 10).replace(/-/g, '');
 }
 
 function buildStoreDatabaseBackupCommand(
@@ -259,10 +254,7 @@ function buildStoreDatabaseBackupCommand(
     dbName: string,
     mode: 'full' | 'schema'
 ) {
-    const date = getCompactDate();
-    const backupType = mode === 'schema' ? 'structure' : 'full';
-    const safeDbName = safeBackupFilenamePart(dbName);
-    const filename = `${date}.${safeDbName}.${backupType}.sql`;
+    const filename = buildDatabaseBackupFilename(dbName, mode);
     const backupDirectory = `/${username}/.neup/backups/database`;
     const backupPath = `${backupDirectory}/${filename}`;
     const dumpOptions = mode === 'schema'
@@ -279,6 +271,7 @@ function buildStoreDatabaseBackupCommand(
             `sudo mkdir -p ${shellDoubleQuote(backupDirectory)}`,
             `${dumpCommand} | sudo tee ${shellDoubleQuote(backupPath)} > /dev/null`,
             `sudo chmod 600 ${shellDoubleQuote(backupPath)}`,
+            `printf 'BACKUP_SIZE_BYTES=%s\\n' "$(sudo stat -c%s ${shellDoubleQuote(backupPath)})"`,
             `echo ${shellDoubleQuote(`Backup stored at ${backupPath}`)}`,
         ].join(' && '),
     };
@@ -314,21 +307,18 @@ export async function storeDatabaseBackup(
         };
     }
 
+    const sizeBytes = Number(result.output?.match(/BACKUP_SIZE_BYTES=(\d+)/)?.[1]);
+
     return {
         success: true,
         filename: backupCommand.filename,
         path: backupCommand.path,
+        sizeBytes: Number.isFinite(sizeBytes) ? sizeBytes : undefined,
         message: `Backup stored at ${backupCommand.path}.`,
     };
 }
 
-/**
- * Read the latest stored backup files from the selected Neup server
- */
-export async function getDatabaseBackupSummary(
-    serverId: string,
-    dbName: string
-): Promise<DatabaseBackupSummary> {
+async function listDatabaseBackupFiles(serverId: string, dbName: string): Promise<DatabaseBackupFile[]> {
     const server = await getServerForRunner(serverId);
     if (!server || !server.username || !server.privateKey) {
         throw new Error('Server not found or missing credentials.');
@@ -339,17 +329,17 @@ export async function getDatabaseBackupSummary(
     const command = [
         `BACKUP_DIR=${shellDoubleQuote(backupDirectory)}`,
         'if [ -d "$BACKUP_DIR" ]; then',
-        `sudo find "$BACKUP_DIR" -maxdepth 1 -type f \\( -name "[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].${safeDbName}.full.sql" -o -name "[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].${safeDbName}.structure.sql" \\) -printf '%T@|%f|%s\\n' 2>/dev/null`,
+        `sudo find "$BACKUP_DIR" -maxdepth 1 -type f \\( -name "*.${safeDbName}.full.sql" -o -name "*.${safeDbName}.structure.sql" \\) -printf '%T@|%f|%s\\n' 2>/dev/null`,
         'fi',
     ].join('\n');
 
     const result = await executeQuickCommand(serverId, command);
     if (result.error) {
-        return {};
+        return [];
     }
 
-    const summary: DatabaseBackupSummary = {};
     const rows = result.output?.split('\n').map((line) => line.trim()).filter(Boolean) ?? [];
+    const files: DatabaseBackupFile[] = [];
 
     for (const row of rows) {
         const [timestampValue, filename, sizeValue] = row.split('|');
@@ -362,17 +352,43 @@ export async function getDatabaseBackupSummary(
         const mode: 'full' | 'schema' | null = filename.endsWith('.structure.sql') ? 'schema' : filename.endsWith('.full.sql') ? 'full' : null;
         if (!mode) continue;
 
-        const file = {
+        files.push({
             filename,
             path: `${backupDirectory}/${filename}`,
             mode,
             sizeBytes,
             modifiedAt: new Date(timestamp * 1000).toISOString(),
-        };
-        const current = summary[mode];
+        });
+    }
+
+    return files.sort((left, right) => new Date(right.modifiedAt).getTime() - new Date(left.modifiedAt).getTime());
+}
+
+/**
+ * Read every stored backup file for a database from the selected Neup server
+ */
+export async function getDatabaseBackupFiles(
+    serverId: string,
+    dbName: string
+): Promise<DatabaseBackupFile[]> {
+    return listDatabaseBackupFiles(serverId, dbName);
+}
+
+/**
+ * Read the latest stored backup files from the selected Neup server
+ */
+export async function getDatabaseBackupSummary(
+    serverId: string,
+    dbName: string
+): Promise<DatabaseBackupSummary> {
+    const summary: DatabaseBackupSummary = {};
+    const files = await listDatabaseBackupFiles(serverId, dbName);
+
+    for (const file of files) {
+        const current = summary[file.mode];
 
         if (!current || new Date(file.modifiedAt).getTime() > new Date(current.modifiedAt).getTime()) {
-            summary[mode] = file;
+            summary[file.mode] = file;
         }
     }
 

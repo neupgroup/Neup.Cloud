@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getDatabaseBackupSummary, getDatabaseDetails } from '@/services/database/database-runtime';
-import type { DatabaseBackupSummary } from '@/services/database/engine-types';
+import { getDatabaseBackupFiles, getDatabaseDetails, listAllDatabases } from '@/services/database/database-runtime';
+import type { DatabaseBackupFile } from '@/services/database/engine-types';
 import { resolveSelectedServerId, type DatabaseEngine } from "../route-helpers";
 import { DatabaseBackupsClient } from "./backups-client";
 
@@ -23,11 +23,19 @@ function parseBackupType(type: string | undefined): DatabaseEngine | null {
     return null;
 }
 
+async function resolveBackupEngine(serverId: string, dbName: string, type: string | undefined) {
+    const queryEngine = parseBackupType(type);
+    if (queryEngine) return queryEngine;
+
+    const databases = await listAllDatabases(serverId);
+    return databases.find((database) => database.name === dbName)?.engine ?? null;
+}
+
 /*
 ::neup.documentation::database-backups-page
 ::private
 
-Provides a dedicated database backup action page. It validates `selectedServer`, `database`, and `type` query parameters before rendering client controls that execute backup storage through the command runner.
+Provides a dedicated database backups page. It validates `selectedServer` and `database`, infers the database engine from the selected server when `type` is omitted, and renders stored backup cards for the selected database.
 
 ::private end
 ::end
@@ -38,28 +46,27 @@ export default async function DatabaseBackupsPage({ searchParams }: Props) {
         selectedServer: resolvedSearchParams.selectedServer,
     }));
     const dbName = resolvedSearchParams.database?.trim();
-    const engine = parseBackupType(resolvedSearchParams.type);
 
-    if (!serverId || !dbName || !engine) notFound();
+    if (!serverId || !dbName) notFound();
 
-    let details = null;
-    let backupSummary: DatabaseBackupSummary = {};
+    let backups: DatabaseBackupFile[] = [];
     try {
-        [details, backupSummary] = await Promise.all([
+        const engine = await resolveBackupEngine(serverId, dbName, resolvedSearchParams.type);
+        if (!engine) notFound();
+
+        [, backups] = await Promise.all([
             getDatabaseDetails(serverId, engine, dbName),
-            getDatabaseBackupSummary(serverId, dbName),
+            getDatabaseBackupFiles(serverId, dbName),
         ]);
+
+        return (
+            <DatabaseBackupsClient
+                engine={engine}
+                dbName={dbName}
+                backups={backups}
+            />
+        );
     } catch (error) {
         notFound();
     }
-
-    return (
-        <DatabaseBackupsClient
-            serverId={serverId}
-            engine={engine}
-            dbName={dbName}
-            databaseSize={details.size}
-            backupSummary={backupSummary}
-        />
-    );
 }

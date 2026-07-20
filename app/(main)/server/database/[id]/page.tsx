@@ -214,6 +214,28 @@ export default async function DatabaseDetailsPage({ params, searchParams }: Prop
                         </div>
                     </Link>
 
+                    {/* Backups */}
+                    <Link href={`/server/database/backups?selectedServer=${encodeURIComponent(serverId)}&database=${encodeURIComponent(dbName)}`} className="block">
+                        <div className="p-4 min-w-0 w-full transition-colors hover:bg-muted/50 border-b border-border">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4 min-w-0 flex-1">
+                                    <div className="p-2 rounded-lg shrink-0 bg-cyan-500/10 text-cyan-500">
+                                        <HardDrive className="h-5 w-5" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="font-bold text-base">Backups</span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            View and store server backups for this database
+                                        </p>
+                                    </div>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                            </div>
+                        </div>
+                    </Link>
+
                     {/* Engine Settings */}
                     <Link href={withSelectedServerQuery(`/server/database/${id}/settings`, serverId)} className="block">
                         <div className="p-4 min-w-0 w-full transition-colors hover:bg-muted/50">

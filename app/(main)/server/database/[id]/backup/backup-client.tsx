@@ -3,12 +3,13 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Database, Download, FileJson, FileCode, ShieldCheck, CheckCircle2, Loader2, ChevronLeft, AlertCircle, HardDrive } from "lucide-react";
+import { Database, Download, FileCode, ShieldCheck, CheckCircle2, Loader2, ChevronLeft, AlertCircle, HardDrive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from '@/core/hooks/use-toast';
 import Link from 'next/link';
 import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
+import { storeDatabaseBackup } from '@/services/database/database-runtime';
 
 interface BackupClientPageProps {
     serverId: string;
@@ -44,7 +45,7 @@ export function BackupClientPage({ serverId, engine, dbName, databaseSize }: Bac
 
             const blob = await response.blob();
             const contentDisposition = response.headers.get('content-disposition');
-            const filename = contentDisposition?.match(/filename="([^"]+)"/)?.[1] || `${dbName}_${mode}_backup.sql`;
+            const filename = contentDisposition?.match(/filename="([^"]+)"/)?.[1] || `${dbName}_${mode === 'schema' ? 'structure' : 'full'}_backup.sql`;
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -63,6 +64,36 @@ export function BackupClientPage({ serverId, engine, dbName, databaseSize }: Bac
                 variant: 'destructive',
                 title: 'Error',
                 description: error.message || 'Failed to generate backup.',
+            });
+        } finally {
+            setIsGenerating(null);
+        }
+    };
+
+    const handleStoreBackup = async () => {
+        setIsGenerating('store-full');
+
+        try {
+            const result = await storeDatabaseBackup(serverId, engine, dbName, 'full');
+
+            if (!result.success) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Backup Failed',
+                    description: result.message || 'Failed to store backup on NeupServer.',
+                });
+                return;
+            }
+
+            toast({
+                title: 'Backup Stored',
+                description: 'The backup has been completed.',
+            });
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Backup Failed',
+                description: error.message || 'Failed to store backup on NeupServer.',
             });
         } finally {
             setIsGenerating(null);
@@ -111,14 +142,25 @@ export function BackupClientPage({ serverId, engine, dbName, databaseSize }: Bac
                                 <CheckCircle2 className="h-4 w-4 text-green-500" /> Stored in /[username]/.neup/backups/database
                             </li>
                             <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <CheckCircle2 className="h-4 w-4 text-green-500" /> Named as [YYYYMMDD].[database].[full/structure].sql
+                                <CheckCircle2 className="h-4 w-4 text-green-500" /> Named as [YYYYMMDD].[timestamp].[random].[database].[full/structure].sql
                             </li>
                         </ul>
-                        <Button className="w-full h-11 shadow-lg shadow-primary/10" asChild>
-                            <Link href={withSelectedServer(`/server/database/backups?database=${encodeURIComponent(dbName)}&type=${engine === 'postgres' ? 'postgres' : 'sql'}`)}>
-                                <HardDrive className="mr-2 h-4 w-4" />
-                                Store Backup in NeupServer
-                            </Link>
+                        <Button
+                            className="w-full h-11 shadow-lg shadow-primary/10"
+                            onClick={handleStoreBackup}
+                            disabled={isGenerating !== null}
+                        >
+                            {isGenerating === 'store-full' ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Backing Up...
+                                </>
+                            ) : (
+                                <>
+                                    <HardDrive className="mr-2 h-4 w-4" />
+                                    Backup Now
+                                </>
+                            )}
                         </Button>
                     </CardContent>
                 </Card>

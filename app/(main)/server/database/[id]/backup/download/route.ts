@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { generateDatabaseBackup, getDatabaseDetails } from '@/services/database/database-runtime';
+import { buildDatabaseBackupFilename } from '@/services/database/engine-types';
 import { parseDatabaseRouteId, resolveSelectedServerId } from '../../../route-helpers';
 
 const BACKUP_MODES = new Set(['full', 'schema']);
@@ -51,7 +52,7 @@ export async function GET(
             return jsonError(result.message || 'Failed to generate backup.', 500);
         }
 
-        const filename = safeDownloadName(result.filename || `${dbName}_${backupMode}_backup.sql`);
+        const filename = safeDownloadName(result.filename || buildDatabaseBackupFilename(dbName, backupMode));
 
         return new Response(result.content, {
             status: 200,

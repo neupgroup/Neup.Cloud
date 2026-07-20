@@ -69,6 +69,7 @@ export type BackupResult = {
 export type StoredBackupResult = OperationResult & {
     path?: string;
     filename?: string;
+    sizeBytes?: number;
 };
 
 export type DatabaseBackupFile = {
@@ -88,3 +89,25 @@ export type OperationResult = {
     success: boolean;
     message: string;
 };
+
+export function safeBackupFilenamePart(value: string) {
+    return value.replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
+export function getDatabaseBackupType(mode: 'full' | 'schema') {
+    return mode === 'schema' ? 'structure' : 'full';
+}
+
+export function buildDatabaseBackupFilename(
+    dbName: string,
+    mode: 'full' | 'schema',
+    date = new Date()
+) {
+    const compactDate = date.toISOString().slice(0, 10).replace(/-/g, '');
+    const timestamp = date.getTime();
+    const randomPart = Array.from({ length: 5 }, () => Math.floor(Math.random() * 36).toString(36)).join('');
+    const backupType = getDatabaseBackupType(mode);
+    const safeDbName = safeBackupFilenamePart(dbName);
+
+    return `${compactDate}.${timestamp}.${randomPart}.${safeDbName}.${backupType}.sql`;
+}

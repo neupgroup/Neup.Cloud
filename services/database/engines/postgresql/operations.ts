@@ -2,7 +2,7 @@
 
 import { getServerForRunner } from '@/services/server/server-service';
 import { runCommandOnServer } from '@/services/server/ssh';
-import type { DatabaseDetails, DatabaseUser, OperationResult, BackupResult, QueryResult } from '../../engine-types';
+import { buildDatabaseBackupFilename, type DatabaseDetails, type DatabaseUser, type OperationResult, type BackupResult, type QueryResult } from '../../engine-types';
 
 /**
  * Get detailed information about a PostgreSQL database
@@ -436,8 +436,7 @@ export async function generatePostgresBackup(
     }
 
     try {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-        const filename = `${dbName}_${mode}_${timestamp}.sql`;
+        const filename = buildDatabaseBackupFilename(dbName, mode);
         const options = mode === 'schema' ? '--schema-only' : '';
 
         const backupCmd = `sudo -u postgres pg_dump ${options} ${dbName}`;
