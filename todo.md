@@ -19,6 +19,7 @@
 - [ ] Fix invalid `backHref` prop usage in [app/(main)/server/webservices/nginx/default/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/webservices/nginx/default/page.tsx).
 - [ ] Fix pipeline editor access record typing in [app/(plain)/pipeline/editor/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(plain)/pipeline/editor/page.tsx).
 - [ ] Fix spread and const assertion typing issues in [app/bridge/api.v1/intelligence/getResponse/route.ts](/Users/neupkishor/Code/neup.cloud/app/bridge/api.v1/intelligence/getResponse/route.ts).
+- [ ] Fix numeric/string identifier typing mismatches in [app/bridge/api.v1/intelligence/getResponse/route.ts](/Users/neupkishor/Code/neup.cloud/app/bridge/api.v1/intelligence/getResponse/route.ts).
 - [ ] Fix stale intelligence store type references in [core/ai/files/intelligence/store.ts](/Users/neupkishor/Code/neup.cloud/core/ai/files/intelligence/store.ts).
 - [ ] Fix nullable return typing in [services/core/go.ts](/Users/neupkishor/Code/neup.cloud/services/core/go.ts) and [services/core/python.ts](/Users/neupkishor/Code/neup.cloud/services/core/python.ts).
 - [ ] Fix generic database typing issues in [services/database/data.ts](/Users/neupkishor/Code/neup.cloud/services/database/data.ts).

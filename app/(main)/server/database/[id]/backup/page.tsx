@@ -24,9 +24,10 @@ export default async function DatabaseBackupPage({ params, searchParams }: Props
     if (!parsedId) notFound();
     const { engine, dbName } = parsedId;
 
+    let details = null;
     try {
         // Verify existence first
-        await getDatabaseDetails(serverId, engine, dbName);
+        details = await getDatabaseDetails(serverId, engine, dbName);
     } catch (error) {
         notFound();
     }
@@ -36,6 +37,7 @@ export default async function DatabaseBackupPage({ params, searchParams }: Props
             serverId={serverId}
             engine={engine}
             dbName={dbName}
+            databaseSize={details.size}
         />
     );
 }

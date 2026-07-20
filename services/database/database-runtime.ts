@@ -14,9 +14,13 @@ import type {
     DatabaseUser,
     OperationResult,
     BackupResult,
+    StoredBackupResult,
+    DatabaseBackupSummary,
     QueryResult,
     DatabaseSettings
 } from './engine-types';
+import { getServerForRunner } from '@/services/server/server-service';
+import { executeCommand, executeQuickCommand } from '@/services/server/commands/server-command-service';
 
 // Import common operations
 import {
@@ -66,6 +70,8 @@ export type {
     DatabaseTable,
     OperationResult,
     BackupResult,
+    StoredBackupResult,
+    DatabaseBackupSummary,
     QueryResult,
     DatabaseSettings,
     EngineStatus
@@ -233,6 +239,144 @@ export async function generateDatabaseBackup(
     } else {
         return generatePostgresBackup(serverId, dbName, mode);
     }
+}
+
+function safeBackupFilenamePart(value: string) {
+    return value.replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
+function shellDoubleQuote(value: string) {
+    return `"${value.replace(/["\\$`]/g, '\\$&')}"`;
+}
+
+function getCompactDate(date = new Date()) {
+    return date.toISOString().slice(0, 10).replace(/-/g, '');
+}
+
+function buildStoreDatabaseBackupCommand(
+    username: string,
+    engine: 'mariadb' | 'postgres',
+    dbName: string,
+    mode: 'full' | 'schema'
+) {
+    const date = getCompactDate();
+    const backupType = mode === 'schema' ? 'structure' : 'full';
+    const safeDbName = safeBackupFilenamePart(dbName);
+    const filename = `${date}.${safeDbName}.${backupType}.sql`;
+    const backupDirectory = `/${username}/.neup/backups/database`;
+    const backupPath = `${backupDirectory}/${filename}`;
+    const dumpOptions = mode === 'schema'
+        ? engine === 'postgres' ? '--schema-only' : '--no-data'
+        : '';
+    const dumpCommand = engine === 'postgres'
+        ? `sudo -u postgres pg_dump ${dumpOptions} ${shellDoubleQuote(dbName)}`
+        : `sudo mysqldump ${dumpOptions} ${shellDoubleQuote(dbName)}`;
+
+    return {
+        filename,
+        path: backupPath,
+        command: [
+            `sudo mkdir -p ${shellDoubleQuote(backupDirectory)}`,
+            `${dumpCommand} | sudo tee ${shellDoubleQuote(backupPath)} > /dev/null`,
+            `sudo chmod 600 ${shellDoubleQuote(backupPath)}`,
+            `echo ${shellDoubleQuote(`Backup stored at ${backupPath}`)}`,
+        ].join(' && '),
+    };
+}
+
+/**
+ * Store a database backup on the selected Neup server
+ */
+export async function storeDatabaseBackup(
+    serverId: string,
+    engine: 'mariadb' | 'postgres',
+    dbName: string,
+    mode: 'full' | 'schema'
+): Promise<StoredBackupResult> {
+    const server = await getServerForRunner(serverId);
+    if (!server || !server.username || !server.privateKey) {
+        throw new Error('Server not found or missing credentials.');
+    }
+
+    const backupCommand = buildStoreDatabaseBackupCommand(server.username, engine, dbName, mode);
+    const result = await executeCommand(
+        serverId,
+        backupCommand.command,
+        `Store ${engine} Database Backup`,
+        backupCommand.command,
+        `database:${engine}:${dbName}:backup:${mode}`
+    );
+
+    if (result.error) {
+        return {
+            success: false,
+            message: result.error,
+        };
+    }
+
+    return {
+        success: true,
+        filename: backupCommand.filename,
+        path: backupCommand.path,
+        message: `Backup stored at ${backupCommand.path}.`,
+    };
+}
+
+/**
+ * Read the latest stored backup files from the selected Neup server
+ */
+export async function getDatabaseBackupSummary(
+    serverId: string,
+    dbName: string
+): Promise<DatabaseBackupSummary> {
+    const server = await getServerForRunner(serverId);
+    if (!server || !server.username || !server.privateKey) {
+        throw new Error('Server not found or missing credentials.');
+    }
+
+    const safeDbName = safeBackupFilenamePart(dbName);
+    const backupDirectory = `/${server.username}/.neup/backups/database`;
+    const command = [
+        `BACKUP_DIR=${shellDoubleQuote(backupDirectory)}`,
+        'if [ -d "$BACKUP_DIR" ]; then',
+        `sudo find "$BACKUP_DIR" -maxdepth 1 -type f \\( -name "[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].${safeDbName}.full.sql" -o -name "[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].${safeDbName}.structure.sql" \\) -printf '%T@|%f|%s\\n' 2>/dev/null`,
+        'fi',
+    ].join('\n');
+
+    const result = await executeQuickCommand(serverId, command);
+    if (result.error) {
+        return {};
+    }
+
+    const summary: DatabaseBackupSummary = {};
+    const rows = result.output?.split('\n').map((line) => line.trim()).filter(Boolean) ?? [];
+
+    for (const row of rows) {
+        const [timestampValue, filename, sizeValue] = row.split('|');
+        if (!timestampValue || !filename || !sizeValue) continue;
+
+        const timestamp = Number(timestampValue);
+        const sizeBytes = Number(sizeValue);
+        if (!Number.isFinite(timestamp) || !Number.isFinite(sizeBytes)) continue;
+
+        const mode: 'full' | 'schema' | null = filename.endsWith('.structure.sql') ? 'schema' : filename.endsWith('.full.sql') ? 'full' : null;
+        if (!mode) continue;
+
+        const file = {
+            filename,
+            path: `${backupDirectory}/${filename}`,
+            mode,
+            sizeBytes,
+            modifiedAt: new Date(timestamp * 1000).toISOString(),
+        };
+        const current = summary[mode];
+
+        if (!current || new Date(file.modifiedAt).getTime() > new Date(current.modifiedAt).getTime()) {
+            summary[mode] = file;
+        }
+    }
+
+    return summary;
 }
 
 /**

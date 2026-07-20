@@ -66,6 +66,24 @@ export type BackupResult = {
     message: string;
 };
 
+export type StoredBackupResult = OperationResult & {
+    path?: string;
+    filename?: string;
+};
+
+export type DatabaseBackupFile = {
+    filename: string;
+    path: string;
+    mode: 'full' | 'schema';
+    sizeBytes: number;
+    modifiedAt: string;
+};
+
+export type DatabaseBackupSummary = {
+    full?: DatabaseBackupFile;
+    schema?: DatabaseBackupFile;
+};
+
 export type OperationResult = {
     success: boolean;
     message: string;

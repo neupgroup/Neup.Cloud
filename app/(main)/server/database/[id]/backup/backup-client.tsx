@@ -7,7 +7,6 @@ import { Database, Download, FileJson, FileCode, ShieldCheck, CheckCircle2, Load
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from '@/core/hooks/use-toast';
-import { generateDatabaseBackup } from '@/services/database/database-runtime';
 import Link from 'next/link';
 import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
 
@@ -15,9 +14,10 @@ interface BackupClientPageProps {
     serverId: string;
     engine: 'mariadb' | 'postgres';
     dbName: string;
+    databaseSize: string;
 }
 
-export function BackupClientPage({ serverId, engine, dbName }: BackupClientPageProps) {
+export function BackupClientPage({ serverId, engine, dbName, databaseSize }: BackupClientPageProps) {
     const { toast } = useToast();
     const withSelectedServer = useSelectedServerHref();
     const [isGenerating, setIsGenerating] = useState<string | null>(null);
@@ -25,31 +25,39 @@ export function BackupClientPage({ serverId, engine, dbName }: BackupClientPageP
     const handleBackup = async (mode: 'full' | 'schema') => {
         setIsGenerating(mode);
         try {
-            const result = await generateDatabaseBackup(serverId, engine, dbName, mode);
+            const params = new URLSearchParams({
+                mode,
+                selectedServer: serverId,
+            });
+            const databaseId = encodeURIComponent(`${engine}-${dbName}`);
+            const response = await fetch(`/server/database/${databaseId}/backup/download?${params.toString()}`);
 
-            if (result.success && result.content) {
-                // Create a blob and download it
-                const blob = new Blob([result.content], { type: 'text/sql' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = result.filename || `${dbName}_backup.sql`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-
-                toast({
-                    title: 'Download Started',
-                    description: `Your ${mode} backup is being saved to your computer.`,
-                });
-            } else {
+            if (!response.ok) {
+                const error = await response.json().catch(() => null);
                 toast({
                     variant: 'destructive',
                     title: 'Backup Failed',
-                    description: result.message,
+                    description: error?.message || 'Failed to generate backup.',
                 });
+                return;
             }
+
+            const blob = await response.blob();
+            const contentDisposition = response.headers.get('content-disposition');
+            const filename = contentDisposition?.match(/filename="([^"]+)"/)?.[1] || `${dbName}_${mode}_backup.sql`;
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            toast({
+                title: 'Download Started',
+                description: `Your ${mode} backup is being saved to your computer.`,
+            });
         } catch (error: any) {
             toast({
                 variant: 'destructive',
@@ -88,33 +96,29 @@ export function BackupClientPage({ serverId, engine, dbName }: BackupClientPageP
                         <CardDescription>Includes all tables, schemas, and data rows.</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6 space-y-4">
+                        <div className="flex items-center justify-between rounded-md border bg-muted/30 px-3 py-2">
+                            <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <HardDrive className="h-4 w-4" />
+                                Estimated export size
+                            </span>
+                            <span className="text-sm font-semibold text-foreground">{databaseSize}</span>
+                        </div>
                         <ul className="space-y-2.5">
                             <li className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <CheckCircle2 className="h-4 w-4 text-green-500" /> Complete data preservation
                             </li>
                             <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <CheckCircle2 className="h-4 w-4 text-green-500" /> Structure and sequences
+                                <CheckCircle2 className="h-4 w-4 text-green-500" /> Stored in /[username]/.neup/backups/database
                             </li>
                             <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <CheckCircle2 className="h-4 w-4 text-green-500" /> Full restoration compatibility
+                                <CheckCircle2 className="h-4 w-4 text-green-500" /> Named as [YYYYMMDD].[database].[full/structure].sql
                             </li>
                         </ul>
-                        <Button
-                            className="w-full h-11 shadow-lg shadow-primary/10"
-                            onClick={() => handleBackup('full')}
-                            disabled={isGenerating !== null}
-                        >
-                            {isGenerating === 'full' ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Generating Dump...
-                                </>
-                            ) : (
-                                <>
-                                    <Download className="mr-2 h-4 w-4" />
-                                    Download Full SQL (.sql)
-                                </>
-                            )}
+                        <Button className="w-full h-11 shadow-lg shadow-primary/10" asChild>
+                            <Link href={withSelectedServer(`/server/database/backups?database=${encodeURIComponent(dbName)}&type=${engine === 'postgres' ? 'postgres' : 'sql'}`)}>
+                                <HardDrive className="mr-2 h-4 w-4" />
+                                Store Backup in NeupServer
+                            </Link>
                         </Button>
                     </CardContent>
                 </Card>
