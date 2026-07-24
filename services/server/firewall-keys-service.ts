@@ -93,7 +93,7 @@ export async function addAuthorizedKey(serverId: string, publicKey: string): Pro
         const result = await runCommandOnServer(
             server.publicIp,
             server.username,
-            server.privateKey!,
+            server.privateKey,
             cmd,
             undefined,
             undefined,
@@ -115,8 +115,8 @@ export async function getAuthorizedKeys(serverId: string): Promise<{ keys?: SshK
     if (!server) {
         return { error: 'Server not found.' };
     }
-    if (!server.username || !server.privateKey) {
-        return { error: 'No username or private key configured for this server.' };
+    if (!server.username) {
+        return { error: 'No username or SSH authentication configured for this server.' };
     }
 
     try {

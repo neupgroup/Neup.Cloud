@@ -18,9 +18,11 @@ const initialState: ServerFormData = {
   provider: "Custom",
   publicIp: "",
   privateIp: "",
+  authMethod: "privateKey",
   privateKey: "",
   publicKey: "",
   privateKeyPassphrase: "",
+  sshPassword: "",
   expiresAt: "",
 };
 
@@ -37,11 +39,17 @@ export default function AddServerPage() {
   };
 
   const handleCheckConnection = async () => {
-    if (!formData.publicIp || !formData.username || !formData.privateKey) {
+    const usesPrivateKey = formData.authMethod === "privateKey";
+    const privateKey = formData.privateKey.trim();
+    const sshPassword = formData.sshPassword.trim();
+
+    if (!formData.publicIp || !formData.username || (usesPrivateKey ? !privateKey : !sshPassword)) {
       toast({
         variant: "destructive",
         title: "Missing required fields",
-        description: "Please fill in Public IP, Username, and SSH private key.",
+        description: usesPrivateKey
+          ? "Please fill in Public IP, Username, and SSH private key."
+          : "Please fill in Public IP, Username, and password.",
       });
       return;
     }
@@ -56,9 +64,11 @@ export default function AddServerPage() {
         provider: formData.provider,
         publicIp: formData.publicIp,
         privateIp: formData.privateIp || "",
-        privateKey: formData.privateKey,
+        privateKey: usesPrivateKey ? privateKey : "",
         moreDetails: serializeServerMetadata(undefined, {
-          sshPassphrase: hasPasskey ? formData.privateKeyPassphrase || undefined : undefined,
+          sshAuthMethod: usesPrivateKey ? "privateKey" : "password",
+          sshPassphrase: usesPrivateKey && hasPasskey ? formData.privateKeyPassphrase || undefined : undefined,
+          sshPassword: usesPrivateKey ? undefined : sshPassword,
         }),
       };
 
@@ -75,7 +85,9 @@ export default function AddServerPage() {
         undefined,
         false,
         {},
-        passphrase ?? undefined
+        passphrase ?? undefined,
+        undefined,
+        usesPrivateKey ? undefined : sshPassword
       );
 
       if (result.code === 0) {
@@ -99,6 +111,8 @@ export default function AddServerPage() {
     setIsLoading(true);
 
     try {
+      const usesPrivateKey = formData.authMethod === "privateKey";
+
       await createServer({
         name: formData.name,
         username: formData.username,
@@ -106,12 +120,14 @@ export default function AddServerPage() {
         provider: formData.provider,
         publicIp: formData.publicIp,
         privateIp: formData.privateIp,
-        privateKey: formData.privateKey,
-        publicKey: formData.publicKey,
+        privateKey: usesPrivateKey ? formData.privateKey.trim() : null,
+        publicKey: usesPrivateKey ? formData.publicKey : null,
         moreDetails: serializeServerMetadata(undefined, {
           validTill: formData.expiresAt || undefined,
           expiresAt: undefined,
-          sshPassphrase: hasPasskey ? formData.privateKeyPassphrase || undefined : undefined,
+          sshAuthMethod: usesPrivateKey ? "privateKey" : "password",
+          sshPassphrase: usesPrivateKey && hasPasskey ? formData.privateKeyPassphrase || undefined : undefined,
+          sshPassword: usesPrivateKey ? undefined : formData.sshPassword.trim(),
         }),
       });
 

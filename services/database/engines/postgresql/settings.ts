@@ -9,7 +9,7 @@ export async function savePostgresSettings(
     settings: DatabaseSettings
 ): Promise<{ success: boolean; message: string }> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -110,7 +110,7 @@ export async function getPostgresSettings(
     serverId: string
 ): Promise<DatabaseSettings> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 

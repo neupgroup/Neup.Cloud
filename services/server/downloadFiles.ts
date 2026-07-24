@@ -11,7 +11,7 @@ export async function downloadFiles(
   rootMode = false
 ): Promise<{ filePath?: string; fileName?: string; error?: string }> {
   const server = await getServerForRunner(serverId);
-  if (!server || !server.username || !server.privateKey) return { error: 'Server configuration missing.' };
+  if (!server || !server.username) return { error: 'Server configuration missing.' };
 
   const tempDir = path.join(os.tmpdir(), 'neup-downloads');
   await fs.mkdir(tempDir, { recursive: true });

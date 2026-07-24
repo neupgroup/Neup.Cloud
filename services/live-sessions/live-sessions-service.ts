@@ -4,7 +4,6 @@ import { appendLiveSessionLog, executeQuickCommand } from '@/services/saved-comm
 import { createServerLog, updateServerLog } from '@/services/logs/server';
 import { getServerForRunner } from '@/services/server/server-runtime';
 import { createLiveSession, getLiveSessionById, updateLiveSession } from '@/services/live-sessions/data';
-import { getServerSshPassphrase } from '@/services/server/server-metadata';
 
 export async function initLiveSession(sessionId: string, serverId: string | undefined) {
   const cookieStore = await cookies();
@@ -98,10 +97,9 @@ export async function executeLiveCommand(sessionId: string, serverId: string | u
   } else {
     try {
       const server = await getServerForRunner(serverId);
-      if (!server || !server.username || !server.privateKey) {
+      if (!server || !server.username) {
         output = 'Error: Server not configured correctly for SSH.';
       } else {
-        const sshPassphrase = getServerSshPassphrase(server.moreDetails);
         const connectionPrefix = currentCwd !== '~' ? `cd "${currentCwd}" && ` : '';
         const pwdMarker = '___PWD_MARKER___';
         const fullCommand = `export TERM=xterm-256color; ${connectionPrefix}${command}; echo "${pwdMarker}"; pwd`;
@@ -119,8 +117,7 @@ export async function executeLiveCommand(sessionId: string, serverId: string | u
           undefined,
           undefined,
           true,
-          serverVariables,
-          sshPassphrase ?? undefined
+          serverVariables
         );
 
         const fullOutput = result.stdout + (result.stderr ? '\n' + result.stderr : '');

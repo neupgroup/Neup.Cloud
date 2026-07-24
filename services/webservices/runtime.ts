@@ -14,7 +14,7 @@ export async function getServerPublicIp(serverId: string) {
       return { success: true, publicIp: server.publicIp };
     }
 
-    if (!server.username || !server.privateKey) {
+    if (!server.username) {
       return {
         success: false,
         error: 'Server credentials not configured for SSH access',
@@ -73,7 +73,7 @@ export async function getNginxConfigurationsForServer(serverId?: string): Promis
     }
 
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
       return [];
     }
 
@@ -171,7 +171,7 @@ export async function getWebOrServerNginxConfigById(id: string, serverId?: strin
 
   try {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
       return null;
     }
 

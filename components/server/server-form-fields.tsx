@@ -19,9 +19,11 @@ export type ServerFormData = {
   provider: string;
   publicIp: string;
   privateIp: string;
+  authMethod: "privateKey" | "password";
   privateKey: string;
   publicKey: string;
   privateKeyPassphrase: string;
+  sshPassword: string;
   expiresAt?: string;
 };
 
@@ -219,10 +221,39 @@ export function ServerFormFields({
 
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>SSH private key</CardTitle>
-          <CardDescription>Import an SSH key file or generate a new one.</CardDescription>
+          <CardTitle>SSH authentication</CardTitle>
+          <CardDescription>Use a private key or a server password.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="grid gap-2">
+            <Label htmlFor="authMethod">Authentication method</Label>
+            <Select value={formData.authMethod} onValueChange={(value: "privateKey" | "password") => onFieldChange("authMethod", value)}>
+              <SelectTrigger id="authMethod">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="privateKey">SSH private key</SelectItem>
+                <SelectItem value="password">Password</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {formData.authMethod === "password" ? (
+            <div className="grid gap-2">
+              <Label htmlFor="sshPassword">Password</Label>
+              <Input
+                id="sshPassword"
+                type="password"
+                required={mode === "add"}
+                value={formData.sshPassword}
+                onChange={(event) => onFieldChange("sshPassword", event.target.value)}
+                placeholder={mode === "add" ? "Enter server password" : "Leave blank to keep the existing password"}
+              />
+            </div>
+          ) : null}
+
+          {formData.authMethod === "privateKey" ? (
+            <>
           <div className="flex flex-wrap items-center gap-2">
             <input
               ref={privateKeyFileInputRef}
@@ -360,6 +391,8 @@ export function ServerFormFields({
                   </Button>
                 </div>
               ) : null}
+            </>
+          ) : null}
             </>
           ) : null}
         </CardContent>

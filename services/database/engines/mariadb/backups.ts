@@ -13,7 +13,7 @@ export async function generateMariaDBBackup(
     mode: 'full' | 'schema'
 ): Promise<BackupResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 

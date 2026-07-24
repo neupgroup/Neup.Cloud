@@ -9,7 +9,7 @@ import type { DatabaseInstallation, EngineStatus, DatabaseInstance } from './eng
  */
 export async function checkDatabaseInstallation(serverId: string): Promise<DatabaseInstallation> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -88,7 +88,7 @@ export async function checkDatabaseInstallation(serverId: string): Promise<Datab
  */
 export async function installDatabaseEngine(serverId: string, engine: 'mariadb' | 'postgres'): Promise<{ success: boolean; message: string }> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -203,7 +203,7 @@ EOF`,
  */
 export async function listAllDatabases(serverId: string): Promise<DatabaseInstance[]> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 

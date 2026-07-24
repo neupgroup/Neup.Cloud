@@ -20,7 +20,7 @@ export type PackageVersionInfo = {
 // Search all available packages
 export async function searchAvailablePackages(serverId: string, query: string) {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { error: 'Server not found.' };
     }
 
@@ -116,7 +116,7 @@ export async function searchAvailablePackages(serverId: string, query: string) {
 
 export async function getPackageVersions(serverId: string, packageName: string) {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) return { error: 'Server not found.' };
+    if (!server || !server.username) return { error: 'Server not found.' };
 
     try {
         // Use apt-cache policy to see installed and candidate
@@ -192,7 +192,7 @@ export async function getPackageVersions(serverId: string, packageName: string) 
 
 export async function installPackage(serverId: string, packageName: string, version?: string) {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) return { error: 'Server configuration missing.' };
+    if (!server || !server.username) return { error: 'Server configuration missing.' };
 
     try {
         let cmd = '';
@@ -218,7 +218,7 @@ export async function installPackage(serverId: string, packageName: string, vers
 
 export async function uninstallPackage(serverId: string, packageName: string) {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) return { error: 'Server configuration missing.' };
+    if (!server || !server.username) return { error: 'Server configuration missing.' };
 
     try {
         const cmd = `sudo DEBIAN_FRONTEND=noninteractive apt-get remove -y "${packageName}"`;
@@ -236,7 +236,7 @@ export async function uninstallPackage(serverId: string, packageName: string) {
 
 export async function reinstallPackage(serverId: string, packageName: string) {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) return { error: 'Server configuration missing.' };
+    if (!server || !server.username) return { error: 'Server configuration missing.' };
 
     try {
         const cmd = `sudo DEBIAN_FRONTEND=noninteractive apt-get install --reinstall -y "${packageName}"`;

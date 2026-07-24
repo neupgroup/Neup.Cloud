@@ -4,6 +4,7 @@
 import { NodeSSH } from 'node-ssh';
 import { UniversalLinux } from '@/services/core/universal';
 import { prisma } from '@/services/prisma';
+import { getServerSshPassphrase, getServerSshPassword } from '@/services/server/server-metadata';
 import { SWAP_DIR, dynamicSwapPath } from '@/services/server/swap-paths';
 
 const DEFAULT_SWAP_SIZE_MB = 2048;
@@ -11,7 +12,8 @@ const DEFAULT_SWAP_SIZE_MB = 2048;
 export type SshExecutionRequest = {
     host: string;
     username: string;
-    privateKey: string;
+    privateKey?: string;
+    password?: string;
     command: string;
     onStdout?: (chunk: Buffer | string) => void;
     onStderr?: (chunk: Buffer | string) => void;
@@ -48,17 +50,33 @@ function normalizePassphrase(value?: string): string | undefined {
 async function createConnectedSsh(config: {
     host: string;
     username: string;
-    privateKey: string;
+    privateKey?: string;
+    password?: string;
     passphrase?: string;
 }): Promise<NodeSSH> {
     const passphrase = normalizePassphrase(config.passphrase);
+    const privateKey = normalizePassphrase(config.privateKey);
+    const password = normalizePassphrase(config.password);
     let ssh = new NodeSSH();
+
+    if (!privateKey && !password) {
+        throw new Error('No SSH private key or password configured.');
+    }
+
+    if (!privateKey) {
+        await ssh.connect({
+            host: config.host,
+            username: config.username,
+            password,
+        });
+        return ssh;
+    }
 
     if (!passphrase) {
         await ssh.connect({
             host: config.host,
             username: config.username,
-            privateKey: config.privateKey,
+            privateKey,
         });
         return ssh;
     }
@@ -67,7 +85,7 @@ async function createConnectedSsh(config: {
         await ssh.connect({
             host: config.host,
             username: config.username,
-            privateKey: config.privateKey,
+            privateKey,
             passphrase,
         });
         return ssh;
@@ -86,7 +104,7 @@ async function createConnectedSsh(config: {
         await ssh.connect({
             host: config.host,
             username: config.username,
-            privateKey: config.privateKey,
+            privateKey,
         });
         return ssh;
     }
@@ -128,17 +146,39 @@ function parseSwapSizeMb(moreDetails: string | null | undefined): number {
 async function getSwapSizeForServer(
     host: string,
     username: string,
-    privateKey: string
+    privateKey?: string | null
 ): Promise<number> {
     const server = await prisma.server.findFirst({
         where: {
             publicIp: host,
             username,
-            privateKey,
+            privateKey: privateKey || null,
         },
     }) as { moreDetails: string | null } | null;
 
     return parseSwapSizeMb(server?.moreDetails);
+}
+
+async function getStoredAuthenticationForServer(
+    host: string,
+    username: string,
+    privateKey?: string | null
+): Promise<{ passphrase?: string; password?: string }> {
+    const server = await prisma.server.findFirst({
+        where: {
+            publicIp: host,
+            username,
+            privateKey: privateKey || null,
+        },
+        select: {
+            moreDetails: true,
+        },
+    });
+
+    return {
+        passphrase: getServerSshPassphrase(server?.moreDetails) ?? undefined,
+        password: getServerSshPassword(server?.moreDetails) ?? undefined,
+    };
 }
 
 async function forceCleanupSwapFile(
@@ -146,7 +186,8 @@ async function forceCleanupSwapFile(
     username: string,
     privateKey: string,
     swapFile: string,
-    passphrase?: string
+    passphrase?: string,
+    password?: string
 ): Promise<void> {
     let cleanupSsh: NodeSSH | null = null;
 
@@ -156,6 +197,7 @@ async function forceCleanupSwapFile(
             username,
             privateKey,
             passphrase,
+            password,
         });
 
         await cleanupSsh.execCommand(`sudo swapoff "${swapFile}" 2>/dev/null || true; sudo rm -f "${swapFile}" 2>/dev/null || true`);
@@ -177,6 +219,7 @@ class BaseSshCommandExecutor implements ISshCommandExecutor {
                 username: request.username,
                 privateKey: request.privateKey,
                 passphrase: request.passphrase,
+                password: request.password,
             });
 
             const connectedSsh = ssh;
@@ -230,8 +273,9 @@ class DynamicSwapSshCommandExecutor implements ISshCommandExecutor {
 
     async run(request: SshExecutionRequest): Promise<SshExecutionResult> {
         let swapFilePath: string | null = null;
+        const privateKey = request.privateKey ?? '';
         try {
-            const swapSizeInMegabytes = await getSwapSizeForServer(request.host, request.username, request.privateKey);
+            const swapSizeInMegabytes = await getSwapSizeForServer(request.host, request.username, privateKey);
             let wrappedCommand = request.command;
 
             if (swapSizeInMegabytes > 0) {
@@ -277,9 +321,10 @@ class DynamicSwapSshCommandExecutor implements ISshCommandExecutor {
                 await forceCleanupSwapFile(
                     request.host,
                     request.username,
-                    request.privateKey,
+                    privateKey,
                     swapFilePath,
-                    request.passphrase
+                    request.passphrase,
+                    request.password
                 );
             }
 
@@ -289,9 +334,10 @@ class DynamicSwapSshCommandExecutor implements ISshCommandExecutor {
                 await forceCleanupSwapFile(
                     request.host,
                     request.username,
-                    request.privateKey,
+                    privateKey,
                     swapFilePath,
-                    request.passphrase
+                    request.passphrase,
+                    request.password
                 );
             }
 
@@ -311,46 +357,65 @@ function createDynamicSwapSshExecutor(recorder?: SshExecutionRecorder): ISshComm
 export async function runCommandOnServer(
     host: string,
     username: string,
-    privateKey: string,
+    privateKey: string | null | undefined,
     command: string,
     onStdout?: (chunk: Buffer | string) => void,
     onStderr?: (chunk: Buffer | string) => void,
     skipSwap: boolean = false,
     variables: Record<string, string | number | boolean> = {},
     passphrase?: string,
-    recorder?: SshExecutionRecorder
+    recorder?: SshExecutionRecorder,
+    password?: string
 ): Promise<{ stdout: string; stderr: string; code: number | null }> {
     const executor: ISshCommandExecutor = skipSwap
         ? createBaseSshExecutor(recorder)
         : createDynamicSwapSshExecutor(recorder);
 
+    const storedAuthentication = await getStoredAuthenticationForServer(host, username, privateKey);
+    const resolvedPassphrase = passphrase ?? storedAuthentication.passphrase;
+    const resolvedPassword = password ?? storedAuthentication.password;
+
     return executor.run({
         host,
         username,
-        privateKey,
+        privateKey: privateKey ?? undefined,
         command,
         onStdout,
         onStderr,
         variables,
-        passphrase,
+        passphrase: resolvedPassphrase,
+        password: resolvedPassword,
     });
+}
+
+export async function runCommandOnServerWithAuth(request: SshExecutionRequest & {
+    skipSwap?: boolean;
+    recorder?: SshExecutionRecorder;
+}): Promise<{ stdout: string; stderr: string; code: number | null }> {
+    const executor: ISshCommandExecutor = request.skipSwap
+        ? createBaseSshExecutor(request.recorder)
+        : createDynamicSwapSshExecutor(request.recorder);
+
+    return executor.run(request);
 }
 
 export async function uploadFileToServer(
     host: string,
     username: string,
-    privateKey: string,
+    privateKey: string | null | undefined,
     localPath: string,
     remotePath: string,
     passphrase?: string
 ): Promise<void> {
     let ssh: NodeSSH | null = null;
+    const storedAuthentication = await getStoredAuthenticationForServer(host, username, privateKey);
     try {
         ssh = await createConnectedSsh({
             host,
             username,
-            privateKey,
-            passphrase,
+            privateKey: privateKey ?? undefined,
+            passphrase: passphrase ?? storedAuthentication.passphrase,
+            password: storedAuthentication.password,
         });
         await ssh.putFile(localPath, remotePath);
     } finally {
@@ -361,18 +426,20 @@ export async function uploadFileToServer(
 export async function uploadDirectoryToServer(
     host: string,
     username: string,
-    privateKey: string,
+    privateKey: string | null | undefined,
     localPath: string,
     remotePath: string,
     passphrase?: string
 ): Promise<void> {
     let ssh: NodeSSH | null = null;
+    const storedAuthentication = await getStoredAuthenticationForServer(host, username, privateKey);
     try {
         ssh = await createConnectedSsh({
             host,
             username,
-            privateKey,
-            passphrase,
+            privateKey: privateKey ?? undefined,
+            passphrase: passphrase ?? storedAuthentication.passphrase,
+            password: storedAuthentication.password,
         });
         await ssh.putDirectory(localPath, remotePath, {
             recursive: true,
@@ -386,18 +453,20 @@ export async function uploadDirectoryToServer(
 export async function downloadFileFromServer(
     host: string,
     username: string,
-    privateKey: string,
+    privateKey: string | null | undefined,
     remotePath: string,
     localPath: string,
     passphrase?: string
 ): Promise<void> {
     let ssh: NodeSSH | null = null;
+    const storedAuthentication = await getStoredAuthenticationForServer(host, username, privateKey);
     try {
         ssh = await createConnectedSsh({
             host,
             username,
-            privateKey,
-            passphrase,
+            privateKey: privateKey ?? undefined,
+            passphrase: passphrase ?? storedAuthentication.passphrase,
+            password: storedAuthentication.password,
         });
         await ssh.getFile(localPath, remotePath);
     } finally {

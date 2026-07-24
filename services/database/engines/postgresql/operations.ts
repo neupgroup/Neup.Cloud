@@ -9,7 +9,7 @@ import { buildDatabaseBackupFilename, type DatabaseDetails, type DatabaseUser, t
  */
 export async function getPostgresDetails(serverId: string, dbName: string): Promise<DatabaseDetails> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -71,7 +71,7 @@ export async function createPostgresDatabase(
     dbPass: string
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -124,7 +124,7 @@ export async function dropPostgresDatabase(
     dbName: string
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -201,7 +201,7 @@ export async function dropPostgresDatabase(
  */
 export async function listPostgresUsers(serverId: string, dbName: string): Promise<DatabaseUser[]> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -291,7 +291,7 @@ export async function createPostgresUser(
     permissions: 'full' | 'read' = 'full'
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -331,7 +331,7 @@ export async function deletePostgresUser(
     username: string
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server missing.');
     }
 
@@ -368,7 +368,7 @@ export async function updatePostgresUserPermissions(
     permissions: 'full' | 'read'
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server missing.');
     }
 
@@ -404,7 +404,7 @@ export async function updatePostgresUserPassword(
     newPassword: string
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server missing.');
     }
 
@@ -431,7 +431,7 @@ export async function generatePostgresBackup(
     mode: 'full' | 'schema'
 ): Promise<BackupResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -479,7 +479,7 @@ export async function executePostgresQuery(
     query: string
 ): Promise<QueryResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 

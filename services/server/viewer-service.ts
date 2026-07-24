@@ -3,13 +3,11 @@
 import { getServerForRunner } from '@/services/server/server-service';
 import { runCommandOnServer } from '@/services/server/ssh';
 import { revalidatePath } from 'next/cache';
-import { getServerSshPassphrase } from '@/services/server/server-metadata';
 
 export async function getFileContent(serverId: string, path: string, isBinary: boolean = false, rootMode: boolean = false) {
     const server = await getServerForRunner(serverId);
     if (!server) return { error: 'Server not found.' };
-    if (!server.username || !server.privateKey) return { error: 'SSH config missing.' };
-    const sshPassphrase = getServerSshPassphrase(server.moreDetails);
+    if (!server.username) return { error: 'SSH config missing.' };
 
     try {
         let command;
@@ -21,7 +19,7 @@ export async function getFileContent(serverId: string, path: string, isBinary: b
             command = rootMode ? `sudo cat ${path}` : `cat ${path}`;
         }
 
-        const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, command, undefined, undefined, true, {}, sshPassphrase ?? undefined); // skipSwap - Don't use swap space for file viewer operations
+        const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, command, undefined, undefined, true, {}); // skipSwap - Don't use swap space for file viewer operations
 
         if (result.code !== 0) {
             return { error: result.stderr || 'Failed to read file.' };
@@ -36,8 +34,7 @@ export async function getFileContent(serverId: string, path: string, isBinary: b
 export async function saveFileContent(serverId: string, path: string, content: string, rootMode: boolean = false) {
     const server = await getServerForRunner(serverId);
     if (!server) return { error: 'Server not found.' };
-    if (!server.username || !server.privateKey) return { error: 'SSH config missing.' };
-    const sshPassphrase = getServerSshPassphrase(server.moreDetails);
+    if (!server.username) return { error: 'SSH config missing.' };
 
     try {
         // Escape content carefully. 
@@ -49,7 +46,7 @@ export async function saveFileContent(serverId: string, path: string, content: s
             ? `echo "${base64Content}" | base64 -d | sudo tee ${path} > /dev/null`
             : `echo "${base64Content}" | base64 -d > ${path}`;
 
-        const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, command, undefined, undefined, true, {}, sshPassphrase ?? undefined); // skipSwap - Don't use swap space for file viewer operations
+        const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, command, undefined, undefined, true, {}); // skipSwap - Don't use swap space for file viewer operations
 
         if (result.code !== 0) {
             return { error: result.stderr || 'Failed to save file.' };

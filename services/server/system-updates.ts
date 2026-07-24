@@ -13,7 +13,7 @@ export type PackageUpdate = {
 
 export async function getSystemUpdates(serverId: string) {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { error: 'Server not found or misconfigured.' };
     }
 
@@ -89,7 +89,7 @@ export async function getSystemUpdates(serverId: string) {
 
 export async function refreshPackageList(serverId: string) {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { error: 'Server not found or misconfigured.' };
     }
 
@@ -123,7 +123,7 @@ export async function refreshPackageList(serverId: string) {
 
 export async function getInstalledPackages(serverId: string) {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { error: 'Server not found or misconfigured.' };
     }
 
@@ -170,7 +170,7 @@ export async function getInstalledPackages(serverId: string) {
 
 export async function getPackageDetails(serverId: string, packageName: string) {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { error: 'Server not found.' };
     }
 
@@ -212,7 +212,7 @@ export async function getPackageDetails(serverId: string, packageName: string) {
 
 export async function updatePackage(serverId: string, packageName: string) {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) return { error: 'Server configuration missing.' };
+    if (!server || !server.username) return { error: 'Server configuration missing.' };
 
     try {
         // Run interactive update? No, run non-interactive

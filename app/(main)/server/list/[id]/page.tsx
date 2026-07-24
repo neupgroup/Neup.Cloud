@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from "@/core/hooks/use-toast";
 import { getServer, updateServer, checkServerConnection } from "@/services/server/server-service";
 import type { Server } from "@/services/server/types";
-import { getServerExpiration, getServerSshPassphrase, parseServerMetadata, serializeServerMetadata } from "@/services/server/server-metadata";
+import { getServerExpiration, getServerSshAuthMethod, getServerSshPassphrase, parseServerMetadata, serializeServerMetadata } from "@/services/server/server-metadata";
 import { ServerFormFields, type ServerFormData } from "@/components/server/server-form-fields";
 
 function formatDate(value?: string | null) {
@@ -119,6 +119,7 @@ function ServerDetailsForm({ server }: { server: Server }) {
 
   const currentExpiration = getServerExpiration(serverState.moreDetails);
   const currentMetadata = useMemo(() => parseServerMetadata(serverState.moreDetails), [serverState.moreDetails]);
+  const currentAuthMethod = useMemo(() => getServerSshAuthMethod(serverState.moreDetails), [serverState.moreDetails]);
   const currentPassphrase = useMemo(() => getServerSshPassphrase(serverState.moreDetails) ?? "", [serverState.moreDetails]);
 
   const [hasPasskey, setHasPasskey] = useState(Boolean(currentPassphrase));
@@ -129,9 +130,11 @@ function ServerDetailsForm({ server }: { server: Server }) {
     provider: serverState.provider,
     publicIp: serverState.publicIp,
     privateIp: serverState.privateIp ?? "",
+    authMethod: currentAuthMethod,
     privateKey: "",
     publicKey: serverState.publicKey ?? "",
     privateKeyPassphrase: "",
+    sshPassword: "",
   });
 
   useEffect(() => {
@@ -142,12 +145,14 @@ function ServerDetailsForm({ server }: { server: Server }) {
       provider: serverState.provider,
       publicIp: serverState.publicIp,
       privateIp: serverState.privateIp ?? "",
+      authMethod: currentAuthMethod,
       privateKey: "",
       publicKey: serverState.publicKey ?? "",
       privateKeyPassphrase: "",
+      sshPassword: "",
     });
     setHasPasskey(Boolean(currentPassphrase));
-  }, [currentExpiration, serverState, currentPassphrase]);
+  }, [currentExpiration, serverState, currentAuthMethod, currentPassphrase]);
 
   const updateField = (name: keyof ServerFormData, value: string) => {
     setFormData((current) => ({ ...current, [name]: value }));
@@ -157,6 +162,17 @@ function ServerDetailsForm({ server }: { server: Server }) {
     event.preventDefault();
     setIsSaving(true);
     try {
+      const usesPrivateKey = formData.authMethod === "privateKey";
+
+      if (!usesPrivateKey && currentAuthMethod !== "password" && !formData.sshPassword.trim()) {
+        toast({
+          variant: "destructive",
+          title: "Missing required fields",
+          description: "Please enter the server password before switching authentication methods.",
+        });
+        return;
+      }
+
       await updateServer(serverState.id, {
         name: formData.name,
         username: formData.username,
@@ -164,11 +180,13 @@ function ServerDetailsForm({ server }: { server: Server }) {
         provider: formData.provider,
         publicIp: formData.publicIp,
         privateIp: formData.privateIp,
-        privateKey: formData.privateKey,
-        publicKey: formData.publicKey,
+        privateKey: usesPrivateKey ? formData.privateKey : null,
+        publicKey: usesPrivateKey ? formData.publicKey : null,
         moreDetails: serializeServerMetadata(serverState.moreDetails, {
           ...currentMetadata,
-          sshPassphrase: hasPasskey ? formData.privateKeyPassphrase || currentPassphrase || undefined : undefined,
+          sshAuthMethod: usesPrivateKey ? "privateKey" : "password",
+          sshPassphrase: usesPrivateKey && hasPasskey ? formData.privateKeyPassphrase || currentPassphrase || undefined : undefined,
+          sshPassword: usesPrivateKey ? undefined : formData.sshPassword || undefined,
         }),
       });
 
@@ -191,7 +209,9 @@ function ServerDetailsForm({ server }: { server: Server }) {
           ...currentMetadata,
           validTill: nextExpiration ? nextExpiration.toISOString() : undefined,
           expiresAt: undefined,
+          sshAuthMethod: currentAuthMethod,
           sshPassphrase: currentPassphrase || undefined,
+          sshPassword: undefined,
         }),
       });
 

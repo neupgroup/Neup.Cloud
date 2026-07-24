@@ -8,7 +8,6 @@ import { getCommandLog } from '@/services/logs/command-log';
 import { runCustomCommandOnServer as runCustomCommandOnServerLogic } from '@/services/server/server-runtime';
 import { runCommandOnServer, uploadFileToServer } from '@/services/server/ssh';
 import { getServerForRunner } from '@/services/server/server-service';
-import { getServerSshPassphrase } from '@/services/server/server-metadata';
 import type { FileOrFolder, FileSearchResult } from '@/services/server/server-file-types';
 
 export async function runCustomCommandOnServer(serverId: string, command: string) {
@@ -77,11 +76,9 @@ export async function browseDirectory(
   if (!server) {
     return { files: [], error: 'Server not found.' };
   }
-  if (!server.username || !server.privateKey) {
-    return { files: [], error: 'No username or private key configured for this server.' };
+  if (!server.username) {
+    return { files: [], error: 'No username or SSH authentication configured for this server.' };
   }
-
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
 
   try {
     const safePath = targetPath.endsWith('/') ? targetPath : `${targetPath}/`;
@@ -95,9 +92,7 @@ export async function browseDirectory(
       command,
       undefined,
       undefined,
-      true,
-      {},
-      sshPassphrase ?? undefined
+      true, {}
     );
 
     if (result.code !== 0) {
@@ -115,11 +110,9 @@ export async function browseDirectory(
 
 export async function isDirectory(serverId: string, targetPath: string, rootMode = false): Promise<boolean> {
   const server = await getServerForRunner(serverId);
-  if (!server || !server.username || !server.privateKey) {
+  if (!server || !server.username) {
     return false;
   }
-
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
 
   try {
     const command = rootMode ? `sudo test -d "${targetPath}"` : `test -d "${targetPath}"`;
@@ -130,9 +123,7 @@ export async function isDirectory(serverId: string, targetPath: string, rootMode
       command,
       undefined,
       undefined,
-      true,
-      {},
-      sshPassphrase ?? undefined
+      true, {}
     );
     return result.code === 0;
   } catch {
@@ -145,11 +136,9 @@ export async function uploadFile(serverId: string, remotePath: string, formData:
   if (!server) {
     return { error: 'Server not found.' };
   }
-  if (!server.username || !server.privateKey) {
-    return { error: 'No username or private key configured for this server.' };
+  if (!server.username) {
+    return { error: 'No username or SSH authentication configured for this server.' };
   }
-
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
 
   const file = formData.get('file') as File | null;
   if (!file) {
@@ -166,7 +155,7 @@ export async function uploadFile(serverId: string, remotePath: string, formData:
 
     const remoteFilePath = path.join(remotePath, file.name);
 
-    await uploadFileToServer(server.publicIp, server.username, server.privateKey, tempFilePath, remoteFilePath, sshPassphrase ?? undefined);
+    await uploadFileToServer(server.publicIp, server.username, server.privateKey, tempFilePath, remoteFilePath);
 
     revalidatePath(`/servers/${serverId}/server/files`);
     return { success: true };
@@ -179,9 +168,7 @@ export async function uploadFile(serverId: string, remotePath: string, formData:
 
 export async function renameFile(serverId: string, currentPath: string, newName: string, rootMode = false) {
   const server = await getServerForRunner(serverId);
-  if (!server || !server.username || !server.privateKey) return { error: 'Server configuration missing.' };
-
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
+  if (!server || !server.username) return { error: 'Server configuration missing.' };
 
   try {
     const directory = currentPath.substring(0, currentPath.lastIndexOf('/'));
@@ -194,9 +181,7 @@ export async function renameFile(serverId: string, currentPath: string, newName:
       command,
       undefined,
       undefined,
-      true,
-      {},
-      sshPassphrase ?? undefined
+      true, {}
     );
 
     if (result.code !== 0) return { error: result.stderr || 'Rename failed.' };
@@ -210,9 +195,7 @@ export async function renameFile(serverId: string, currentPath: string, newName:
 
 export async function deleteFiles(serverId: string, paths: string[], rootMode = false) {
   const server = await getServerForRunner(serverId);
-  if (!server || !server.username || !server.privateKey) return { error: 'Server configuration missing.' };
-
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
+  if (!server || !server.username) return { error: 'Server configuration missing.' };
 
   try {
     const pathArgs = paths.map((entry) => `"${entry}"`).join(' ');
@@ -224,9 +207,7 @@ export async function deleteFiles(serverId: string, paths: string[], rootMode = 
       command,
       undefined,
       undefined,
-      true,
-      {},
-      sshPassphrase ?? undefined
+      true, {}
     );
 
     if (result.code !== 0) return { error: result.stderr || 'Delete failed.' };
@@ -239,9 +220,7 @@ export async function deleteFiles(serverId: string, paths: string[], rootMode = 
 
 export async function moveFiles(serverId: string, sourcePaths: string[], destPath: string, rootMode = false) {
   const server = await getServerForRunner(serverId);
-  if (!server || !server.username || !server.privateKey) return { error: 'Server configuration missing.' };
-
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
+  if (!server || !server.username) return { error: 'Server configuration missing.' };
 
   try {
     const pathArgs = sourcePaths.map((entry) => `"${entry}"`).join(' ');
@@ -253,9 +232,7 @@ export async function moveFiles(serverId: string, sourcePaths: string[], destPat
       command,
       undefined,
       undefined,
-      true,
-      {},
-      sshPassphrase ?? undefined
+      true, {}
     );
 
     if (result.code !== 0) return { error: result.stderr || 'Move failed.' };
@@ -268,9 +245,7 @@ export async function moveFiles(serverId: string, sourcePaths: string[], destPat
 
 export async function copyFiles(serverId: string, sourcePaths: string[], destPath: string, rootMode = false) {
   const server = await getServerForRunner(serverId);
-  if (!server || !server.username || !server.privateKey) return { error: 'Server configuration missing.' };
-
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
+  if (!server || !server.username) return { error: 'Server configuration missing.' };
 
   try {
     const pathArgs = sourcePaths.map((entry) => `"${entry}"`).join(' ');
@@ -282,9 +257,7 @@ export async function copyFiles(serverId: string, sourcePaths: string[], destPat
       command,
       undefined,
       undefined,
-      true,
-      {},
-      sshPassphrase ?? undefined
+      true, {}
     );
 
     if (result.code !== 0) return { error: result.stderr || 'Copy failed.' };
@@ -297,7 +270,7 @@ export async function copyFiles(serverId: string, sourcePaths: string[], destPat
 
 export async function createDirectory(serverId: string, targetPath: string, rootMode = false) {
   const server = await getServerForRunner(serverId);
-  if (!server || !server.username || !server.privateKey) return { error: 'Server configuration missing.' };
+  if (!server || !server.username) return { error: 'Server configuration missing.' };
 
   try {
     const command = rootMode ? `sudo mkdir -p "${targetPath}"` : `mkdir -p "${targetPath}"`;
@@ -320,7 +293,7 @@ export async function createDirectory(serverId: string, targetPath: string, root
 
 export async function createEmptyFile(serverId: string, targetPath: string, rootMode = false) {
   const server = await getServerForRunner(serverId);
-  if (!server || !server.username || !server.privateKey) return { error: 'Server configuration missing.' };
+  if (!server || !server.username) return { error: 'Server configuration missing.' };
 
   try {
     const command = rootMode ? `sudo touch "${targetPath}"` : `touch "${targetPath}"`;
@@ -370,11 +343,9 @@ export async function searchFilesOnServer(
 ): Promise<{ results: FileSearchResult[]; truncated: boolean; error?: string }> {
   const server = await getServerForRunner(serverId);
   if (!server) return { results: [], truncated: false, error: 'Server not found.' };
-  if (!server.username || !server.privateKey) {
-    return { results: [], truncated: false, error: 'No username or private key configured for this server.' };
+  if (!server.username) {
+    return { results: [], truncated: false, error: 'No username or SSH authentication configured for this server.' };
   }
-
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
 
   const safeBasePath = normalizeAbsolutePath(basePath);
   const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(2000, Math.floor(limit))) : 200;
@@ -416,9 +387,7 @@ export async function searchFilesOnServer(
       command,
       undefined,
       undefined,
-      true,
-      {},
-      sshPassphrase ?? undefined
+      true, {}
     );
 
     if (result.code !== 0 && !result.stdout.trim()) {

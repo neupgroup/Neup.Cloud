@@ -9,7 +9,7 @@ import type { DatabaseUser, OperationResult } from '../_types';
  */
 export async function listMariaDBUsers(serverId: string, dbName: string): Promise<DatabaseUser[]> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -91,7 +91,7 @@ export async function createMariaDBUser(
     permissions: 'full' | 'read' = 'full'
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -128,7 +128,7 @@ export async function deleteMariaDBUser(
     host: string = '%'
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server missing.');
     }
 
@@ -167,7 +167,7 @@ export async function updateMariaDBUserPermissions(
     permissions: 'full' | 'read'
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server missing.');
     }
 
@@ -201,7 +201,7 @@ export async function updateMariaDBUserPassword(
     host: string = '%'
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server missing.');
     }
 

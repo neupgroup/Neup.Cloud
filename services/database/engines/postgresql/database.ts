@@ -9,7 +9,7 @@ import type { DatabaseDetails, OperationResult } from '../_types';
  */
 export async function getPostgresDetails(serverId: string, dbName: string): Promise<DatabaseDetails> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -71,7 +71,7 @@ export async function createPostgresDatabase(
     dbPass: string
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 

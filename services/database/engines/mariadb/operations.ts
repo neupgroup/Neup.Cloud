@@ -9,7 +9,7 @@ import { buildDatabaseBackupFilename, type DatabaseDetails, type DatabaseUser, t
  */
 export async function getMariaDBDetails(serverId: string, dbName: string): Promise<DatabaseDetails> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -68,7 +68,7 @@ export async function createMariaDBDatabase(
     dbPass: string
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -122,7 +122,7 @@ export async function dropMariaDBDatabase(
     dbName: string
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -185,7 +185,7 @@ export async function dropMariaDBDatabase(
  */
 export async function listMariaDBUsers(serverId: string, dbName: string): Promise<DatabaseUser[]> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -239,7 +239,7 @@ export async function createMariaDBUser(
     permissions: 'full' | 'read' = 'full'
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -276,7 +276,7 @@ export async function deleteMariaDBUser(
     host: string = '%'
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server missing.');
     }
 
@@ -315,7 +315,7 @@ export async function updateMariaDBUserPermissions(
     permissions: 'full' | 'read'
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server missing.');
     }
 
@@ -349,7 +349,7 @@ export async function updateMariaDBUserPassword(
     host: string = '%'
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server missing.');
     }
 
@@ -381,7 +381,7 @@ export async function generateMariaDBBackup(
     mode: 'full' | 'schema'
 ): Promise<BackupResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -429,7 +429,7 @@ export async function executeMariaDBQuery(
     query: string
 ): Promise<QueryResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 

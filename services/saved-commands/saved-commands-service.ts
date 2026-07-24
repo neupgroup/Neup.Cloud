@@ -29,8 +29,8 @@ async function executeSingleCommand(
   if (!server) {
     throw new Error('Server not found.');
   }
-  if (!server.username || !server.privateKey) {
-    throw new Error('No username or private key configured for this server.');
+  if (!server.username) {
+    throw new Error('No username or SSH authentication configured for this server.');
   }
 
   const log = await createServerLog({
@@ -115,8 +115,8 @@ export async function executeQuickCommand(serverId: string, command: string) {
     if (!server) {
       return { error: 'Server not found' };
     }
-    if (!server.username || !server.privateKey) {
-      return { error: 'No username or private key configured for this server' };
+    if (!server.username) {
+      return { error: 'No username or SSH authentication configured for this server' };
     }
 
     const result = await runCommandOnServer(

@@ -105,7 +105,7 @@ export async function startStatusTracking(serverId: string) {
     if (!server || server.type !== 'Linux') {
         return { error: 'This feature is only for Linux servers.' };
     }
-    if (!server.username || !server.privateKey) {
+    if (!server.username) {
         return { error: 'Server SSH configuration is missing.' };
     }
 
@@ -123,7 +123,7 @@ export async function startStatusTracking(serverId: string) {
 export async function stopStatusTracking(serverId: string) {
     const server = await getServerForRunner(serverId);
     if (!server) return { error: 'Server not found.' };
-    if (!server.username || !server.privateKey) return { error: 'Server SSH configuration is missing.' };
+    if (!server.username) return { error: 'Server SSH configuration is missing.' };
 
     const command = `sudo systemctl stop neup-logger`;
 
@@ -156,7 +156,7 @@ export async function getStatus(
 ): Promise<{ data?: StatusData; error?: string }> {
     const server = await getServerForRunner(serverId);
     if (!server) return { error: 'Server not found.' };
-    if (!server.username || !server.privateKey) return { error: 'Server SSH configuration is missing.' };
+    if (!server.username) return { error: 'Server SSH configuration is missing.' };
 
     const endTs = endTime || Date.now();
     const startTs = endTs - (durationMinutes * 60 * 1000);
@@ -297,7 +297,7 @@ export async function getStatus(
 export async function getServerUptime(serverId: string) {
     const server = await getServerForRunner(serverId);
     if (!server) return { error: 'Server not found.' };
-    if (!server.username || !server.privateKey) return { error: 'Server SSH configuration is missing.' };
+    if (!server.username) return { error: 'Server SSH configuration is missing.' };
 
     try {
         const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, 'uptime -p', undefined, undefined, true);

@@ -1,7 +1,6 @@
 import { runCommandOnServer } from '@/services/server/ssh';
 import { createServerLog } from '@/services/logs/server';
 import { getServerByIdentifier } from '@/services/server/data';
-import { getServerSshPassphrase } from '@/services/server/server-metadata';
 
 export async function getServerForRunner(id: string) {
   return getServerByIdentifier(id);
@@ -12,14 +11,12 @@ export async function getRamUsage(serverId: string) {
   if (!server) {
     return { error: 'Server not found.' };
   }
-  if (!server.username || !server.privateKey) {
-    return { error: 'Server is missing username or private key configuration for SSH access.' };
+  if (!server.username) {
+    return { error: 'Server is missing username or SSH authentication configuration for SSH access.' };
   }
 
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
-
   try {
-    const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, 'ps -eo rss=', undefined, undefined, false, {}, sshPassphrase ?? undefined);
+    const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, 'ps -eo rss=', undefined, undefined, false, {});
     if (result.code !== 0) {
       return { error: result.stderr || 'Failed to get RAM usage.' };
     }
@@ -43,11 +40,9 @@ export async function getSystemStats(serverId: string) {
   if (!server) {
     return { error: 'Server not found.' };
   }
-  if (!server.username || !server.privateKey) {
-    return { error: 'Server is missing username or private key configuration for SSH access.' };
+  if (!server.username) {
+    return { error: 'Server is missing username or SSH authentication configuration for SSH access.' };
   }
-
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
 
   try {
     const command = `
@@ -56,7 +51,7 @@ export async function getSystemStats(serverId: string) {
     free -m | awk 'NR==2{print $2 " " $3}'
     `;
 
-    const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, command, undefined, undefined, false, {}, sshPassphrase ?? undefined);
+    const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, command, undefined, undefined, false, {});
     if (result.code !== 0) {
       return { error: result.stderr || 'Failed to get system stats.' };
     }
@@ -83,14 +78,12 @@ export async function getSystemUptime(serverId: string) {
   if (!server) {
     return { error: 'Server not found.' };
   }
-  if (!server.username || !server.privateKey) {
-    return { error: 'Server is missing username or private key configuration for SSH access.' };
+  if (!server.username) {
+    return { error: 'Server is missing username or SSH authentication configuration for SSH access.' };
   }
 
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
-
   try {
-    const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, 'cat /proc/uptime', undefined, undefined, false, {}, sshPassphrase ?? undefined);
+    const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, 'cat /proc/uptime', undefined, undefined, false, {});
     if (result.code !== 0) {
       return { error: result.stderr || 'Failed to get uptime.' };
     }
@@ -120,11 +113,9 @@ export async function getServerMemory(serverId: string) {
   if (!server) {
     return { error: 'Server not found.' };
   }
-  if (!server.username || !server.privateKey) {
-    return { error: 'Server is missing username or private key configuration for SSH access.' };
+  if (!server.username) {
+    return { error: 'Server is missing username or SSH authentication configuration for SSH access.' };
   }
-
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
 
   try {
     const result = await runCommandOnServer(
@@ -134,9 +125,7 @@ export async function getServerMemory(serverId: string) {
       "grep -E 'MemTotal|MemAvailable' /proc/meminfo",
       undefined,
       undefined,
-      false,
-      {},
-      sshPassphrase ?? undefined
+      false, {}
     );
 
     if (result.code !== 0) {
@@ -175,11 +164,9 @@ export async function runCustomCommandOnServer(serverId: string, command: string
   if (!server) {
     return { error: 'Server not found.' };
   }
-  if (!server.username || !server.privateKey) {
-    return { error: 'No username or private key configured for this server.' };
+  if (!server.username) {
+    return { error: 'No username or SSH authentication configured for this server.' };
   }
-
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
 
   try {
     const result = await runCommandOnServer(
@@ -190,9 +177,7 @@ export async function runCustomCommandOnServer(serverId: string, command: string
       ,
       undefined,
       undefined,
-      false,
-      {},
-      sshPassphrase ?? undefined
+      false, {}
     );
 
     const output = result.code === 0 ? result.stdout : result.stderr;

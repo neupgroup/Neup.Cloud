@@ -28,7 +28,7 @@ export type SwapFileEntry = {
 
 export async function getRecurringSwapSize(serverId: string): Promise<{ sizeMb: number; error?: string }> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { sizeMb: 0, error: 'Server not found or missing SSH credentials.' };
     }
 
@@ -103,7 +103,7 @@ exit 0
 
 export async function listSwapFiles(serverId: string): Promise<{ files: SwapFileEntry[]; error?: string }> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { files: [], error: 'Server not found or missing SSH credentials.' };
     }
 
@@ -232,7 +232,7 @@ export async function createRecurringSwap(
     }
 
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { error: 'Server not found or missing SSH credentials.' };
     }
 
@@ -310,7 +310,7 @@ export async function deleteRecurringSwap(
     serverId: string
 ): Promise<{ success?: boolean; error?: string }> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { error: 'Server not found or missing SSH credentials.' };
     }
 
@@ -371,7 +371,7 @@ export async function deleteSwapFile(
     }
 
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { error: 'Server not found or missing SSH credentials.' };
     }
 

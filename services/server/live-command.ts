@@ -92,7 +92,7 @@ export async function executeLiveCommand(sessionId: string, serverId: string | u
   } else {
     try {
       const server = await getServerForRunner(serverId);
-      if (!server || !server.username || !server.privateKey) {
+      if (!server || !server.username) {
         output = 'Error: Server not configured correctly for SSH.';
       } else {
         const connectionPrefix = currentCwd !== '~' ? `cd "${currentCwd}" && ` : '';

@@ -79,7 +79,7 @@ async function getStorageOverviewUncached(
     serverId: string
 ): Promise<{ data?: Pick<StorageInfo, 'disk' | 'swap'>; error?: string }> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { error: 'Server not found or missing SSH credentials.' };
     }
 
@@ -165,7 +165,7 @@ async function getStorageBreakdownUncached(
     serverId: string
 ): Promise<{ data?: { diskTotalBytes: number; sections: StorageSection[] }; error?: string }> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { error: 'Server not found or missing SSH credentials.' };
     }
 

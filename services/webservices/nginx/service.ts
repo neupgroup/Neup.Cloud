@@ -105,7 +105,7 @@ export async function deleteNginxConfig(serverId: string, configName: string) {
             return { success: false, error: 'Server not found' };
         }
 
-        if (!server.username || !server.privateKey) {
+        if (!server.username) {
             return {
                 success: false,
                 error: 'Server credentials not configured'
@@ -180,7 +180,7 @@ export async function deployNginxConfig(serverId: string, configContent?: string
             return { success: false, error: 'Server not found' };
         }
 
-        if (!server.username || !server.privateKey) {
+        if (!server.username) {
             return {
                 success: false,
                 error: 'Server credentials not configured'
@@ -271,7 +271,7 @@ export async function generateSslCertificate(
             return { success: false, error: 'Server not found' };
         }
 
-        if (!server.username || !server.privateKey) {
+        if (!server.username) {
             return {
                 success: false,
                 error: 'Server credentials not configured'

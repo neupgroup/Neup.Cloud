@@ -41,8 +41,8 @@ export async function getStartupServices(serverId: string): Promise<{ services?:
     if (!server) {
         return { error: 'Server not found.' };
     }
-    if (!server.username || !server.privateKey) {
-        return { error: 'No username or private key configured for this server.' };
+    if (!server.username) {
+        return { error: 'No username or SSH authentication configured for this server.' };
     }
 
     try {
@@ -74,7 +74,7 @@ export async function getStartupServices(serverId: string): Promise<{ services?:
 export async function toggleService(serverId: string, serviceName: string, enable: boolean): Promise<{ success?: boolean, error?: string }> {
     const server = await getServerForRunner(serverId);
     if (!server) return { error: 'Server not found.' };
-    if (!server.username || !server.privateKey) return { error: 'No credentials.' };
+    if (!server.username) return { error: 'No credentials.' };
 
     // --now enables/disables AND starts/stops immediately
     const action = enable ? 'enable' : 'disable';
@@ -103,7 +103,7 @@ export async function createService(
 ): Promise<{ success?: boolean, error?: string }> {
     const server = await getServerForRunner(serverId);
     if (!server) return { error: 'Server not found.' };
-    if (!server.username || !server.privateKey) return { error: 'No credentials.' };
+    if (!server.username) return { error: 'No credentials.' };
 
     const serviceName = data.name.endsWith('.service') ? data.name : `${data.name}.service`;
     const description = data.description || `Service for ${data.name}`;

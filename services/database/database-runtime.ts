@@ -287,7 +287,7 @@ export async function storeDatabaseBackup(
     mode: 'full' | 'schema'
 ): Promise<StoredBackupResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -336,7 +336,7 @@ function parseBackupFilename(filename: string, fallbackDbName?: string) {
 
 async function listDatabaseBackupFiles(serverId: string, dbName?: string): Promise<DatabaseBackupFile[]> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 

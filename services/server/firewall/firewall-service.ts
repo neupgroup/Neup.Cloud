@@ -21,7 +21,7 @@ export type FirewallStatus = {
 
 export async function getFirewallStatus(serverId: string): Promise<FirewallStatus> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         return { active: false, rules: [], defaultIncoming: 'unknown', defaultOutgoing: 'unknown', error: 'Server not found or missing credentials.' };
     }
 
@@ -182,7 +182,7 @@ export async function getFirewallStatus(serverId: string): Promise<FirewallStatu
 
 export async function allowPort(serverId: string, port: string, protocol: 'tcp' | 'udp' = 'tcp'): Promise<{ success: boolean; message: string }> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found.');
     }
 
@@ -230,7 +230,7 @@ export async function allowPort(serverId: string, port: string, protocol: 'tcp' 
 
 export async function deleteRule(serverId: string, ruleId: number): Promise<{ success: boolean; message: string }> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found.');
     }
 
@@ -263,7 +263,7 @@ export async function deleteRule(serverId: string, ruleId: number): Promise<{ su
 
 export async function toggleFirewall(serverId: string, enable: boolean): Promise<{ success: boolean; message: string }> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found.');
     }
 

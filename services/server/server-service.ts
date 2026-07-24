@@ -27,7 +27,7 @@ import {
   getSystemUptime as getSystemUptimeLogic,
 } from '@/services/server/server-runtime';
 import { runCommandOnServer } from '@/services/server/ssh';
-import { getServerExpiration, getServerSshPassphrase } from '@/services/server/server-metadata';
+import { getServerExpiration, parseServerMetadata } from '@/services/server/server-metadata';
 import type { Server } from '@/services/server/types';
 
 type ServerApplicationMap = {
@@ -76,8 +76,8 @@ export async function createServer(serverData: {
   moreDetails?: string;
   publicIp: string;
   privateIp: string;
-  privateKey: string;
-  publicKey?: string;
+  privateKey?: string | null;
+  publicKey?: string | null;
 }) {
   await createServerRecord(serverData);
   revalidatePath('/server/list');
@@ -93,8 +93,8 @@ export async function updateServer(
     moreDetails: string;
     publicIp: string;
     privateIp: string;
-    privateKey: string;
-    publicKey: string;
+    privateKey: string | null;
+    publicKey: string | null;
     proxyHandler: string;
     loadBalancer: string;
   }>
@@ -108,6 +108,22 @@ export async function updateServer(
       return value !== undefined;
     })
   );
+
+  if (typeof filteredData.moreDetails === 'string') {
+    const existingServer = await getServerById(id);
+    const incomingMetadata = parseServerMetadata(filteredData.moreDetails);
+    const existingMetadata = parseServerMetadata(existingServer?.moreDetails);
+
+    if (incomingMetadata.sshAuthMethod === 'password' && incomingMetadata.sshPassword === undefined) {
+      incomingMetadata.sshPassword = existingMetadata.sshPassword;
+    }
+
+    if (incomingMetadata.sshAuthMethod === 'privateKey') {
+      delete incomingMetadata.sshPassword;
+    }
+
+    filteredData.moreDetails = JSON.stringify(incomingMetadata);
+  }
 
   if (Object.keys(filteredData).length === 0) {
     return;
@@ -178,11 +194,9 @@ export async function checkServerConnection(
     throw new Error('Server not found.');
   }
 
-  if (!server.username || !server.privateKey) {
-    throw new Error('Server is missing username or private key configuration for SSH access.');
+  if (!server.username) {
+    throw new Error('Server is missing username for SSH access.');
   }
-
-  const sshPassphrase = getServerSshPassphrase(server.moreDetails);
 
   try {
     const result = await runCommandOnServer(
@@ -193,8 +207,7 @@ export async function checkServerConnection(
       undefined,
       undefined,
       false,
-      {},
-      sshPassphrase ?? undefined
+      {}
     );
 
     if (result.code !== 0) {

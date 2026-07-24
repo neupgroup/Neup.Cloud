@@ -7,7 +7,7 @@ import { executeCommand } from '@/services/server/commands/server-command-servic
 
 export async function checkRequirementStep(serverId: string, command: string) {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) return { error: 'Server or credentials not found' };
+    if (!server || !server.username) return { error: 'Server or credentials not found' };
 
     try {
         const res = await runCommandOnServer(server.publicIp, server.username, server.privateKey, command, undefined, undefined, true);

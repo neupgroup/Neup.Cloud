@@ -9,7 +9,7 @@ import type { DatabaseDetails, OperationResult } from '../_types';
  */
 export async function getMariaDBDetails(serverId: string, dbName: string): Promise<DatabaseDetails> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 
@@ -68,7 +68,7 @@ export async function createMariaDBDatabase(
     dbPass: string
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
-    if (!server || !server.username || !server.privateKey) {
+    if (!server || !server.username) {
         throw new Error('Server not found or missing credentials.');
     }
 

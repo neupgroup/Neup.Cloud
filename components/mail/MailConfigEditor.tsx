@@ -5,7 +5,7 @@ Reusable mail configuration flow used by the account-level and server-level mail
 
 ::private
 
-Supports a configurable page header so different routes can reuse the same domain and port-check workflow.
+Supports a configurable page header so different routes can reuse the same domain mail DNS verification workflow.
 
 ::private end
 ::end
@@ -28,10 +28,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { PageTitleBack } from '@/components/page-header';
 import { getDomains } from '@/services/domains/domains-service';
 import type { ManagedDomain } from '@/services/domains/types';
-import { getServers } from '@/services/server/server-service';
-import type { Server } from '@/services/server/types';
-import { executeCommand } from '@/services/server/commands/server-command-service';
-import { Loader2, Play } from 'lucide-react';
+import { checkMailDns, checkMailDnsRecord } from '@/services/mail/mail-service';
+import type { MailDnsCheckKey, MailDnsCheckResult } from '@/services/mail/mail-service';
+import { CheckCircle2, ExternalLink, RefreshCw, XCircle } from 'lucide-react';
 
 type MailConfigEditorProps = {
   backHref?: string;
@@ -45,14 +44,14 @@ export default function MailConfigEditor({
   description = 'Configure email for your domain in guided steps.',
 }: MailConfigEditorProps) {
   const [domains, setDomains] = useState<ManagedDomain[]>([]);
-  const [servers, setServers] = useState<Server[]>([]);
+  const [mailDnsCheck, setMailDnsCheck] = useState<MailDnsCheckResult | null>(null);
   const [isDomainsLoading, setIsDomainsLoading] = useState(true);
-  const [isServersLoading, setIsServersLoading] = useState(true);
+  const [isMailDnsChecking, setIsMailDnsChecking] = useState(false);
   const [selectedDomainId, setSelectedDomainId] = useState<string>('');
-  const [selectedServerId, setSelectedServerId] = useState<string>('');
-  const [isRunningPortCheck, setIsRunningPortCheck] = useState(false);
-  const [portCheckOutput, setPortCheckOutput] = useState<string>('');
-  const [portCheckError, setPortCheckError] = useState<string>('');
+  const [mailDnsRefreshKey, setMailDnsRefreshKey] = useState(0);
+  const [generatedGuideKeys, setGeneratedGuideKeys] = useState<string[]>([]);
+  const [spfAllPolicy, setSpfAllPolicy] = useState('-all');
+  const [checkingRecordKeys, setCheckingRecordKeys] = useState<MailDnsCheckKey[]>([]);
 
   useEffect(() => {
     const loadDomains = async () => {
@@ -65,18 +64,7 @@ export default function MailConfigEditor({
       }
     };
 
-    const loadServers = async () => {
-      setIsServersLoading(true);
-      try {
-        const result = await getServers();
-        setServers(result);
-      } finally {
-        setIsServersLoading(false);
-      }
-    };
-
     loadDomains();
-    loadServers();
   }, []);
 
   const selectedDomain = useMemo(
@@ -84,50 +72,83 @@ export default function MailConfigEditor({
     [domains, selectedDomainId]
   );
 
-  const selectedServer = useMemo(
-    () => servers.find((server) => server.id === selectedServerId),
-    [servers, selectedServerId]
-  );
-
   useEffect(() => {
-    setSelectedServerId('');
-    setPortCheckOutput('');
-    setPortCheckError('');
-  }, [selectedDomainId]);
+    let isActive = true;
 
-  useEffect(() => {
-    setPortCheckOutput('');
-    setPortCheckError('');
-  }, [selectedServerId]);
+    const runMailDnsCheck = async () => {
+      if (!selectedDomain) {
+        setMailDnsCheck(null);
+        return;
+      }
 
-  const handleRunPortCheck = async () => {
-    if (!selectedServerId || isRunningPortCheck) {
+      setIsMailDnsChecking(true);
+      setMailDnsCheck(null);
+      setGeneratedGuideKeys([]);
+      setCheckingRecordKeys([]);
+
+      try {
+        const result = await checkMailDns(selectedDomain.name);
+        if (isActive) {
+          setMailDnsCheck(result);
+        }
+      } finally {
+        if (isActive) {
+          setIsMailDnsChecking(false);
+        }
+      }
+    };
+
+    runMailDnsCheck();
+
+    return () => {
+      isActive = false;
+    };
+  }, [selectedDomain, mailDnsRefreshKey]);
+
+  const getGuideValue = (check: MailDnsCheckResult['checks'][number]) => {
+    if (check.key !== 'spf' || !check.guide) {
+      return check.guide?.value ?? '';
+    }
+
+    return check.guide.value.replace(/(?:[~?+\-]all)$/i, spfAllPolicy);
+  };
+
+  const handleCheckRecord = async (key: MailDnsCheckKey) => {
+    if (!selectedDomain || checkingRecordKeys.includes(key)) {
       return;
     }
 
-    setIsRunningPortCheck(true);
-    setPortCheckOutput('');
-    setPortCheckError('');
+    setCheckingRecordKeys((keys) => [...keys, key]);
 
     try {
-      const command = 'nc -vz gmail-smtp-in.l.google.com 25';
-      const result = await executeCommand(
-        selectedServerId,
-        command,
-        'Mail Port 25 Check',
-        command,
-        'mail:port25-check'
-      );
+      const result = await checkMailDnsRecord(selectedDomain.name, key);
+      const [updatedCheck] = result.checks;
 
-      if (result.error) {
-        setPortCheckError(result.error);
+      if (!updatedCheck) {
+        return;
       }
 
-      if (result.output) {
-        setPortCheckOutput(result.output);
-      }
+      setGeneratedGuideKeys((keys) => keys.filter((guideKey) => guideKey !== key));
+      setMailDnsCheck((current) => {
+        if (!current) {
+          return result;
+        }
+
+        const updatedChecks = current.checks.map((check) => (
+          check.key === key ? updatedCheck : check
+        ));
+
+        return {
+          domain: result.domain || current.domain,
+          authoritativeNameservers: result.authoritativeNameservers.length > 0
+            ? result.authoritativeNameservers
+            : current.authoritativeNameservers,
+          checks: updatedChecks,
+          ok: updatedChecks.every((check) => check.ok),
+        };
+      });
     } finally {
-      setIsRunningPortCheck(false);
+      setCheckingRecordKeys((keys) => keys.filter((checkingKey) => checkingKey !== key));
     }
   };
 
@@ -185,89 +206,146 @@ export default function MailConfigEditor({
             <div className="space-y-1 pt-2">
               <h2 className="text-lg font-semibold">Step 2</h2>
               <p className="text-sm text-muted-foreground">
-                Choose what server is to handle the mail service.
+                Verify mail DNS records for Neup.Mail.
               </p>
             </div>
 
-            {isServersLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-44" />
-                <Skeleton className="h-10 w-full" />
+            {isMailDnsChecking ? (
+              <div className="grid gap-2">
+                <Skeleton className="h-5 w-64" />
+                <Skeleton className="h-5 w-72" />
+                <Skeleton className="h-5 w-56" />
               </div>
-            ) : servers.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No servers found. Add a server first to continue.
-              </p>
+            ) : mailDnsCheck ? (
+              <>
+                {mailDnsCheck.authoritativeNameservers.length > 0 ? (
+                  <p className="text-xs text-muted-foreground">
+                    Queried authoritative nameservers: {mailDnsCheck.authoritativeNameservers.join(', ')}
+                  </p>
+                ) : null}
+
+                <div className="grid gap-3">
+                  {mailDnsCheck.checks.map((check) => (
+                    <div
+                      key={check.key}
+                      className="grid gap-2 rounded-md border bg-muted/20 p-4 text-sm"
+                    >
+                      <div className="flex items-start gap-2">
+                        {check.ok ? (
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
+                        ) : (
+                          <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-medium text-foreground">{check.label}</p>
+                          <p className="text-muted-foreground">{check.message}</p>
+                        </div>
+                      </div>
+
+                      <div className="pl-6">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCheckRecord(check.key)}
+                          disabled={checkingRecordKeys.includes(check.key)}
+                          className="inline-flex items-center gap-2"
+                        >
+                          <RefreshCw className={checkingRecordKeys.includes(check.key) ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
+                          {checkingRecordKeys.includes(check.key) ? 'Checking...' : `Check ${check.label}`}
+                        </Button>
+                      </div>
+
+                      {check.records.length > 0 ? (
+                        <div className="grid gap-1 pl-6 font-mono text-xs text-muted-foreground">
+                          {check.records.map((record) => (
+                            <p key={record} className="break-all">{record}</p>
+                          ))}
+                        </div>
+                      ) : null}
+
+                      {!check.ok && check.guide ? (
+                        <div className="grid gap-3 pl-6">
+                          {check.key === 'spf' ? (
+                            <div className="grid gap-2">
+                              <Label htmlFor="spf-all-policy">SPF policy</Label>
+                              <Select value={spfAllPolicy} onValueChange={setSpfAllPolicy}>
+                                <SelectTrigger id="spf-all-policy">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="-all">-all - Hard Fail: reject unauthorized senders</SelectItem>
+                                  <SelectItem value="~all">~all - Soft Fail: accept but mark suspicious</SelectItem>
+                                  <SelectItem value="?all">?all - Neutral: no SPF decision</SelectItem>
+                                  <SelectItem value="+all">+all - Pass everything: never recommended</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          ) : null}
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setGeneratedGuideKeys((keys) => (
+                                keys.includes(check.key)
+                                  ? keys.filter((key) => key !== check.key)
+                                  : [...keys, check.key]
+                              ));
+                            }}
+                          >
+                            Generate
+                          </Button>
+
+                          {generatedGuideKeys.includes(check.key) ? (
+                            <div className="mt-3 grid gap-2 rounded-md border bg-background p-3">
+                              <p className="text-muted-foreground">{check.guide.note}</p>
+                              <div className="grid gap-1 font-mono text-xs">
+                                <p><span className="text-muted-foreground">Type:</span> {check.guide.type}</p>
+                                <p><span className="text-muted-foreground">Name:</span> {check.guide.name}</p>
+                                <p className="break-all"><span className="text-muted-foreground">Value:</span> {getGuideValue(check)}</p>
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+
+                {mailDnsCheck.ok ? (
+                  <div className="grid gap-3 rounded-md border border-green-600/30 bg-green-600/10 p-4">
+                    <p className="text-sm font-medium text-green-700">
+                      Mail DNS is configured correctly. Continue to Neup.Mail.
+                    </p>
+                    <div>
+                      <Button asChild className="inline-flex items-center gap-2">
+                        <a href="https://neupgroup.com/mail" target="_blank" rel="noreferrer">
+                          Continue to Neup.Mail
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setMailDnsRefreshKey((key) => key + 1)}
+                      className="inline-flex items-center gap-2"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      Recheck DNS
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
-              <div className="space-y-2">
-                <Label htmlFor="mail-server">Server</Label>
-                <Select value={selectedServerId} onValueChange={setSelectedServerId}>
-                  <SelectTrigger id="mail-server">
-                    <SelectValue placeholder="Select a server" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {servers.map((server) => (
-                      <SelectItem key={server.id} value={server.id}>
-                        {server.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <p className="text-sm text-muted-foreground">Mail DNS check could not be loaded.</p>
             )}
 
-            {selectedServer ? (
-              <p className="text-sm text-muted-foreground">
-                Selected server: <span className="font-medium text-foreground">{selectedServer.name}</span>
-              </p>
-            ) : null}
-
-            {selectedServer ? (
-              <>
-                <div className="space-y-1 pt-2">
-                  <h2 className="text-lg font-semibold">Step 3</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Run this command in the selected server.
-                  </p>
-                </div>
-
-                <div className="font-mono text-sm p-4 whitespace-pre-wrap overflow-x-auto bg-muted/30 border rounded-md text-foreground">
-                  nc -vz gmail-smtp-in.l.google.com 25
-                </div>
-
-                <div>
-                  <Button
-                    type="button"
-                    onClick={handleRunPortCheck}
-                    disabled={isRunningPortCheck}
-                    className="inline-flex items-center gap-2"
-                  >
-                    {isRunningPortCheck ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Play className="h-4 w-4" />
-                    )}
-                    {isRunningPortCheck ? 'Running...' : 'Run in Selected Server'}
-                  </Button>
-                </div>
-
-                <p className="text-sm text-muted-foreground">
-                  This will check if port 25 is unblocked or blocked.
-                </p>
-
-                {portCheckError ? (
-                  <div className="font-mono text-sm p-4 whitespace-pre-wrap overflow-x-auto bg-destructive/10 border border-destructive/30 rounded-md text-destructive">
-                    {portCheckError}
-                  </div>
-                ) : null}
-
-                {portCheckOutput ? (
-                  <div className="font-mono text-sm p-4 whitespace-pre-wrap overflow-x-auto bg-zinc-950 text-zinc-50 border border-zinc-800/50 rounded-md">
-                    {portCheckOutput}
-                  </div>
-                ) : null}
-              </>
-            ) : null}
           </>
         ) : null}
       </Card>

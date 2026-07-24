@@ -32,7 +32,7 @@ export async function createUser(serverId: string, data: { username: string; pas
             cmd += ` -G ${groups}`;
         }
 
-        const createResult = await runCommandOnServer(server.publicIp, server.username, server.privateKey!, cmd, undefined, undefined, true);
+        const createResult = await runCommandOnServer(server.publicIp, server.username, server.privateKey, cmd, undefined, undefined, true);
         if (createResult.code !== 0) {
             return { error: createResult.stderr || 'Failed to create user' };
         }
@@ -41,7 +41,7 @@ export async function createUser(serverId: string, data: { username: string; pas
         if (password) {
             // echo "user:pass" | chpasswd
             const passCmd = `echo "${username}:${password}" | sudo chpasswd`;
-            const passResult = await runCommandOnServer(server.publicIp, server.username, server.privateKey!, passCmd, undefined, undefined, true);
+            const passResult = await runCommandOnServer(server.publicIp, server.username, server.privateKey, passCmd, undefined, undefined, true);
             if (passResult.code !== 0) {
                 return { error: 'User created but failed to set password: ' + passResult.stderr };
             }
@@ -60,7 +60,7 @@ export async function deleteUser(serverId: string, username: string) {
     try {
         // userdel -r removes home directory too
         const cmd = `sudo userdel -r ${username}`;
-        const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey!, cmd, undefined, undefined, true);
+        const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, cmd, undefined, undefined, true);
 
         if (result.code !== 0) {
             return { error: result.stderr || 'Failed to delete user' };
@@ -76,8 +76,8 @@ export async function getSystemUsers(serverId: string): Promise<{ users?: System
     if (!server) {
         return { error: 'Server not found.' };
     }
-    if (!server.username || !server.privateKey) {
-        return { error: 'No username or private key configured for this server.' };
+    if (!server.username) {
+        return { error: 'No username or SSH authentication configured for this server.' };
     }
 
     try {
@@ -168,7 +168,7 @@ export async function getUserDetails(serverId: string, username: string): Promis
         const groupsResult = await runCommandOnServer(
             server.publicIp,
             server.username,
-            server.privateKey!,
+            server.privateKey,
             `groups ${username}`,
             undefined,
             undefined,
@@ -197,7 +197,7 @@ export async function updateUserPassword(serverId: string, username: string, pas
 
     try {
         const passCmd = `echo "${username}:${password}" | sudo chpasswd`;
-        const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey!, passCmd, undefined, undefined, true);
+        const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, passCmd, undefined, undefined, true);
 
         if (result.code !== 0) {
             return { error: result.stderr || 'Failed to update password' };
@@ -236,7 +236,7 @@ export async function toggleSudo(serverId: string, username: string, enable: boo
             cmd = `sudo gpasswd -d ${username} sudo 2>/dev/null; sudo gpasswd -d ${username} wheel 2>/dev/null; true`;
         }
 
-        const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey!, cmd, undefined, undefined, true);
+        const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, cmd, undefined, undefined, true);
 
         // Check code? 'gpasswd' returns 3 if client not member. 'true' ensures we don't strict fail if not in group.
 

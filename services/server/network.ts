@@ -90,8 +90,8 @@ export async function getNetworkConnections(serverId: string): Promise<{ connect
     if (!server) {
         return { error: 'Server not found.' };
     }
-    if (!server.username || !server.privateKey) {
-        return { error: 'No username or private key configured for this server.' };
+    if (!server.username) {
+        return { error: 'No username or SSH authentication configured for this server.' };
     }
 
     try {

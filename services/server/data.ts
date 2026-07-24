@@ -79,8 +79,8 @@ export async function createServer(data: {
   moreDetails?: string;
   publicIp: string;
   privateIp: string;
-  privateKey: string;
-  publicKey?: string;
+  privateKey?: string | null;
+  publicKey?: string | null;
 }) {
   return prisma.server.create({
     data: {
@@ -101,8 +101,8 @@ export async function updateServer(id: string, data: Partial<{
   moreDetails: string;
   publicIp: string;
   privateIp: string;
-  privateKey: string;
-  publicKey: string;
+  privateKey: string | null;
+  publicKey: string | null;
   proxyHandler: string;
   loadBalancer: string;
 }>) {
