@@ -4,6 +4,8 @@
 import { NodeSSH } from 'node-ssh';
 import { UniversalLinux } from '@/services/core/universal';
 import { prisma } from '@/services/prisma';
+import { connectServerWithPassword } from '@/services/server/auth/password';
+import { connectServerWithPrivateKey } from '@/services/server/auth/privatekey';
 import { getServerSshPassphrase, getServerSshPassword } from '@/services/server/server-metadata';
 import { SWAP_DIR, dynamicSwapPath } from '@/services/server/swap-paths';
 
@@ -38,15 +40,6 @@ export interface ISshCommandExecutor {
     run(request: SshExecutionRequest): Promise<SshExecutionResult>;
 }
 
-function normalizePassphrase(value?: string): string | undefined {
-    if (typeof value !== 'string') {
-        return undefined;
-    }
-
-    const trimmed = value.trim();
-    return trimmed.length > 0 ? trimmed : undefined;
-}
-
 async function createConnectedSsh(config: {
     host: string;
     username: string;
@@ -54,60 +47,27 @@ async function createConnectedSsh(config: {
     password?: string;
     passphrase?: string;
 }): Promise<NodeSSH> {
-    const passphrase = normalizePassphrase(config.passphrase);
-    const privateKey = normalizePassphrase(config.privateKey);
-    const password = normalizePassphrase(config.password);
-    let ssh = new NodeSSH();
+    const privateKey = config.privateKey?.trim();
 
-    if (!privateKey && !password) {
-        throw new Error('No SSH private key or password configured.');
+    if (privateKey) {
+        return connectServerWithPrivateKey({
+            host: config.host,
+            username: config.username,
+            privateKey,
+            passphrase: config.passphrase,
+        });
     }
 
-    if (!privateKey) {
-        await ssh.connect({
+    const password = config.password?.trim();
+    if (password) {
+        return connectServerWithPassword({
             host: config.host,
             username: config.username,
             password,
         });
-        return ssh;
     }
 
-    if (!passphrase) {
-        await ssh.connect({
-            host: config.host,
-            username: config.username,
-            privateKey,
-        });
-        return ssh;
-    }
-
-    try {
-        await ssh.connect({
-            host: config.host,
-            username: config.username,
-            privateKey,
-            passphrase,
-        });
-        return ssh;
-    } catch (error: any) {
-        const message = String(error?.message ?? error ?? '');
-        const authFailed = /all configured authentication methods failed/i.test(message);
-
-        if (!authFailed) {
-            ssh.dispose();
-            throw error;
-        }
-
-        // Fallback: stale/wrong passphrase. Use a fresh SSH instance for retry.
-        ssh.dispose();
-        ssh = new NodeSSH();
-        await ssh.connect({
-            host: config.host,
-            username: config.username,
-            privateKey,
-        });
-        return ssh;
-    }
+    throw new Error('No SSH private key or password configured.');
 }
 
 function parseSwapSizeMb(moreDetails: string | null | undefined): number {
