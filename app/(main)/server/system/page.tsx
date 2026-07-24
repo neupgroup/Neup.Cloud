@@ -6,9 +6,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { HardDrive, ArrowUpCircle, Package, Repeat2, ShieldCheck } from 'lucide-react';
 import { useServerName } from '@/core/hooks/use-server-name';
+import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
 
 export default function SystemPage() {
     const serverName = useServerName();
+    const withSelectedServer = useSelectedServerHref();
 
     return (
         <div className="space-y-8">
@@ -34,7 +36,7 @@ export default function SystemPage() {
                     </CardContent>
                     <CardFooter className="border-t px-6 py-4">
                         <Button asChild className="w-full">
-                            <Link href="/server/system/storage">Open Storage</Link>
+                            <Link href={withSelectedServer("/server/system/storage")}>Open Storage</Link>
                         </Button>
                     </CardFooter>
                 </Card>
@@ -54,7 +56,7 @@ export default function SystemPage() {
                     </CardContent>
                     <CardFooter className="border-t px-6 py-4">
                         <Button asChild className="w-full">
-                            <Link href="/server/system/updates">Open Updates</Link>
+                            <Link href={withSelectedServer("/server/system/updates")}>Open Updates</Link>
                         </Button>
                     </CardFooter>
                 </Card>
@@ -74,7 +76,7 @@ export default function SystemPage() {
                     </CardContent>
                     <CardFooter className="border-t px-6 py-4">
                         <Button asChild className="w-full">
-                            <Link href="/server/system/packages">Open Packages</Link>
+                            <Link href={withSelectedServer("/server/system/packages")}>Open Packages</Link>
                         </Button>
                     </CardFooter>
                 </Card>
@@ -94,7 +96,7 @@ export default function SystemPage() {
                     </CardContent>
                     <CardFooter className="border-t px-6 py-4">
                         <Button asChild className="w-full">
-                            <Link href="/server/system/swapper">Open Swapper</Link>
+                            <Link href={withSelectedServer("/server/system/swapper")}>Open Swapper</Link>
                         </Button>
                     </CardFooter>
                 </Card>
@@ -114,7 +116,7 @@ export default function SystemPage() {
                     </CardContent>
                     <CardFooter className="border-t px-6 py-4">
                         <Button asChild className="w-full">
-                            <Link href="/server/system/requirement">Open Requirement</Link>
+                            <Link href={withSelectedServer("/server/system/requirement")}>Open Requirement</Link>
                         </Button>
                     </CardFooter>
                 </Card>
