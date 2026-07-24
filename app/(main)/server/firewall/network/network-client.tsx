@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { ShieldCheck, Network, Trash2, Plus, Info, Activity, ChevronRight } from "lucide-react";
 import { getFirewallStatus, allowPort, deleteRule, toggleFirewall, type FirewallRule } from '@/services/server/firewall/firewall-service';
+import { isSshAllowRule } from '@/core/firewall-rules';
 import { useToast } from '@/core/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
 
-function RulesList({ rules, onDelete }: { rules: FirewallRule[], onDelete: (id: number) => void }) {
+function RulesList({ rules, firewallActive, onDelete }: { rules: FirewallRule[], firewallActive: boolean, onDelete: (id: number) => void }) {
     if (rules.length === 0) {
         return (
             <div className="text-center p-12 border rounded-lg border-dashed text-muted-foreground">
@@ -54,6 +55,7 @@ function RulesList({ rules, onDelete }: { rules: FirewallRule[], onDelete: (id: 
         <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm">
             {rules.map((rule, index) => {
                 const isPending = rule.id < 0;
+                const isProtectedSshRule = firewallActive && isSshAllowRule(rule);
                 return (
                     <div key={`${rule.id}-${index}`} className={cn(
                         "p-4 min-w-0 w-full transition-colors hover:bg-muted/50 flex items-center justify-between gap-4",
@@ -67,6 +69,11 @@ function RulesList({ rules, onDelete }: { rules: FirewallRule[], onDelete: (id: 
                                 <Badge variant={rule.action.includes('ALLOW') ? 'default' : (rule.action.includes('PENDING') ? 'outline' : 'destructive')} className="text-[10px] h-5">
                                     {rule.action}
                                 </Badge>
+                                {isProtectedSshRule && (
+                                    <Badge variant="outline" className="text-[10px] h-5">
+                                        Protected SSH
+                                    </Badge>
+                                )}
                             </div>
                             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground mt-2">
                                 <div className="flex items-center gap-1.5 shrink-0">
@@ -93,8 +100,14 @@ function RulesList({ rules, onDelete }: { rules: FirewallRule[], onDelete: (id: 
                             size="icon"
                             className="text-muted-foreground hover:text-destructive"
                             onClick={() => onDelete(rule.id)}
-                            disabled={isPending}
-                            title={isPending ? "Cannot delete pending rule. Enable firewall first." : "Delete rule"}
+                            disabled={isPending || isProtectedSshRule}
+                            title={
+                                isProtectedSshRule
+                                    ? "SSH access on port 22 is protected and cannot be disabled."
+                                    : isPending
+                                        ? "Cannot delete pending rule. Enable firewall first."
+                                        : "Delete rule"
+                            }
                         >
                             <Trash2 className="h-4 w-4" />
                         </Button>
@@ -385,7 +398,7 @@ export default function NetworkClient({ serverId }: { serverId: string }) {
                     )}
 
                     <h3 className="text-sm font-medium text-muted-foreground mt-8 mb-2">Active Rules</h3>
-                    <RulesList rules={rules} onDelete={handleDeleteRule} />
+                    <RulesList rules={rules} firewallActive={isActive} onDelete={handleDeleteRule} />
                 </div>
             )}
         </div>

@@ -6,49 +6,71 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Play, RotateCcw, AlertCircle, CheckCircle2, XCircle, Clock, ShieldAlert, Plus } from 'lucide-react';
-import { checkPortConnectivity } from '@/services/server/firewall/firewall-service';
+import { checkOutboundPortConnectivity, checkPortConnectivity } from '@/services/server/firewall/firewall-service';
 import { useToast } from '@/core/hooks/use-toast';
 import { cn } from '@/core/utils';
 
+type TestDirection = 'inbound' | 'outbound';
+type PortTestItem = {
+    port: number;
+    name: string;
+    description: string;
+    direction: TestDirection;
+};
+
 const COMMON_PORTS = [
-    { port: 22, name: 'SSH', description: 'Secure Shell' },
-    { port: 80, name: 'HTTP', description: 'Web traffic' },
-    { port: 443, name: 'HTTPS', description: 'Secure web traffic' },
-    { port: 21, name: 'FTP', description: 'File transfer' },
-    { port: 3306, name: 'MySQL', description: 'Database' },
-    { port: 5432, name: 'PostgreSQL', description: 'Database' },
-    { port: 6379, name: 'Redis', description: 'Cache' },
-    { port: 27017, name: 'MongoDB', description: 'Database' },
-    { port: 8080, name: 'HTTP-Alt', description: 'Web traffic alt' },
-    { port: 3000, name: 'Dev', description: 'App development' },
-];
+    { port: 22, name: 'SSH', description: 'Secure Shell', direction: 'inbound' },
+    { port: 80, name: 'HTTP', description: 'Web traffic', direction: 'inbound' },
+    { port: 443, name: 'HTTPS', description: 'Secure web traffic', direction: 'inbound' },
+    { port: 21, name: 'FTP', description: 'File transfer', direction: 'inbound' },
+    { port: 3306, name: 'MySQL', description: 'Database', direction: 'inbound' },
+    { port: 5432, name: 'PostgreSQL', description: 'Database', direction: 'inbound' },
+    { port: 6379, name: 'Redis', description: 'Cache', direction: 'inbound' },
+    { port: 27017, name: 'MongoDB', description: 'Database', direction: 'inbound' },
+    { port: 8080, name: 'HTTP-Alt', description: 'Web traffic alt', direction: 'inbound' },
+    { port: 3000, name: 'Dev', description: 'App development', direction: 'inbound' },
+] satisfies PortTestItem[];
+
+const OUTBOUND_PORTS = [
+    { port: 25, name: 'SMTP', description: 'Outbound mail delivery', direction: 'outbound' },
+] satisfies PortTestItem[];
 
 type TestResult = {
     port: number;
+    direction: TestDirection;
     status: 'pending' | 'testing' | 'open' | 'closed' | 'blocked' | 'error';
     message: string;
     latency?: number;
 };
 
+function getResultKey(port: number, direction: TestDirection) {
+    return `${direction}:${port}`;
+}
+
 export default function NetworkTestClient({ serverId }: { serverId: string }) {
     const { toast } = useToast();
-    const [results, setResults] = useState<Record<number, TestResult>>({});
+    const [results, setResults] = useState<Record<string, TestResult>>({});
     const [customPort, setCustomPort] = useState('');
-    const [customPorts, setCustomPorts] = useState<{ port: number, name: string, description: string }[]>([]);
+    const [customPorts, setCustomPorts] = useState<PortTestItem[]>([]);
     const [isTestingAll, setIsTestingAll] = useState(false);
 
-    const testPort = async (port: number) => {
+    const testPort = async (port: number, direction: TestDirection = 'inbound') => {
+        const key = getResultKey(port, direction);
         setResults(prev => ({
             ...prev,
-            [port]: { port, status: 'testing', message: 'Testing connectivity...' }
+            [key]: { port, direction, status: 'testing', message: 'Testing connectivity...' }
         }));
 
         try {
-            const result = await checkPortConnectivity(serverId, port);
+            const result = direction === 'outbound'
+                ? await checkOutboundPortConnectivity(serverId, port)
+                : await checkPortConnectivity(serverId, port);
+
             setResults(prev => ({
                 ...prev,
-                [port]: {
+                [key]: {
                     port,
+                    direction,
                     status: result.status,
                     message: result.message,
                     latency: result.latency
@@ -57,15 +79,15 @@ export default function NetworkTestClient({ serverId }: { serverId: string }) {
         } catch (error: any) {
             setResults(prev => ({
                 ...prev,
-                [port]: { port, status: 'error', message: error.message }
+                [key]: { port, direction, status: 'error', message: error.message }
             }));
         }
     };
 
     const testAllCommon = async () => {
         setIsTestingAll(true);
-        for (const item of COMMON_PORTS) {
-            await testPort(item.port);
+        for (const item of [...OUTBOUND_PORTS, ...COMMON_PORTS]) {
+            await testPort(item.port, item.direction);
         }
         setIsTestingAll(false);
     };
@@ -83,7 +105,7 @@ export default function NetworkTestClient({ serverId }: { serverId: string }) {
         const isAlreadyCustom = customPorts.some(p => p.port === portNum);
 
         if (!isCommon && !isAlreadyCustom) {
-            setCustomPorts(prev => [{ port: portNum, name: 'Custom', description: 'User defined port' }, ...prev]);
+            setCustomPorts(prev => [{ port: portNum, name: 'Custom', description: 'User defined port', direction: 'inbound' }, ...prev]);
         }
 
         testPort(portNum);
@@ -163,12 +185,12 @@ export default function NetworkTestClient({ serverId }: { serverId: string }) {
                     </div>
                 </div>
 
-                {[...customPorts, ...COMMON_PORTS].map((item) => {
-                    const result = results[item.port];
+                {[...OUTBOUND_PORTS, ...customPorts, ...COMMON_PORTS].map((item) => {
+                    const result = results[getResultKey(item.port, item.direction)];
                     return (
                         <div
-                            key={item.port}
-                            onClick={() => result?.status !== 'testing' && testPort(item.port)}
+                            key={`${item.direction}-${item.port}`}
+                            onClick={() => result?.status !== 'testing' && testPort(item.port, item.direction)}
                             className={cn(
                                 "p-4 transition-all duration-300 hover:bg-muted/50 flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 cursor-pointer select-none active:bg-muted/70",
                                 result?.status === 'open' ? "border-l-green-500" :
@@ -182,6 +204,9 @@ export default function NetworkTestClient({ serverId }: { serverId: string }) {
                                 <div className="flex items-center gap-2">
                                     <span className="text-lg font-bold tracking-tight">{item.port}</span>
                                     <span className="text-sm font-medium text-muted-foreground uppercase">{item.name}</span>
+                                    <Badge variant="outline" className="h-5 text-[10px] uppercase">
+                                        {item.direction}
+                                    </Badge>
                                 </div>
 
                                 <div className="flex items-center gap-2 group/msg">

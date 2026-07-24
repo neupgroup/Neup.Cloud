@@ -2,6 +2,7 @@
 
 import { getServerForRunner } from '@/services/server/server-service';
 import { runCommandOnServer } from '@/services/server/ssh';
+import { isSshAllowRule } from '@/core/firewall-rules';
 
 export type FirewallRule = {
     id: number;
@@ -239,6 +240,13 @@ export async function deleteRule(serverId: string, ruleId: number): Promise<{ su
     }
 
     try {
+        const firewallStatus = await getFirewallStatus(serverId);
+        const rule = firewallStatus.rules.find((item) => item.id === ruleId);
+
+        if (firewallStatus.active && rule && isSshAllowRule(rule)) {
+            return { success: false, message: 'SSH access on port 22 is protected and cannot be disabled.' };
+        }
+
         // ufw delete requires confirmation, so we force it with --force? No, `delete` by number doesn't usually look for confirmation if not interactive, but let's check. 
         // `echo "y" | sudo ufw delete <number>` is safer.
         const cmd = `echo "y" | sudo ufw delete ${ruleId}`;
@@ -434,5 +442,47 @@ export async function checkPortConnectivity(serverId: string, port: number): Pro
                 ? 'Receiving requests (No application listening)'
                 : 'Not receiving requests'
         };
+    }
+}
+
+export async function checkOutboundPortConnectivity(serverId: string, port: number): Promise<{ status: 'open' | 'blocked' | 'error', message: string, latency?: number }> {
+    const server = await getServerForRunner(serverId);
+    if (!server || !server.username) {
+        return { status: 'error', message: 'Server not found or missing credentials.' };
+    }
+
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+        return { status: 'error', message: 'Invalid port.' };
+    }
+
+    const targetHost = port === 25 ? 'gmail-smtp-in.l.google.com' : 'google.com';
+    const command = `start=$(date +%s%3N); if command -v nc >/dev/null 2>&1; then timeout 6 nc -vz -w 5 ${targetHost} ${port}; else timeout 6 bash -lc 'cat < /dev/null > /dev/tcp/${targetHost}/${port}'; fi; code=$?; end=$(date +%s%3N); echo "__NEUP_LATENCY_MS:$((end-start))"; exit $code`;
+
+    try {
+        const result = await runCommandOnServer(
+            server.publicIp,
+            server.username,
+            server.privateKey,
+            command,
+            undefined,
+            undefined,
+            true
+        );
+
+        const latencyMatch = result.stdout.match(/__NEUP_LATENCY_MS:(\d+)/);
+        const latency = latencyMatch ? Number(latencyMatch[1]) : undefined;
+
+        if (result.code === 0) {
+            return { status: 'open', message: `Outbound port ${port} is reachable.`, latency };
+        }
+
+        const detail = (result.stderr || result.stdout).replace(/__NEUP_LATENCY_MS:\d+/g, '').trim();
+        return {
+            status: 'blocked',
+            message: detail ? `Outbound port ${port} is not reachable: ${detail}` : `Outbound port ${port} is not reachable.`,
+            latency,
+        };
+    } catch (error: any) {
+        return { status: 'error', message: error.message };
     }
 }
