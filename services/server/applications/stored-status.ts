@@ -1,4 +1,4 @@
-import { getProcessCardStatus, ServerProcess } from './status';
+import { getProcessCardStatus, type ServerProcess } from './status-card';
 import type { Application } from './_types';
 
 export function getStoredStatus(application: Application) {

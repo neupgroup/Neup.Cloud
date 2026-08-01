@@ -3,10 +3,10 @@
 import { syncApplicationsWithServer as syncWithServer } from './sync';
 import { getApplications as getApplicationsData } from './_data';
 import { getStoredStatus } from './stored-status';
-import { getProcessCardStatus } from './status';
+import { getProcessCardStatus } from './status-card';
 import { getSelectedServerId } from './session';
 import type { Application } from './_types';
-import type { ApplicationCardStatus, ServerProcess } from './status';
+import type { ApplicationCardStatus, ServerProcess } from './status-card';
 
 export type ApplicationItem = {
   id: string;

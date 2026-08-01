@@ -1,6 +1,5 @@
-import type { Application } from '@/services/server/applications/_types';
-import type { ApplicationCardStatus } from '@/services/server/applications/status';
-import { getLanguageDisplay, getStatusDotClass } from '@/services/server/applications/status';
+import type { ApplicationCardStatus } from '@/services/server/applications/status-card';
+import { getLanguageDisplay, getStatusDotClass } from '@/services/server/applications/status-card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/core/utils';
@@ -8,7 +7,11 @@ import { AppWindow, Code, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 export type ApplicationCardProps = {
-  application: Application;
+  application: {
+    name: string;
+    appIcon?: string;
+    language: string;
+  };
   status?: ApplicationCardStatus;
   href?: string;
   sourceLabel?: string;
