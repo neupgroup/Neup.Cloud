@@ -1,4 +1,4 @@
-import { prisma } from '@/services/prisma';
+import { prisma } from '@/core/database/prisma';
 
 export async function getErrors() {
   return prisma.appError.findMany({

@@ -1,7 +1,7 @@
 'use server';
 
 import { stringUuid } from '@/core/data/uuid';
-import { prisma } from '@/services/prisma';
+import { prisma } from '@/core/database/prisma';
 
 export type ApplicationServerStatus = 'stopped' | 'started' | 'inactive';
 

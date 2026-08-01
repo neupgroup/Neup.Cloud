@@ -1,3 +1,5 @@
+import { Prisma } from '@/core/database/prisma';
+
 import type { Application } from './_types';
 
 export type SupervisorProcessLike = {
@@ -11,7 +13,7 @@ export type SupervisorProcessLike = {
 };
 
 export function toJsonField(value: unknown) {
-  return value === undefined ? undefined : value;
+  return value === undefined ? undefined : value === null ? Prisma.DbNull : value;
 }
 
 export function mapApplication(record: any): Application {

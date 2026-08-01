@@ -1,9 +1,5 @@
-let prisma: any = null;
-let stringUuid: any = null;
-if (typeof window === 'undefined') {
-  prisma = require('@/services/prisma').prisma;
-  stringUuid = require('@/core/data/uuid').stringUuid;
-}
+import { stringUuid } from '@/core/data/uuid';
+import { prisma } from '@/core/database/prisma';
 
 export async function createServerLog(data: {
   serverId: string;

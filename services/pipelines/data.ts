@@ -1,6 +1,4 @@
-import { Prisma } from '@prisma/client';
-
-import { prisma } from '@/services/prisma';
+import { Prisma, prisma } from '@/core/database/prisma';
 import { stringUuid } from '@/core/data/uuid';
 
 export interface StoredPipeline {

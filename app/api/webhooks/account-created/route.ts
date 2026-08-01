@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/services/prisma';
+import { prisma } from '@/core/database/prisma';
 
 /**
  * POST /api/webhooks/account-created

@@ -1,6 +1,5 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, prisma } from '@/core/database/prisma';
 import type { CommandVariable, SavedCommand } from '@/services/saved-commands/types';
-import { prisma } from '@/services/prisma';
 import { stringUuid } from '@/core/data/uuid';
 
 function toJsonField(value: Prisma.InputJsonValue | null | undefined) {

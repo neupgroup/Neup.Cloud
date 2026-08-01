@@ -1,7 +1,4 @@
-let prisma: any = null;
-if (typeof window === 'undefined') {
-  prisma = require('@/services/prisma').prisma;
-}
+import { prisma } from '@/core/database/prisma';
 
 export async function getLiveSessionById(id: string) {
   return prisma.liveSession.findUnique({

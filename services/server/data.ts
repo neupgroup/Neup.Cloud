@@ -1,4 +1,4 @@
-import { prisma } from '@/services/prisma';
+import { prisma } from '@/core/database/prisma';
 import { stringUuid } from '@/core/data/uuid';
 import { stripSensitiveServerMetadata } from '@/services/server/server-metadata';
 

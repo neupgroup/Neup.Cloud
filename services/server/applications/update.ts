@@ -1,4 +1,4 @@
-import { prisma } from '@/services/prisma';
+import { prisma } from '@/core/database/prisma';
 
 import type { Application, UpdateApplicationData } from './_types';
 import { checkName, mapApplication, toJsonField } from './_utils';
