@@ -1648,9 +1648,9 @@ function PipelineEditorCanvas({
   );
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(15,23,42,0.08),transparent_26%),linear-gradient(180deg,#f8fafc_0%,#eef2f5_100%)] text-foreground">
+    <div className="min-h-screen bg-white text-foreground">
       <div className="flex min-h-screen flex-col">
-        <header className="border-b border-white/70 bg-white/85 px-4 py-4 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl md:px-6">
+        <header className="border-b border-white/70 bg-white/85 px-4 py-4 shadow-[0_18px_60px_rgba(15,23,42,0.12)] backdrop-blur-xl md:px-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center">
@@ -1694,8 +1694,7 @@ function PipelineEditorCanvas({
         </header>
 
         <div className={cn('grid flex-1 gap-0', shouldShowSidebar && 'xl:grid-cols-[minmax(0,1fr)_380px]')}>
-          <main ref={canvasShellRef} className="relative h-[calc(100vh-81px)] overflow-hidden">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(15,23,42,0.08),transparent_36%)]" />
+          <main ref={canvasShellRef} className="relative h-[calc(100vh-81px)] overflow-hidden bg-white">
 
             {shouldShowEmptyCanvasCta ? (
               <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center p-6">

@@ -102,9 +102,9 @@ const connectionCards = [
 
 export default function PipelinePage() {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(15,23,42,0.06),transparent_28%),linear-gradient(180deg,#f8fafc_0%,#f3f5f7_100%)] text-foreground">
+    <div className="min-h-screen bg-white text-foreground">
       <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-6 py-6 md:px-8 lg:px-10">
-        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-white/70 bg-white/85 px-5 py-4 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur-xl">
+        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-white/70 bg-white/85 px-5 py-4 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <Logo />
             <div className="hidden h-10 w-px bg-border md:block" />

@@ -279,7 +279,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
 
 function Header({ isMobileMenuOpen, toggleMobileMenu }: { isMobileMenuOpen: boolean, toggleMobileMenu: () => void }) {
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center border-b bg-background shadow-sm">
+    <header className="sticky top-0 z-40 flex h-16 items-center border-b bg-background shadow-[0_16px_40px_rgba(15,23,42,0.10)]">
       <div className="mx-auto flex w-full max-w-[1440px] items-center px-4 sm:px-6 md:px-8">
         <div className="flex items-center gap-4 md:hidden">
           <Button variant="ghost" size="icon" onClick={toggleMobileMenu}>
@@ -382,14 +382,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased bg-[#fafafa]">
+      <body className="font-body antialiased bg-white">
         <Suspense fallback={null}>
           <ServerQueryPreserver />
         </Suspense>
         {isPlainRoute ? (
-          <div className="min-h-screen w-full bg-[#f3f5f7] text-foreground">{children}</div>
+          <div className="min-h-screen w-full bg-white text-foreground">{children}</div>
         ) : (
-          <div className="min-h-screen w-full bg-[#fafafa] text-foreground">
+          <div className="min-h-screen w-full bg-white text-foreground">
             <Header isMobileMenuOpen={isMobileMenuOpen} toggleMobileMenu={toggleMobileMenu} />
 
             <div className={cn(

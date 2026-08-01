@@ -510,7 +510,7 @@ export function PipelineProviderConnectionPage({ provider }: { provider: Pipelin
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(15,23,42,0.06),transparent_26%),linear-gradient(180deg,#f8fafc_0%,#eef2f5_100%)] text-foreground">
+    <div className="min-h-screen bg-white text-foreground">
       <div className="mx-auto max-w-[1380px] px-6 py-8 md:px-8">
         <div className="mb-6 flex flex-wrap items-center gap-2 text-sm text-slate-500">
           <Link href="/pipeline" className="transition-colors hover:text-slate-900">
