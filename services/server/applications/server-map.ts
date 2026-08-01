@@ -1,6 +1,6 @@
 'use server';
 
-import { createId } from '@/core/create-id';
+import { stringUuid } from '@/core/data/uuid';
 import { prisma } from '@/services/prisma';
 
 export type ApplicationServerStatus = 'stopped' | 'started' | 'inactive';
@@ -91,7 +91,7 @@ export async function ensureInitialApplicationServerMap(applicationId: string, s
 
     await tx.applicationServerMap.create({
       data: {
-        id: createId(),
+        id: stringUuid(),
         applicationId,
         serverId,
         status: 'started',
@@ -129,7 +129,7 @@ export async function upsertApplicationServerStatus(
 
     await tx.applicationServerMap.create({
       data: {
-        id: createId(),
+        id: stringUuid(),
         applicationId,
         serverId,
         status: toStatusValue(status),

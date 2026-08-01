@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/core/utils';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/core/server-context';
 
 export function ServerNameLink({ name, className }: { name: string; className?: string }) {

@@ -18,7 +18,7 @@ import { Activity, TerminalSquare, FolderOpen, Rocket, Database, Globe, HardDriv
 import { PageTitle } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useServerName } from '@/core/hooks/use-server-name';
+import { useServerName } from '@/inapp/hooks/use-server-name';
 
 export default function ServerHomePage() {
     const serverName = useServerName();

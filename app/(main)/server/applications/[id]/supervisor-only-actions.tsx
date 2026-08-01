@@ -18,7 +18,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { deleteSupervisorOnlyProcess, stopSupervisorOnlyProcess } from '@/services/server/applications/service';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { useToast } from '@/core/hooks/use-toast';
 
 interface SupervisorOnlyActionsProps {

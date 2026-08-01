@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { FolderOpen, Network, ScrollText, AlertCircle } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
-import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 import { cn } from "@/core/utils";
 import { useSystemSection, SystemSectionProps } from '@/components/applications/system-section';
 

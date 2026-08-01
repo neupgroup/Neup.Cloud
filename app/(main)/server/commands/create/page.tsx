@@ -17,7 +17,7 @@ import { useToast } from '@/core/hooks/use-toast';
 import { createSavedCommand } from '@/services/server/commands/server-command-service';
 import { VARIABLE_REGEX } from '@/services/saved-commands/types';
 import { serializeCommandSetCommands } from '@/services/server/commands/serialize';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/core/server-context';
 
 type CreateMode = 'command' | 'set';

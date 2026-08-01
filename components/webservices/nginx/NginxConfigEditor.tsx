@@ -49,7 +49,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/core/server-context';
 
 interface ProxySettings {

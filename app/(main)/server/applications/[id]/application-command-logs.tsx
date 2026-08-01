@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getCommandLog, type CommandLog } from '@/services/logs/command-log';
 import { CommandLogList, CommandLogListSkeleton } from '@/app/(main)/server/commands/command-log-card';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 
 /** A command is considered "running" if it has status "pending" and was started
  *  less than 20 minutes ago. Anything older is treated as cancelled/timed-out. */

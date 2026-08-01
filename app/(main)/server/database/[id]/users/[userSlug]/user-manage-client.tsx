@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 
 interface UserManageClientProps {
     serverId: string;

@@ -1,5 +1,5 @@
 import { prisma } from '@/services/prisma';
-import { createId } from '@/core/create-id';
+import { stringUuid } from '@/core/data/uuid';
 import { getServerSelectionCandidates } from '@/core/server-context';
 import { stripSensitiveServerMetadata } from '@/services/server/server-metadata';
 
@@ -84,7 +84,7 @@ export async function createServer(data: {
 }) {
   return prisma.server.create({
     data: {
-      id: createId(),
+      id: stringUuid(),
       ...data,
       moreDetails: data.moreDetails ?? null,
       createdAt: new Date(),

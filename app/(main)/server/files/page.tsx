@@ -71,8 +71,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
-import { useServerName } from '@/core/hooks/use-server-name';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
+import { useServerName } from '@/inapp/hooks/use-server-name';
 import { withSelectedServerQuery } from '@/core/server-context';
 
 /*

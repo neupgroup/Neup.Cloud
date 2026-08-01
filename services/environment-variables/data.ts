@@ -1,5 +1,5 @@
 import { prisma } from '@/services/prisma';
-import { createId } from '@/core/create-id';
+import { stringUuid } from '@/core/data/uuid';
 import type { EnvironmentVariable } from '@/services/environment-variables/environment-variables-service';
 
 function mapEnvironmentVariable(record: {
@@ -35,7 +35,7 @@ export async function getEnvironmentVariables() {
 export async function createEnvironmentVariable(data: Omit<EnvironmentVariable, 'id' | 'createdAt'>) {
   const record = await prisma.environmentVariable.create({
     data: {
-      id: createId(),
+      id: stringUuid(),
       key: data.key,
       value: data.value,
       targetType: data.targetType,

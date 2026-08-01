@@ -40,7 +40,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
-import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 
 function RulesList({ rules, firewallActive, onDelete }: { rules: FirewallRule[], firewallActive: boolean, onDelete: (id: number) => void }) {
     if (rules.length === 0) {

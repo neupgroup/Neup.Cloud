@@ -1,5 +1,5 @@
 import { prisma } from '@/services/prisma';
-import { createId } from '@/core/create-id';
+import { stringUuid } from '@/core/data/uuid';
 import type { ExternalDatabase } from '@/services/database/types';
 
 type DatabaseDelegate = {
@@ -126,7 +126,7 @@ export async function createDatabase(data: Omit<ExternalDatabase, 'id'>) {
   if (delegate) {
     const record = await delegate.create({
       data: {
-        id: createId(),
+        id: stringUuid(),
         title: data.title,
         description: data.description,
         connectionType: data.connectionType,
@@ -140,7 +140,7 @@ export async function createDatabase(data: Omit<ExternalDatabase, 'id'>) {
     return mapDatabase(record);
   }
 
-  const id = createId();
+  const id = stringUuid();
   const now = new Date();
   const lastValidatedAt = data.lastValidatedAt ? new Date(data.lastValidatedAt) : null;
 

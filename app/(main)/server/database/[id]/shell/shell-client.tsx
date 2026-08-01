@@ -14,7 +14,7 @@ import { PageTitleBack } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from '@/core/hooks/use-toast';
-import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 
 import { executeDatabaseQuery } from '@/services/database/database-runtime';
 

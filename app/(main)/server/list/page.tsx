@@ -8,7 +8,7 @@ import { PageTitle } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/core/hooks/use-toast";
-import { useSelectedServerId } from "@/core/hooks/use-selected-server";
+import { useSelectedServerId } from "@/inapp/hooks/use-selected-server";
 import { withSelectedServerQuery } from "@/core/server-context";
 import { getServersWithRunningApplications, selectServer } from "@/services/server/server-service";
 import { getServerExpiration } from "@/services/server/server-metadata";

@@ -16,8 +16,8 @@ import { cn } from '@/core/utils';
 import { searchFilesOnServer } from '@/services/server/server-file-service';
 import type { FileSearchResult } from '@/services/server/server-file-types';
 import { ExternalLink, FileSearch, FolderOpen, Loader2, Shield, ShieldOff } from 'lucide-react';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
-import { useServerName } from '@/core/hooks/use-server-name';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
+import { useServerName } from '@/inapp/hooks/use-server-name';
 
 function formatBytes(bytes: number | null) {
   if (!bytes || bytes <= 0) return '-';

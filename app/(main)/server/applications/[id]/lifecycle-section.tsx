@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { Card } from "@/components/ui/card";
 import { useToast } from '@/core/hooks/use-toast';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { cn } from "@/core/utils";
 import { executeApplicationCommand } from "@/services/server/applications/service";
 

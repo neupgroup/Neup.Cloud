@@ -5,8 +5,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { getServer } from '@/services/server/server-service';
 import { endLiveSession, executeLiveCommand, initLiveSession } from '@/services/server/live-command';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
-import { useServerName } from '@/core/hooks/use-server-name';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
+import { useServerName } from '@/inapp/hooks/use-server-name';
 
 interface HistoryItem {
   time: string;

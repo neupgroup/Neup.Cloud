@@ -11,6 +11,7 @@
 - [ ] Add `::neup.documentation::...::end` documentation to [components/server-query-preserver.tsx](/Users/neupkishor/Code/neup.cloud/components/server-query-preserver.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [components/page-header.tsx](/Users/neupkishor/Code/neup.cloud/components/page-header.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/firewall/network/test/test-client.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/firewall/network/test/test-client.tsx).
+- [ ] Restore or relocate selected server context helpers referenced by [inapp/hooks/use-selected-server.ts](/Users/neupkishor/Code/neup.cloud/inapp/hooks/use-selected-server.ts) and [services/server/data.ts](/Users/neupkishor/Code/neup.cloud/services/server/data.ts).
 - [ ] Fix TypeScript shape mismatch in [app/(main)/intelligence/access/[id]/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/intelligence/access/[id]/page.tsx) for missing `availableTo`.
 - [ ] Fix intelligence log typing mismatches in [app/(main)/intelligence/logs/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/intelligence/logs/page.tsx).
 - [ ] Fix intelligence recharge typing mismatches in [app/(main)/intelligence/logs/recharge/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/intelligence/logs/recharge/page.tsx).

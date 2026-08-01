@@ -9,7 +9,7 @@ import { cn } from '@/core/utils';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { getAccountName } from '@/services/account';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/core/server-context';
 
 export type CommandLogItem = {

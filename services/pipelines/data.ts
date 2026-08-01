@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 import { prisma } from '@/services/prisma';
-import { createId } from '@/core/create-id';
+import { stringUuid } from '@/core/data/uuid';
 
 export interface StoredPipeline {
   id: string;
@@ -83,7 +83,7 @@ export async function createPipeline(data: {
 }) {
   const record = await prisma.pipeline.create({
     data: {
-      id: createId(),
+      id: stringUuid(),
       accountId: data.accountId,
       title: data.title,
       description: data.description ?? null,
@@ -125,7 +125,7 @@ export async function createPipelineLog(data: {
     };
   }).pipelineLog.create({
     data: {
-      id: createId(),
+      id: stringUuid(),
       pipelineId: data.pipelineId,
       timestamp: new Date(),
       logBy: data.logBy,

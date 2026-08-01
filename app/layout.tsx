@@ -63,7 +63,7 @@ import { getServer } from '@/services/server/server-service';
 
 import { findLongestMatch } from '@/services/core/findLongestMatch';
 import { ServerQueryPreserver } from '@/components/server-query-preserver';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/core/server-context';
 
 function NavLink({

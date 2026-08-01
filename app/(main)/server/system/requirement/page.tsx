@@ -16,8 +16,8 @@ import Link from 'next/link';
 import { cn } from '@/core/utils';
 import { requirements } from '@/services/server/requirement-list';
 import * as Icons from 'lucide-react';
-import { useServerName } from '@/core/hooks/use-server-name';
-import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
+import { useServerName } from '@/inapp/hooks/use-server-name';
+import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 

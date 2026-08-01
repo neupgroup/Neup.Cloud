@@ -41,7 +41,7 @@ import { type SavedCommand } from '@/services/saved-commands/types';
 import { cn } from '@/core/utils';
 import { CommandLogList, CommandLogListSkeleton } from './command-log-card';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { resolveSelectedServerValue, withSelectedServerQuery } from '@/core/server-context';
 
 /*

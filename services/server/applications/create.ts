@@ -1,5 +1,5 @@
 import { prisma } from '@/services/prisma';
-import { createId } from '@/core/create-id';
+import { stringUuid } from '@/core/data/uuid';
 
 import type { Application, CreateApplicationData } from './_types';
 import { checkName, mapApplication, toJsonField } from './_utils';
@@ -20,7 +20,7 @@ export function generateSupervisorServiceToken(length: number = SUPERVISOR_SERVI
 }
 
 export async function createApplication(data: CreateApplicationData): Promise<Application> {
-  const applicationId = createId();
+  const applicationId = stringUuid();
   const information = {
     ...(data.information ?? {}),
     supervisorServiceName:

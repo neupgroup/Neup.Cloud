@@ -1,5 +1,28 @@
 'use client';
 
+/*
+::neup.documentation::inapp-hooks-use-selected-server
+::title Selected Server Hooks
+
+Provides client hooks for reading and preserving the selected server query context inside the app.
+
+::public
+
+Use `useSelectedServerId()` to read the selected server ID.
+
+Use `useSelectedServerHref()` or `useSelectedServerUrlUpdater()` when links should preserve the selected server.
+
+::public end
+
+::private
+
+These hooks live in `inapp` because they are application navigation helpers, while the query parsing remains in `core/server-context`.
+
+::private end
+
+::end
+*/
+
 import { useEffect, useMemo } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import {

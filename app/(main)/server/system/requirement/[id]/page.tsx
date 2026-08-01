@@ -19,8 +19,8 @@ import * as Icons from 'lucide-react';
 import { cn } from '@/core/utils';
 import { Loader2, CheckCircle2, XCircle, Trash2, AlertTriangle } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
-import { useServerName } from '@/core/hooks/use-server-name';
-import { useSelectedServerHref, useSelectedServerId } from '@/core/hooks/use-selected-server';
+import { useServerName } from '@/inapp/hooks/use-server-name';
+import { useSelectedServerHref, useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 
 const Icon = ({ name, className }: { name: string, className?: string }) => {
     // @ts-ignore

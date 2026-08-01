@@ -1,5 +1,5 @@
 import { prisma } from '@/services/prisma';
-import { createId } from '@/core/create-id';
+import { stringUuid } from '@/core/data/uuid';
 import type { ManagedDomain } from '@/services/domains/types';
 
 function mapDomain(record: {
@@ -39,7 +39,7 @@ export async function createDomain(data: {
 }) {
   const record = await prisma.domain.create({
     data: {
-      id: createId(),
+      id: stringUuid(),
       name: data.name,
       status: 'pending',
       addedAt: new Date(),

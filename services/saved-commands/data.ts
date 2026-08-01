@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import type { CommandVariable, SavedCommand } from '@/services/saved-commands/types';
 import { prisma } from '@/services/prisma';
-import { createId } from '@/core/create-id';
+import { stringUuid } from '@/core/data/uuid';
 
 function toJsonField(value: Prisma.InputJsonValue | null | undefined) {
   return value === undefined ? undefined : value === null ? Prisma.DbNull : value;
@@ -50,7 +50,7 @@ export async function createSavedCommand(data: {
 }) {
   const record = await prisma.savedCommand.create({
     data: {
-      id: createId(),
+      id: stringUuid(),
       name: data.name,
       command: data.command,
       description: data.description ?? null,

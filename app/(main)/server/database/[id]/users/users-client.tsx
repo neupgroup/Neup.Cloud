@@ -11,7 +11,7 @@ import { useToast } from '@/core/hooks/use-toast';
 import { UserCreateForm } from "./user-create-form";
 import { deleteDatabaseUser, type DatabaseUser } from '@/services/database/database-runtime';
 import Link from 'next/link';
-import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 
 interface UsersClientPageProps {
     serverId: string;

@@ -6,7 +6,7 @@ import { ChevronDown, ChevronLeft, HardDrive, RotateCcw, Trash2 } from 'lucide-r
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 import type { DatabaseBackupFile } from '@/services/database/engine-types';
 
 type DatabaseBackupsClientProps = {

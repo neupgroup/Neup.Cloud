@@ -1,8 +1,8 @@
 let prisma: any = null;
-let createId: any = null;
+let stringUuid: any = null;
 if (typeof window === 'undefined') {
   prisma = require('@/services/prisma').prisma;
-  createId = require('@/core/create-id').createId;
+  stringUuid = require('@/core/data/uuid').stringUuid;
 }
 
 export async function createServerLog(data: {
@@ -17,7 +17,7 @@ export async function createServerLog(data: {
 }) {
   return prisma.serverLog.create({
     data: {
-      id: createId(),
+      id: stringUuid(),
       serverId: data.serverId,
       command: data.command,
       commandName: data.commandName ?? null,

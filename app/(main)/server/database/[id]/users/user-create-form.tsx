@@ -11,7 +11,7 @@ import { useToast } from '@/core/hooks/use-toast';
 import { Loader2, UserPlus, ShieldCheck, Key, User, Database } from 'lucide-react';
 import { createDatabaseUser } from '@/services/database/database-runtime';
 import { Checkbox } from "@/components/ui/checkbox";
-import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 
 interface UserCreateFormProps {
     serverId: string;

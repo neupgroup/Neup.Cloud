@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { cn } from '@/core/utils';
 import { Badge } from "@/components/ui/badge";
 import type { DatabaseUser } from '@/services/database/database-runtime';
-import { useSelectedServerHref } from '@/core/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 
 export default function DatabaseUsersClient({ users, dbId }: { users: DatabaseUser[], dbId: string }) {
     const withSelectedServer = useSelectedServerHref();
