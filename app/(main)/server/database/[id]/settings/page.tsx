@@ -17,7 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RemoteConnectionSettings } from "./remote-connection-settings";
-import { withSelectedServerQuery } from "@/core/server-context";
+import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
 import { parseDatabaseRouteId, resolveSelectedServerId } from "../../route-helpers";
 import { DropDatabaseButton } from "./drop-database-button";
 

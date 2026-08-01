@@ -48,7 +48,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { withSelectedServerQuery } from '@/core/server-context';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 const CustomTooltip = ({ active, payload, label, unit }: any) => {
     if (active && payload && payload.length) {

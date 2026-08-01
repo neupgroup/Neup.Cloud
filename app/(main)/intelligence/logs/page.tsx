@@ -5,12 +5,37 @@ import { ChevronLeft, ChevronRight, ScrollText } from 'lucide-react';
 import LogsAccordion from '@/app/(main)/intelligence/logs/logs-accordion';
 import { PageTitle } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
-import { getCurrentIntelligenceAccountId } from '@/core/ai/files/intelligence/account';
-import { getPaginatedIntelligenceLogs, parseLogContext } from '@/core/ai/files/intelligence/store';
+import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
+import { getPaginatedIntelligenceLogs } from '@/services/intelligence/store';
 
 export const metadata: Metadata = {
   title: 'Intelligence Logs, Neup.Cloud',
 };
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
+function parseLogContext(value: string | null) {
+  let parsed: unknown = value || {};
+
+  if (value) {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      parsed = value;
+    }
+  }
+
+  const record = asRecord(parsed);
+
+  return {
+    guider: String(record.guider || record.masterPrompt || ''),
+    query: String(record.query || ''),
+    displayContext: typeof record.context === 'string' ? record.context : JSON.stringify(record.context ?? ''),
+    currency: typeof record.currency === 'string' ? record.currency : null,
+  };
+}
 
 export default async function IntelligenceLogsPage({
   searchParams,

@@ -8,8 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { getCurrentIntelligenceAccountId } from '@/core/ai/files/intelligence/account';
-import { getAccessTokens, getIntelligenceModels } from '@/core/ai/files/intelligence/store';
+import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
+import { getAccessTokens, getIntelligenceModels } from '@/services/intelligence/store';
 import AccessCreateForm from '@/app/(main)/intelligence/access/add/access-create-form';
 
 export const metadata: Metadata = {

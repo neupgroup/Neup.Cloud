@@ -11,8 +11,8 @@ import { AlertCircle, Calendar, CheckCircle2, Copy, FileText, Globe, Key, Refres
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { deleteCertificate, getCertificate, reissueCertificate } from '@/services/webservices/certificates-service';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 interface CertificateDetails {
     fileName: string;

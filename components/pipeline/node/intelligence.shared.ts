@@ -8,7 +8,7 @@ export type PipelineIntelligenceModel = {
 };
 
 export type PipelineIntelligencePrompt = {
-  id: number;
+  id: string;
   promptId: string;
   primaryModelId: number | null;
   fallbackModelId: number | null;

@@ -16,7 +16,7 @@ Use `useSelectedServerHref()` or `useSelectedServerUrlUpdater()` when links shou
 
 ::private
 
-These hooks live in `inapp` because they are application navigation helpers, while the query parsing remains in `core/server-context`.
+These hooks live in `inapp` because selected-server navigation is application context. Generic parameter mutation remains in `core/helpers/link`.
 
 ::private end
 
@@ -24,44 +24,50 @@ These hooks live in `inapp` because they are application navigation helpers, whi
 */
 
 import { useEffect, useMemo } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import {
   cacheSelectedServerId,
   getSelectedServerId,
   getSelectedServerFromParams,
   withSelectedServerQuery,
-} from '@/core/server-context';
+} from '@/inapp/helpers/navigation';
+
+export { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+
+function getCurrentSearch() {
+  return typeof window === 'undefined' ? '' : window.location.search;
+}
 
 export function useSelectedServerId() {
-  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  const selectedServerId = useMemo(() => getSelectedServerId(searchParams), [searchParams]);
+  const selectedServerId = useMemo(() => getSelectedServerId(getCurrentSearch()), [pathname]);
 
   useEffect(() => {
-    const selectedServerFromUrl = getSelectedServerFromParams(searchParams);
+    const selectedServerFromUrl = getSelectedServerFromParams(getCurrentSearch());
     if (selectedServerFromUrl) {
       cacheSelectedServerId(selectedServerFromUrl);
     }
-  }, [searchParams]);
+  }, [pathname]);
 
   return selectedServerId;
 }
 
 export function useSelectedServerHref() {
-  const searchParams = useSearchParams();
   const selectedServerId = useSelectedServerId();
 
-  return (href: string) => withSelectedServerQuery(href, selectedServerId ?? getSelectedServerFromParams(searchParams));
+  return (href: string) => withSelectedServerQuery(href, selectedServerId ?? getSelectedServerFromParams(getCurrentSearch()));
 }
 
 export function useSelectedServerUrlUpdater() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const selectedServerId = useSelectedServerId();
 
-  return (nextSelectedServerId: string | null | undefined) =>
-    withSelectedServerQuery(
-      `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`,
+  return (nextSelectedServerId: string | null | undefined) => {
+    const search = getCurrentSearch();
+    return withSelectedServerQuery(
+      `${pathname}${search}`,
       nextSelectedServerId ?? selectedServerId
     );
+  };
 }

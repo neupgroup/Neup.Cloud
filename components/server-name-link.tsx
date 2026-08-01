@@ -1,15 +1,12 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/core/utils';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { getSelectedServerId, withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 export function ServerNameLink({ name, className }: { name: string; className?: string }) {
     const router = useRouter();
     const pathname = usePathname();
-    const searchParams = useSearchParams();
-    const selectedServerId = useSelectedServerId();
 
     return (
         <span
@@ -18,8 +15,9 @@ export function ServerNameLink({ name, className }: { name: string; className?: 
                 className
             )}
             onClick={() => {
-                const query = searchParams?.toString();
-                const currentPath = withSelectedServerQuery(query ? `${pathname}?${query}` : pathname, selectedServerId);
+                const query = typeof window === 'undefined' ? '' : window.location.search;
+                const selectedServerId = getSelectedServerId(query);
+                const currentPath = withSelectedServerQuery(query ? `${pathname}${query}` : pathname, selectedServerId);
                 router.push(`/server/list?redirects=${encodeURIComponent(currentPath)}`);
             }}
         >

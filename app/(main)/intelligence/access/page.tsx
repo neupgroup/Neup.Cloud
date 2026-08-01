@@ -12,8 +12,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { getCurrentIntelligenceAccountId } from '@/core/ai/files/intelligence/account';
-import { getIntelligenceAccesses, maskSecret } from '@/core/ai/files/intelligence/store';
+import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
+import { maskSecret } from '@/services/intelligence/helpers';
+import { getIntelligenceAccesses } from '@/services/intelligence/store';
 
 export const metadata: Metadata = {
   title: 'Intelligence Access, Neup.Cloud',

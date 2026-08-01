@@ -12,6 +12,7 @@ import { generateSSHKeyPair, addAuthorizedKey } from "@/services/server/firewall
 import { useToast } from '@/core/hooks/use-toast';
 import { useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
+import { getRandomWord } from "@/core/dictionary";
 
 export default function CreateKeyPage() {
     const { toast } = useToast();
@@ -24,24 +25,13 @@ export default function CreateKeyPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [downloaded, setDownloaded] = useState(false);
 
-    const generateRandomName = () => {
-        // We will import this dynamically or moving the logic here if simple. 
-        // Let's us import useful helper.
-        // Actually, since this is client side, I can just use the dictionary I created or a simple list if import fails.
-        // But I made a file, let's try to import it.
-        // Wait, standard import is top level.
-        // For now, I'll assume I can just import getRandomWord from '@/core/dictionary' at top level.
-        return `generated-key-${Math.floor(Math.random() * 10000)}`;
-    };
-
     const handleGenerate = async () => {
         setIsGenerating(true);
         try {
             // Auto generate name if empty
             let nameToUse = keyName;
             if (!nameToUse) {
-                const { getRandomWord } = await import('@/core/dictionary');
-                const word = getRandomWord();
+                const word = await getRandomWord();
                 const number = Math.floor(1000 + Math.random() * 9000); // 4 digit number
                 nameToUse = `${word}.${number}.key`;
                 setKeyName(nameToUse);

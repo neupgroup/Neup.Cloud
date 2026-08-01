@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { getServers, selectServer } from "@/services/server/server-service";
 import type { Server } from "@/services/server/types";
 import { Loader2, ServerIcon, ArrowRight } from "lucide-react";
-import { withSelectedServerQuery } from "@/core/server-context";
+import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
 
 export default function ServersHomepage() {
   const router = useRouter();

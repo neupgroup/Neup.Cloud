@@ -1,6 +1,6 @@
 'use server';
 
-import { ensureIntelligenceTables, getIntelligenceDbPool } from '@/core/ai/files/intelligence/db';
+import { ensureIntelligenceTables, getIntelligenceDbPool } from '@/services/intelligence/db';
 
 export interface OpenFlowUsageLogRecord {
   id: number;
@@ -17,7 +17,7 @@ export async function getOpenFlowUsageLogs(
 ): Promise<OpenFlowUsageLogRecord[]> {
   try {
     await ensureIntelligenceTables();
-    const db = getIntelligenceDbPool();
+    const db = await getIntelligenceDbPool();
 
     const result = await db.query<{
       id: string | number;

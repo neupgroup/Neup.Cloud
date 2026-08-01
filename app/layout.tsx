@@ -63,8 +63,12 @@ import { getServer } from '@/services/server/server-service';
 
 import { findLongestMatch } from '@/services/core/findLongestMatch';
 import { ServerQueryPreserver } from '@/components/server-query-preserver';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/core/server-context';
+import {
+  cacheSelectedServerId,
+  getSelectedServerFromParams,
+  getSelectedServerId,
+  withSelectedServerQuery,
+} from '@/inapp/helpers/navigation';
 
 function NavLink({
   href,
@@ -315,11 +319,20 @@ function Header({ isMobileMenuOpen, toggleMobileMenu }: { isMobileMenuOpen: bool
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const selectedServerId = useSelectedServerId();
+  const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isServerSelected, setIsServerSelected] = useState(false);
   const [serverData, setServerData] = useState<any>(null);
   const isPlainRoute = pathname === '/pipeline/editor' || pathname.startsWith('/pipeline/editor/');
+
+  useEffect(() => {
+    const search = typeof window === 'undefined' ? '' : window.location.search;
+    const selectedFromUrl = getSelectedServerFromParams(search);
+    if (selectedFromUrl) {
+      cacheSelectedServerId(selectedFromUrl);
+    }
+    setSelectedServerId(getSelectedServerId(search));
+  }, [pathname]);
 
   useEffect(() => {
     const checkCookie = async () => {
@@ -370,7 +383,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased bg-[#fafafa]">
-        <ServerQueryPreserver />
+        <Suspense fallback={null}>
+          <ServerQueryPreserver />
+        </Suspense>
         {isPlainRoute ? (
           <div className="min-h-screen w-full bg-[#f3f5f7] text-foreground">{children}</div>
         ) : (

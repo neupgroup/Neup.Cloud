@@ -55,7 +55,7 @@ function mapPipelineLog(record: {
   };
 }
 
-export async function getPipelinesByAccountId(accountId: string) {
+export async function getPipelinesByAccountId(accountId: string): Promise<StoredPipeline[]> {
   const records = await prisma.pipeline.findMany({
     where: { accountId },
     orderBy: [{ title: 'asc' }, { id: 'asc' }],

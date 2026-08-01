@@ -3,33 +3,41 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { getCurrentIntelligenceAccountId } from '@/core/ai/files/intelligence/account';
+import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
+import {
+  decryptValue,
+  encryptValue,
+  generateAccessIdentifier,
+  generateAccessToken,
+  hashAccessToken,
+  parseAccessFormData,
+  parseAccessIdFormData,
+  parseModelFormData,
+  parseModelIdFormData,
+  parseRechargeFormData,
+} from '@/services/intelligence/helpers';
 import {
   createAccessTokenRecord,
   createIntelligenceAccessRecord,
   createIntelligenceModelRecord,
-  decryptValue,
   deleteIntelligenceAccessRecord,
   deleteIntelligenceModelRecord,
-  encryptValue,
-  generateAccessIdentifier,
-  generateAccessToken,
   getAccessTokenById,
   getIntelligenceAccessById,
   getIntelligenceModels,
-  hashAccessToken,
-  parseAccessFormData,
-  parseAccessIdFormData,
-  parseModelIdFormData,
-  parseModelFormData,
-  parseRechargeFormData,
-  parseTokenFormData,
   publishIntelligenceAccess,
   rechargeIntelligenceAccessBalance,
   updateIntelligenceAccessRecord,
   updateIntelligenceAccessStatus,
   updateIntelligenceModelRecord,
-} from '@/core/ai/files/intelligence/store';
+} from '@/services/intelligence/store';
+
+function parseTokenFormData(formData: FormData) {
+  return {
+    name: String(formData.get('name') || '').trim(),
+    key: String(formData.get('key') || '').trim(),
+  };
+}
 
 export async function createAccessTokenAction(formData: FormData) {
   const accountId = await getCurrentIntelligenceAccountId();

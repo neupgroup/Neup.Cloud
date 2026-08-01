@@ -10,7 +10,7 @@ import { differenceInDays, differenceInHours, format, formatDistanceToNow } from
 import { useEffect, useState } from 'react';
 import { getAccountName } from '@/services/account';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 export type CommandLogItem = {
   id: string;

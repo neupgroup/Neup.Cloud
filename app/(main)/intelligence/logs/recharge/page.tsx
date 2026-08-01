@@ -14,8 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { getCurrentIntelligenceAccountId } from '@/core/ai/files/intelligence/account';
-import { getIntelligenceAccesses } from '@/core/ai/files/intelligence/store';
+import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
+import { getIntelligenceAccesses } from '@/services/intelligence/store';
 
 export const metadata: Metadata = {
   title: 'Recharge Intelligence Access Balance, Neup.Cloud',

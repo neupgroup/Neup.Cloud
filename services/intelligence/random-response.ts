@@ -1,4 +1,4 @@
-import { invokeModel } from '@/core/ai/files/intelligence/model-client';
+import { invokeModel } from '@/services/intelligence/model-client';
 
 export type AiResponseModelTuple = [apiKey: string, provider: string, modelCode: string];
 

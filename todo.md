@@ -1,5 +1,4 @@
 # TODO
-
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/webservices/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/webservices/page.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/page.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/search/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/search/page.tsx).
@@ -11,25 +10,18 @@
 - [ ] Add `::neup.documentation::...::end` documentation to [components/server-query-preserver.tsx](/Users/neupkishor/Code/neup.cloud/components/server-query-preserver.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [components/page-header.tsx](/Users/neupkishor/Code/neup.cloud/components/page-header.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/firewall/network/test/test-client.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/firewall/network/test/test-client.tsx).
-- [ ] Restore or relocate selected server context helpers referenced by [inapp/hooks/use-selected-server.ts](/Users/neupkishor/Code/neup.cloud/inapp/hooks/use-selected-server.ts) and [services/server/data.ts](/Users/neupkishor/Code/neup.cloud/services/server/data.ts).
-- [ ] Fix TypeScript shape mismatch in [app/(main)/intelligence/access/[id]/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/intelligence/access/[id]/page.tsx) for missing `availableTo`.
-- [ ] Fix intelligence log typing mismatches in [app/(main)/intelligence/logs/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/intelligence/logs/page.tsx).
 - [ ] Fix intelligence recharge typing mismatches in [app/(main)/intelligence/logs/recharge/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/intelligence/logs/recharge/page.tsx).
-- [ ] Fix implicit `any` in [app/(main)/pipeline/instance/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/pipeline/instance/page.tsx).
+- [ ] Fix missing toast `id` values in [app/(main)/server/files/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/files/page.tsx).
 - [ ] Fix missing `Server` properties in [app/(main)/server/webservices/configure/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/webservices/configure/page.tsx).
 - [ ] Fix invalid `backHref` prop usage in [app/(main)/server/webservices/nginx/default/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/webservices/nginx/default/page.tsx).
-- [ ] Fix pipeline editor access record typing in [app/(plain)/pipeline/editor/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(plain)/pipeline/editor/page.tsx).
-- [ ] Fix spread and const assertion typing issues in [app/bridge/api.v1/intelligence/getResponse/route.ts](/Users/neupkishor/Code/neup.cloud/app/bridge/api.v1/intelligence/getResponse/route.ts).
-- [ ] Fix numeric/string identifier typing mismatches in [app/bridge/api.v1/intelligence/getResponse/route.ts](/Users/neupkishor/Code/neup.cloud/app/bridge/api.v1/intelligence/getResponse/route.ts).
-- [ ] Fix stale intelligence store type references in [core/ai/files/intelligence/store.ts](/Users/neupkishor/Code/neup.cloud/core/ai/files/intelligence/store.ts).
+- [ ] Restore or replace missing dashboard AI flow imports in [components/dashboard/recommendation-client.tsx](/Users/neupkishor/Code/neup.cloud/components/dashboard/recommendation-client.tsx).
+- [ ] Restore generated Prisma alias `@/prisma/client` or update imports in [core/database/prisma.ts](/Users/neupkishor/Code/neup.cloud/core/database/prisma.ts).
 - [ ] Fix nullable return typing in [services/core/go.ts](/Users/neupkishor/Code/neup.cloud/services/core/go.ts) and [services/core/python.ts](/Users/neupkishor/Code/neup.cloud/services/core/python.ts).
 - [ ] Fix generic database typing issues in [services/database/data.ts](/Users/neupkishor/Code/neup.cloud/services/database/data.ts).
 - [ ] Restore missing database engine shared types referenced by [services/database/engines/mariadb/backups.ts](/Users/neupkishor/Code/neup.cloud/services/database/engines/mariadb/backups.ts), [services/database/engines/mariadb/database.ts](/Users/neupkishor/Code/neup.cloud/services/database/engines/mariadb/database.ts), [services/database/engines/mariadb/queries.ts](/Users/neupkishor/Code/neup.cloud/services/database/engines/mariadb/queries.ts), [services/database/engines/mariadb/settings.ts](/Users/neupkishor/Code/neup.cloud/services/database/engines/mariadb/settings.ts), [services/database/engines/mariadb/users.ts](/Users/neupkishor/Code/neup.cloud/services/database/engines/mariadb/users.ts), and [services/database/engines/postgresql/database.ts](/Users/neupkishor/Code/neup.cloud/services/database/engines/postgresql/database.ts), [services/database/engines/postgresql/settings.ts](/Users/neupkishor/Code/neup.cloud/services/database/engines/postgresql/settings.ts).
 - [ ] Fix invalid database type exports consumed by [services/database/management.ts](/Users/neupkishor/Code/neup.cloud/services/database/management.ts).
 - [ ] Fix implicit `any` in [services/errors/errors-service.ts](/Users/neupkishor/Code/neup.cloud/services/errors/errors-service.ts).
 - [ ] Fix command log typing in [services/home-service.ts](/Users/neupkishor/Code/neup.cloud/services/home-service.ts).
-- [ ] Fix nullable intelligence runtime typing in [services/intelligence/openflow.ts](/Users/neupkishor/Code/neup.cloud/services/intelligence/openflow.ts).
 - [ ] Resolve duplicate export in [services/logs/logs-service.ts](/Users/neupkishor/Code/neup.cloud/services/logs/logs-service.ts).
-- [ ] Fix pipeline service type drift in [services/pipelines/pipelines-service.ts](/Users/neupkishor/Code/neup.cloud/services/pipelines/pipelines-service.ts).
 - [ ] Fix implicit `any` in [services/webservices/runtime.ts](/Users/neupkishor/Code/neup.cloud/services/webservices/runtime.ts).
 - [ ] Fix invalid void handling in [services/webservices/service.ts](/Users/neupkishor/Code/neup.cloud/services/webservices/service.ts).

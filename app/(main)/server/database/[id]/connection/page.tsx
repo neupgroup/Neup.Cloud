@@ -13,7 +13,7 @@ import type { Metadata } from 'next';
 import { Badge } from "@/components/ui/badge";
 import { getDatabaseDetails } from '@/services/database/database-runtime';
 import { notFound } from "next/navigation";
-import { withSelectedServerQuery } from "@/core/server-context";
+import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
 import { parseDatabaseRouteId, resolveSelectedServerId } from "../../route-helpers";
 
 export const metadata: Metadata = {

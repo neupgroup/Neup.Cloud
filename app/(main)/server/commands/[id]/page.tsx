@@ -40,7 +40,7 @@ import type { SavedCommand } from '@/services/saved-commands/types';
 import { useToast } from '@/core/hooks/use-toast';
 import { PageTitleBack } from '@/components/page-header';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { resolveSelectedServerValue, withSelectedServerQuery } from '@/core/server-context';
+import { resolveSelectedServerValue, withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 export default function CommandDetailPage({ params }: { params: { id: string } }) {
     const { id } = params;

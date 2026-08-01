@@ -3,14 +3,16 @@ import { notFound } from 'next/navigation';
 import { FilePenLine } from 'lucide-react';
 
 import { PageTitleBack } from '@/components/page-header';
-import { getCurrentIntelligenceAccountId } from '@/core/ai/files/intelligence/account';
+import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
+import {
+  isAccessPublished,
+  parseDetailsArray,
+} from '@/services/intelligence/helpers';
 import {
   getAccessTokens,
   getIntelligenceAccessById,
   getIntelligenceModels,
-  isAccessPublished,
-  parseDetailsArray,
-} from '@/core/ai/files/intelligence/store';
+} from '@/services/intelligence/store';
 import AccessDetailClient from '@/app/(main)/intelligence/access/[id]/access-detail-client';
 
 export const metadata: Metadata = {
@@ -43,6 +45,9 @@ export default async function IntelligenceAccessDetailPage({
 
   const detailsArray = parseDetailsArray(access.details);
   const published = isAccessPublished(access.details);
+  const availableTo = Array.isArray(access.available_to)
+    ? access.available_to.map((value) => String(value))
+    : [];
 
   return (
     <div className="grid gap-8">
@@ -68,6 +73,7 @@ export default async function IntelligenceAccessDetailPage({
           tokenBalance: access.token_balance,
           details: detailsArray,
           published,
+          availableTo,
         }}
         tokens={tokens}
         models={models}

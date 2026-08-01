@@ -1,9 +1,10 @@
 import { after, NextRequest, NextResponse } from 'next/server';
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 
-import { ensureIntelligenceTables, getIntelligenceDbPool } from '@/core/ai/files/intelligence/db';
-import { invokeModel } from '@/core/ai/files/intelligence/model-client';
-import { insertIntelligenceDevLog, decryptValue } from '@/core/ai/files/intelligence/store';
+import { ensureIntelligenceTables, getIntelligenceDbPool } from '@/services/intelligence/db';
+import { decryptValue } from '@/services/intelligence/helpers';
+import { invokeModel } from '@/services/intelligence/model-client';
+import { insertIntelligenceDevLog } from '@/services/intelligence/store';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -110,7 +111,9 @@ const RESERVED_QUERY_KEYS = new Set([
 ]);
 
 function successResponse(response: string | unknown, status = 200) {
-  const data = typeof response === 'string' ? { response } : response;
+  const data = response && typeof response === 'object' && !Array.isArray(response)
+    ? response
+    : { response };
   
   return NextResponse.json(
     {
@@ -124,15 +127,18 @@ function successResponse(response: string | unknown, status = 200) {
   );
 }
 
-function errorResponse(errorCode: string, message?: string, status = 400) {
-  void message;
+function errorResponse(errorCode: string, messageOrStatus?: string | number, status = 400) {
+  const message = typeof messageOrStatus === 'string' ? messageOrStatus : errorCode;
+  const responseStatus = typeof messageOrStatus === 'number' ? messageOrStatus : status;
+
   return NextResponse.json(
     {
       success: false,
       error: errorCode,
+      message,
     },
     {
-      status,
+      status: responseStatus,
       headers: RESPONSE_HEADERS,
     }
   );
@@ -451,7 +457,7 @@ function parseModelsFromDetails(details: unknown, accessKey: string): Array<{
           price: {},
         },
         apiKey,
-        source: (i === startIndex ? 'primary' : 'fallback') as const,
+        source: i === startIndex ? 'primary' as const : 'fallback' as const,
       });
     }
   } catch (error) {
@@ -661,7 +667,7 @@ async function parseInput(request: NextRequest): Promise<ParsedInput> {
 
 async function findAccessRow(accountId: string, accessIdentifier: string): Promise<IntelligenceAccessRow | null> {
   await ensureIntelligenceTables();
-  const db = getIntelligenceDbPool();
+  const db = await getIntelligenceDbPool();
   const result = await db.query<IntelligenceAccessRow>(
     `
       SELECT
@@ -696,7 +702,7 @@ async function findAccessRow(accountId: string, accessIdentifier: string): Promi
 
 async function findAccessRowByAccessId(accessId: string): Promise<IntelligenceAccessRow | null> {
   await ensureIntelligenceTables();
-  const db = getIntelligenceDbPool();
+  const db = await getIntelligenceDbPool();
   const result = await db.query<IntelligenceAccessRow>(
     `
       SELECT
@@ -767,7 +773,7 @@ async function finalizeRequestLog(input: {
   devDetails?: Record<string, unknown> | null;
 }) {
   await ensureIntelligenceTables();
-  const db = getIntelligenceDbPool();
+  const db = await getIntelligenceDbPool();
   const balanceToDeduct = Math.max(input.cost || 0, 0);
 
   const updateResult = await db.query<{ balance: number }>(
@@ -830,7 +836,7 @@ async function logFailedRequest(input: {
   devDetails?: Record<string, unknown> | null;
 }) {
   await ensureIntelligenceTables();
-  const db = getIntelligenceDbPool();
+  const db = await getIntelligenceDbPool();
   
   const details = {
     query: input.query,

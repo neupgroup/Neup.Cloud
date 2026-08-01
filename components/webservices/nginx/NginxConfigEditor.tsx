@@ -50,7 +50,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { withSelectedServerQuery } from '@/inapp/hooks/use-selected-server';
 
 interface ProxySettings {
     setHost?: boolean;

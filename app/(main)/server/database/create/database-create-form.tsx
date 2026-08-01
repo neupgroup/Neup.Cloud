@@ -11,7 +11,7 @@ import { Loader2, Database, ShieldCheck, Key, User, AlertTriangle, CheckCircle, 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { type DatabaseInstallation, installDatabaseEngine, checkDatabaseInstallation, createDatabaseInstance } from '@/services/database/database-runtime';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 interface DatabaseCreateFormProps {
     serverId?: string;

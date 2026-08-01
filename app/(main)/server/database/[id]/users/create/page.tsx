@@ -5,7 +5,7 @@ import { UserCreateForm } from "../user-create-form";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, UserPlus } from "lucide-react";
 import Link from "next/link";
-import { withSelectedServerQuery } from "@/core/server-context";
+import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
 import { parseDatabaseRouteId, resolveSelectedServerId } from "../../../route-helpers";
 
 export default async function CreateUserPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams?: Promise<{ selectedServer?: string }> }) {

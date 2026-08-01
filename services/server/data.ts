@@ -1,7 +1,44 @@
 import { prisma } from '@/services/prisma';
 import { stringUuid } from '@/core/data/uuid';
-import { getServerSelectionCandidates } from '@/core/server-context';
 import { stripSensitiveServerMetadata } from '@/services/server/server-metadata';
+
+function trimServerIdentifier(value: string | null | undefined) {
+  const next = value?.trim();
+  return next ? next : null;
+}
+
+function getServerSelectionCandidates(value: string | null | undefined) {
+  const trimmed = trimServerIdentifier(value);
+  if (!trimmed) {
+    return [];
+  }
+
+  const candidates = new Set<string>([trimmed]);
+  const addCandidate = (next: string | null | undefined) => {
+    const normalized = trimServerIdentifier(next);
+    if (normalized) {
+      candidates.add(normalized);
+    }
+  };
+
+  try {
+    const parsed = new URL(trimmed);
+    addCandidate(parsed.hostname);
+  } catch {
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed) === false && /[/:]/.test(trimmed)) {
+      try {
+        const parsed = new URL(`ssh://${trimmed}`);
+        addCandidate(parsed.hostname);
+      } catch {
+        // Keep the raw candidate when a URL-like identifier cannot be parsed.
+      }
+    }
+  }
+
+  addCandidate(trimmed.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '').split('/')[0]?.replace(/:\d+$/, ''));
+
+  return Array.from(candidates);
+}
 
 export function toPublicServer<
   T extends {

@@ -13,7 +13,7 @@ import { restartNginxService } from './restart-action';
 import { testNginxConfiguration } from './test-action';
 import { useToast } from '@/core/hooks/use-toast';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 export default function NginxConfigurationsPage() {
     const [configurations, setConfigurations] = useState<WebServiceConfig[]>([]);

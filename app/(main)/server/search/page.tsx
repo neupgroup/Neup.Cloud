@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/core/hooks/use-toast';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 import { cn } from '@/core/utils';
 import { searchFilesOnServer } from '@/services/server/server-file-service';
 import type { FileSearchResult } from '@/services/server/server-file-types';
@@ -48,7 +48,7 @@ function splitExtensions(input: string) {
     .filter(Boolean);
 }
 
-export default function ServerSearchPage() {
+function ServerSearchContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -352,5 +352,13 @@ export default function ServerSearchPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function ServerSearchPage() {
+  return (
+    <Suspense fallback={null}>
+      <ServerSearchContent />
+    </Suspense>
   );
 }

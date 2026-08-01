@@ -18,7 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { PageTitle } from '@/components/page-header';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 export default function WebServicesPage() {
     const router = useRouter();

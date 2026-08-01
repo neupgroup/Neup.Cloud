@@ -26,7 +26,7 @@ import { ServerNameLink } from "@/components/server-name-link";
 import { CommandLogList, CommandLogListSkeleton } from '@/app/(main)/server/commands/command-log-card';
 import { ApplicationSection } from '@/components/specifics/application/section';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 export default function Home() {
   const router = useRouter();

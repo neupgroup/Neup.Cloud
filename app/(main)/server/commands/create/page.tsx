@@ -18,7 +18,7 @@ import { createSavedCommand } from '@/services/server/commands/server-command-se
 import { VARIABLE_REGEX } from '@/services/saved-commands/types';
 import { serializeCommandSetCommands } from '@/services/server/commands/serialize';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 type CreateMode = 'command' | 'set';
 

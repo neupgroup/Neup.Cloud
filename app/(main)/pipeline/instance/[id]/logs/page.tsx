@@ -7,7 +7,7 @@ import { PageTitle } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { getCurrentIntelligenceAccountId } from '@/core/ai/files/intelligence/account';
+import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
 import {
   getPipelineById,
   getPipelineLogsByPipelineId,

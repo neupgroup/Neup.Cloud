@@ -2,7 +2,7 @@
 
 import { getServerForRunner } from '@/services/server/server-service';
 import { runCommandOnServer } from '@/services/server/ssh';
-import { isSshAllowRule } from '@/core/firewall-rules';
+import { isSshAllowRule } from '@/services/server/firewall/firewall-rules';
 
 export type FirewallRule = {
     id: number;

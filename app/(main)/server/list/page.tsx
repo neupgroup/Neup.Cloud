@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Check, ChevronRight, CirclePlus, Loader2, ServerIcon } from "lucide-react";
 
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/core/hooks/use-toast";
 import { useSelectedServerId } from "@/inapp/hooks/use-selected-server";
-import { withSelectedServerQuery } from "@/core/server-context";
+import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
 import { getServersWithRunningApplications, selectServer } from "@/services/server/server-service";
 import { getServerExpiration } from "@/services/server/server-metadata";
 import type { Server } from "@/services/server/types";
@@ -58,7 +58,7 @@ function getAppStatusClasses(status: ServerApplicationMap["status"]) {
   return "border-slate-400/60";
 }
 
-export default function Page() {
+function ServerListContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -314,5 +314,13 @@ export default function Page() {
         })
       )}
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <ServerListContent />
+    </Suspense>
   );
 }

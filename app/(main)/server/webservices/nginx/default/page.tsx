@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { getServer } from '@/services/server/server-service';
 import DefaultNginxConfigClient from './client';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 export default async function DefaultNginxConfigPage({
     searchParams,

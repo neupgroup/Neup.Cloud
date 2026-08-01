@@ -73,7 +73,7 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { useServerName } from '@/inapp/hooks/use-server-name';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 /*
 ::neup.documentation::server-files-page

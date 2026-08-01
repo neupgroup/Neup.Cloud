@@ -13,7 +13,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getServer } from "@/services/server/server-service";
-import { withSelectedServerQuery } from "@/core/server-context";
+import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
 
 export const metadata: Metadata = {
     title: 'Firewall | Neup.Cloud',

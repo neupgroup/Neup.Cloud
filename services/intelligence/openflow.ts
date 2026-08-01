@@ -1,5 +1,5 @@
-import { invokeModel } from '@/core/ai/files/intelligence/model-client';
-import { ensureIntelligenceTables, getIntelligenceDbPool } from '@/core/ai/files/intelligence/db';
+import { invokeModel } from '@/services/intelligence/model-client';
+import { ensureIntelligenceTables, getIntelligenceDbPool } from '@/services/intelligence/db';
 
 export interface OpenFlowExecutionInput {
   provider: string;
@@ -119,7 +119,7 @@ async function logOpenFlowUsage(input: {
 }) {
   try {
     await ensureIntelligenceTables();
-    const db = getIntelligenceDbPool();
+    const db = await getIntelligenceDbPool();
 
     await db.query(
       `

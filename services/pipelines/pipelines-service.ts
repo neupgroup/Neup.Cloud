@@ -3,24 +3,26 @@
 import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
-import { getCurrentIntelligenceAccountId } from '@/core/ai/files/intelligence/account';
-import { ensureIntelligenceTables, getIntelligenceDbPool } from '@/core/ai/files/intelligence/db';
-import { invokeModel } from '@/core/ai/files/intelligence/model-client';
+import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
+import { ensureIntelligenceTables, getIntelligenceDbPool } from '@/services/intelligence/db';
 import {
-  createIntelligenceAccessRecord,
+  buildDetailsObject,
+  buildModelString,
   generateAccessIdentifier,
   generateAccessToken,
+  hashAccessToken,
+  parseDetailsObject,
+  parseModelString,
+} from '@/services/intelligence/helpers';
+import { invokeModel } from '@/services/intelligence/model-client';
+import {
+  createIntelligenceAccessRecord,
   getAccessTokens,
   getIntelligenceAccesses,
   getIntelligenceModels,
-  hashAccessToken,
-  buildModelString,
-  buildDetailsObject,
-  parseDetailsObject,
-  parseModelString,
   type IntelligenceAccessRecord,
   type StoredModelConfig,
-} from '@/core/ai/files/intelligence/store';
+} from '@/services/intelligence/store';
 import {
   createPipeline,
   createPipelineLog,
@@ -316,7 +318,7 @@ async function upsertPipelinePromptRecord(
 
   if (existingAccess) {
     await ensureIntelligenceTables();
-    const db = getIntelligenceDbPool();
+    const db = await getIntelligenceDbPool();
     const refreshedTokenHash = hashAccessToken(generateAccessToken());
 
     // Get access tokens to retrieve API keys
@@ -422,7 +424,7 @@ async function upsertPipelinePromptRecord(
 }
 
 async function finalizeRequestLog(input: {
-  accessId: number;
+  accessId: string;
   query: string;
   masterPrompt: string;
   context: string;
@@ -436,7 +438,7 @@ async function finalizeRequestLog(input: {
   currentBalance: number;
 }): Promise<number> {
   await ensureIntelligenceTables();
-  const db = getIntelligenceDbPool();
+  const db = await getIntelligenceDbPool();
   const balanceToDeduct = Math.max(input.cost || 0, 0);
 
   const updateResult = await db.query<{ balance: number }>(
@@ -489,7 +491,7 @@ async function finalizeRequestLog(input: {
 }
 
 async function logFailedRequest(input: {
-  accessId: number;
+  accessId: string;
   query: string;
   masterPrompt: string;
   context: string;
@@ -499,7 +501,7 @@ async function logFailedRequest(input: {
   currency: string | null;
 }) {
   await ensureIntelligenceTables();
-  const db = getIntelligenceDbPool();
+  const db = await getIntelligenceDbPool();
   
   const details = {
     query: input.query,

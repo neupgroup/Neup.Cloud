@@ -11,8 +11,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { getCurrentIntelligenceAccountId } from '@/core/ai/files/intelligence/account';
-import { getPaginatedIntelligenceDevLogs } from '@/core/ai/files/intelligence/store';
+import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
+import { getPaginatedIntelligenceDevLogs } from '@/services/intelligence/store';
 
 export const metadata: Metadata = {
   title: 'Intelligence Devlog, Neup.Cloud',

@@ -42,7 +42,7 @@ import { cn } from '@/core/utils';
 import { CommandLogList, CommandLogListSkeleton } from './command-log-card';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { resolveSelectedServerValue, withSelectedServerQuery } from '@/core/server-context';
+import { resolveSelectedServerValue, withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 /*
 ::neup.documentation::server-commands-page

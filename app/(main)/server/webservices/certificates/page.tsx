@@ -10,8 +10,8 @@ import { useEffect, useState } from 'react';
 import { getCertificates } from '@/services/webservices/certificates-service';
 import { CreateCertificateDialog } from './create-dialog';
 import Link from 'next/link';
-import { useSelectedServerId } from '@/core/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 interface Certificate {
     fileName: string;

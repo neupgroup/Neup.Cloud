@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/core/hooks/use-toast';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/core/server-context';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 import { Edit, Trash, Key, UploadCloud, Loader2, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

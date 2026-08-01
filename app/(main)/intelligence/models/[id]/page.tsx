@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { FilePenLine } from 'lucide-react';
 
 import { PageTitleBack } from '@/components/page-header';
-import { getIntelligenceModelById } from '@/core/ai/files/intelligence/store';
+import { getIntelligenceModelById } from '@/services/intelligence/store';
 import ModelEditForm from '@/app/(main)/intelligence/models/[id]/model-edit-form';
 
 export const metadata: Metadata = {

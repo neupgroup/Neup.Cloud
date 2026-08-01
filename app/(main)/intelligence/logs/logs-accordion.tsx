@@ -12,7 +12,7 @@ import { cn } from '@/core/utils';
 interface LogViewModel {
   id: number;
   accountId: string;
-  accessId: number;
+  accessId: string;
   model: string | null;
   currency: string | null;
   cost: number | null;
