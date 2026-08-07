@@ -26,7 +26,7 @@ export default function NginxConfigurationsPage() {
     const handleTest = async () => {
         setTesting(true);
         try {
-            const result = await testNginxConfiguration();
+            const result = await testNginxConfiguration(selectedServerId);
             if (result.success) {
                 toast({
                     title: "Test Passed",
@@ -54,7 +54,7 @@ export default function NginxConfigurationsPage() {
     const handleRestart = async () => {
         setRestarting(true);
         try {
-            const result = await restartNginxService();
+            const result = await restartNginxService(selectedServerId);
             if (result.success) {
                 toast({
                     title: "Success",
@@ -81,12 +81,12 @@ export default function NginxConfigurationsPage() {
 
     useEffect(() => {
         loadConfigurations();
-    }, []);
+    }, [selectedServerId]);
 
     const loadConfigurations = async () => {
         setLoading(true);
         try {
-            const configs = await getNginxConfigurations();
+            const configs = await getNginxConfigurations(selectedServerId);
             setConfigurations(configs);
         } catch (error) {
             console.error('Error loading configurations:', error);

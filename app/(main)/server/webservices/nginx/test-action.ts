@@ -3,10 +3,10 @@
 import { executeCommand } from '@/services/server/commands/server-command-service';
 import { cookies } from 'next/headers';
 
-export async function testNginxConfiguration() {
+export async function testNginxConfiguration(selectedServerId?: string | null) {
     try {
         const cookieStore = await cookies();
-        const serverId = cookieStore.get('selected_server')?.value;
+        const serverId = selectedServerId?.trim() || cookieStore.get('selected_server')?.value;
 
         if (!serverId) {
             return {

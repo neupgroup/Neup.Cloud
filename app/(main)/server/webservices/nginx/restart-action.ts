@@ -6,10 +6,10 @@ import { cookies } from 'next/headers';
 /**
  * Restart Nginx service on the selected server
  */
-export async function restartNginxService() {
+export async function restartNginxService(selectedServerId?: string | null) {
     try {
         const cookieStore = await cookies();
-        const serverId = cookieStore.get('selected_server')?.value;
+        const serverId = selectedServerId?.trim() || cookieStore.get('selected_server')?.value;
 
         if (!serverId) {
             return { success: false, error: 'No server selected' };

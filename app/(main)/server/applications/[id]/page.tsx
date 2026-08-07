@@ -135,7 +135,7 @@ export default async function ApplicationDetailPage({
       <RunningInSection applicationId={application.id} maps={maps} runningSection={runningSection} />
       <ApplicationLifecycleWrapper applicationId={application.id} application={application} />
       {application.repository ? <GitHubSection application={application} /> : null}
-      <SystemSection application={application} />
+      <SystemSection application={application} selectedServerId={pageData.serverId} />
       <DeploymentActionsCard
         applicationId={application.id}
         onOpenEnvironments={undefined}

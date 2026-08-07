@@ -1,5 +1,6 @@
 export interface SystemSectionProps {
     application: any;
+    selectedServerId?: string | null;
 }
 
 export function useSystemSection(application: any) {

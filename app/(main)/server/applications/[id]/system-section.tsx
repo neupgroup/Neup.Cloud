@@ -4,13 +4,12 @@ import Link from 'next/link';
 import { FolderOpen, Network, ScrollText, AlertCircle } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
-import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 import { cn } from "@/core/utils";
 import { useSystemSection, SystemSectionProps } from '@/components/applications/system-section';
 
-export function SystemSection({ application }: SystemSectionProps) {
+export function SystemSection({ application, selectedServerId }: SystemSectionProps) {
   const { portsDescription, outputLogPath, errorLogPath } = useSystemSection(application);
-  const withSelectedServer = useSelectedServerHref();
 
   const InfoRow = ({
     icon: Icon,
@@ -85,7 +84,7 @@ export function SystemSection({ application }: SystemSectionProps) {
           icon={FolderOpen}
           title="File Manager"
           description={`Browse files at ${application.location}`}
-          href={withSelectedServer(`/server/files?path=${encodeURIComponent(application.location)}`)}
+          href={withSelectedServerQuery(`/server/files?path=${encodeURIComponent(application.location)}`, selectedServerId)}
           openInNewTab
         />
 
@@ -93,7 +92,7 @@ export function SystemSection({ application }: SystemSectionProps) {
           icon={ScrollText}
           title="Terminal Output"
           description={outputLogPath}
-          href={withSelectedServer(`/server/viewer?path=${encodeURIComponent(outputLogPath)}&type=text`)}
+          href={withSelectedServerQuery(`/server/viewer?path=${encodeURIComponent(outputLogPath)}&type=text`, selectedServerId)}
           openInNewTab
         />
 
@@ -101,7 +100,7 @@ export function SystemSection({ application }: SystemSectionProps) {
           icon={AlertCircle}
           title="Error Log"
           description={errorLogPath}
-          href={withSelectedServer(`/server/viewer?path=${encodeURIComponent(errorLogPath)}&type=text`)}
+          href={withSelectedServerQuery(`/server/viewer?path=${encodeURIComponent(errorLogPath)}&type=text`, selectedServerId)}
           openInNewTab
         />
 

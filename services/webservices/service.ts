@@ -161,10 +161,10 @@ export async function getLatestWebServiceConfig(
   }
 }
 
-export async function getNginxConfigurations(): Promise<WebServiceConfig[]> {
+export async function getNginxConfigurations(selectedServerId?: string | null): Promise<WebServiceConfig[]> {
   try {
     const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+    const serverId = selectedServerId?.trim() || cookieStore.get('selected_server')?.value;
     return await getNginxConfigurationsForServer(serverId);
   } catch (error) {
     console.error('Error getting combined nginx configs:', error);
