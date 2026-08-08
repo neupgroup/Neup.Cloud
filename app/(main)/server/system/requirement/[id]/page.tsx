@@ -14,7 +14,7 @@ import { requirements } from '@/services/server/requirement-list';
 import { PageTitleBack } from '@/components/page-header';
 import { useToast } from '@/core/hooks/use-toast';
 import { useState, useEffect } from 'react';
-import { checkRequirementStep, installRequirementStep, uninstallRequirementStep } from '../runner';
+import { checkRequirementStep, installRequirementStep, uninstallRequirementStep, updateRequirementStep } from '../runner';
 import * as Icons from 'lucide-react';
 import { cn } from '@/core/utils';
 import { Loader2, CheckCircle2, XCircle, Trash2, AlertTriangle } from 'lucide-react';
@@ -81,6 +81,9 @@ export default function RequirementDetailPage() {
     const [isInstalling, setIsInstalling] = useState(false);
     const [isUninstalling, setIsUninstalling] = useState(false);
     const [isRepairing, setIsRepairing] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [updateStepStatus, setUpdateStepStatus] = useState<Record<number, 'pending' | 'checking' | 'completed' | 'failed'>>({});
+    const [updateStepOutput, setUpdateStepOutput] = useState<Record<number, string>>({});
 
     useEffect(() => {
         if (config && serverId) {
@@ -259,6 +262,57 @@ export default function RequirementDetailPage() {
         await checkAllSteps();
     };
 
+    const handleUpdate = async () => {
+        if (!config?.updateAction || !serverId) return;
+
+        const confirmationMessage = config.updateAction.confirmMessage || `Update ${config.title} now?`;
+        if (!confirm(confirmationMessage)) {
+            return;
+        }
+
+        setIsUpdating(true);
+        setUpdateStepStatus({});
+        setUpdateStepOutput({});
+        const nextOutputs: Record<number, string> = {};
+
+        for (let i = 0; i < config.updateAction.steps.length; i++) {
+            const step = config.updateAction.steps[i];
+            const command = step.installCommand || step.checkCommand;
+
+            setUpdateStepStatus(prev => ({ ...prev, [i]: 'checking' }));
+
+            const updateRes = await updateRequirementStep(serverId, command, id);
+            if (updateRes.error) {
+                toast({
+                    variant: 'destructive',
+                    title: `${config.title} Update Step ${i + 1} Failed`,
+                    description: updateRes.error,
+                });
+                setUpdateStepStatus(prev => ({ ...prev, [i]: 'failed' }));
+                setIsUpdating(false);
+                return;
+            }
+
+            const output = updateRes.output?.trim() || 'Completed';
+            nextOutputs[i] = output;
+            setUpdateStepStatus(prev => ({ ...prev, [i]: 'completed' }));
+            setUpdateStepOutput(prev => ({ ...prev, [i]: output }));
+        }
+
+        const lastStepIndex = config.updateAction.steps.length - 1;
+        const verificationSummary = nextOutputs[lastStepIndex] || '';
+
+        toast({
+            title: `${config.title} Updated`,
+            description: verificationSummary
+                ? `${config.updateAction.successMessage || `${config.title} update completed successfully.`} ${verificationSummary}`
+                : config.updateAction.successMessage || `${config.title} update completed successfully.`,
+        });
+
+        setIsUpdating(false);
+        await checkAllSteps();
+    };
+
     if (!config) {
         return <div className="p-8">Requirement not found.</div>;
     }
@@ -357,13 +411,13 @@ export default function RequirementDetailPage() {
                         </div>
                     ) : (
                         <div
-                            onClick={!allCompleted && !isInstalling && !isUninstalling && !isRepairing ? handleInstall : undefined}
+                            onClick={!allCompleted && !isInstalling && !isUninstalling && !isRepairing && !isUpdating ? handleInstall : undefined}
                             className={cn(
                                 "flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t transition-all",
                                 allCompleted
                                     ? "bg-muted/5 opacity-70 cursor-not-allowed"
                                     : "hover:bg-muted/50 cursor-pointer bg-muted/10",
-                                (isInstalling || isUninstalling || isRepairing) && "opacity-70 cursor-not-allowed"
+                                (isInstalling || isUninstalling || isRepairing || isUpdating) && "opacity-70 cursor-not-allowed"
                             )}
                         >
                             <div className="space-y-1 text-center sm:text-left flex-1">
@@ -392,10 +446,10 @@ export default function RequirementDetailPage() {
 
                     {!isLoading && config.steps.some(s => s.uninstallCommand) && (
                         <div
-                            onClick={!isRepairing && !isInstalling && !isUninstalling ? handleRepair : undefined}
+                            onClick={!isRepairing && !isInstalling && !isUninstalling && !isUpdating ? handleRepair : undefined}
                             className={cn(
                                 "flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t transition-all bg-amber-50/60",
-                                (!isRepairing && !isInstalling && !isUninstalling)
+                                (!isRepairing && !isInstalling && !isUninstalling && !isUpdating)
                                     ? "hover:bg-amber-100/60 cursor-pointer"
                                     : "opacity-70 cursor-not-allowed"
                             )}
@@ -413,6 +467,98 @@ export default function RequirementDetailPage() {
                     )}
                 </div>
             </div>
+
+            {config.updateAction && (
+                <div className="space-y-4">
+                    <h3 className="text-xl font-semibold px-1">Update Now</h3>
+                    <div className="rounded-lg border border-blue-200 bg-card text-card-foreground shadow-sm overflow-hidden">
+                        {config.updateAction.steps.map((step, index) => {
+                            const status = updateStepStatus[index] || 'pending';
+                            const isCompleted = status === 'completed';
+                            const isChecking = status === 'checking';
+                            const isFailed = status === 'failed';
+                            const output = updateStepOutput[index];
+
+                            return (
+                                <div
+                                    key={index}
+                                    className={cn(
+                                        "flex items-center gap-4 p-4 border-b last:border-0 transition-all",
+                                        isCompleted && "bg-blue-50/30"
+                                    )}
+                                >
+                                    <div className="shrink-0">
+                                        {isChecking ? (
+                                            <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
+                                                <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                                            </div>
+                                        ) : isCompleted ? (
+                                            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                                                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                                            </div>
+                                        ) : isFailed ? (
+                                            <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                                                <XCircle className="h-5 w-5 text-red-600" />
+                                            </div>
+                                        ) : (
+                                            <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center border border-blue-200">
+                                                <Icon name={step.icon} className="h-5 w-5 text-blue-700" />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className={cn(
+                                            "text-base font-medium mb-1",
+                                            isCompleted && "text-blue-900",
+                                            isFailed && "text-red-900"
+                                        )}>
+                                            {index + 1}. {step.name}
+                                        </h4>
+                                        <p className="text-sm text-muted-foreground">
+                                            {step.description}
+                                        </p>
+                                        {output && (
+                                            <p className="mt-2 text-xs text-blue-900/70 break-words">
+                                                {output}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+
+                        <div
+                            onClick={!isUpdating && !isInstalling && !isUninstalling && !isRepairing ? handleUpdate : undefined}
+                            className={cn(
+                                "flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t transition-all bg-blue-50/60",
+                                (!isUpdating && !isInstalling && !isUninstalling && !isRepairing)
+                                    ? "hover:bg-blue-100/60 cursor-pointer"
+                                    : "opacity-70 cursor-not-allowed"
+                            )}
+                        >
+                            <div className="space-y-1 text-center sm:text-left flex-1">
+                                <h3 className="font-medium flex items-center gap-2 text-blue-900 justify-center sm:justify-start">
+                                    {isUpdating ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            Updating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Icons.RefreshCw className="h-4 w-4" />
+                                            {config.updateAction.title}
+                                        </>
+                                    )}
+                                </h3>
+                                <p className="text-sm text-blue-900/75">
+                                    {config.updateAction.description}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Uninstall Section - Show if any step is installed or failed (partial install) and uninstall commands exist */}
             {config.steps.some(s => s.uninstallCommand) && (
@@ -468,10 +614,10 @@ export default function RequirementDetailPage() {
 
                         {/* Uninstall Action Item */}
                         <div
-                            onClick={!isUninstalling && !isInstalling && !isRepairing ? handleUninstall : undefined}
+                            onClick={!isUninstalling && !isInstalling && !isRepairing && !isUpdating ? handleUninstall : undefined}
                             className={cn(
                                 "flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-destructive/10 transition-all hover:bg-destructive/10 cursor-pointer bg-destructive/5",
-                                (isUninstalling || isInstalling || isRepairing) && "opacity-70 cursor-not-allowed hover:bg-destructive/5"
+                                (isUninstalling || isInstalling || isRepairing || isUpdating) && "opacity-70 cursor-not-allowed hover:bg-destructive/5"
                             )}
                         >
                             <div className="space-y-1 text-center sm:text-left flex-1">

@@ -14,6 +14,13 @@ export interface RequirementDefinition {
     description: string;
     icon: string;
     steps: RequirementStep[];
+    updateAction?: {
+        title: string;
+        description: string;
+        steps: RequirementStep[];
+        confirmMessage?: string;
+        successMessage?: string;
+    };
 }
 
 export const requirements: RequirementDefinition[] = [
@@ -22,6 +29,49 @@ export const requirements: RequirementDefinition[] = [
         title: 'Node.js',
         description: 'Install this if you plan to host applications built with Node.js (e.g., Next.js, Express, NestJS).',
         icon: 'Hexagon',
+        updateAction: {
+            title: 'Update Node.js Now',
+            description: 'Check for available Node.js and npm updates, apply only supported upgrades in order, then verify the installed versions.',
+            steps: [
+                {
+                    name: 'Verify Node.js Update Availability',
+                    description: 'Check whether the selected server has a newer Node.js package available in the configured repository.',
+                    icon: 'Search',
+                    checkCommand: 'bash -lc \'if apt list --upgradable 2>/dev/null | grep -q "^nodejs/"; then echo "Node.js update available"; else echo "Node.js is already up to date"; fi\'',
+                    installCommand: ''
+                },
+                {
+                    name: 'Verify npm Update Availability',
+                    description: 'Check whether a newer npm release is available for the currently installed Node.js major version.',
+                    icon: 'SearchCheck',
+                    checkCommand: 'bash -lc \'NODE_MAJOR=$(node -p "process.versions.node.split(\\x27.\\x27)[0]" 2>/dev/null || echo "0"); CURRENT_NPM=$(npm -v 2>/dev/null || echo ""); if [ "$NODE_MAJOR" -ge 22 ]; then TARGET=$(npm view npm version 2>/dev/null); elif [ "$NODE_MAJOR" -ge 20 ]; then TARGET=$(npm view npm@^11 version 2>/dev/null | tail -n 1); elif [ "$NODE_MAJOR" -ge 18 ]; then TARGET=$(npm view npm@^10 version 2>/dev/null | tail -n 1); else TARGET=""; fi; if [ -z "$TARGET" ]; then echo "No supported npm update target for Node.js $NODE_MAJOR"; elif [ "$CURRENT_NPM" != "$TARGET" ]; then echo "npm update available: $CURRENT_NPM -> $TARGET"; else echo "npm is already up to date: $CURRENT_NPM"; fi\'',
+                    installCommand: ''
+                },
+                {
+                    name: 'Update Node.js If Available',
+                    description: 'Refresh the NodeSource configuration and upgrade Node.js if a newer package exists for the configured release line.',
+                    icon: 'RefreshCw',
+                    checkCommand: 'node -v',
+                    installCommand: 'curl -fsSL https://deb.nodesource.com/setup_26.x | sudo -E bash - && sudo apt-get install -y nodejs'
+                },
+                {
+                    name: 'Update npm If Available',
+                    description: 'Upgrade npm only to the newest release compatible with the currently installed Node.js major version.',
+                    icon: 'PackageCheck',
+                    checkCommand: 'npm -v',
+                    installCommand: 'bash -lc \'NODE_MAJOR=$(node -p "process.versions.node.split(\\x27.\\x27)[0]" 2>/dev/null || echo "0"); CURRENT_NPM=$(npm -v 2>/dev/null || echo ""); if [ "$NODE_MAJOR" -ge 22 ]; then TARGET=$(npm view npm version 2>/dev/null); elif [ "$NODE_MAJOR" -ge 20 ]; then TARGET=$(npm view npm@^11 version 2>/dev/null | tail -n 1); elif [ "$NODE_MAJOR" -ge 18 ]; then TARGET=$(npm view npm@^10 version 2>/dev/null | tail -n 1); else TARGET=""; fi; if [ -z "$TARGET" ]; then echo "Skipped npm update because no supported target was detected for Node.js $NODE_MAJOR"; elif [ "$CURRENT_NPM" = "$TARGET" ]; then echo "npm already up to date: $CURRENT_NPM"; else sudo npm install -g "npm@$TARGET" && echo "npm updated: $CURRENT_NPM -> $TARGET"; fi\''
+                },
+                {
+                    name: 'Verify Installed Versions',
+                    description: 'Confirm the final Node.js and npm versions after the update flow finishes.',
+                    icon: 'BadgeCheck',
+                    checkCommand: 'bash -lc \'echo "Node.js $(node -v) | npm $(npm -v)"\'',
+                    installCommand: ''
+                }
+            ],
+            confirmMessage: 'Update Node.js now? This will refresh packages on the selected server.',
+            successMessage: 'Node.js update workflow completed successfully.'
+        },
         steps: [
             {
                 name: 'Install Node.js (LTS)',

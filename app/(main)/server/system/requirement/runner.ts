@@ -43,3 +43,15 @@ export async function uninstallRequirementStep(serverId: string, command: string
         return { error: e.message };
     }
 }
+
+export async function updateRequirementStep(serverId: string, command: string, requirementId?: string) {
+    try {
+        const result = await executeCommand(serverId, command, 'System Requirement Update', command, requirementId ? `requirement:${requirementId}:update` : null);
+        if (result.error) {
+            return { error: result.error };
+        }
+        return { success: true, output: result.output };
+    } catch (e: any) {
+        return { error: e.message };
+    }
+}
