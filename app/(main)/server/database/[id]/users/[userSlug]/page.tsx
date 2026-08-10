@@ -1,6 +1,6 @@
 
 import { notFound } from "next/navigation";
-import { getDatabaseDetails } from '@/services/database/database-runtime';
+import { getDatabaseDetails, listDatabaseUsers } from '@/services/database/database-runtime';
 import { UserManageClient } from "./user-manage-client";
 import type { Metadata } from "next";
 import { parseDatabaseRouteId, resolveSelectedServerId } from "../../../route-helpers";
@@ -14,6 +14,14 @@ type Props = {
     searchParams?: Promise<{ selectedServer?: string }>;
 }
 
+function decodeUserSlugPart(value: string) {
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return value;
+    }
+}
+
 export default async function ManageUserPage({ params, searchParams }: Props) {
     const { id, userSlug } = await params;
     const serverId = await resolveSelectedServerId(searchParams);
@@ -24,15 +32,19 @@ export default async function ManageUserPage({ params, searchParams }: Props) {
     if (!parsedId) notFound();
     const { engine, dbName } = parsedId;
 
-    // Parse User Slug: Format is "username-host"
-    const userParts = userSlug.split('-');
-    if (userParts.length < 1) notFound();
-    const username = userParts[0];
-    const host = userParts.length > 1 ? userParts[1] : '%';
+    const [encodedUsername, encodedHost] = userSlug.split('--');
+    if (!encodedUsername) notFound();
+    const username = decodeUserSlugPart(encodedUsername);
+    const host = encodedHost ? decodeUserSlugPart(encodedHost) : '%';
+    let permissions: 'full' | 'read' | 'custom' = 'custom';
 
     try {
         // Verify database exists
         await getDatabaseDetails(serverId, engine, dbName);
+        const users = await listDatabaseUsers(serverId, engine, dbName);
+        const user = users.find((entry) => entry.username === username && (entry.host || '%') === host);
+        if (!user) notFound();
+        permissions = user.permissions || 'custom';
     } catch (e) {
         notFound();
     }
@@ -43,7 +55,8 @@ export default async function ManageUserPage({ params, searchParams }: Props) {
             engine={engine}
             dbName={dbName}
             username={username}
-            host={host === 'local' ? 'localhost' : host}
+            host={host}
+            initialPermissions={permissions}
         />
     );
 }

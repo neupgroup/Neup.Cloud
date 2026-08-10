@@ -42,6 +42,11 @@ export type DatabaseUser = {
     permissions?: 'full' | 'read' | 'custom';
 };
 
+export type DatabaseUserAssignment = DatabaseUser & {
+    databaseName: string;
+    engine: 'mariadb' | 'postgres';
+};
+
 // Database Tables
 export type DatabaseTable = {
     name: string;

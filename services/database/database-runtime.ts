@@ -12,6 +12,7 @@ import type {
     DatabaseInstance,
     DatabaseDetails,
     DatabaseUser,
+    DatabaseUserAssignment,
     OperationResult,
     BackupResult,
     StoredBackupResult,
@@ -39,6 +40,7 @@ import {
     listMariaDBUsers,
     createMariaDBUser,
     deleteMariaDBUser,
+    revokeMariaDBUserDatabaseAccess,
     updateMariaDBUserPermissions,
     updateMariaDBUserPassword,
     generateMariaDBBackup,
@@ -53,6 +55,8 @@ import {
     listPostgresUsers,
     createPostgresUser,
     deletePostgresUser,
+    reassignPostgresRoleOwnedObjects,
+    revokePostgresUserDatabaseAccess,
     updatePostgresUserPermissions,
     updatePostgresUserPassword,
     generatePostgresBackup,
@@ -69,6 +73,7 @@ export type {
     DatabaseInstance,
     DatabaseDetails,
     DatabaseUser,
+    DatabaseUserAssignment,
     DatabaseTable,
     OperationResult,
     BackupResult,
@@ -159,6 +164,30 @@ export async function listDatabaseUsers(
 }
 
 /**
+ * List all database user assignments across all databases on a server.
+ */
+export async function listAllDatabaseUserAssignments(
+    serverId: string,
+    databases?: DatabaseInstance[]
+): Promise<DatabaseUserAssignment[]> {
+    const databaseInstances = databases || await listAllDatabases(serverId);
+    const assignments: DatabaseUserAssignment[] = [];
+
+    for (const database of databaseInstances) {
+        const users = await listDatabaseUsers(serverId, database.engine, database.name);
+        assignments.push(
+            ...users.map((user) => ({
+                ...user,
+                databaseName: database.name,
+                engine: database.engine
+            }))
+        );
+    }
+
+    return assignments;
+}
+
+/**
  * Create a new database user
  */
 export async function createDatabaseUser(
@@ -191,6 +220,44 @@ export async function deleteDatabaseUser(
     } else {
         return deletePostgresUser(serverId, username);
     }
+}
+
+/**
+ * Revoke a user's access to a database without dropping the user.
+ */
+export async function revokeDatabaseUserAccess(
+    serverId: string,
+    engine: 'mariadb' | 'postgres',
+    dbName: string,
+    username: string,
+    host: string = '%'
+): Promise<OperationResult> {
+    if (engine === 'mariadb') {
+        return revokeMariaDBUserDatabaseAccess(serverId, dbName, username, host);
+    } else {
+        return revokePostgresUserDatabaseAccess(serverId, dbName, username);
+    }
+}
+
+/**
+ * Reassign database objects owned by a user to another role.
+ */
+export async function reassignDatabaseUserOwnedObjects(
+    serverId: string,
+    engine: 'mariadb' | 'postgres',
+    dbName: string,
+    username: string,
+    targetRole: string,
+    dropOwnedPrivileges: boolean = false
+): Promise<OperationResult> {
+    if (engine === 'mariadb') {
+        return {
+            success: false,
+            message: 'MariaDB does not support PostgreSQL-style owned object reassignment.'
+        };
+    }
+
+    return reassignPostgresRoleOwnedObjects(serverId, dbName, username, targetRole, dropOwnedPrivileges);
 }
 
 /**

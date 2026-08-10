@@ -305,6 +305,40 @@ export async function deleteMariaDBUser(
 }
 
 /**
+ * Revoke a MariaDB user's access to a database without dropping the user.
+ */
+export async function revokeMariaDBUserDatabaseAccess(
+    serverId: string,
+    dbName: string,
+    username: string,
+    host: string = '%'
+): Promise<OperationResult> {
+    const server = await getServerForRunner(serverId);
+    if (!server || !server.username) {
+        throw new Error('Server missing.');
+    }
+
+    try {
+        const safeDb = dbName.replace(/[^a-zA-Z0-9_]/g, '');
+        const commands = [
+            `sudo mysql -e "REVOKE ALL PRIVILEGES ON \\\`${safeDb}\\\`.* FROM '${username}'@'${host}';"`,
+            `sudo mysql -e "FLUSH PRIVILEGES;"`
+        ];
+
+        for (const cmd of commands) {
+            const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, cmd, undefined, undefined, true);
+            if (result.code !== 0) {
+                throw new Error(result.stderr || 'Failed to revoke database access');
+            }
+        }
+
+        return { success: true, message: `Database access revoked for ${username}.` };
+    } catch (error: any) {
+        return { success: false, message: error.message || 'Revoke failed.' };
+    }
+}
+
+/**
  * Update MariaDB user permissions
  */
 export async function updateMariaDBUserPermissions(

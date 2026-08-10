@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { RemoteConnectionSettings } from "./remote-connection-settings";
 import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
 import { parseDatabaseRouteId, resolveSelectedServerId } from "../../route-helpers";
-import { DropDatabaseButton } from "./drop-database-button";
+import { DropDatabaseButton } from "../drop-database-button";
 
 
 export const metadata: Metadata = {

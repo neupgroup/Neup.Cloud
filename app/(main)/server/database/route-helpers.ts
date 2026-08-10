@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
+import type { DatabaseEngine } from "./route-paths";
 
-export type DatabaseEngine = "mariadb" | "postgres";
+export type { DatabaseEngine } from "./route-paths";
 
 export async function resolveSelectedServerId(
   searchParams?: Promise<{ selectedServer?: string }>

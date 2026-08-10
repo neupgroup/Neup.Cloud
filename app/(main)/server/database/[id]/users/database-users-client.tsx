@@ -7,6 +7,7 @@ import { cn } from '@/core/utils';
 import { Badge } from "@/components/ui/badge";
 import type { DatabaseUser } from '@/services/database/database-runtime';
 import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
+import { buildDatabaseUserRouteSlug } from "../../route-paths";
 
 export default function DatabaseUsersClient({ users, dbId }: { users: DatabaseUser[], dbId: string }) {
     const withSelectedServer = useSelectedServerHref();
@@ -48,7 +49,7 @@ export default function DatabaseUsersClient({ users, dbId }: { users: DatabaseUs
                     users.map((user, index) => (
                         <Link
                             key={`${user.username}-${user.host}`}
-                            href={withSelectedServer(`/server/database/${dbId}/users/${user.username}`)}
+                            href={withSelectedServer(`/server/database/${dbId}/users/${buildDatabaseUserRouteSlug(user.username, user.host || '%')}`)}
                             className="block group"
                         >
                             <div className={cn(

@@ -207,12 +207,16 @@ export async function listPostgresUsers(serverId: string, dbName: string): Promi
 
     const users: DatabaseUser[] = [];
     try {
-        // Get all roles that can login and have some privilege on this database
+        const safeDb = dbName.replace(/[^a-zA-Z0-9_]/g, '');
+        if (!safeDb) {
+            throw new Error('Invalid database name.');
+        }
+
         const result = await runCommandOnServer(
             server.publicIp,
             server.username,
             server.privateKey,
-            `sudo -u postgres psql -t -c "SELECT DISTINCT r.rolname FROM pg_roles r WHERE r.rolcanlogin = true AND (has_database_privilege(r.rolname, '${dbName}', 'CONNECT') OR r.rolsuper = true);"`,
+            `sudo -u postgres psql -A -t -F "|" -c "SELECT r.rolname, CASE WHEN r.rolsuper OR pg_catalog.pg_get_userbyid(d.datdba) = r.rolname OR has_database_privilege(r.rolname, '${safeDb}', 'CREATE') THEN 'full' ELSE 'read' END FROM pg_roles r CROSS JOIN pg_database d WHERE d.datname = '${safeDb}' AND r.rolcanlogin = true AND (has_database_privilege(r.rolname, '${safeDb}', 'CONNECT') OR r.rolsuper = true) ORDER BY r.rolname;"`,
             undefined,
             undefined,
             true
@@ -222,57 +226,17 @@ export async function listPostgresUsers(serverId: string, dbName: string): Promi
             const lines = result.stdout.trim().split('\n').filter(Boolean);
 
             for (const line of lines) {
-                const username = line.trim();
+                const [username, permissions] = line.split('|').map((part) => part.trim());
                 if (!username) continue;
-
-                // Check actual privileges for this user on this database
-                const privResult = await runCommandOnServer(
-                    server.publicIp,
-                    server.username,
-                    server.privateKey,
-                    `sudo -u postgres psql -t -c "SELECT has_database_privilege('${username}', '${dbName}', 'CREATE') as create_priv, has_database_privilege('${username}', '${dbName}', 'TEMP') as temp_priv, has_database_privilege('${username}', '${dbName}', 'CONNECT') as connect_priv;"`,
-                    undefined,
-                    undefined,
-                    true
-                );
-
-                let perms: 'full' | 'read' | 'custom' = 'read';
-
-                if (privResult.code === 0 && privResult.stdout) {
-                    const privLine = privResult.stdout.trim();
-                    // Format: "t | t | t" or "f | f | t"
-                    const [createPriv] = privLine.split('|').map(s => s.trim());
-
-                    // If user has CREATE privilege, they likely have full access
-                    // Also check if they're a superuser or database owner
-                    const ownerResult = await runCommandOnServer(
-                        server.publicIp,
-                        server.username,
-                        server.privateKey,
-                        `sudo -u postgres psql -t -c "SELECT pg_catalog.pg_get_userbyid(d.datdba) = '${username}' as is_owner, r.rolsuper FROM pg_database d, pg_roles r WHERE d.datname = '${dbName}' AND r.rolname = '${username}';"`,
-                        undefined,
-                        undefined,
-                        true
-                    );
-
-                    if (ownerResult.code === 0 && ownerResult.stdout) {
-                        const ownerLine = ownerResult.stdout.trim();
-                        const [isOwner, isSuperuser] = ownerLine.split('|').map(s => s.trim());
-
-                        if (isSuperuser === 't' || isOwner === 't' || createPriv === 't') {
-                            perms = 'full';
-                        } else {
-                            perms = 'read';
-                        }
-                    }
-                }
 
                 users.push({
                     username,
                     host: 'localhost',
-                    permissions: perms
+                    permissions: permissions === 'full' ? 'full' : 'read'
                 });
             }
+        } else {
+            throw new Error(result.stderr || 'Failed to list PostgreSQL database users.');
         }
     } catch (e) {
         console.error('Failed to list PostgreSQL database users', e);
@@ -355,6 +319,93 @@ export async function deletePostgresUser(
     } catch (error: any) {
         console.error('Error deleting PostgreSQL user:', error);
         return { success: false, message: error.message || 'Delete failed.' };
+    }
+}
+
+/**
+ * Reassign PostgreSQL objects owned by a role in one database.
+ */
+export async function reassignPostgresRoleOwnedObjects(
+    serverId: string,
+    dbName: string,
+    username: string,
+    targetRole: string = 'postgres',
+    dropOwnedPrivileges: boolean = false
+): Promise<OperationResult> {
+    const server = await getServerForRunner(serverId);
+    if (!server || !server.username) {
+        throw new Error('Server missing.');
+    }
+
+    try {
+        const safeDb = dbName.replace(/[^a-zA-Z0-9_]/g, '');
+        const safeUser = username.replace(/[^a-zA-Z0-9_]/g, '');
+        const safeTargetRole = targetRole.replace(/[^a-zA-Z0-9_]/g, '');
+
+        if (!safeDb || !safeUser || !safeTargetRole) {
+            throw new Error('Invalid database role reassignment input.');
+        }
+
+        const commands = [
+            `sudo -u postgres psql -d ${safeDb} -c "REASSIGN OWNED BY ${safeUser} TO ${safeTargetRole};"`
+        ];
+
+        if (dropOwnedPrivileges) {
+            commands.push(`sudo -u postgres psql -d ${safeDb} -c "DROP OWNED BY ${safeUser};"`);
+        }
+
+        for (const cmd of commands) {
+            const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, cmd, undefined, undefined, true);
+            if (result.code !== 0) {
+                throw new Error(result.stderr || 'Failed to reassign owned objects');
+            }
+        }
+
+        return { success: true, message: `Objects owned by ${username} reassigned to ${targetRole}.` };
+    } catch (error: any) {
+        return { success: false, message: error.message || 'Reassignment failed.' };
+    }
+}
+
+/**
+ * Revoke a PostgreSQL role's access to a database without dropping the role.
+ */
+export async function revokePostgresUserDatabaseAccess(
+    serverId: string,
+    dbName: string,
+    username: string
+): Promise<OperationResult> {
+    const server = await getServerForRunner(serverId);
+    if (!server || !server.username) {
+        throw new Error('Server missing.');
+    }
+
+    try {
+        const safeDb = dbName.replace(/[^a-zA-Z0-9_]/g, '');
+        const safeUser = username.replace(/[^a-zA-Z0-9_]/g, '');
+
+        if (!safeDb || !safeUser) {
+            throw new Error('Invalid database role input.');
+        }
+
+        const commands = [
+            `sudo -u postgres psql -d ${safeDb} -c "REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ${safeUser};"`,
+            `sudo -u postgres psql -d ${safeDb} -c "REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM ${safeUser};"`,
+            `sudo -u postgres psql -d ${safeDb} -c "REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM ${safeUser};"`,
+            `sudo -u postgres psql -d ${safeDb} -c "REVOKE ALL PRIVILEGES ON SCHEMA public FROM ${safeUser};"`,
+            `sudo -u postgres psql -c "REVOKE ALL PRIVILEGES ON DATABASE ${safeDb} FROM ${safeUser};"`
+        ];
+
+        for (const cmd of commands) {
+            const result = await runCommandOnServer(server.publicIp, server.username, server.privateKey, cmd, undefined, undefined, true);
+            if (result.code !== 0) {
+                throw new Error(result.stderr || 'Failed to revoke database access');
+            }
+        }
+
+        return { success: true, message: `Database access revoked for ${username}.` };
+    } catch (error: any) {
+        return { success: false, message: error.message || 'Revoke failed.' };
     }
 }
 

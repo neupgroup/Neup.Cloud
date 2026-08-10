@@ -6,7 +6,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Database, Plus, Server, Settings, Activity, ShieldCheck, CheckCircle, AlertCircle, HardDrive, Trash2, ExternalLink, ChevronRight } from "lucide-react";
+import { Database, Plus, Server, Settings, Activity, ShieldCheck, CheckCircle, AlertCircle, HardDrive, Trash2, ExternalLink, ChevronRight, Users } from "lucide-react";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { PageTitle } from "@/components/page-header";
@@ -200,6 +200,30 @@ export default async function DatabasePage({
                             )}
                         </Card>
                     </div>
+
+                    <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm">
+                        <Link href={withSelectedServerQuery('/server/database/users', serverId)} className="block">
+                            <div className="p-4 min-w-0 w-full transition-colors hover:bg-muted/50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                                        <div className="p-2 rounded-lg shrink-0 bg-blue-500/10 text-blue-500">
+                                            <Users className="h-5 w-5" />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="font-bold text-lg">Database Users</span>
+                                                <Badge variant="secondary" className="text-[10px]">{databaseInstances.length} databases</Badge>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">
+                                                View users across all databases, assign access, update roles, revoke access, and drop users.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                                </div>
+                            </div>
+                        </Link>
+                    </Card>
                 </>
             )}
         </div>

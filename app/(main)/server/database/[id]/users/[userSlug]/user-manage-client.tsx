@@ -4,11 +4,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { User, ShieldCheck, Trash2, Key, ChevronLeft, Loader2, Save, Lock } from "lucide-react";
+import { ArrowRightLeft, ShieldCheck, ShieldX, Trash2, Key, ChevronLeft, Loader2, Save, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from '@/core/hooks/use-toast';
-import { updateDatabaseUserPermissions, deleteDatabaseUser, updateDatabaseUserPassword } from '@/services/database/database-runtime';
+import {
+    deleteDatabaseUser,
+    reassignDatabaseUserOwnedObjects,
+    revokeDatabaseUserAccess,
+    updateDatabaseUserPassword,
+    updateDatabaseUserPermissions
+} from '@/services/database/database-runtime';
 import Link from 'next/link';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +27,7 @@ interface UserManageClientProps {
     dbName: string;
     username: string;
     host: string;
+    initialPermissions: 'full' | 'read' | 'custom';
 }
 
 type Permission = 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'CREATE' | 'DROP' | 'ALTER' | 'INDEX';
@@ -43,14 +50,22 @@ const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
     INDEX: 'Create and manage indexes',
 };
 
-export function UserManageClient({ serverId, engine, dbName, username, host }: UserManageClientProps) {
+function getInitialPermissions(permissions: UserManageClientProps['initialPermissions']) {
+    if (permissions === 'full') return PERMISSION_PRESETS.full;
+    if (permissions === 'read') return PERMISSION_PRESETS.read;
+    return PERMISSION_PRESETS.readWrite;
+}
+
+export function UserManageClient({ serverId, engine, dbName, username, host, initialPermissions }: UserManageClientProps) {
     const router = useRouter();
     const { toast } = useToast();
     const withSelectedServer = useSelectedServerHref();
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(PERMISSION_PRESETS.full);
+    const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(getInitialPermissions(initialPermissions));
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [targetRole, setTargetRole] = useState('postgres');
+    const [dropOwnedPrivileges, setDropOwnedPrivileges] = useState(false);
 
     const handlePresetClick = (preset: keyof typeof PERMISSION_PRESETS) => {
         setSelectedPermissions(PERMISSION_PRESETS[preset]);
@@ -106,6 +121,56 @@ export function UserManageClient({ serverId, engine, dbName, username, host }: U
                 setConfirmPassword('');
             } else {
                 toast({ variant: 'destructive', title: 'Update failed', description: res.message });
+            }
+        } catch (e: any) {
+            toast({ variant: 'destructive', title: 'Error', description: e.message });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleRevokeAccess = async () => {
+        if (!confirm(`Revoke ${username}'s access to ${dbName}? The user account will remain available for other databases.`)) return;
+
+        setIsLoading(true);
+        try {
+            const res = await revokeDatabaseUserAccess(serverId, engine, dbName, username, host);
+            if (res.success) {
+                toast({ title: 'Database access revoked', description: res.message });
+                router.push(withSelectedServer(`/server/database/${engine}-${dbName}/users`));
+            } else {
+                toast({ variant: 'destructive', title: 'Revoke failed', description: res.message });
+            }
+        } catch (e: any) {
+            toast({ variant: 'destructive', title: 'Error', description: e.message });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleReassignOwnedObjects = async () => {
+        if (engine !== 'postgres') return;
+
+        const cleanTargetRole = targetRole.trim();
+        if (!cleanTargetRole) {
+            toast({ variant: 'destructive', title: 'Target role required', description: 'Enter a PostgreSQL role to receive owned objects.' });
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const res = await reassignDatabaseUserOwnedObjects(
+                serverId,
+                engine,
+                dbName,
+                username,
+                cleanTargetRole,
+                dropOwnedPrivileges
+            );
+            if (res.success) {
+                toast({ title: 'Owned objects reassigned', description: res.message });
+            } else {
+                toast({ variant: 'destructive', title: 'Reassignment failed', description: res.message });
             }
         } catch (e: any) {
             toast({ variant: 'destructive', title: 'Error', description: e.message });
@@ -299,6 +364,68 @@ export function UserManageClient({ serverId, engine, dbName, username, host }: U
                     </CardContent>
                 </Card>
 
+                {/* Remove Database Access */}
+                <Card className="border-2 border-primary/5">
+                    <CardHeader>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <ShieldX className="h-5 w-5 text-primary" />
+                            Revoke Database Access
+                        </CardTitle>
+                        <CardDescription>Remove this user's role on this database without deleting the user account</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                            This removes database-level privileges for <span className="font-mono text-foreground">{username}</span> on <span className="font-mono text-foreground">{dbName}</span>. The user can still exist for other databases.
+                        </p>
+                        <Button variant="outline" onClick={handleRevokeAccess} disabled={isLoading}>
+                            {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShieldX className="h-4 w-4 mr-2" />}
+                            Revoke Access
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                {engine === 'postgres' && (
+                    <Card className="border-2 border-primary/5">
+                        <CardHeader>
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <ArrowRightLeft className="h-5 w-5 text-primary" />
+                                Reassign Owned Objects
+                            </CardTitle>
+                            <CardDescription>Move objects owned by this PostgreSQL role before dropping it</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="targetRole">Target Role</Label>
+                                <Input
+                                    id="targetRole"
+                                    value={targetRole}
+                                    onChange={(event) => setTargetRole(event.target.value)}
+                                    placeholder="postgres"
+                                    className="h-11 font-mono"
+                                />
+                            </div>
+                            <div className="flex items-start space-x-3 rounded-lg border bg-muted/30 p-3">
+                                <Checkbox
+                                    id="dropOwnedPrivileges"
+                                    checked={dropOwnedPrivileges}
+                                    onCheckedChange={(checked) => setDropOwnedPrivileges(checked === true)}
+                                    className="mt-0.5"
+                                />
+                                <div className="space-y-1">
+                                    <Label htmlFor="dropOwnedPrivileges">Drop remaining grants after reassignment</Label>
+                                    <p className="text-xs text-muted-foreground">
+                                        Runs PostgreSQL DROP OWNED after reassignment to clear privileges that can block DROP ROLE.
+                                    </p>
+                                </div>
+                            </div>
+                            <Button onClick={handleReassignOwnedObjects} disabled={isLoading || !targetRole.trim()}>
+                                {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowRightLeft className="h-4 w-4 mr-2" />}
+                                Reassign Owned Objects
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
                 {/* Danger Zone */}
                 <Card className="border-2 border-destructive/20 bg-destructive/5">
                     <CardHeader className="bg-destructive/10">
@@ -310,7 +437,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host }: U
                     </CardHeader>
                     <CardContent className="pt-6 space-y-4">
                         <p className="text-sm text-muted-foreground leading-relaxed">
-                            Deleting this user will immediately revoke all access to this database. Any applications using these credentials will fail to connect.
+                            Deleting this user removes the account from the database engine. Any applications using these credentials will fail to connect.
                         </p>
                         <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
                             {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
