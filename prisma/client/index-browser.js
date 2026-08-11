@@ -306,7 +306,10 @@ exports.Prisma.DatabaseScalarFieldEnum = {
 };
 
 exports.Prisma.AccountScalarFieldEnum = {
-  id: 'id'
+  id: 'id',
+  displayName: 'displayName',
+  displayImage: 'displayImage',
+  neupid: 'neupid'
 };
 
 exports.Prisma.PermitScalarFieldEnum = {

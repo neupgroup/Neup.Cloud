@@ -25,6 +25,20 @@ export const SELECTED_SERVER_QUERY_KEY = 'selectedServer';
 
 const SELECTED_SERVER_SESSION_KEY = 'selectedServer:lastKnown';
 
+const SELECTED_SERVER_ROUTE_PREFIXES = [
+  '/server/home',
+  '/server/status',
+  '/server/applications',
+  '/server/database',
+  '/server/mail',
+  '/server/commands',
+  '/server/firewall',
+  '/server/files',
+  '/server/search',
+  '/server/webservices',
+  '/server/system',
+] as const;
+
 type ServerSelectionCandidate = {
   id: string;
   publicIp?: string | null;
@@ -148,6 +162,16 @@ export function cacheSelectedServerId(serverId: string | null | undefined) {
 
 export function getSelectedServerId(searchParams?: Pick<URLSearchParams, 'toString'> | string | null) {
   return getSelectedServerFromParams(searchParams) ?? getCachedSelectedServerId();
+}
+
+export function shouldPreserveSelectedServer(pathname: string | null | undefined) {
+  if (!pathname) {
+    return false;
+  }
+
+  return SELECTED_SERVER_ROUTE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
 }
 
 export function withSelectedServerQuery(href: string, selectedServerId?: string | null) {

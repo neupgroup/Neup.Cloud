@@ -1,54 +1,53 @@
-"use client";
+/*
+::neup.documentation::app-not-found-page
+::title Application Not Found Page
+
+::public
+
+Renders the application-level 404 screen for unknown routes.
+
+::public end
+
+::end
+*/
 
 import Link from 'next/link';
+import { ArrowLeft, FileQuestion, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { FileQuestion } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
-function getRandomJoke() {
-    const jokes = [
-        "It worked on my machine!",
-        "404: The page took a coffee break.",
-        "Our codebase is a maze, you found a wall!",
-        "This page is still in beta. Like everything else.",
-        "If you find the page, let us know!",
-        "¯\\_(ツ)_/¯",
-        "Oops! Looks like the page was garbage collected.",
-        "Try turning it off and on again.",
-        "This is not the page you are looking for.",
-        "Somewhere, a developer is fixing this. Maybe."
-    ];
-    return jokes[Math.floor(Math.random() * jokes.length)];
-}
 
 export default function NotFound() {
-    const [joke, setJoke] = useState("");
-    useEffect(() => {
-        setJoke(getRandomJoke());
-    }, []);
-
-    return (
-        <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 text-center">
-            <div className="bg-muted/30 p-6 rounded-full mb-6">
-                <FileQuestion className="h-16 w-16 text-muted-foreground" />
-            </div>
-            <h1 className="text-4xl font-bold font-headline tracking-tight mb-2">
-                404, Page Not Found
-            </h1>
-            <p className="text-muted-foreground text-lg max-w-lg mb-8">
-                {joke && (
-                    <span className="block mt-2 italic text-foreground/80">
-                        One of our developers said &quot;{joke}&quot;
-                    </span>
-                )}
-            </p>
-            <div className="flex gap-4">
-                <Button asChild size="lg">
-                    <Link href="/">
-                        Return Home
-                    </Link>
-                </Button>
-            </div>
+  return (
+    <main className="flex min-h-[70vh] items-center justify-center px-4 py-16">
+      <section className="w-full max-w-xl text-center">
+        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-md border bg-muted/40 text-muted-foreground">
+          <FileQuestion className="h-7 w-7" />
         </div>
-    );
+
+        <p className="mb-3 text-sm font-semibold uppercase text-muted-foreground">
+          404
+        </p>
+        <h1 className="mb-3 text-3xl font-semibold tracking-tight text-foreground">
+          Page not found
+        </h1>
+        <p className="mx-auto mb-8 max-w-md text-sm leading-6 text-muted-foreground">
+          The page you are looking for does not exist or may have been moved.
+        </p>
+
+        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Button asChild>
+            <Link href="/">
+              <Home className="h-4 w-4" />
+              Go home
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/server/list">
+              <ArrowLeft className="h-4 w-4" />
+              View servers
+            </Link>
+          </Button>
+        </div>
+      </section>
+    </main>
+  );
 }

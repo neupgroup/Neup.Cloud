@@ -2,7 +2,13 @@
 
 import { useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { cacheSelectedServerId, getSelectedServerFromParams, getCachedSelectedServerId, withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import {
+  cacheSelectedServerId,
+  getCachedSelectedServerId,
+  getSelectedServerFromParams,
+  shouldPreserveSelectedServer,
+  withSelectedServerQuery,
+} from '@/inapp/helpers/navigation';
 
 export function ServerQueryPreserver() {
   const pathname = usePathname();
@@ -17,7 +23,7 @@ export function ServerQueryPreserver() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (!pathname.startsWith('/server')) {
+    if (!shouldPreserveSelectedServer(pathname)) {
       return;
     }
 

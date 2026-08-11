@@ -1,0 +1,4 @@
+ALTER TABLE "accounts"
+  ADD COLUMN IF NOT EXISTS "displayName" TEXT,
+  ADD COLUMN IF NOT EXISTS "displayImage" TEXT,
+  ADD COLUMN IF NOT EXISTS "neupid" TEXT;

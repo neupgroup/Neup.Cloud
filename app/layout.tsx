@@ -47,21 +47,11 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect, Suspense } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Logo } from '@/components/logo';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Toaster } from "@/components/ui/toaster"
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import './globals.css';
 import { ProgressBar } from '@/components/progress-bar';
 import NProgress from 'nprogress';
-import { getServer } from '@/services/server/server-service';
-import account from '@/logica/account';
 
 import { findLongestMatch } from '@/services/core/findLongestMatch';
 import { ServerQueryPreserver } from '@/components/server-query-preserver';
@@ -69,6 +59,7 @@ import {
   cacheSelectedServerId,
   getSelectedServerFromParams,
   getSelectedServerId,
+  shouldPreserveSelectedServer,
   withSelectedServerQuery,
 } from '@/inapp/helpers/navigation';
 
@@ -86,6 +77,11 @@ function getCookieValue(name: string) {
     .find((part) => part.startsWith(`${name}=`));
 
   return cookie ? decodeURIComponent(cookie.slice(name.length + 1)).trim() : null;
+}
+
+function formatNeupId(value: string | null) {
+  if (!value) return null;
+  return value.startsWith('@') ? value : `@${value}`;
 }
 
 function NavLink({
@@ -132,7 +128,7 @@ function NavLink({
 }
 
 
-function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData, selectedServerId }: { currentPath: string, onLinkClick?: () => void, isServerSelected: boolean, serverData: any, selectedServerId: string | null }) {
+function MainNavContent({ currentPath, onLinkClick, isServerSelected, selectedServerId }: { currentPath: string, onLinkClick?: () => void, isServerSelected: boolean, selectedServerId: string | null }) {
   const navLinks = [
     { href: "/", label: "Dashboard", icon: Home },
   ];
@@ -307,24 +303,15 @@ function Header({ isMobileMenuOpen, toggleMobileMenu }: { isMobileMenuOpen: bool
 
     async function loadAccountProfile() {
       try {
-        const authAccountToken = getCookieValue('auth_account');
-        if (!authAccountToken) return;
-
-        const response = await account.lookup.current.get(authAccountToken, [
-          'displayName',
-          'displayImage',
-          'neupid',
-        ]);
-
-        if (isMounted && response.ok && response.body.success) {
+        if (isMounted) {
           setAccountProfile({
-            displayName: response.body.displayName ?? null,
-            displayImage: response.body.displayImage ?? null,
-            neupid: response.body.neupid ?? null,
+            displayName: getCookieValue('neup_profile_display_name'),
+            displayImage: getCookieValue('neup_profile_display_image'),
+            neupid: formatNeupId(getCookieValue('neup_profile_neupid')),
           });
         }
       } catch (error) {
-        console.error('Failed to fetch account profile:', error);
+        console.error('Failed to load account profile:', error);
       }
     }
 
@@ -355,48 +342,20 @@ function Header({ isMobileMenuOpen, toggleMobileMenu }: { isMobileMenuOpen: bool
           </div>
         </div>
         <div className="ml-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-11 max-w-[260px] gap-3 rounded-full px-2 pr-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={accountProfile.displayImage ?? undefined} alt={displayName} />
-                  <AvatarFallback>
-                    <CircleUser className="h-5 w-5" />
-                  </AvatarFallback>
-                </Avatar>
-                <span className="hidden min-w-0 text-left sm:block">
-                  <span className="block truncate text-sm font-semibold leading-tight">{displayName}</span>
-                  {neupId && (
-                    <span className="block truncate text-xs leading-tight text-muted-foreground">{neupId}</span>
-                  )}
-                </span>
-                <span className="sr-only">Toggle user menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 rounded-sm border-muted">
-              <DropdownMenuLabel className="flex items-center gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={accountProfile.displayImage ?? undefined} alt={displayName} />
-                  <AvatarFallback>
-                    <CircleUser className="h-5 w-5" />
-                  </AvatarFallback>
-                </Avatar>
-                <span className="min-w-0">
-                  <span className="block truncate text-sm font-bold">{displayName}</span>
-                  {neupId ? (
-                    <span className="block truncate text-xs font-medium text-muted-foreground">{neupId}</span>
-                  ) : (
-                    <span className="block truncate text-xs font-medium text-muted-foreground">Neup.Cloud</span>
-                  )}
-                </span>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-xs font-semibold">Settings</DropdownMenuItem>
-              <DropdownMenuItem className="text-xs font-semibold">Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-xs font-bold text-destructive">Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Link href="/profile" className="flex h-11 max-w-[280px] items-center gap-3 rounded-md px-2.5 hover:bg-muted">
+            <span className="hidden min-w-0 text-right sm:block">
+              <span className="block truncate text-sm font-semibold leading-tight text-foreground">{displayName}</span>
+              {neupId && (
+                <span className="block truncate text-xs font-medium leading-tight text-muted-foreground">{neupId}</span>
+              )}
+            </span>
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={accountProfile.displayImage ?? undefined} alt={displayName} />
+              <AvatarFallback>
+                <CircleUser className="h-5 w-5" />
+              </AvatarFallback>
+            </Avatar>
+          </Link>
         </div>
       </div>
     </header>
@@ -408,35 +367,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isServerSelected, setIsServerSelected] = useState(false);
-  const [serverData, setServerData] = useState<any>(null);
   const isPlainRoute = pathname === '/pipeline/editor' || pathname.startsWith('/pipeline/editor/');
 
   useEffect(() => {
+    if (!shouldPreserveSelectedServer(pathname) && pathname !== '/') {
+      setSelectedServerId(null);
+      setIsServerSelected(false);
+      return;
+    }
+
     const search = typeof window === 'undefined' ? '' : window.location.search;
     const selectedFromUrl = getSelectedServerFromParams(search);
     if (selectedFromUrl) {
       cacheSelectedServerId(selectedFromUrl);
     }
-    setSelectedServerId(getSelectedServerId(search));
+    const nextSelectedServerId = getSelectedServerId(search);
+    setSelectedServerId(nextSelectedServerId);
+    setIsServerSelected(Boolean(nextSelectedServerId));
   }, [pathname]);
-
-  useEffect(() => {
-    const checkCookie = async () => {
-      setIsServerSelected(!!selectedServerId);
-
-      if (selectedServerId) {
-        try {
-          const data = await getServer(selectedServerId);
-          setServerData(data);
-        } catch (error) {
-          console.error('Failed to fetch server data:', error);
-        }
-      } else {
-        setServerData(null);
-      }
-    };
-    checkCookie();
-  }, [pathname, selectedServerId]);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -484,7 +432,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             )}>
               <ScrollArea className="h-full">
                 <div className="p-4 sm:p-6">
-                  <MainNavContent currentPath={pathname} onLinkClick={closeMobileMenu} isServerSelected={isServerSelected} serverData={serverData} selectedServerId={selectedServerId} />
+                  <MainNavContent currentPath={pathname} onLinkClick={closeMobileMenu} isServerSelected={isServerSelected} selectedServerId={selectedServerId} />
                 </div>
               </ScrollArea>
             </div>
@@ -493,7 +441,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <aside className="hidden h-[calc(100vh-4rem)] flex-col border-r bg-background lg:sticky lg:top-16 lg:flex">
                 <ScrollArea className="flex-1">
                   <div className="p-6">
-                    <MainNavContent currentPath={pathname} isServerSelected={isServerSelected} serverData={serverData} selectedServerId={selectedServerId} />
+                    <MainNavContent currentPath={pathname} isServerSelected={isServerSelected} selectedServerId={selectedServerId} />
                   </div>
                 </ScrollArea>
               </aside>

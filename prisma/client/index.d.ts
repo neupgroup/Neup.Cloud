@@ -21234,28 +21234,46 @@ export namespace Prisma {
 
   export type AccountMinAggregateOutputType = {
     id: string | null
+    displayName: string | null
+    displayImage: string | null
+    neupid: string | null
   }
 
   export type AccountMaxAggregateOutputType = {
     id: string | null
+    displayName: string | null
+    displayImage: string | null
+    neupid: string | null
   }
 
   export type AccountCountAggregateOutputType = {
     id: number
+    displayName: number
+    displayImage: number
+    neupid: number
     _all: number
   }
 
 
   export type AccountMinAggregateInputType = {
     id?: true
+    displayName?: true
+    displayImage?: true
+    neupid?: true
   }
 
   export type AccountMaxAggregateInputType = {
     id?: true
+    displayName?: true
+    displayImage?: true
+    neupid?: true
   }
 
   export type AccountCountAggregateInputType = {
     id?: true
+    displayName?: true
+    displayImage?: true
+    neupid?: true
     _all?: true
   }
 
@@ -21333,6 +21351,9 @@ export namespace Prisma {
 
   export type AccountGroupByOutputType = {
     id: string
+    displayName: string | null
+    displayImage: string | null
+    neupid: string | null
     _count: AccountCountAggregateOutputType | null
     _min: AccountMinAggregateOutputType | null
     _max: AccountMaxAggregateOutputType | null
@@ -21354,23 +21375,35 @@ export namespace Prisma {
 
   export type AccountSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    displayName?: boolean
+    displayImage?: boolean
+    neupid?: boolean
     permits?: boolean | Account$permitsArgs<ExtArgs>
     _count?: boolean | AccountCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["account"]>
 
   export type AccountSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    displayName?: boolean
+    displayImage?: boolean
+    neupid?: boolean
   }, ExtArgs["result"]["account"]>
 
   export type AccountSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    displayName?: boolean
+    displayImage?: boolean
+    neupid?: boolean
   }, ExtArgs["result"]["account"]>
 
   export type AccountSelectScalar = {
     id?: boolean
+    displayName?: boolean
+    displayImage?: boolean
+    neupid?: boolean
   }
 
-  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id", ExtArgs["result"]["account"]>
+  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "displayName" | "displayImage" | "neupid", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     permits?: boolean | Account$permitsArgs<ExtArgs>
     _count?: boolean | AccountCountOutputTypeDefaultArgs<ExtArgs>
@@ -21385,6 +21418,9 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
+      displayName: string | null
+      displayImage: string | null
+      neupid: string | null
     }, ExtArgs["result"]["account"]>
     composites: {}
   }
@@ -21810,6 +21846,9 @@ export namespace Prisma {
    */
   interface AccountFieldRefs {
     readonly id: FieldRef<"Account", 'String'>
+    readonly displayName: FieldRef<"Account", 'String'>
+    readonly displayImage: FieldRef<"Account", 'String'>
+    readonly neupid: FieldRef<"Account", 'String'>
   }
     
 
@@ -28568,7 +28607,10 @@ export namespace Prisma {
 
 
   export const AccountScalarFieldEnum: {
-    id: 'id'
+    id: 'id',
+    displayName: 'displayName',
+    displayImage: 'displayImage',
+    neupid: 'neupid'
   };
 
   export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
@@ -29966,11 +30008,17 @@ export namespace Prisma {
     OR?: AccountWhereInput[]
     NOT?: AccountWhereInput | AccountWhereInput[]
     id?: StringFilter<"Account"> | string
+    displayName?: StringNullableFilter<"Account"> | string | null
+    displayImage?: StringNullableFilter<"Account"> | string | null
+    neupid?: StringNullableFilter<"Account"> | string | null
     permits?: PermitListRelationFilter
   }
 
   export type AccountOrderByWithRelationInput = {
     id?: SortOrder
+    displayName?: SortOrderInput | SortOrder
+    displayImage?: SortOrderInput | SortOrder
+    neupid?: SortOrderInput | SortOrder
     permits?: PermitOrderByRelationAggregateInput
   }
 
@@ -29979,11 +30027,17 @@ export namespace Prisma {
     AND?: AccountWhereInput | AccountWhereInput[]
     OR?: AccountWhereInput[]
     NOT?: AccountWhereInput | AccountWhereInput[]
+    displayName?: StringNullableFilter<"Account"> | string | null
+    displayImage?: StringNullableFilter<"Account"> | string | null
+    neupid?: StringNullableFilter<"Account"> | string | null
     permits?: PermitListRelationFilter
   }, "id">
 
   export type AccountOrderByWithAggregationInput = {
     id?: SortOrder
+    displayName?: SortOrderInput | SortOrder
+    displayImage?: SortOrderInput | SortOrder
+    neupid?: SortOrderInput | SortOrder
     _count?: AccountCountOrderByAggregateInput
     _max?: AccountMaxOrderByAggregateInput
     _min?: AccountMinOrderByAggregateInput
@@ -29994,6 +30048,9 @@ export namespace Prisma {
     OR?: AccountScalarWhereWithAggregatesInput[]
     NOT?: AccountScalarWhereWithAggregatesInput | AccountScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Account"> | string
+    displayName?: StringNullableWithAggregatesFilter<"Account"> | string | null
+    displayImage?: StringNullableWithAggregatesFilter<"Account"> | string | null
+    neupid?: StringNullableWithAggregatesFilter<"Account"> | string | null
   }
 
   export type PermitWhereInput = {
@@ -31622,34 +31679,55 @@ export namespace Prisma {
 
   export type AccountCreateInput = {
     id: string
+    displayName?: string | null
+    displayImage?: string | null
+    neupid?: string | null
     permits?: PermitCreateNestedManyWithoutAccountInput
   }
 
   export type AccountUncheckedCreateInput = {
     id: string
+    displayName?: string | null
+    displayImage?: string | null
+    neupid?: string | null
     permits?: PermitUncheckedCreateNestedManyWithoutAccountInput
   }
 
   export type AccountUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    displayImage?: NullableStringFieldUpdateOperationsInput | string | null
+    neupid?: NullableStringFieldUpdateOperationsInput | string | null
     permits?: PermitUpdateManyWithoutAccountNestedInput
   }
 
   export type AccountUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    displayImage?: NullableStringFieldUpdateOperationsInput | string | null
+    neupid?: NullableStringFieldUpdateOperationsInput | string | null
     permits?: PermitUncheckedUpdateManyWithoutAccountNestedInput
   }
 
   export type AccountCreateManyInput = {
     id: string
+    displayName?: string | null
+    displayImage?: string | null
+    neupid?: string | null
   }
 
   export type AccountUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    displayImage?: NullableStringFieldUpdateOperationsInput | string | null
+    neupid?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AccountUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    displayImage?: NullableStringFieldUpdateOperationsInput | string | null
+    neupid?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type PermitCreateInput = {
@@ -32989,14 +33067,23 @@ export namespace Prisma {
 
   export type AccountCountOrderByAggregateInput = {
     id?: SortOrder
+    displayName?: SortOrder
+    displayImage?: SortOrder
+    neupid?: SortOrder
   }
 
   export type AccountMaxOrderByAggregateInput = {
     id?: SortOrder
+    displayName?: SortOrder
+    displayImage?: SortOrder
+    neupid?: SortOrder
   }
 
   export type AccountMinOrderByAggregateInput = {
     id?: SortOrder
+    displayName?: SortOrder
+    displayImage?: SortOrder
+    neupid?: SortOrder
   }
 
   export type AccountScalarRelationFilter = {
@@ -34210,10 +34297,16 @@ export namespace Prisma {
 
   export type AccountCreateWithoutPermitsInput = {
     id: string
+    displayName?: string | null
+    displayImage?: string | null
+    neupid?: string | null
   }
 
   export type AccountUncheckedCreateWithoutPermitsInput = {
     id: string
+    displayName?: string | null
+    displayImage?: string | null
+    neupid?: string | null
   }
 
   export type AccountCreateOrConnectWithoutPermitsInput = {
@@ -34234,10 +34327,16 @@ export namespace Prisma {
 
   export type AccountUpdateWithoutPermitsInput = {
     id?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    displayImage?: NullableStringFieldUpdateOperationsInput | string | null
+    neupid?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AccountUncheckedUpdateWithoutPermitsInput = {
     id?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    displayImage?: NullableStringFieldUpdateOperationsInput | string | null
+    neupid?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ApplicationServerMapCreateManyServerInput = {

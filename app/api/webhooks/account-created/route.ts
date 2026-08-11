@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/core/database/prisma';
+import { ensureAccountProfile } from '@/services/account-profile';
 
 /**
  * POST /api/webhooks/account-created
@@ -38,12 +39,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // 1. Ensure the account row exists (idempotent)
-    await prisma.account.upsert({
-      where: { id: accountId },
-      update: {},
-      create: { id: accountId },
-    });
+    // 1. Ensure the account row exists with profile fields (idempotent)
+    await ensureAccountProfile({ accountId });
 
     // 2. Grant the default role to the account (owner = self for individual accounts)
     const grantId = `grant::${accountId}::${DEFAULT_ROLE_ID}`;
