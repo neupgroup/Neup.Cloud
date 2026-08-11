@@ -196,7 +196,7 @@ export async function createDatabaseUser(
     dbName: string,
     username: string,
     password: string,
-    permissions: 'full' | 'read' = 'full'
+    permissions: 'full' | 'read' = 'read'
 ): Promise<OperationResult> {
     if (engine === 'mariadb') {
         return createMariaDBUser(serverId, dbName, username, password, permissions);

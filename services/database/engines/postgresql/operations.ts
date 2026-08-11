@@ -83,6 +83,7 @@ export async function createPostgresDatabase(
         const commands = [
             `sudo -u postgres psql -c "CREATE USER ${safeDbUser} WITH PASSWORD '${dbPass}';"`,
             `sudo -u postgres psql -c "CREATE DATABASE ${safeDbName} OWNER ${safeDbUser};"`,
+            `sudo -u postgres psql -c "REVOKE CONNECT ON DATABASE ${safeDbName} FROM PUBLIC;"`,
             `sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${safeDbName} TO ${safeDbUser};"`
         ];
 
@@ -216,7 +217,7 @@ export async function listPostgresUsers(serverId: string, dbName: string): Promi
             server.publicIp,
             server.username,
             server.privateKey,
-            `sudo -u postgres psql -A -t -F "|" -c "SELECT r.rolname, CASE WHEN r.rolsuper OR pg_catalog.pg_get_userbyid(d.datdba) = r.rolname OR has_database_privilege(r.rolname, '${safeDb}', 'CREATE') THEN 'full' ELSE 'read' END FROM pg_roles r CROSS JOIN pg_database d WHERE d.datname = '${safeDb}' AND r.rolcanlogin = true AND (has_database_privilege(r.rolname, '${safeDb}', 'CONNECT') OR r.rolsuper = true) ORDER BY r.rolname;"`,
+            `sudo -u postgres psql -d ${safeDb} -A -t -F "|" -c "WITH target_database AS (SELECT oid, datname, datdba, datacl FROM pg_database WHERE datname = '${safeDb}'), explicit_database_grants AS (SELECT acl.grantee, bool_or(acl.privilege_type IN ('CREATE', 'TEMPORARY')) AS has_full_privilege, bool_or(acl.privilege_type = 'CONNECT') AS has_connect_privilege FROM target_database d CROSS JOIN LATERAL aclexplode(d.datacl) acl WHERE acl.grantee <> 0 GROUP BY acl.grantee), explicit_schema_grants AS (SELECT acl.grantee, bool_or(acl.privilege_type = 'CREATE') AS has_full_privilege, bool_or(acl.privilege_type = 'USAGE') AS has_usage_privilege FROM pg_namespace n CROSS JOIN LATERAL aclexplode(n.nspacl) acl WHERE n.nspname = 'public' AND acl.grantee <> 0 GROUP BY acl.grantee), explicit_table_grants AS (SELECT c.relacl FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relkind IN ('r', 'p', 'v', 'm', 'S')), object_grants AS (SELECT acl.grantee, bool_or(acl.privilege_type IN ('INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER')) AS has_full_privilege, bool_or(acl.privilege_type = 'SELECT') AS has_read_privilege FROM explicit_table_grants t CROSS JOIN LATERAL aclexplode(t.relacl) acl WHERE acl.grantee <> 0 GROUP BY acl.grantee) SELECT r.rolname, CASE WHEN r.rolsuper OR d.datdba = r.oid OR COALESCE(edg.has_full_privilege, false) OR COALESCE(esg.has_full_privilege, false) OR COALESCE(og.has_full_privilege, false) THEN 'full' ELSE 'read' END FROM pg_roles r CROSS JOIN target_database d LEFT JOIN explicit_database_grants edg ON edg.grantee = r.oid LEFT JOIN explicit_schema_grants esg ON esg.grantee = r.oid LEFT JOIN object_grants og ON og.grantee = r.oid WHERE r.rolcanlogin = true AND (r.rolsuper OR d.datdba = r.oid OR COALESCE(edg.has_connect_privilege, false) OR COALESCE(edg.has_full_privilege, false) OR COALESCE(esg.has_usage_privilege, false) OR COALESCE(esg.has_full_privilege, false) OR COALESCE(og.has_read_privilege, false) OR COALESCE(og.has_full_privilege, false)) ORDER BY r.rolname;"`,
             undefined,
             undefined,
             true
@@ -252,7 +253,7 @@ export async function createPostgresUser(
     dbName: string,
     username: string,
     password: string,
-    permissions: 'full' | 'read' = 'full'
+    permissions: 'full' | 'read' = 'read'
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
     if (!server || !server.username) {
@@ -263,15 +264,25 @@ export async function createPostgresUser(
         const safeDb = dbName.replace(/[^a-zA-Z0-9_]/g, '');
         const safeUser = username.replace(/[^a-zA-Z0-9_]/g, '');
 
-        const privs = permissions === 'full' ? 'ALL PRIVILEGES' : 'SELECT';
         const commands = [
-            `sudo -u postgres psql -c "CREATE USER ${safeUser} WITH PASSWORD '${password}';"`,
-            `sudo -u postgres psql -c "GRANT ${privs} ON DATABASE ${safeDb} TO ${safeUser};"`
+            `sudo -u postgres psql -c "CREATE USER ${safeUser} WITH PASSWORD '${password}';"`
         ];
 
-        if (permissions === 'read') {
-            // For Postgres read-only, we also need to grant on schema tables
-            commands.push(`sudo -u postgres psql -d ${safeDb} -c "GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${safeUser};"`);
+        if (permissions === 'full') {
+            commands.push(
+                `sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${safeDb} TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT ALL PRIVILEGES ON SCHEMA public TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO ${safeUser};"`
+            );
+        } else {
+            commands.push(
+                `sudo -u postgres psql -c "GRANT CONNECT ON DATABASE ${safeDb} TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT USAGE ON SCHEMA public TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO ${safeUser};"`
+            );
         }
 
         for (const cmd of commands) {
@@ -425,15 +436,30 @@ export async function updatePostgresUserPermissions(
 
     try {
         const safeDb = dbName.replace(/[^a-zA-Z0-9_]/g, '');
-        const privs = permissions === 'full' ? 'ALL PRIVILEGES' : 'SELECT';
-
+        const safeUser = username.replace(/[^a-zA-Z0-9_]/g, '');
         const commands = [
-            `sudo -u postgres psql -c "REVOKE ALL PRIVILEGES ON DATABASE ${safeDb} FROM ${username};"`,
-            `sudo -u postgres psql -c "GRANT ${privs} ON DATABASE ${safeDb} TO ${username};"`
+            `sudo -u postgres psql -c "REVOKE ALL PRIVILEGES ON DATABASE ${safeDb} FROM ${safeUser};"`,
+            `sudo -u postgres psql -d ${safeDb} -c "REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ${safeUser};"`,
+            `sudo -u postgres psql -d ${safeDb} -c "REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM ${safeUser};"`,
+            `sudo -u postgres psql -d ${safeDb} -c "REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM ${safeUser};"`,
+            `sudo -u postgres psql -d ${safeDb} -c "REVOKE ALL PRIVILEGES ON SCHEMA public FROM ${safeUser};"`
         ];
 
-        if (permissions === 'read') {
-            commands.push(`sudo -u postgres psql -d ${safeDb} -c "GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${username};"`);
+        if (permissions === 'full') {
+            commands.push(
+                `sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${safeDb} TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT ALL PRIVILEGES ON SCHEMA public TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO ${safeUser};"`
+            );
+        } else {
+            commands.push(
+                `sudo -u postgres psql -c "GRANT CONNECT ON DATABASE ${safeDb} TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT USAGE ON SCHEMA public TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${safeUser};"`,
+                `sudo -u postgres psql -d ${safeDb} -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO ${safeUser};"`
+            );
         }
 
         for (const cmd of commands) {

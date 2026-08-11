@@ -88,7 +88,7 @@ export async function createMariaDBUser(
     dbName: string,
     username: string,
     password: string,
-    permissions: 'full' | 'read' = 'full'
+    permissions: 'full' | 'read' = 'read'
 ): Promise<OperationResult> {
     const server = await getServerForRunner(serverId);
     if (!server || !server.username) {

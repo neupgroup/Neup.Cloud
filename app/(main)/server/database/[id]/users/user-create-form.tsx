@@ -47,7 +47,7 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
     const [isLoading, setIsLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(PERMISSION_PRESETS.full);
+    const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(PERMISSION_PRESETS.read);
 
     const handlePresetClick = (preset: keyof typeof PERMISSION_PRESETS) => {
         setSelectedPermissions(PERMISSION_PRESETS[preset]);
