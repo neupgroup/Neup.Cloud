@@ -56,10 +56,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Toaster } from "@/components/ui/toaster"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import './globals.css';
 import { ProgressBar } from '@/components/progress-bar';
 import NProgress from 'nprogress';
 import { getServer } from '@/services/server/server-service';
+import account from '@/logica/account';
 
 import { findLongestMatch } from '@/services/core/findLongestMatch';
 import { ServerQueryPreserver } from '@/components/server-query-preserver';
@@ -69,6 +71,22 @@ import {
   getSelectedServerId,
   withSelectedServerQuery,
 } from '@/inapp/helpers/navigation';
+
+type CurrentAccountProfile = {
+  displayName: string | null;
+  displayImage: string | null;
+  neupid: string | null;
+};
+
+function getCookieValue(name: string) {
+  if (typeof document === 'undefined') return null;
+
+  const cookie = document.cookie
+    .split('; ')
+    .find((part) => part.startsWith(`${name}=`));
+
+  return cookie ? decodeURIComponent(cookie.slice(name.length + 1)).trim() : null;
+}
 
 function NavLink({
   href,
@@ -278,6 +296,48 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, serverData
 }
 
 function Header({ isMobileMenuOpen, toggleMobileMenu }: { isMobileMenuOpen: boolean, toggleMobileMenu: () => void }) {
+  const [accountProfile, setAccountProfile] = useState<CurrentAccountProfile>({
+    displayName: null,
+    displayImage: null,
+    neupid: null,
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadAccountProfile() {
+      try {
+        const authAccountToken = getCookieValue('auth_account');
+        if (!authAccountToken) return;
+
+        const response = await account.lookup.current.get(authAccountToken, [
+          'displayName',
+          'displayImage',
+          'neupid',
+        ]);
+
+        if (isMounted && response.ok && response.body.success) {
+          setAccountProfile({
+            displayName: response.body.displayName ?? null,
+            displayImage: response.body.displayImage ?? null,
+            neupid: response.body.neupid ?? null,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch account profile:', error);
+      }
+    }
+
+    loadAccountProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const displayName = accountProfile.displayName ?? 'My Account';
+  const neupId = accountProfile.neupid;
+
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center border-b bg-background shadow-[0_16px_40px_rgba(15,23,42,0.10)]">
       <div className="mx-auto flex w-full max-w-[1440px] items-center px-4 sm:px-6 md:px-8">
@@ -297,13 +357,39 @@ function Header({ isMobileMenuOpen, toggleMobileMenu }: { isMobileMenuOpen: bool
         <div className="ml-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <CircleUser className="h-5 w-5" />
+              <Button variant="ghost" className="h-11 max-w-[260px] gap-3 rounded-full px-2 pr-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={accountProfile.displayImage ?? undefined} alt={displayName} />
+                  <AvatarFallback>
+                    <CircleUser className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden min-w-0 text-left sm:block">
+                  <span className="block truncate text-sm font-semibold leading-tight">{displayName}</span>
+                  {neupId && (
+                    <span className="block truncate text-xs leading-tight text-muted-foreground">{neupId}</span>
+                  )}
+                </span>
                 <span className="sr-only">Toggle user menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-sm border-muted">
-              <DropdownMenuLabel className="text-xs uppercase tracking-widest font-bold">My Account</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-64 rounded-sm border-muted">
+              <DropdownMenuLabel className="flex items-center gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={accountProfile.displayImage ?? undefined} alt={displayName} />
+                  <AvatarFallback>
+                    <CircleUser className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-bold">{displayName}</span>
+                  {neupId ? (
+                    <span className="block truncate text-xs font-medium text-muted-foreground">{neupId}</span>
+                  ) : (
+                    <span className="block truncate text-xs font-medium text-muted-foreground">Neup.Cloud</span>
+                  )}
+                </span>
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-xs font-semibold">Settings</DropdownMenuItem>
               <DropdownMenuItem className="text-xs font-semibold">Support</DropdownMenuItem>
