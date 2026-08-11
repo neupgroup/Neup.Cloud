@@ -1654,7 +1654,7 @@ function PipelineEditorCanvas({
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center">
-                <Link href="/" className="flex items-center gap-2 text-foreground">
+                <Link href="/home" className="flex items-center gap-2 text-foreground">
                   <Cloud className="h-6 w-6 text-primary" />
                   <span className="font-headline text-lg font-bold">Neup</span>
                 </Link>

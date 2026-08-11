@@ -34,14 +34,18 @@ export function ApplicationSection({
   const [isLoading, setIsLoading] = useState(true);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const isFirstLoadRef = useRef(true);
+  const statusFilterKey = Array.isArray(statusFilter) ? statusFilter.join('|') : statusFilter;
 
   useEffect(() => {
     let cancelled = false;
+    const resolvedStatusFilter = Array.isArray(statusFilter)
+      ? [...statusFilter]
+      : statusFilter;
 
     const fetch = async () => {
       setIsLoading(true);
       try {
-        const result = await getApplicationItems(source, statusFilter, selectedServerId ?? undefined);
+        const result = await getApplicationItems(source, resolvedStatusFilter, selectedServerId ?? undefined);
         if (!cancelled) {
           setItems(result);
           setHasLoadedOnce(true);
@@ -56,7 +60,7 @@ export function ApplicationSection({
 
     void fetch();
     return () => { cancelled = true; };
-  }, [source, statusFilter, selectedServerId]);
+  }, [source, statusFilterKey, selectedServerId]);
 
   if (!isLoading && items.length === 0 && hideWhenEmpty) return null;
 

@@ -115,7 +115,7 @@ export default function IntelligencePage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-3 sm:flex-row">
           <Button asChild>
-            <Link href="/">Back to Dashboard</Link>
+            <Link href="/home">Back to Dashboard</Link>
           </Button>
           <Button variant="outline" asChild>
             <Link href="/servers">View Servers</Link>

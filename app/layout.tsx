@@ -130,7 +130,7 @@ function NavLink({
 
 function MainNavContent({ currentPath, onLinkClick, isServerSelected, selectedServerId }: { currentPath: string, onLinkClick?: () => void, isServerSelected: boolean, selectedServerId: string | null }) {
   const navLinks = [
-    { href: "/", label: "Dashboard", icon: Home },
+    { href: "/home", label: "Dashboard", icon: Home },
   ];
 
   const intelligenceLinks = [
@@ -370,7 +370,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const isPlainRoute = pathname === '/pipeline/editor' || pathname.startsWith('/pipeline/editor/');
 
   useEffect(() => {
-    if (!shouldPreserveSelectedServer(pathname) && pathname !== '/') {
+    if (!shouldPreserveSelectedServer(pathname)) {
       setSelectedServerId(null);
       setIsServerSelected(false);
       return;

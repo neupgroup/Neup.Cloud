@@ -116,7 +116,7 @@ export default function PipelinePage() {
 
           <div className="flex flex-wrap items-center gap-2">
             <Button asChild variant="outline" className="rounded-full border-slate-200 bg-white/90">
-              <Link href="/">Dashboard</Link>
+              <Link href="/home">Dashboard</Link>
             </Button>
             <Button asChild className="rounded-full px-5">
               <Link href="/pipeline/editor">
@@ -151,7 +151,7 @@ export default function PipelinePage() {
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="rounded-full border-slate-200 bg-white">
-                  <Link href="/">Return home</Link>
+                  <Link href="/home">Return home</Link>
                 </Button>
               </div>
 

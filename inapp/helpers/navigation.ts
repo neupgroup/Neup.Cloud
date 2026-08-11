@@ -26,6 +26,7 @@ export const SELECTED_SERVER_QUERY_KEY = 'selectedServer';
 const SELECTED_SERVER_SESSION_KEY = 'selectedServer:lastKnown';
 
 const SELECTED_SERVER_ROUTE_PREFIXES = [
+  '/home',
   '/server/home',
   '/server/status',
   '/server/applications',
