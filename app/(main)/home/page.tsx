@@ -42,6 +42,59 @@ import { ApplicationSection } from '@/components/specifics/application/section';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
+type ServerAlert = {
+  id: string;
+  title: string;
+  severity: 'Error' | 'Warning' | 'Info' | 'Command';
+  time: string;
+};
+
+const sampleServerAlerts: ServerAlert[] = [
+  {
+    id: 'cpu-spike',
+    title: 'CPU Spike by 20%',
+    severity: 'Error',
+    time: 'Before 2 mins',
+  },
+  {
+    id: 'disk-warning',
+    title: 'Disk usage increased by 14%',
+    severity: 'Warning',
+    time: 'Before 8 mins',
+  },
+  {
+    id: 'ssh-failures',
+    title: 'SSH failures increased by 6 attempts',
+    severity: 'Warning',
+    time: 'Before 18 mins',
+  },
+  {
+    id: 'backup-delay',
+    title: 'Backup delayed by 12 mins',
+    severity: 'Info',
+    time: 'Before 34 mins',
+  },
+  {
+    id: 'command-completed',
+    title: 'Command completed successfully',
+    severity: 'Command',
+    time: 'Before 1 hr',
+  },
+];
+
+function getAlertDotClassName(severity: ServerAlert['severity']) {
+  switch (severity) {
+    case 'Error':
+      return 'bg-red-500';
+    case 'Warning':
+      return 'bg-amber-500';
+    case 'Info':
+      return 'bg-blue-500';
+    default:
+      return 'bg-green-500';
+  }
+}
+
 export default function Home() {
   const router = useRouter();
   const pathname = usePathname();
@@ -206,16 +259,6 @@ export default function Home() {
               "Select a server to manage your infrastructure."
             )}
           </p>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row md:justify-end">
-          <Button variant="outline" onClick={() => router.push('/servers/add')}>
-            <Plus className="h-4 w-4" />
-            Add server
-          </Button>
-          <Button variant="outline" onClick={() => router.push('/servers/purchase')}>
-            <Server className="h-4 w-4" />
-            Purchase server
-          </Button>
         </div>
       </div>
 
@@ -388,6 +431,78 @@ export default function Home() {
           ) : (
             <CommandLogList logs={activityLogs} />
           )}
+          <div className="flex justify-start">
+            <Button
+              variant="outline"
+              onClick={() => router.push(withSelectedServerQuery('/server/commands/history', serverId))}
+            >
+              See all activities
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {serverId && (
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-xl font-bold tracking-tight">Server Alerts</h2>
+            <p className="text-sm text-muted-foreground">Recent alerts on your servers.</p>
+          </div>
+
+          {sampleServerAlerts.length > 0 ? (
+            <Card className="w-full overflow-hidden border-border">
+              <div className="w-full">
+                {sampleServerAlerts.map((alert, index) => {
+                  const isLast = index === sampleServerAlerts.length - 1;
+
+                  return (
+                    <div
+                      key={alert.id}
+                      className={cn(
+                        'px-4 py-4 transition-colors hover:bg-muted/40',
+                        !isLast && 'border-b border-border'
+                      )}
+                    >
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex min-w-0 items-start gap-2">
+                          <span
+                            className={cn(
+                              'mt-2 h-2.5 w-2.5 shrink-0 rounded-full',
+                              getAlertDotClassName(alert.severity)
+                            )}
+                            aria-hidden="true"
+                          />
+                          <p className="text-base font-semibold tracking-tight text-foreground">
+                            <span>{alert.title} on {serverInfo?.name || 'selected server'}</span>
+                          </p>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {alert.time}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>No recent alerts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Manage your server now</p>
+              </CardContent>
+            </Card>
+          )}
+          <div className="flex justify-start">
+            <Button
+              variant="outline"
+              onClick={() => router.push('/alerts')}
+            >
+              See all alerts
+            </Button>
+          </div>
         </div>
       )}
     </div>
