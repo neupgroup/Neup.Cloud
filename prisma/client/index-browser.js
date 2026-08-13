@@ -214,6 +214,20 @@ exports.Prisma.AppErrorScalarFieldEnum = {
   stack: 'stack'
 };
 
+exports.Prisma.ProjectScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdOn: 'createdOn'
+};
+
+exports.Prisma.LoggerActivityScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  type: 'type',
+  data: 'data',
+  loggedOn: 'loggedOn'
+};
+
 exports.Prisma.LiveSessionScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -405,6 +419,8 @@ exports.Prisma.ModelName = {
   Domain: 'Domain',
   EnvironmentVariable: 'EnvironmentVariable',
   AppError: 'AppError',
+  Project: 'Project',
+  LoggerActivity: 'LoggerActivity',
   LiveSession: 'LiveSession',
   AccessToken: 'AccessToken',
   IntelligenceModel: 'IntelligenceModel',

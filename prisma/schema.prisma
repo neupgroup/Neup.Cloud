@@ -132,6 +132,30 @@ model AppError {
   @@map("errors")
 }
 
+model Project {
+  id             String           @id @db.Text
+  name           String           @unique @db.Text
+  createdOn      DateTime         @map("createdOn") @db.Timestamp(6)
+  loggerActivity LoggerActivity[]
+
+  @@map("projects")
+}
+
+model LoggerActivity {
+  id        String   @id @db.Text
+  projectId String   @map("projectId") @db.Text
+  type      String   @db.Text
+  data      Json
+  loggedOn  DateTime @map("loggedOn") @db.Timestamp(6)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId], map: "logger_activity_project_id_idx")
+  @@index([type], map: "logger_activity_type_idx")
+  @@index([loggedOn], map: "logger_activity_logged_on_idx")
+  @@map("loggerActivity")
+}
+
 model LiveSession {
   id          String   @id @db.Text
   createdAt   DateTime @map("createdAt") @db.Timestamp(6)

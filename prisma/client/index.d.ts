@@ -54,6 +54,16 @@ export type EnvironmentVariable = $Result.DefaultSelection<Prisma.$EnvironmentVa
  */
 export type AppError = $Result.DefaultSelection<Prisma.$AppErrorPayload>
 /**
+ * Model Project
+ * 
+ */
+export type Project = $Result.DefaultSelection<Prisma.$ProjectPayload>
+/**
+ * Model LoggerActivity
+ * 
+ */
+export type LoggerActivity = $Result.DefaultSelection<Prisma.$LoggerActivityPayload>
+/**
  * Model LiveSession
  * 
  */
@@ -352,6 +362,26 @@ export class PrismaClient<
     * ```
     */
   get appError(): Prisma.AppErrorDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.project`: Exposes CRUD operations for the **Project** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Projects
+    * const projects = await prisma.project.findMany()
+    * ```
+    */
+  get project(): Prisma.ProjectDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.loggerActivity`: Exposes CRUD operations for the **LoggerActivity** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more LoggerActivities
+    * const loggerActivities = await prisma.loggerActivity.findMany()
+    * ```
+    */
+  get loggerActivity(): Prisma.LoggerActivityDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.liveSession`: Exposes CRUD operations for the **LiveSession** model.
@@ -954,6 +984,8 @@ export namespace Prisma {
     Domain: 'Domain',
     EnvironmentVariable: 'EnvironmentVariable',
     AppError: 'AppError',
+    Project: 'Project',
+    LoggerActivity: 'LoggerActivity',
     LiveSession: 'LiveSession',
     AccessToken: 'AccessToken',
     IntelligenceModel: 'IntelligenceModel',
@@ -985,7 +1017,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "server" | "serverLog" | "savedCommand" | "application" | "applicationServerMap" | "domain" | "environmentVariable" | "appError" | "liveSession" | "accessToken" | "intelligenceModel" | "intelligenceAccess" | "intelligenceLog" | "openFlowUsageLog" | "pipeline" | "pipelineLog" | "database" | "account" | "permit" | "authzRole" | "authzCapability" | "authzRoleCapability" | "authzAccountAccessGrant" | "authzAssetsAccessGrant"
+      modelProps: "server" | "serverLog" | "savedCommand" | "application" | "applicationServerMap" | "domain" | "environmentVariable" | "appError" | "project" | "loggerActivity" | "liveSession" | "accessToken" | "intelligenceModel" | "intelligenceAccess" | "intelligenceLog" | "openFlowUsageLog" | "pipeline" | "pipelineLog" | "database" | "account" | "permit" | "authzRole" | "authzCapability" | "authzRoleCapability" | "authzAccountAccessGrant" | "authzAssetsAccessGrant"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1578,6 +1610,154 @@ export namespace Prisma {
           count: {
             args: Prisma.AppErrorCountArgs<ExtArgs>
             result: $Utils.Optional<AppErrorCountAggregateOutputType> | number
+          }
+        }
+      }
+      Project: {
+        payload: Prisma.$ProjectPayload<ExtArgs>
+        fields: Prisma.ProjectFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ProjectFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ProjectFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectPayload>
+          }
+          findFirst: {
+            args: Prisma.ProjectFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ProjectFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectPayload>
+          }
+          findMany: {
+            args: Prisma.ProjectFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectPayload>[]
+          }
+          create: {
+            args: Prisma.ProjectCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectPayload>
+          }
+          createMany: {
+            args: Prisma.ProjectCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ProjectCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectPayload>[]
+          }
+          delete: {
+            args: Prisma.ProjectDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectPayload>
+          }
+          update: {
+            args: Prisma.ProjectUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectPayload>
+          }
+          deleteMany: {
+            args: Prisma.ProjectDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ProjectUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ProjectUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectPayload>[]
+          }
+          upsert: {
+            args: Prisma.ProjectUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectPayload>
+          }
+          aggregate: {
+            args: Prisma.ProjectAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateProject>
+          }
+          groupBy: {
+            args: Prisma.ProjectGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ProjectGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ProjectCountArgs<ExtArgs>
+            result: $Utils.Optional<ProjectCountAggregateOutputType> | number
+          }
+        }
+      }
+      LoggerActivity: {
+        payload: Prisma.$LoggerActivityPayload<ExtArgs>
+        fields: Prisma.LoggerActivityFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.LoggerActivityFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoggerActivityPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.LoggerActivityFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoggerActivityPayload>
+          }
+          findFirst: {
+            args: Prisma.LoggerActivityFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoggerActivityPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.LoggerActivityFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoggerActivityPayload>
+          }
+          findMany: {
+            args: Prisma.LoggerActivityFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoggerActivityPayload>[]
+          }
+          create: {
+            args: Prisma.LoggerActivityCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoggerActivityPayload>
+          }
+          createMany: {
+            args: Prisma.LoggerActivityCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.LoggerActivityCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoggerActivityPayload>[]
+          }
+          delete: {
+            args: Prisma.LoggerActivityDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoggerActivityPayload>
+          }
+          update: {
+            args: Prisma.LoggerActivityUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoggerActivityPayload>
+          }
+          deleteMany: {
+            args: Prisma.LoggerActivityDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.LoggerActivityUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LoggerActivityUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoggerActivityPayload>[]
+          }
+          upsert: {
+            args: Prisma.LoggerActivityUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoggerActivityPayload>
+          }
+          aggregate: {
+            args: Prisma.LoggerActivityAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateLoggerActivity>
+          }
+          groupBy: {
+            args: Prisma.LoggerActivityGroupByArgs<ExtArgs>
+            result: $Utils.Optional<LoggerActivityGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.LoggerActivityCountArgs<ExtArgs>
+            result: $Utils.Optional<LoggerActivityCountAggregateOutputType> | number
           }
         }
       }
@@ -2881,6 +3061,8 @@ export namespace Prisma {
     domain?: DomainOmit
     environmentVariable?: EnvironmentVariableOmit
     appError?: AppErrorOmit
+    project?: ProjectOmit
+    loggerActivity?: LoggerActivityOmit
     liveSession?: LiveSessionOmit
     accessToken?: AccessTokenOmit
     intelligenceModel?: IntelligenceModelOmit
@@ -3031,6 +3213,37 @@ export namespace Prisma {
    */
   export type ApplicationCountOutputTypeCountServerMapsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ApplicationServerMapWhereInput
+  }
+
+
+  /**
+   * Count Type ProjectCountOutputType
+   */
+
+  export type ProjectCountOutputType = {
+    loggerActivity: number
+  }
+
+  export type ProjectCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    loggerActivity?: boolean | ProjectCountOutputTypeCountLoggerActivityArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * ProjectCountOutputType without action
+   */
+  export type ProjectCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectCountOutputType
+     */
+    select?: ProjectCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ProjectCountOutputType without action
+   */
+  export type ProjectCountOutputTypeCountLoggerActivityArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoggerActivityWhereInput
   }
 
 
@@ -11676,6 +11889,2114 @@ export namespace Prisma {
      * Omit specific fields from the AppError
      */
     omit?: AppErrorOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Project
+   */
+
+  export type AggregateProject = {
+    _count: ProjectCountAggregateOutputType | null
+    _min: ProjectMinAggregateOutputType | null
+    _max: ProjectMaxAggregateOutputType | null
+  }
+
+  export type ProjectMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    createdOn: Date | null
+  }
+
+  export type ProjectMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    createdOn: Date | null
+  }
+
+  export type ProjectCountAggregateOutputType = {
+    id: number
+    name: number
+    createdOn: number
+    _all: number
+  }
+
+
+  export type ProjectMinAggregateInputType = {
+    id?: true
+    name?: true
+    createdOn?: true
+  }
+
+  export type ProjectMaxAggregateInputType = {
+    id?: true
+    name?: true
+    createdOn?: true
+  }
+
+  export type ProjectCountAggregateInputType = {
+    id?: true
+    name?: true
+    createdOn?: true
+    _all?: true
+  }
+
+  export type ProjectAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Project to aggregate.
+     */
+    where?: ProjectWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Projects to fetch.
+     */
+    orderBy?: ProjectOrderByWithRelationInput | ProjectOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ProjectWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Projects from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Projects.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Projects
+    **/
+    _count?: true | ProjectCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ProjectMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ProjectMaxAggregateInputType
+  }
+
+  export type GetProjectAggregateType<T extends ProjectAggregateArgs> = {
+        [P in keyof T & keyof AggregateProject]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateProject[P]>
+      : GetScalarType<T[P], AggregateProject[P]>
+  }
+
+
+
+
+  export type ProjectGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProjectWhereInput
+    orderBy?: ProjectOrderByWithAggregationInput | ProjectOrderByWithAggregationInput[]
+    by: ProjectScalarFieldEnum[] | ProjectScalarFieldEnum
+    having?: ProjectScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ProjectCountAggregateInputType | true
+    _min?: ProjectMinAggregateInputType
+    _max?: ProjectMaxAggregateInputType
+  }
+
+  export type ProjectGroupByOutputType = {
+    id: string
+    name: string
+    createdOn: Date
+    _count: ProjectCountAggregateOutputType | null
+    _min: ProjectMinAggregateOutputType | null
+    _max: ProjectMaxAggregateOutputType | null
+  }
+
+  type GetProjectGroupByPayload<T extends ProjectGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ProjectGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ProjectGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ProjectGroupByOutputType[P]>
+            : GetScalarType<T[P], ProjectGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ProjectSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    createdOn?: boolean
+    loggerActivity?: boolean | Project$loggerActivityArgs<ExtArgs>
+    _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["project"]>
+
+  export type ProjectSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    createdOn?: boolean
+  }, ExtArgs["result"]["project"]>
+
+  export type ProjectSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    createdOn?: boolean
+  }, ExtArgs["result"]["project"]>
+
+  export type ProjectSelectScalar = {
+    id?: boolean
+    name?: boolean
+    createdOn?: boolean
+  }
+
+  export type ProjectOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "createdOn", ExtArgs["result"]["project"]>
+  export type ProjectInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    loggerActivity?: boolean | Project$loggerActivityArgs<ExtArgs>
+    _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type ProjectIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type ProjectIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $ProjectPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Project"
+    objects: {
+      loggerActivity: Prisma.$LoggerActivityPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      createdOn: Date
+    }, ExtArgs["result"]["project"]>
+    composites: {}
+  }
+
+  type ProjectGetPayload<S extends boolean | null | undefined | ProjectDefaultArgs> = $Result.GetResult<Prisma.$ProjectPayload, S>
+
+  type ProjectCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ProjectFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ProjectCountAggregateInputType | true
+    }
+
+  export interface ProjectDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Project'], meta: { name: 'Project' } }
+    /**
+     * Find zero or one Project that matches the filter.
+     * @param {ProjectFindUniqueArgs} args - Arguments to find a Project
+     * @example
+     * // Get one Project
+     * const project = await prisma.project.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ProjectFindUniqueArgs>(args: SelectSubset<T, ProjectFindUniqueArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Project that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ProjectFindUniqueOrThrowArgs} args - Arguments to find a Project
+     * @example
+     * // Get one Project
+     * const project = await prisma.project.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ProjectFindUniqueOrThrowArgs>(args: SelectSubset<T, ProjectFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Project that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectFindFirstArgs} args - Arguments to find a Project
+     * @example
+     * // Get one Project
+     * const project = await prisma.project.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ProjectFindFirstArgs>(args?: SelectSubset<T, ProjectFindFirstArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Project that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectFindFirstOrThrowArgs} args - Arguments to find a Project
+     * @example
+     * // Get one Project
+     * const project = await prisma.project.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ProjectFindFirstOrThrowArgs>(args?: SelectSubset<T, ProjectFindFirstOrThrowArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Projects that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Projects
+     * const projects = await prisma.project.findMany()
+     * 
+     * // Get first 10 Projects
+     * const projects = await prisma.project.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const projectWithIdOnly = await prisma.project.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ProjectFindManyArgs>(args?: SelectSubset<T, ProjectFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Project.
+     * @param {ProjectCreateArgs} args - Arguments to create a Project.
+     * @example
+     * // Create one Project
+     * const Project = await prisma.project.create({
+     *   data: {
+     *     // ... data to create a Project
+     *   }
+     * })
+     * 
+     */
+    create<T extends ProjectCreateArgs>(args: SelectSubset<T, ProjectCreateArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Projects.
+     * @param {ProjectCreateManyArgs} args - Arguments to create many Projects.
+     * @example
+     * // Create many Projects
+     * const project = await prisma.project.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ProjectCreateManyArgs>(args?: SelectSubset<T, ProjectCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Projects and returns the data saved in the database.
+     * @param {ProjectCreateManyAndReturnArgs} args - Arguments to create many Projects.
+     * @example
+     * // Create many Projects
+     * const project = await prisma.project.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Projects and only return the `id`
+     * const projectWithIdOnly = await prisma.project.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ProjectCreateManyAndReturnArgs>(args?: SelectSubset<T, ProjectCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Project.
+     * @param {ProjectDeleteArgs} args - Arguments to delete one Project.
+     * @example
+     * // Delete one Project
+     * const Project = await prisma.project.delete({
+     *   where: {
+     *     // ... filter to delete one Project
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ProjectDeleteArgs>(args: SelectSubset<T, ProjectDeleteArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Project.
+     * @param {ProjectUpdateArgs} args - Arguments to update one Project.
+     * @example
+     * // Update one Project
+     * const project = await prisma.project.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ProjectUpdateArgs>(args: SelectSubset<T, ProjectUpdateArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Projects.
+     * @param {ProjectDeleteManyArgs} args - Arguments to filter Projects to delete.
+     * @example
+     * // Delete a few Projects
+     * const { count } = await prisma.project.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ProjectDeleteManyArgs>(args?: SelectSubset<T, ProjectDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Projects.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Projects
+     * const project = await prisma.project.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ProjectUpdateManyArgs>(args: SelectSubset<T, ProjectUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Projects and returns the data updated in the database.
+     * @param {ProjectUpdateManyAndReturnArgs} args - Arguments to update many Projects.
+     * @example
+     * // Update many Projects
+     * const project = await prisma.project.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Projects and only return the `id`
+     * const projectWithIdOnly = await prisma.project.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ProjectUpdateManyAndReturnArgs>(args: SelectSubset<T, ProjectUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Project.
+     * @param {ProjectUpsertArgs} args - Arguments to update or create a Project.
+     * @example
+     * // Update or create a Project
+     * const project = await prisma.project.upsert({
+     *   create: {
+     *     // ... data to create a Project
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Project we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ProjectUpsertArgs>(args: SelectSubset<T, ProjectUpsertArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Projects.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectCountArgs} args - Arguments to filter Projects to count.
+     * @example
+     * // Count the number of Projects
+     * const count = await prisma.project.count({
+     *   where: {
+     *     // ... the filter for the Projects we want to count
+     *   }
+     * })
+    **/
+    count<T extends ProjectCountArgs>(
+      args?: Subset<T, ProjectCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ProjectCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Project.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ProjectAggregateArgs>(args: Subset<T, ProjectAggregateArgs>): Prisma.PrismaPromise<GetProjectAggregateType<T>>
+
+    /**
+     * Group by Project.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ProjectGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ProjectGroupByArgs['orderBy'] }
+        : { orderBy?: ProjectGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ProjectGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetProjectGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Project model
+   */
+  readonly fields: ProjectFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Project.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ProjectClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    loggerActivity<T extends Project$loggerActivityArgs<ExtArgs> = {}>(args?: Subset<T, Project$loggerActivityArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoggerActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Project model
+   */
+  interface ProjectFieldRefs {
+    readonly id: FieldRef<"Project", 'String'>
+    readonly name: FieldRef<"Project", 'String'>
+    readonly createdOn: FieldRef<"Project", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Project findUnique
+   */
+  export type ProjectFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectInclude<ExtArgs> | null
+    /**
+     * Filter, which Project to fetch.
+     */
+    where: ProjectWhereUniqueInput
+  }
+
+  /**
+   * Project findUniqueOrThrow
+   */
+  export type ProjectFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectInclude<ExtArgs> | null
+    /**
+     * Filter, which Project to fetch.
+     */
+    where: ProjectWhereUniqueInput
+  }
+
+  /**
+   * Project findFirst
+   */
+  export type ProjectFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectInclude<ExtArgs> | null
+    /**
+     * Filter, which Project to fetch.
+     */
+    where?: ProjectWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Projects to fetch.
+     */
+    orderBy?: ProjectOrderByWithRelationInput | ProjectOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Projects.
+     */
+    cursor?: ProjectWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Projects from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Projects.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Projects.
+     */
+    distinct?: ProjectScalarFieldEnum | ProjectScalarFieldEnum[]
+  }
+
+  /**
+   * Project findFirstOrThrow
+   */
+  export type ProjectFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectInclude<ExtArgs> | null
+    /**
+     * Filter, which Project to fetch.
+     */
+    where?: ProjectWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Projects to fetch.
+     */
+    orderBy?: ProjectOrderByWithRelationInput | ProjectOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Projects.
+     */
+    cursor?: ProjectWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Projects from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Projects.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Projects.
+     */
+    distinct?: ProjectScalarFieldEnum | ProjectScalarFieldEnum[]
+  }
+
+  /**
+   * Project findMany
+   */
+  export type ProjectFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectInclude<ExtArgs> | null
+    /**
+     * Filter, which Projects to fetch.
+     */
+    where?: ProjectWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Projects to fetch.
+     */
+    orderBy?: ProjectOrderByWithRelationInput | ProjectOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Projects.
+     */
+    cursor?: ProjectWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Projects from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Projects.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Projects.
+     */
+    distinct?: ProjectScalarFieldEnum | ProjectScalarFieldEnum[]
+  }
+
+  /**
+   * Project create
+   */
+  export type ProjectCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Project.
+     */
+    data: XOR<ProjectCreateInput, ProjectUncheckedCreateInput>
+  }
+
+  /**
+   * Project createMany
+   */
+  export type ProjectCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Projects.
+     */
+    data: ProjectCreateManyInput | ProjectCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Project createManyAndReturn
+   */
+  export type ProjectCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * The data used to create many Projects.
+     */
+    data: ProjectCreateManyInput | ProjectCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Project update
+   */
+  export type ProjectUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Project.
+     */
+    data: XOR<ProjectUpdateInput, ProjectUncheckedUpdateInput>
+    /**
+     * Choose, which Project to update.
+     */
+    where: ProjectWhereUniqueInput
+  }
+
+  /**
+   * Project updateMany
+   */
+  export type ProjectUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Projects.
+     */
+    data: XOR<ProjectUpdateManyMutationInput, ProjectUncheckedUpdateManyInput>
+    /**
+     * Filter which Projects to update
+     */
+    where?: ProjectWhereInput
+    /**
+     * Limit how many Projects to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Project updateManyAndReturn
+   */
+  export type ProjectUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * The data used to update Projects.
+     */
+    data: XOR<ProjectUpdateManyMutationInput, ProjectUncheckedUpdateManyInput>
+    /**
+     * Filter which Projects to update
+     */
+    where?: ProjectWhereInput
+    /**
+     * Limit how many Projects to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Project upsert
+   */
+  export type ProjectUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Project to update in case it exists.
+     */
+    where: ProjectWhereUniqueInput
+    /**
+     * In case the Project found by the `where` argument doesn't exist, create a new Project with this data.
+     */
+    create: XOR<ProjectCreateInput, ProjectUncheckedCreateInput>
+    /**
+     * In case the Project was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ProjectUpdateInput, ProjectUncheckedUpdateInput>
+  }
+
+  /**
+   * Project delete
+   */
+  export type ProjectDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectInclude<ExtArgs> | null
+    /**
+     * Filter which Project to delete.
+     */
+    where: ProjectWhereUniqueInput
+  }
+
+  /**
+   * Project deleteMany
+   */
+  export type ProjectDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Projects to delete
+     */
+    where?: ProjectWhereInput
+    /**
+     * Limit how many Projects to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Project.loggerActivity
+   */
+  export type Project$loggerActivityArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityInclude<ExtArgs> | null
+    where?: LoggerActivityWhereInput
+    orderBy?: LoggerActivityOrderByWithRelationInput | LoggerActivityOrderByWithRelationInput[]
+    cursor?: LoggerActivityWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LoggerActivityScalarFieldEnum | LoggerActivityScalarFieldEnum[]
+  }
+
+  /**
+   * Project without action
+   */
+  export type ProjectDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model LoggerActivity
+   */
+
+  export type AggregateLoggerActivity = {
+    _count: LoggerActivityCountAggregateOutputType | null
+    _min: LoggerActivityMinAggregateOutputType | null
+    _max: LoggerActivityMaxAggregateOutputType | null
+  }
+
+  export type LoggerActivityMinAggregateOutputType = {
+    id: string | null
+    projectId: string | null
+    type: string | null
+    loggedOn: Date | null
+  }
+
+  export type LoggerActivityMaxAggregateOutputType = {
+    id: string | null
+    projectId: string | null
+    type: string | null
+    loggedOn: Date | null
+  }
+
+  export type LoggerActivityCountAggregateOutputType = {
+    id: number
+    projectId: number
+    type: number
+    data: number
+    loggedOn: number
+    _all: number
+  }
+
+
+  export type LoggerActivityMinAggregateInputType = {
+    id?: true
+    projectId?: true
+    type?: true
+    loggedOn?: true
+  }
+
+  export type LoggerActivityMaxAggregateInputType = {
+    id?: true
+    projectId?: true
+    type?: true
+    loggedOn?: true
+  }
+
+  export type LoggerActivityCountAggregateInputType = {
+    id?: true
+    projectId?: true
+    type?: true
+    data?: true
+    loggedOn?: true
+    _all?: true
+  }
+
+  export type LoggerActivityAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoggerActivity to aggregate.
+     */
+    where?: LoggerActivityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoggerActivities to fetch.
+     */
+    orderBy?: LoggerActivityOrderByWithRelationInput | LoggerActivityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: LoggerActivityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoggerActivities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoggerActivities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned LoggerActivities
+    **/
+    _count?: true | LoggerActivityCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: LoggerActivityMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: LoggerActivityMaxAggregateInputType
+  }
+
+  export type GetLoggerActivityAggregateType<T extends LoggerActivityAggregateArgs> = {
+        [P in keyof T & keyof AggregateLoggerActivity]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateLoggerActivity[P]>
+      : GetScalarType<T[P], AggregateLoggerActivity[P]>
+  }
+
+
+
+
+  export type LoggerActivityGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoggerActivityWhereInput
+    orderBy?: LoggerActivityOrderByWithAggregationInput | LoggerActivityOrderByWithAggregationInput[]
+    by: LoggerActivityScalarFieldEnum[] | LoggerActivityScalarFieldEnum
+    having?: LoggerActivityScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: LoggerActivityCountAggregateInputType | true
+    _min?: LoggerActivityMinAggregateInputType
+    _max?: LoggerActivityMaxAggregateInputType
+  }
+
+  export type LoggerActivityGroupByOutputType = {
+    id: string
+    projectId: string
+    type: string
+    data: JsonValue
+    loggedOn: Date
+    _count: LoggerActivityCountAggregateOutputType | null
+    _min: LoggerActivityMinAggregateOutputType | null
+    _max: LoggerActivityMaxAggregateOutputType | null
+  }
+
+  type GetLoggerActivityGroupByPayload<T extends LoggerActivityGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<LoggerActivityGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof LoggerActivityGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], LoggerActivityGroupByOutputType[P]>
+            : GetScalarType<T[P], LoggerActivityGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type LoggerActivitySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    projectId?: boolean
+    type?: boolean
+    data?: boolean
+    loggedOn?: boolean
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loggerActivity"]>
+
+  export type LoggerActivitySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    projectId?: boolean
+    type?: boolean
+    data?: boolean
+    loggedOn?: boolean
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loggerActivity"]>
+
+  export type LoggerActivitySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    projectId?: boolean
+    type?: boolean
+    data?: boolean
+    loggedOn?: boolean
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loggerActivity"]>
+
+  export type LoggerActivitySelectScalar = {
+    id?: boolean
+    projectId?: boolean
+    type?: boolean
+    data?: boolean
+    loggedOn?: boolean
+  }
+
+  export type LoggerActivityOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "projectId" | "type" | "data" | "loggedOn", ExtArgs["result"]["loggerActivity"]>
+  export type LoggerActivityInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+  }
+  export type LoggerActivityIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+  }
+  export type LoggerActivityIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+  }
+
+  export type $LoggerActivityPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "LoggerActivity"
+    objects: {
+      project: Prisma.$ProjectPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      projectId: string
+      type: string
+      data: Prisma.JsonValue
+      loggedOn: Date
+    }, ExtArgs["result"]["loggerActivity"]>
+    composites: {}
+  }
+
+  type LoggerActivityGetPayload<S extends boolean | null | undefined | LoggerActivityDefaultArgs> = $Result.GetResult<Prisma.$LoggerActivityPayload, S>
+
+  type LoggerActivityCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<LoggerActivityFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: LoggerActivityCountAggregateInputType | true
+    }
+
+  export interface LoggerActivityDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LoggerActivity'], meta: { name: 'LoggerActivity' } }
+    /**
+     * Find zero or one LoggerActivity that matches the filter.
+     * @param {LoggerActivityFindUniqueArgs} args - Arguments to find a LoggerActivity
+     * @example
+     * // Get one LoggerActivity
+     * const loggerActivity = await prisma.loggerActivity.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends LoggerActivityFindUniqueArgs>(args: SelectSubset<T, LoggerActivityFindUniqueArgs<ExtArgs>>): Prisma__LoggerActivityClient<$Result.GetResult<Prisma.$LoggerActivityPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one LoggerActivity that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {LoggerActivityFindUniqueOrThrowArgs} args - Arguments to find a LoggerActivity
+     * @example
+     * // Get one LoggerActivity
+     * const loggerActivity = await prisma.loggerActivity.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends LoggerActivityFindUniqueOrThrowArgs>(args: SelectSubset<T, LoggerActivityFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LoggerActivityClient<$Result.GetResult<Prisma.$LoggerActivityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoggerActivity that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoggerActivityFindFirstArgs} args - Arguments to find a LoggerActivity
+     * @example
+     * // Get one LoggerActivity
+     * const loggerActivity = await prisma.loggerActivity.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends LoggerActivityFindFirstArgs>(args?: SelectSubset<T, LoggerActivityFindFirstArgs<ExtArgs>>): Prisma__LoggerActivityClient<$Result.GetResult<Prisma.$LoggerActivityPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoggerActivity that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoggerActivityFindFirstOrThrowArgs} args - Arguments to find a LoggerActivity
+     * @example
+     * // Get one LoggerActivity
+     * const loggerActivity = await prisma.loggerActivity.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends LoggerActivityFindFirstOrThrowArgs>(args?: SelectSubset<T, LoggerActivityFindFirstOrThrowArgs<ExtArgs>>): Prisma__LoggerActivityClient<$Result.GetResult<Prisma.$LoggerActivityPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more LoggerActivities that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoggerActivityFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all LoggerActivities
+     * const loggerActivities = await prisma.loggerActivity.findMany()
+     * 
+     * // Get first 10 LoggerActivities
+     * const loggerActivities = await prisma.loggerActivity.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const loggerActivityWithIdOnly = await prisma.loggerActivity.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends LoggerActivityFindManyArgs>(args?: SelectSubset<T, LoggerActivityFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoggerActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a LoggerActivity.
+     * @param {LoggerActivityCreateArgs} args - Arguments to create a LoggerActivity.
+     * @example
+     * // Create one LoggerActivity
+     * const LoggerActivity = await prisma.loggerActivity.create({
+     *   data: {
+     *     // ... data to create a LoggerActivity
+     *   }
+     * })
+     * 
+     */
+    create<T extends LoggerActivityCreateArgs>(args: SelectSubset<T, LoggerActivityCreateArgs<ExtArgs>>): Prisma__LoggerActivityClient<$Result.GetResult<Prisma.$LoggerActivityPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many LoggerActivities.
+     * @param {LoggerActivityCreateManyArgs} args - Arguments to create many LoggerActivities.
+     * @example
+     * // Create many LoggerActivities
+     * const loggerActivity = await prisma.loggerActivity.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends LoggerActivityCreateManyArgs>(args?: SelectSubset<T, LoggerActivityCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many LoggerActivities and returns the data saved in the database.
+     * @param {LoggerActivityCreateManyAndReturnArgs} args - Arguments to create many LoggerActivities.
+     * @example
+     * // Create many LoggerActivities
+     * const loggerActivity = await prisma.loggerActivity.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many LoggerActivities and only return the `id`
+     * const loggerActivityWithIdOnly = await prisma.loggerActivity.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends LoggerActivityCreateManyAndReturnArgs>(args?: SelectSubset<T, LoggerActivityCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoggerActivityPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a LoggerActivity.
+     * @param {LoggerActivityDeleteArgs} args - Arguments to delete one LoggerActivity.
+     * @example
+     * // Delete one LoggerActivity
+     * const LoggerActivity = await prisma.loggerActivity.delete({
+     *   where: {
+     *     // ... filter to delete one LoggerActivity
+     *   }
+     * })
+     * 
+     */
+    delete<T extends LoggerActivityDeleteArgs>(args: SelectSubset<T, LoggerActivityDeleteArgs<ExtArgs>>): Prisma__LoggerActivityClient<$Result.GetResult<Prisma.$LoggerActivityPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one LoggerActivity.
+     * @param {LoggerActivityUpdateArgs} args - Arguments to update one LoggerActivity.
+     * @example
+     * // Update one LoggerActivity
+     * const loggerActivity = await prisma.loggerActivity.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends LoggerActivityUpdateArgs>(args: SelectSubset<T, LoggerActivityUpdateArgs<ExtArgs>>): Prisma__LoggerActivityClient<$Result.GetResult<Prisma.$LoggerActivityPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more LoggerActivities.
+     * @param {LoggerActivityDeleteManyArgs} args - Arguments to filter LoggerActivities to delete.
+     * @example
+     * // Delete a few LoggerActivities
+     * const { count } = await prisma.loggerActivity.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends LoggerActivityDeleteManyArgs>(args?: SelectSubset<T, LoggerActivityDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoggerActivities.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoggerActivityUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many LoggerActivities
+     * const loggerActivity = await prisma.loggerActivity.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends LoggerActivityUpdateManyArgs>(args: SelectSubset<T, LoggerActivityUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoggerActivities and returns the data updated in the database.
+     * @param {LoggerActivityUpdateManyAndReturnArgs} args - Arguments to update many LoggerActivities.
+     * @example
+     * // Update many LoggerActivities
+     * const loggerActivity = await prisma.loggerActivity.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LoggerActivities and only return the `id`
+     * const loggerActivityWithIdOnly = await prisma.loggerActivity.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LoggerActivityUpdateManyAndReturnArgs>(args: SelectSubset<T, LoggerActivityUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoggerActivityPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one LoggerActivity.
+     * @param {LoggerActivityUpsertArgs} args - Arguments to update or create a LoggerActivity.
+     * @example
+     * // Update or create a LoggerActivity
+     * const loggerActivity = await prisma.loggerActivity.upsert({
+     *   create: {
+     *     // ... data to create a LoggerActivity
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the LoggerActivity we want to update
+     *   }
+     * })
+     */
+    upsert<T extends LoggerActivityUpsertArgs>(args: SelectSubset<T, LoggerActivityUpsertArgs<ExtArgs>>): Prisma__LoggerActivityClient<$Result.GetResult<Prisma.$LoggerActivityPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of LoggerActivities.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoggerActivityCountArgs} args - Arguments to filter LoggerActivities to count.
+     * @example
+     * // Count the number of LoggerActivities
+     * const count = await prisma.loggerActivity.count({
+     *   where: {
+     *     // ... the filter for the LoggerActivities we want to count
+     *   }
+     * })
+    **/
+    count<T extends LoggerActivityCountArgs>(
+      args?: Subset<T, LoggerActivityCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], LoggerActivityCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a LoggerActivity.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoggerActivityAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends LoggerActivityAggregateArgs>(args: Subset<T, LoggerActivityAggregateArgs>): Prisma.PrismaPromise<GetLoggerActivityAggregateType<T>>
+
+    /**
+     * Group by LoggerActivity.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoggerActivityGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends LoggerActivityGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: LoggerActivityGroupByArgs['orderBy'] }
+        : { orderBy?: LoggerActivityGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, LoggerActivityGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLoggerActivityGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the LoggerActivity model
+   */
+  readonly fields: LoggerActivityFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for LoggerActivity.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__LoggerActivityClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    project<T extends ProjectDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProjectDefaultArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the LoggerActivity model
+   */
+  interface LoggerActivityFieldRefs {
+    readonly id: FieldRef<"LoggerActivity", 'String'>
+    readonly projectId: FieldRef<"LoggerActivity", 'String'>
+    readonly type: FieldRef<"LoggerActivity", 'String'>
+    readonly data: FieldRef<"LoggerActivity", 'Json'>
+    readonly loggedOn: FieldRef<"LoggerActivity", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * LoggerActivity findUnique
+   */
+  export type LoggerActivityFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityInclude<ExtArgs> | null
+    /**
+     * Filter, which LoggerActivity to fetch.
+     */
+    where: LoggerActivityWhereUniqueInput
+  }
+
+  /**
+   * LoggerActivity findUniqueOrThrow
+   */
+  export type LoggerActivityFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityInclude<ExtArgs> | null
+    /**
+     * Filter, which LoggerActivity to fetch.
+     */
+    where: LoggerActivityWhereUniqueInput
+  }
+
+  /**
+   * LoggerActivity findFirst
+   */
+  export type LoggerActivityFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityInclude<ExtArgs> | null
+    /**
+     * Filter, which LoggerActivity to fetch.
+     */
+    where?: LoggerActivityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoggerActivities to fetch.
+     */
+    orderBy?: LoggerActivityOrderByWithRelationInput | LoggerActivityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoggerActivities.
+     */
+    cursor?: LoggerActivityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoggerActivities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoggerActivities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoggerActivities.
+     */
+    distinct?: LoggerActivityScalarFieldEnum | LoggerActivityScalarFieldEnum[]
+  }
+
+  /**
+   * LoggerActivity findFirstOrThrow
+   */
+  export type LoggerActivityFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityInclude<ExtArgs> | null
+    /**
+     * Filter, which LoggerActivity to fetch.
+     */
+    where?: LoggerActivityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoggerActivities to fetch.
+     */
+    orderBy?: LoggerActivityOrderByWithRelationInput | LoggerActivityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoggerActivities.
+     */
+    cursor?: LoggerActivityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoggerActivities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoggerActivities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoggerActivities.
+     */
+    distinct?: LoggerActivityScalarFieldEnum | LoggerActivityScalarFieldEnum[]
+  }
+
+  /**
+   * LoggerActivity findMany
+   */
+  export type LoggerActivityFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityInclude<ExtArgs> | null
+    /**
+     * Filter, which LoggerActivities to fetch.
+     */
+    where?: LoggerActivityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoggerActivities to fetch.
+     */
+    orderBy?: LoggerActivityOrderByWithRelationInput | LoggerActivityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing LoggerActivities.
+     */
+    cursor?: LoggerActivityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoggerActivities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoggerActivities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoggerActivities.
+     */
+    distinct?: LoggerActivityScalarFieldEnum | LoggerActivityScalarFieldEnum[]
+  }
+
+  /**
+   * LoggerActivity create
+   */
+  export type LoggerActivityCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityInclude<ExtArgs> | null
+    /**
+     * The data needed to create a LoggerActivity.
+     */
+    data: XOR<LoggerActivityCreateInput, LoggerActivityUncheckedCreateInput>
+  }
+
+  /**
+   * LoggerActivity createMany
+   */
+  export type LoggerActivityCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many LoggerActivities.
+     */
+    data: LoggerActivityCreateManyInput | LoggerActivityCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LoggerActivity createManyAndReturn
+   */
+  export type LoggerActivityCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * The data used to create many LoggerActivities.
+     */
+    data: LoggerActivityCreateManyInput | LoggerActivityCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LoggerActivity update
+   */
+  export type LoggerActivityUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityInclude<ExtArgs> | null
+    /**
+     * The data needed to update a LoggerActivity.
+     */
+    data: XOR<LoggerActivityUpdateInput, LoggerActivityUncheckedUpdateInput>
+    /**
+     * Choose, which LoggerActivity to update.
+     */
+    where: LoggerActivityWhereUniqueInput
+  }
+
+  /**
+   * LoggerActivity updateMany
+   */
+  export type LoggerActivityUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update LoggerActivities.
+     */
+    data: XOR<LoggerActivityUpdateManyMutationInput, LoggerActivityUncheckedUpdateManyInput>
+    /**
+     * Filter which LoggerActivities to update
+     */
+    where?: LoggerActivityWhereInput
+    /**
+     * Limit how many LoggerActivities to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoggerActivity updateManyAndReturn
+   */
+  export type LoggerActivityUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * The data used to update LoggerActivities.
+     */
+    data: XOR<LoggerActivityUpdateManyMutationInput, LoggerActivityUncheckedUpdateManyInput>
+    /**
+     * Filter which LoggerActivities to update
+     */
+    where?: LoggerActivityWhereInput
+    /**
+     * Limit how many LoggerActivities to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LoggerActivity upsert
+   */
+  export type LoggerActivityUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityInclude<ExtArgs> | null
+    /**
+     * The filter to search for the LoggerActivity to update in case it exists.
+     */
+    where: LoggerActivityWhereUniqueInput
+    /**
+     * In case the LoggerActivity found by the `where` argument doesn't exist, create a new LoggerActivity with this data.
+     */
+    create: XOR<LoggerActivityCreateInput, LoggerActivityUncheckedCreateInput>
+    /**
+     * In case the LoggerActivity was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<LoggerActivityUpdateInput, LoggerActivityUncheckedUpdateInput>
+  }
+
+  /**
+   * LoggerActivity delete
+   */
+  export type LoggerActivityDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityInclude<ExtArgs> | null
+    /**
+     * Filter which LoggerActivity to delete.
+     */
+    where: LoggerActivityWhereUniqueInput
+  }
+
+  /**
+   * LoggerActivity deleteMany
+   */
+  export type LoggerActivityDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoggerActivities to delete
+     */
+    where?: LoggerActivityWhereInput
+    /**
+     * Limit how many LoggerActivities to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoggerActivity without action
+   */
+  export type LoggerActivityDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoggerActivity
+     */
+    select?: LoggerActivitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoggerActivity
+     */
+    omit?: LoggerActivityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoggerActivityInclude<ExtArgs> | null
   }
 
 
@@ -28488,6 +30809,26 @@ export namespace Prisma {
   export type AppErrorScalarFieldEnum = (typeof AppErrorScalarFieldEnum)[keyof typeof AppErrorScalarFieldEnum]
 
 
+  export const ProjectScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    createdOn: 'createdOn'
+  };
+
+  export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
+
+
+  export const LoggerActivityScalarFieldEnum: {
+    id: 'id',
+    projectId: 'projectId',
+    type: 'type',
+    data: 'data',
+    loggedOn: 'loggedOn'
+  };
+
+  export type LoggerActivityScalarFieldEnum = (typeof LoggerActivityScalarFieldEnum)[keyof typeof LoggerActivityScalarFieldEnum]
+
+
   export const LiveSessionScalarFieldEnum: {
     id: 'id',
     createdAt: 'createdAt',
@@ -29421,6 +31762,106 @@ export namespace Prisma {
     source?: StringWithAggregatesFilter<"AppError"> | string
     timestamp?: DateTimeWithAggregatesFilter<"AppError"> | Date | string
     stack?: StringNullableWithAggregatesFilter<"AppError"> | string | null
+  }
+
+  export type ProjectWhereInput = {
+    AND?: ProjectWhereInput | ProjectWhereInput[]
+    OR?: ProjectWhereInput[]
+    NOT?: ProjectWhereInput | ProjectWhereInput[]
+    id?: StringFilter<"Project"> | string
+    name?: StringFilter<"Project"> | string
+    createdOn?: DateTimeFilter<"Project"> | Date | string
+    loggerActivity?: LoggerActivityListRelationFilter
+  }
+
+  export type ProjectOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    createdOn?: SortOrder
+    loggerActivity?: LoggerActivityOrderByRelationAggregateInput
+  }
+
+  export type ProjectWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    name?: string
+    AND?: ProjectWhereInput | ProjectWhereInput[]
+    OR?: ProjectWhereInput[]
+    NOT?: ProjectWhereInput | ProjectWhereInput[]
+    createdOn?: DateTimeFilter<"Project"> | Date | string
+    loggerActivity?: LoggerActivityListRelationFilter
+  }, "id" | "name">
+
+  export type ProjectOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    createdOn?: SortOrder
+    _count?: ProjectCountOrderByAggregateInput
+    _max?: ProjectMaxOrderByAggregateInput
+    _min?: ProjectMinOrderByAggregateInput
+  }
+
+  export type ProjectScalarWhereWithAggregatesInput = {
+    AND?: ProjectScalarWhereWithAggregatesInput | ProjectScalarWhereWithAggregatesInput[]
+    OR?: ProjectScalarWhereWithAggregatesInput[]
+    NOT?: ProjectScalarWhereWithAggregatesInput | ProjectScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Project"> | string
+    name?: StringWithAggregatesFilter<"Project"> | string
+    createdOn?: DateTimeWithAggregatesFilter<"Project"> | Date | string
+  }
+
+  export type LoggerActivityWhereInput = {
+    AND?: LoggerActivityWhereInput | LoggerActivityWhereInput[]
+    OR?: LoggerActivityWhereInput[]
+    NOT?: LoggerActivityWhereInput | LoggerActivityWhereInput[]
+    id?: StringFilter<"LoggerActivity"> | string
+    projectId?: StringFilter<"LoggerActivity"> | string
+    type?: StringFilter<"LoggerActivity"> | string
+    data?: JsonFilter<"LoggerActivity">
+    loggedOn?: DateTimeFilter<"LoggerActivity"> | Date | string
+    project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
+  }
+
+  export type LoggerActivityOrderByWithRelationInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    type?: SortOrder
+    data?: SortOrder
+    loggedOn?: SortOrder
+    project?: ProjectOrderByWithRelationInput
+  }
+
+  export type LoggerActivityWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: LoggerActivityWhereInput | LoggerActivityWhereInput[]
+    OR?: LoggerActivityWhereInput[]
+    NOT?: LoggerActivityWhereInput | LoggerActivityWhereInput[]
+    projectId?: StringFilter<"LoggerActivity"> | string
+    type?: StringFilter<"LoggerActivity"> | string
+    data?: JsonFilter<"LoggerActivity">
+    loggedOn?: DateTimeFilter<"LoggerActivity"> | Date | string
+    project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
+  }, "id">
+
+  export type LoggerActivityOrderByWithAggregationInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    type?: SortOrder
+    data?: SortOrder
+    loggedOn?: SortOrder
+    _count?: LoggerActivityCountOrderByAggregateInput
+    _max?: LoggerActivityMaxOrderByAggregateInput
+    _min?: LoggerActivityMinOrderByAggregateInput
+  }
+
+  export type LoggerActivityScalarWhereWithAggregatesInput = {
+    AND?: LoggerActivityScalarWhereWithAggregatesInput | LoggerActivityScalarWhereWithAggregatesInput[]
+    OR?: LoggerActivityScalarWhereWithAggregatesInput[]
+    NOT?: LoggerActivityScalarWhereWithAggregatesInput | LoggerActivityScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"LoggerActivity"> | string
+    projectId?: StringWithAggregatesFilter<"LoggerActivity"> | string
+    type?: StringWithAggregatesFilter<"LoggerActivity"> | string
+    data?: JsonWithAggregatesFilter<"LoggerActivity">
+    loggedOn?: DateTimeWithAggregatesFilter<"LoggerActivity"> | Date | string
   }
 
   export type LiveSessionWhereInput = {
@@ -31037,6 +33478,107 @@ export namespace Prisma {
     stack?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type ProjectCreateInput = {
+    id: string
+    name: string
+    createdOn: Date | string
+    loggerActivity?: LoggerActivityCreateNestedManyWithoutProjectInput
+  }
+
+  export type ProjectUncheckedCreateInput = {
+    id: string
+    name: string
+    createdOn: Date | string
+    loggerActivity?: LoggerActivityUncheckedCreateNestedManyWithoutProjectInput
+  }
+
+  export type ProjectUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdOn?: DateTimeFieldUpdateOperationsInput | Date | string
+    loggerActivity?: LoggerActivityUpdateManyWithoutProjectNestedInput
+  }
+
+  export type ProjectUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdOn?: DateTimeFieldUpdateOperationsInput | Date | string
+    loggerActivity?: LoggerActivityUncheckedUpdateManyWithoutProjectNestedInput
+  }
+
+  export type ProjectCreateManyInput = {
+    id: string
+    name: string
+    createdOn: Date | string
+  }
+
+  export type ProjectUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdOn?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProjectUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdOn?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoggerActivityCreateInput = {
+    id: string
+    type: string
+    data: JsonNullValueInput | InputJsonValue
+    loggedOn: Date | string
+    project: ProjectCreateNestedOneWithoutLoggerActivityInput
+  }
+
+  export type LoggerActivityUncheckedCreateInput = {
+    id: string
+    projectId: string
+    type: string
+    data: JsonNullValueInput | InputJsonValue
+    loggedOn: Date | string
+  }
+
+  export type LoggerActivityUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
+    project?: ProjectUpdateOneRequiredWithoutLoggerActivityNestedInput
+  }
+
+  export type LoggerActivityUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    projectId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoggerActivityCreateManyInput = {
+    id: string
+    projectId: string
+    type: string
+    data: JsonNullValueInput | InputJsonValue
+    loggedOn: Date | string
+  }
+
+  export type LoggerActivityUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoggerActivityUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    projectId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type LiveSessionCreateInput = {
     id: string
     createdAt: Date | string
@@ -32545,6 +35087,34 @@ export namespace Prisma {
     timestamp?: SortOrder
     stack?: SortOrder
   }
+
+  export type LoggerActivityListRelationFilter = {
+    every?: LoggerActivityWhereInput
+    some?: LoggerActivityWhereInput
+    none?: LoggerActivityWhereInput
+  }
+
+  export type LoggerActivityOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ProjectCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    createdOn?: SortOrder
+  }
+
+  export type ProjectMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    createdOn?: SortOrder
+  }
+
+  export type ProjectMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    createdOn?: SortOrder
+  }
   export type JsonFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -32567,6 +35137,59 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type ProjectScalarRelationFilter = {
+    is?: ProjectWhereInput
+    isNot?: ProjectWhereInput
+  }
+
+  export type LoggerActivityCountOrderByAggregateInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    type?: SortOrder
+    data?: SortOrder
+    loggedOn?: SortOrder
+  }
+
+  export type LoggerActivityMaxOrderByAggregateInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    type?: SortOrder
+    loggedOn?: SortOrder
+  }
+
+  export type LoggerActivityMinOrderByAggregateInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    type?: SortOrder
+    loggedOn?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
   }
 
   export type LiveSessionCountOrderByAggregateInput = {
@@ -32595,32 +35218,6 @@ export namespace Prisma {
     status?: SortOrder
     serverLogId?: SortOrder
     serverId?: SortOrder
-  }
-  export type JsonWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedJsonFilter<$PrismaModel>
-    _max?: NestedJsonFilter<$PrismaModel>
   }
 
   export type BigIntFilter<$PrismaModel = never> = {
@@ -33395,6 +35992,62 @@ export namespace Prisma {
     push?: string | string[]
   }
 
+  export type LoggerActivityCreateNestedManyWithoutProjectInput = {
+    create?: XOR<LoggerActivityCreateWithoutProjectInput, LoggerActivityUncheckedCreateWithoutProjectInput> | LoggerActivityCreateWithoutProjectInput[] | LoggerActivityUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: LoggerActivityCreateOrConnectWithoutProjectInput | LoggerActivityCreateOrConnectWithoutProjectInput[]
+    createMany?: LoggerActivityCreateManyProjectInputEnvelope
+    connect?: LoggerActivityWhereUniqueInput | LoggerActivityWhereUniqueInput[]
+  }
+
+  export type LoggerActivityUncheckedCreateNestedManyWithoutProjectInput = {
+    create?: XOR<LoggerActivityCreateWithoutProjectInput, LoggerActivityUncheckedCreateWithoutProjectInput> | LoggerActivityCreateWithoutProjectInput[] | LoggerActivityUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: LoggerActivityCreateOrConnectWithoutProjectInput | LoggerActivityCreateOrConnectWithoutProjectInput[]
+    createMany?: LoggerActivityCreateManyProjectInputEnvelope
+    connect?: LoggerActivityWhereUniqueInput | LoggerActivityWhereUniqueInput[]
+  }
+
+  export type LoggerActivityUpdateManyWithoutProjectNestedInput = {
+    create?: XOR<LoggerActivityCreateWithoutProjectInput, LoggerActivityUncheckedCreateWithoutProjectInput> | LoggerActivityCreateWithoutProjectInput[] | LoggerActivityUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: LoggerActivityCreateOrConnectWithoutProjectInput | LoggerActivityCreateOrConnectWithoutProjectInput[]
+    upsert?: LoggerActivityUpsertWithWhereUniqueWithoutProjectInput | LoggerActivityUpsertWithWhereUniqueWithoutProjectInput[]
+    createMany?: LoggerActivityCreateManyProjectInputEnvelope
+    set?: LoggerActivityWhereUniqueInput | LoggerActivityWhereUniqueInput[]
+    disconnect?: LoggerActivityWhereUniqueInput | LoggerActivityWhereUniqueInput[]
+    delete?: LoggerActivityWhereUniqueInput | LoggerActivityWhereUniqueInput[]
+    connect?: LoggerActivityWhereUniqueInput | LoggerActivityWhereUniqueInput[]
+    update?: LoggerActivityUpdateWithWhereUniqueWithoutProjectInput | LoggerActivityUpdateWithWhereUniqueWithoutProjectInput[]
+    updateMany?: LoggerActivityUpdateManyWithWhereWithoutProjectInput | LoggerActivityUpdateManyWithWhereWithoutProjectInput[]
+    deleteMany?: LoggerActivityScalarWhereInput | LoggerActivityScalarWhereInput[]
+  }
+
+  export type LoggerActivityUncheckedUpdateManyWithoutProjectNestedInput = {
+    create?: XOR<LoggerActivityCreateWithoutProjectInput, LoggerActivityUncheckedCreateWithoutProjectInput> | LoggerActivityCreateWithoutProjectInput[] | LoggerActivityUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: LoggerActivityCreateOrConnectWithoutProjectInput | LoggerActivityCreateOrConnectWithoutProjectInput[]
+    upsert?: LoggerActivityUpsertWithWhereUniqueWithoutProjectInput | LoggerActivityUpsertWithWhereUniqueWithoutProjectInput[]
+    createMany?: LoggerActivityCreateManyProjectInputEnvelope
+    set?: LoggerActivityWhereUniqueInput | LoggerActivityWhereUniqueInput[]
+    disconnect?: LoggerActivityWhereUniqueInput | LoggerActivityWhereUniqueInput[]
+    delete?: LoggerActivityWhereUniqueInput | LoggerActivityWhereUniqueInput[]
+    connect?: LoggerActivityWhereUniqueInput | LoggerActivityWhereUniqueInput[]
+    update?: LoggerActivityUpdateWithWhereUniqueWithoutProjectInput | LoggerActivityUpdateWithWhereUniqueWithoutProjectInput[]
+    updateMany?: LoggerActivityUpdateManyWithWhereWithoutProjectInput | LoggerActivityUpdateManyWithWhereWithoutProjectInput[]
+    deleteMany?: LoggerActivityScalarWhereInput | LoggerActivityScalarWhereInput[]
+  }
+
+  export type ProjectCreateNestedOneWithoutLoggerActivityInput = {
+    create?: XOR<ProjectCreateWithoutLoggerActivityInput, ProjectUncheckedCreateWithoutLoggerActivityInput>
+    connectOrCreate?: ProjectCreateOrConnectWithoutLoggerActivityInput
+    connect?: ProjectWhereUniqueInput
+  }
+
+  export type ProjectUpdateOneRequiredWithoutLoggerActivityNestedInput = {
+    create?: XOR<ProjectCreateWithoutLoggerActivityInput, ProjectUncheckedCreateWithoutLoggerActivityInput>
+    connectOrCreate?: ProjectCreateOrConnectWithoutLoggerActivityInput
+    upsert?: ProjectUpsertWithoutLoggerActivityInput
+    connect?: ProjectWhereUniqueInput
+    update?: XOR<XOR<ProjectUpdateToOneWithWhereWithoutLoggerActivityInput, ProjectUpdateWithoutLoggerActivityInput>, ProjectUncheckedUpdateWithoutLoggerActivityInput>
+  }
+
   export type BigIntFieldUpdateOperationsInput = {
     set?: bigint | number
     increment?: bigint | number
@@ -34109,6 +36762,97 @@ export namespace Prisma {
     files?: NullableJsonNullValueInput | InputJsonValue
   }
 
+  export type LoggerActivityCreateWithoutProjectInput = {
+    id: string
+    type: string
+    data: JsonNullValueInput | InputJsonValue
+    loggedOn: Date | string
+  }
+
+  export type LoggerActivityUncheckedCreateWithoutProjectInput = {
+    id: string
+    type: string
+    data: JsonNullValueInput | InputJsonValue
+    loggedOn: Date | string
+  }
+
+  export type LoggerActivityCreateOrConnectWithoutProjectInput = {
+    where: LoggerActivityWhereUniqueInput
+    create: XOR<LoggerActivityCreateWithoutProjectInput, LoggerActivityUncheckedCreateWithoutProjectInput>
+  }
+
+  export type LoggerActivityCreateManyProjectInputEnvelope = {
+    data: LoggerActivityCreateManyProjectInput | LoggerActivityCreateManyProjectInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type LoggerActivityUpsertWithWhereUniqueWithoutProjectInput = {
+    where: LoggerActivityWhereUniqueInput
+    update: XOR<LoggerActivityUpdateWithoutProjectInput, LoggerActivityUncheckedUpdateWithoutProjectInput>
+    create: XOR<LoggerActivityCreateWithoutProjectInput, LoggerActivityUncheckedCreateWithoutProjectInput>
+  }
+
+  export type LoggerActivityUpdateWithWhereUniqueWithoutProjectInput = {
+    where: LoggerActivityWhereUniqueInput
+    data: XOR<LoggerActivityUpdateWithoutProjectInput, LoggerActivityUncheckedUpdateWithoutProjectInput>
+  }
+
+  export type LoggerActivityUpdateManyWithWhereWithoutProjectInput = {
+    where: LoggerActivityScalarWhereInput
+    data: XOR<LoggerActivityUpdateManyMutationInput, LoggerActivityUncheckedUpdateManyWithoutProjectInput>
+  }
+
+  export type LoggerActivityScalarWhereInput = {
+    AND?: LoggerActivityScalarWhereInput | LoggerActivityScalarWhereInput[]
+    OR?: LoggerActivityScalarWhereInput[]
+    NOT?: LoggerActivityScalarWhereInput | LoggerActivityScalarWhereInput[]
+    id?: StringFilter<"LoggerActivity"> | string
+    projectId?: StringFilter<"LoggerActivity"> | string
+    type?: StringFilter<"LoggerActivity"> | string
+    data?: JsonFilter<"LoggerActivity">
+    loggedOn?: DateTimeFilter<"LoggerActivity"> | Date | string
+  }
+
+  export type ProjectCreateWithoutLoggerActivityInput = {
+    id: string
+    name: string
+    createdOn: Date | string
+  }
+
+  export type ProjectUncheckedCreateWithoutLoggerActivityInput = {
+    id: string
+    name: string
+    createdOn: Date | string
+  }
+
+  export type ProjectCreateOrConnectWithoutLoggerActivityInput = {
+    where: ProjectWhereUniqueInput
+    create: XOR<ProjectCreateWithoutLoggerActivityInput, ProjectUncheckedCreateWithoutLoggerActivityInput>
+  }
+
+  export type ProjectUpsertWithoutLoggerActivityInput = {
+    update: XOR<ProjectUpdateWithoutLoggerActivityInput, ProjectUncheckedUpdateWithoutLoggerActivityInput>
+    create: XOR<ProjectCreateWithoutLoggerActivityInput, ProjectUncheckedCreateWithoutLoggerActivityInput>
+    where?: ProjectWhereInput
+  }
+
+  export type ProjectUpdateToOneWithWhereWithoutLoggerActivityInput = {
+    where?: ProjectWhereInput
+    data: XOR<ProjectUpdateWithoutLoggerActivityInput, ProjectUncheckedUpdateWithoutLoggerActivityInput>
+  }
+
+  export type ProjectUpdateWithoutLoggerActivityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdOn?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProjectUncheckedUpdateWithoutLoggerActivityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdOn?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntelligenceLogCreateWithoutAccessInput = {
     id?: bigint | number
     details: JsonNullValueInput | InputJsonValue
@@ -34393,6 +37137,34 @@ export namespace Prisma {
     serverId?: StringFieldUpdateOperationsInput | string
     status?: EnumApplicationServerMapStatusFieldUpdateOperationsInput | $Enums.ApplicationServerMapStatus
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type LoggerActivityCreateManyProjectInput = {
+    id: string
+    type: string
+    data: JsonNullValueInput | InputJsonValue
+    loggedOn: Date | string
+  }
+
+  export type LoggerActivityUpdateWithoutProjectInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoggerActivityUncheckedUpdateWithoutProjectInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoggerActivityUncheckedUpdateManyWithoutProjectInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type IntelligenceLogCreateManyAccessInput = {

@@ -167,6 +167,10 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, selectedSe
     { href: "/billing", label: "Billing", icon: CreditCard },
   ]
 
+  const maintenanceLinks = [
+    { href: "/logger", label: "Logger", icon: ScrollText },
+  ];
+
   const serverLinks = [
     { href: "/server/home", label: "Home", icon: Home },
     { href: "/server/status", label: "Status", icon: HeartPulse },
@@ -196,6 +200,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, selectedSe
     ...domainLinks.map(l => l.href),
     ...securityLinks.map(l => l.href),
     ...accountLinks.map(l => l.href),
+    ...maintenanceLinks.map(l => l.href),
     ...(isServerSelected ? serverLinks.map(l => l.href) : []),
     // maintenanceLinks removed
 
@@ -256,6 +261,18 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, selectedSe
           Domains
         </div>
         {domainLinks.map(({ href, label, icon: Icon }) => (
+          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} selectedServerId={selectedServerId} onClick={onLinkClick}>
+            <Icon className="h-4 w-4" />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+      </div>
+
+      <div className="space-y-2">
+        <div className="px-3 text-xs font-semibold uppercase text-muted-foreground pt-4">
+          Maintenance
+        </div>
+        {maintenanceLinks.map(({ href, label, icon: Icon }) => (
           <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} selectedServerId={selectedServerId} onClick={onLinkClick}>
             <Icon className="h-4 w-4" />
             <span>{label}</span>
