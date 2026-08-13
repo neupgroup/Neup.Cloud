@@ -78,7 +78,7 @@ export default async function LoggerErrorsPage() {
                           {formatDistanceToNow(new Date(activity.loggedOn), { addSuffix: true })}
                         </p>
                       </div>
-                      <Badge variant="destructive">{activity.type}</Badge>
+                      <Badge variant="destructive">{activity.type ?? 'undefined'}</Badge>
                     </div>
                     <ScrollArea className="max-h-72 rounded-md border bg-muted/20 p-3">
                       <pre className="text-xs">{formatData(activity.data)}</pre>

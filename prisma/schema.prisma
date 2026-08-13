@@ -144,7 +144,7 @@ model Project {
 model LoggerActivity {
   id        String   @id @db.Text
   projectId String   @map("projectId") @db.Text
-  type      String   @db.Text
+  type      String?  @db.Text
   data      Json
   loggedOn  DateTime @map("loggedOn") @db.Timestamp(6)
 

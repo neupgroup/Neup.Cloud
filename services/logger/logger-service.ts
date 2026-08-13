@@ -16,7 +16,7 @@ type LogRequestInput = {
 
 export type LoggerActivityRecord = {
   id: string;
-  type: string;
+  type: string | null;
   data: unknown;
   loggedOn: string;
   project: {
@@ -66,7 +66,7 @@ export async function logActivity(input: LogRequestInput) {
 
   const activity = await createLoggerActivity({
     projectId: project.id,
-    type: typeof input.type === 'string' && input.type.trim() ? input.type.trim() : 'info',
+    type: typeof input.type === 'string' && input.type.trim() ? input.type.trim() : undefined,
     data: input.data ?? {},
   });
 

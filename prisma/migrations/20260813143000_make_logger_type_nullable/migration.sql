@@ -1,0 +1,2 @@
+ALTER TABLE "loggerActivity"
+ALTER COLUMN "type" DROP NOT NULL;

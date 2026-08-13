@@ -13073,7 +13073,7 @@ export namespace Prisma {
   export type LoggerActivityGroupByOutputType = {
     id: string
     projectId: string
-    type: string
+    type: string | null
     data: JsonValue
     loggedOn: Date
     _count: LoggerActivityCountAggregateOutputType | null
@@ -13149,7 +13149,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       projectId: string
-      type: string
+      type: string | null
       data: Prisma.JsonValue
       loggedOn: Date
     }, ExtArgs["result"]["loggerActivity"]>
@@ -31815,7 +31815,7 @@ export namespace Prisma {
     NOT?: LoggerActivityWhereInput | LoggerActivityWhereInput[]
     id?: StringFilter<"LoggerActivity"> | string
     projectId?: StringFilter<"LoggerActivity"> | string
-    type?: StringFilter<"LoggerActivity"> | string
+    type?: StringNullableFilter<"LoggerActivity"> | string | null
     data?: JsonFilter<"LoggerActivity">
     loggedOn?: DateTimeFilter<"LoggerActivity"> | Date | string
     project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
@@ -31824,7 +31824,7 @@ export namespace Prisma {
   export type LoggerActivityOrderByWithRelationInput = {
     id?: SortOrder
     projectId?: SortOrder
-    type?: SortOrder
+    type?: SortOrderInput | SortOrder
     data?: SortOrder
     loggedOn?: SortOrder
     project?: ProjectOrderByWithRelationInput
@@ -31836,7 +31836,7 @@ export namespace Prisma {
     OR?: LoggerActivityWhereInput[]
     NOT?: LoggerActivityWhereInput | LoggerActivityWhereInput[]
     projectId?: StringFilter<"LoggerActivity"> | string
-    type?: StringFilter<"LoggerActivity"> | string
+    type?: StringNullableFilter<"LoggerActivity"> | string | null
     data?: JsonFilter<"LoggerActivity">
     loggedOn?: DateTimeFilter<"LoggerActivity"> | Date | string
     project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
@@ -31845,7 +31845,7 @@ export namespace Prisma {
   export type LoggerActivityOrderByWithAggregationInput = {
     id?: SortOrder
     projectId?: SortOrder
-    type?: SortOrder
+    type?: SortOrderInput | SortOrder
     data?: SortOrder
     loggedOn?: SortOrder
     _count?: LoggerActivityCountOrderByAggregateInput
@@ -31859,7 +31859,7 @@ export namespace Prisma {
     NOT?: LoggerActivityScalarWhereWithAggregatesInput | LoggerActivityScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"LoggerActivity"> | string
     projectId?: StringWithAggregatesFilter<"LoggerActivity"> | string
-    type?: StringWithAggregatesFilter<"LoggerActivity"> | string
+    type?: StringNullableWithAggregatesFilter<"LoggerActivity"> | string | null
     data?: JsonWithAggregatesFilter<"LoggerActivity">
     loggedOn?: DateTimeWithAggregatesFilter<"LoggerActivity"> | Date | string
   }
@@ -33526,7 +33526,7 @@ export namespace Prisma {
 
   export type LoggerActivityCreateInput = {
     id: string
-    type: string
+    type?: string | null
     data: JsonNullValueInput | InputJsonValue
     loggedOn: Date | string
     project: ProjectCreateNestedOneWithoutLoggerActivityInput
@@ -33535,14 +33535,14 @@ export namespace Prisma {
   export type LoggerActivityUncheckedCreateInput = {
     id: string
     projectId: string
-    type: string
+    type?: string | null
     data: JsonNullValueInput | InputJsonValue
     loggedOn: Date | string
   }
 
   export type LoggerActivityUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
     loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
     project?: ProjectUpdateOneRequiredWithoutLoggerActivityNestedInput
@@ -33551,7 +33551,7 @@ export namespace Prisma {
   export type LoggerActivityUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     projectId?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
     loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33559,14 +33559,14 @@ export namespace Prisma {
   export type LoggerActivityCreateManyInput = {
     id: string
     projectId: string
-    type: string
+    type?: string | null
     data: JsonNullValueInput | InputJsonValue
     loggedOn: Date | string
   }
 
   export type LoggerActivityUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
     loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33574,7 +33574,7 @@ export namespace Prisma {
   export type LoggerActivityUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     projectId?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
     loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -36764,14 +36764,14 @@ export namespace Prisma {
 
   export type LoggerActivityCreateWithoutProjectInput = {
     id: string
-    type: string
+    type?: string | null
     data: JsonNullValueInput | InputJsonValue
     loggedOn: Date | string
   }
 
   export type LoggerActivityUncheckedCreateWithoutProjectInput = {
     id: string
-    type: string
+    type?: string | null
     data: JsonNullValueInput | InputJsonValue
     loggedOn: Date | string
   }
@@ -36808,7 +36808,7 @@ export namespace Prisma {
     NOT?: LoggerActivityScalarWhereInput | LoggerActivityScalarWhereInput[]
     id?: StringFilter<"LoggerActivity"> | string
     projectId?: StringFilter<"LoggerActivity"> | string
-    type?: StringFilter<"LoggerActivity"> | string
+    type?: StringNullableFilter<"LoggerActivity"> | string | null
     data?: JsonFilter<"LoggerActivity">
     loggedOn?: DateTimeFilter<"LoggerActivity"> | Date | string
   }
@@ -37141,28 +37141,28 @@ export namespace Prisma {
 
   export type LoggerActivityCreateManyProjectInput = {
     id: string
-    type: string
+    type?: string | null
     data: JsonNullValueInput | InputJsonValue
     loggedOn: Date | string
   }
 
   export type LoggerActivityUpdateWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
     loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type LoggerActivityUncheckedUpdateWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
     loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type LoggerActivityUncheckedUpdateManyWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
     loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
   }

@@ -79,7 +79,7 @@ export default async function LoggerPage() {
                         </p>
                       </div>
                       <Badge variant={activity.type === 'error' ? 'destructive' : 'secondary'}>
-                        {activity.type}
+                        {activity.type ?? 'undefined'}
                       </Badge>
                     </div>
                     <ScrollArea className="max-h-72 rounded-md border bg-muted/20 p-3">

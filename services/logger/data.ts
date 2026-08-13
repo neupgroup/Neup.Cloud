@@ -9,7 +9,7 @@ type EnsureProjectInput = {
 
 type CreateLoggerActivityInput = {
   projectId: string;
-  type: string;
+  type?: string;
   data: unknown;
 };
 

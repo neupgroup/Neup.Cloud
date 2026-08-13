@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     const activity = await logActivity({
       projectId: readOptionalString(body.projectId),
       projectName: readOptionalString(body.projectName),
-      type: readOptionalString(body.type) ?? 'info',
+      type: readOptionalString(body.type),
       data: body.data ?? {},
     });
 
