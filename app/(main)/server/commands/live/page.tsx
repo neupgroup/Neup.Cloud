@@ -2,11 +2,13 @@
 
 import { Clock, Play, Terminal, XCircle } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import { getServer } from '@/services/server/server-service';
 import { endLiveSession, executeLiveCommand, initLiveSession } from '@/services/server/live-command';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { useServerName } from '@/inapp/hooks/use-server-name';
+import { getWildcardCertificateSession, verifyWildcardCertificateSession } from '@/services/webservices/nginx/service';
 
 interface HistoryItem {
   time: string;
@@ -27,15 +29,23 @@ function getOrCreateSessionId(storageKey: string) {
 }
 
 export default function LiveConsolePage() {
+  const searchParams = useSearchParams();
   const serverId = useSelectedServerId();
   const resolvedServerName = useServerName();
+  const requestedSessionId = searchParams.get('sessionId')?.trim() || null;
+  const acmeMode = searchParams.get('acme') === '1';
 
   const sessionId = useMemo(() => {
+    if (requestedSessionId) {
+      return requestedSessionId;
+    }
+
     const key = `neup:commands:live-session-id:${serverId ?? 'local'}`;
     return getOrCreateSessionId(key);
-  }, [serverId]);
+  }, [requestedSessionId, serverId]);
 
   const [serverName, setServerName] = useState(resolvedServerName || 'Mock Server');
+  const [acmeSession, setAcmeSession] = useState<Awaited<ReturnType<typeof getWildcardCertificateSession>>>(null);
 
   const [input, setInput] = useState('');
   const [cwd, setCwd] = useState('~');
@@ -43,6 +53,7 @@ export default function LiveConsolePage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [isEnded, setIsEnded] = useState(false);
+  const [isVerifyingAcme, setIsVerifyingAcme] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -64,6 +75,21 @@ export default function LiveConsolePage() {
     initLiveSession(sessionId, serverId ?? undefined);
     inputRef.current?.focus();
   }, [sessionId, serverId]);
+
+  useEffect(() => {
+    if (!acmeMode) {
+      setAcmeSession(null);
+      return;
+    }
+
+    getWildcardCertificateSession(sessionId)
+      .then((session) => {
+        setAcmeSession(session);
+      })
+      .catch(() => {
+        setAcmeSession(null);
+      });
+  }, [acmeMode, sessionId]);
 
   useEffect(() => {
     if (isEnded) return;
@@ -88,6 +114,48 @@ export default function LiveConsolePage() {
   const handleEndSession = async () => {
     setIsEnded(true);
     await endLiveSession(sessionId);
+  };
+
+  const handleVerifyAcme = async () => {
+    if (!acmeMode || isVerifyingAcme) {
+      return;
+    }
+
+    setIsVerifyingAcme(true);
+    const timestamp = new Date().toLocaleTimeString();
+    setHistory((prev) => [
+      ...prev,
+      { time: timestamp, type: 'output', content: 'Starting ACME DNS verification...' },
+    ]);
+
+    try {
+      const result = await verifyWildcardCertificateSession(sessionId);
+      const nextTime = new Date().toLocaleTimeString();
+      if (result.success) {
+        setHistory((prev) => [
+          ...prev,
+          { time: nextTime, type: 'output', content: result.message || 'Wildcard certificate verified successfully.' },
+        ]);
+      } else {
+        setHistory((prev) => [
+          ...prev,
+          { time: nextTime, type: 'output', content: result.error || 'Wildcard certificate verification failed.' },
+        ]);
+      }
+
+      const nextSession = await getWildcardCertificateSession(sessionId);
+      setAcmeSession(nextSession);
+    } catch (err: any) {
+      const nextTime = new Date().toLocaleTimeString();
+      setHistory((prev) => [
+        ...prev,
+        { time: nextTime, type: 'output', content: `Verification error: ${err.message}` },
+      ]);
+    } finally {
+      setIsVerifyingAcme(false);
+      setTimeLeft(15 * 60);
+      setTimeout(() => inputRef.current?.focus(), 10);
+    }
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -147,6 +215,17 @@ export default function LiveConsolePage() {
           </div>
 
           <div className="flex items-center space-x-6">
+            {acmeMode && acmeSession && !isEnded ? (
+              <button
+                onClick={handleVerifyAcme}
+                disabled={isVerifyingAcme || acmeSession.status === 'completed'}
+                className="flex items-center bg-blue-900/20 hover:bg-blue-900/40 disabled:opacity-50 disabled:cursor-not-allowed text-blue-400 border border-blue-900/50 px-3 py-1 rounded transition-colors"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                {isVerifyingAcme ? 'Verifying ACME...' : 'Verify ACME Challenge'}
+              </button>
+            ) : null}
+
             <div
               className={`flex items-center font-bold px-3 py-1 rounded bg-zinc-900 ${timeLeft < 60 ? 'text-red-500 animate-pulse' : 'text-zinc-300'}`}
             >
@@ -190,6 +269,16 @@ export default function LiveConsolePage() {
             <br />
             --------------------------------------------------
           </div>
+
+          {acmeMode && acmeSession ? (
+            <div className="mb-4 rounded border border-amber-500/30 bg-amber-500/10 p-3 text-amber-200">
+              <div className="font-semibold">Wildcard ACME session</div>
+              <div className="text-xs mt-1">Status: {acmeSession.status}</div>
+              <div className="text-xs">Record: {acmeSession.dnsRecord}</div>
+              <div className="text-xs break-all">Value: {acmeSession.challenge}</div>
+              {acmeSession.message ? <div className="text-xs mt-1">{acmeSession.message}</div> : null}
+            </div>
+          ) : null}
 
           {history.map((item, idx) => (
             <div key={idx} className="flex flex-col animate-in fade-in duration-200">

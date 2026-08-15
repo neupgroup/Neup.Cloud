@@ -13,13 +13,12 @@ Displays the most recent logger activity stored from external applications.
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Activity, AlertTriangle } from 'lucide-react';
+import { Activity, AlertTriangle, ChevronRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 import { PageTitle } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { getAllLoggerActivities } from '@/services/logger/logger-service';
@@ -58,41 +57,41 @@ export default async function LoggerPage() {
         </Button>
       </PageTitle>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>All stored logger events ordered by newest first.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {activities.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No logger activity has been recorded yet.</p>
-          ) : (
-            <div className="space-y-4">
-              {activities.map((activity, index) => (
-                <div key={activity.id} className="space-y-3">
-                  <div className="flex flex-col gap-3 rounded-lg border p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold">{activity.project.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {formatDistanceToNow(new Date(activity.loggedOn), { addSuffix: true })}
-                        </p>
-                      </div>
-                      <Badge variant={activity.type === 'error' ? 'destructive' : 'secondary'}>
-                        {activity.type ?? 'undefined'}
-                      </Badge>
-                    </div>
-                    <ScrollArea className="max-h-72 rounded-md border bg-muted/20 p-3">
-                      <pre className="text-xs">{formatData(activity.data)}</pre>
-                    </ScrollArea>
+      {activities.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No logger activity has been recorded yet.</p>
+      ) : (
+        <div className="space-y-4">
+          {activities.map((activity, index) => (
+            <div key={activity.id} className="space-y-3">
+              <details className="group rounded-lg border">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-4">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90" />
+                    <p className="truncate text-sm font-medium">
+                      Type: <span className="font-semibold">{activity.type ?? 'undefined'}</span>
+                    </p>
                   </div>
-                  {index < activities.length - 1 ? <Separator /> : null}
+                  <p className="shrink-0 text-sm text-muted-foreground">
+                    {formatDistanceToNow(new Date(activity.loggedOn), { addSuffix: true })}
+                  </p>
+                </summary>
+                <div className="px-4 pb-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className="text-sm font-semibold">{activity.project.name}</span>
+                    <Badge variant={activity.type === 'error' ? 'destructive' : 'secondary'}>
+                      {activity.type ?? 'undefined'}
+                    </Badge>
+                  </div>
+                  <ScrollArea className="max-h-72 rounded-md border bg-muted/20 p-3">
+                    <pre className="text-xs">{formatData(activity.data)}</pre>
+                  </ScrollArea>
                 </div>
-              ))}
+              </details>
+              {index < activities.length - 1 ? <Separator /> : null}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

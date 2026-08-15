@@ -8,7 +8,6 @@ import { useToast } from '@/core/hooks/use-toast';
 import { AlertCircle, Calendar, CheckCircle2, FileKey, RefreshCw, Shield, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getCertificates } from '@/services/webservices/certificates-service';
-import { CreateCertificateDialog } from './create-dialog';
 import Link from 'next/link';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
@@ -71,7 +70,11 @@ export default function CertificatesPage() {
                 backHref={withSelectedServerQuery('/server/webservices', selectedServerId)}
             >
                 <div className="flex gap-2">
-                    <CreateCertificateDialog onSuccess={fetchCertificates} serverId={selectedServerId} />
+                    <Button asChild>
+                        <Link href={withSelectedServerQuery('/server/webservices/certificates/new', selectedServerId)}>
+                            Create Certificate
+                        </Link>
+                    </Button>
                     <Button variant="outline" onClick={fetchCertificates} disabled={loading}>
                         <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                         Refresh

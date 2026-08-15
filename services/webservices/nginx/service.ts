@@ -2,6 +2,7 @@
 
 import { runCommandOnServer } from '@/services/server/ssh';
 import { executeCommand, executeQuickCommand } from '@/services/server/commands/server-command-service';
+import { getAcmeDnsSession, initLiveSession, setAcmeDnsSession } from '@/services/server/live-command';
 import { getServerForRunner } from '@/services/server/server-service';
 import { getServerPublicIp as getServerPublicIpLogic } from '@/services/webservices/service';
 import { generateNginxConfigFromContext as generateNginxConfigFromContextLogic } from '@/services/webservices/nginx/config-generator';
@@ -263,7 +264,8 @@ export async function generateSslCertificate(
     serverId: string,
     domains: string[],
     configName: string,
-    step: 'init' | 'finalize-dns' = 'init'
+    step: 'init' | 'finalize-dns' = 'init',
+    liveSessionId?: string
 ) {
     try {
         const server = await getServerForRunner(serverId);
@@ -362,11 +364,12 @@ export async function generateSslCertificate(
         // ==========================================
         //  DNS VALIDATION (Wildcard)
         // ==========================================
-        const hookScriptPath = '/tmp/neup-cert-hook.sh';
-        const challengeFilePath = `/tmp/cert_challenge_${configName}`;
-        const signalFilePath = `/tmp/cert_signal_${configName}`;
-        const logFilePath = `/tmp/certbot_${configName}.log`;
-        const pidFilePath = `/tmp/certbot_${configName}.pid`;
+        const sessionKey = (liveSessionId?.trim() || configName).replace(/[^a-zA-Z0-9_-]/g, '-');
+        const hookScriptPath = `/tmp/neup-cert-hook-${sessionKey}.sh`;
+        const challengeFilePath = `/tmp/cert_challenge_${sessionKey}`;
+        const signalFilePath = `/tmp/cert_signal_${sessionKey}`;
+        const logFilePath = `/tmp/certbot_${sessionKey}.log`;
+        const pidFilePath = `/tmp/certbot_${sessionKey}.pid`;
 
         if (step === 'init') {
             // Cleanup previous runs and locks
@@ -455,16 +458,56 @@ chmod +x ${hookScriptPath}
                 };
             }
 
+            if (liveSessionId) {
+                await initLiveSession(liveSessionId, serverId);
+                await setAcmeDnsSession(liveSessionId, {
+                    kind: 'acme-dns',
+                    serverId,
+                    configName,
+                    domains: safeDomains,
+                    dnsRecord: `_acme-challenge.${primaryDomain.replace('*.', '')}`,
+                    challenge: challengeToken,
+                    challengeFilePath,
+                    signalFilePath,
+                    logFilePath,
+                    pidFilePath,
+                    status: 'ready-to-verify',
+                    message: 'DNS challenge generated. Add the TXT record, then verify.',
+                    updatedAt: new Date().toISOString(),
+                });
+            }
+
             // Return action required
             return {
                 success: true,
                 actionRequired: 'dns-verification',
                 challenge: challengeToken,
                 dnsRecord: `_acme-challenge.${primaryDomain.replace('*.', '')}`,
-                message: 'Please add the TXT record to your DNS provider.'
+                message: 'Please add the TXT record to your DNS provider.',
+                sessionId: liveSessionId || null,
             };
 
         } else if (step === 'finalize-dns') {
+            if (liveSessionId) {
+                await initLiveSession(liveSessionId, serverId);
+                const existingState = await getAcmeDnsSession(liveSessionId);
+                await setAcmeDnsSession(liveSessionId, {
+                    kind: 'acme-dns',
+                    serverId,
+                    configName,
+                    domains: safeDomains,
+                    dnsRecord: `_acme-challenge.${primaryDomain.replace('*.', '')}`,
+                    challenge: existingState?.challenge || '',
+                    challengeFilePath,
+                    signalFilePath,
+                    logFilePath,
+                    pidFilePath,
+                    status: 'verifying',
+                    message: 'Verification requested. Waiting for Certbot to complete.',
+                    updatedAt: new Date().toISOString(),
+                });
+            }
+
             // Signal Certbot to continue
             const signalCmd = `touch ${signalFilePath}`;
             await executeQuickCommand(serverId, signalCmd);
@@ -514,6 +557,18 @@ chmod +x ${hookScriptPath}
             await executeCommand(serverId, `cat ${logFilePath}`, `SSL Log: ${configName}`, undefined, `webservices:cert:generate`);
 
             if (finalResult.output && finalResult.output.includes('SUCCESS')) {
+                if (liveSessionId) {
+                    const existingState = await getAcmeDnsSession(liveSessionId);
+                    if (existingState) {
+                        await setAcmeDnsSession(liveSessionId, {
+                            ...existingState,
+                            status: 'completed',
+                            message: 'Wildcard certificate generated successfully.',
+                            updatedAt: new Date().toISOString(),
+                        });
+                    }
+                }
+
                 return {
                     success: true,
                     message: `Wildcard certificate generated successfully.`
@@ -523,6 +578,18 @@ chmod +x ${hookScriptPath}
                 const logResult = await executeQuickCommand(serverId, `cat ${logFilePath}`);
                 // Since executeQuickCommand also returns a result object with output/error
                 const logContent = logResult.output || logResult.error || 'No log content available';
+
+                if (liveSessionId) {
+                    const existingState = await getAcmeDnsSession(liveSessionId);
+                    if (existingState) {
+                        await setAcmeDnsSession(liveSessionId, {
+                            ...existingState,
+                            status: 'failed',
+                            message: `Verification failed. ${logContent.slice(-300)}`,
+                            updatedAt: new Date().toISOString(),
+                        });
+                    }
+                }
 
                 return {
                     success: false,
@@ -537,4 +604,24 @@ chmod +x ${hookScriptPath}
         console.error('Error generating SSL certificate:', error);
         return { success: false, error: error.message };
     }
+}
+
+export async function getWildcardCertificateSession(sessionId: string) {
+    return getAcmeDnsSession(sessionId);
+}
+
+export async function verifyWildcardCertificateSession(sessionId: string) {
+    const session = await getAcmeDnsSession(sessionId);
+
+    if (!session) {
+        return { success: false, error: 'Wildcard certificate session not found.' };
+    }
+
+    return generateSslCertificate(
+        session.serverId,
+        session.domains,
+        session.configName,
+        'finalize-dns',
+        sessionId
+    );
 }
