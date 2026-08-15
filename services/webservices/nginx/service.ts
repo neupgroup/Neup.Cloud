@@ -2,6 +2,7 @@
 
 import { runCommandOnServer } from '@/services/server/ssh';
 import { executeCommand, executeQuickCommand } from '@/services/server/commands/server-command-service';
+import { createContinuitySession, sendContinuityCommand } from '@/services/server/continuity-service';
 import { getAcmeDnsSession, initLiveSession, setAcmeDnsSession } from '@/services/server/live-command';
 import { getServerForRunner } from '@/services/server/server-service';
 import { getServerPublicIp as getServerPublicIpLogic } from '@/services/webservices/service';
@@ -74,6 +75,23 @@ export interface NginxConfiguration {
 type GenerateNginxConfigResult =
     | { success: true; config: string; error?: undefined }
     | { success: false; error: string; config?: undefined };
+
+function normalizeWildcardDomains(domains: string[]) {
+    const safeDomains = domains.map(d => d.trim()).filter(d => d);
+    const wildcardDomains = safeDomains.filter((domain) => domain.startsWith('*.'));
+
+    if (wildcardDomains.length === 0) {
+        return Array.from(new Set(safeDomains));
+    }
+
+    const normalizedDomains: string[] = [];
+    for (const wildcardDomain of wildcardDomains) {
+        const baseDomain = wildcardDomain.slice(2);
+        normalizedDomains.push(baseDomain, wildcardDomain);
+    }
+
+    return Array.from(new Set(normalizedDomains));
+}
 
 /**
  * Fetch the public IP of a server by running a command on it
@@ -287,7 +305,7 @@ export async function generateSslCertificate(
 
         // Prepare domain flags
         const domainList = Array.isArray(domains) ? domains : [domains];
-        const safeDomains = domainList.map(d => d.trim()).filter(d => d);
+        const safeDomains = normalizeWildcardDomains(domainList);
 
         if (safeDomains.length === 0) {
             return { success: false, error: 'No domains provided for certificate generation' };
@@ -624,4 +642,76 @@ export async function verifyWildcardCertificateSession(sessionId: string) {
         'finalize-dns',
         sessionId
     );
+}
+
+function shellQuote(value: string) {
+    return `'${value.replace(/'/g, `'\"'\"'`)}'`;
+}
+
+function assertSafeCertificateName(value: string) {
+    const trimmed = value.trim();
+    if (!trimmed || trimmed.includes('/') || trimmed.includes('..')) {
+        throw new Error('Invalid certificate name.');
+    }
+
+    return trimmed.replace(/[^a-zA-Z0-9_.-]/g, '-');
+}
+
+export async function startContinuitySslCertificateSession(
+    serverId: string,
+    domains: string[],
+    configName: string
+) {
+    const safeDomains = Array.isArray(domains)
+        ? normalizeWildcardDomains(domains)
+        : [];
+
+    if (safeDomains.length === 0) {
+        return { success: false, error: 'No domains provided for certificate generation.' };
+    }
+
+    if (!safeDomains.some((domain) => domain.includes('*'))) {
+        return { success: false, error: 'Continuity certificate sessions are only used for DNS wildcard certificates.' };
+    }
+
+    const certName = assertSafeCertificateName(configName);
+    const sslDir = '/etc/nginx/ssl';
+    const domainFlags = safeDomains.map((domain) => `-d ${shellQuote(domain)}`).join(' ');
+    const quotedCertName = shellQuote(certName);
+    const session = await createContinuitySession(serverId);
+
+    const script = [
+        'sudo rm -f /var/lib/letsencrypt/.certbot.lock',
+        'sudo rm -f /var/log/letsencrypt/.certbot.lock',
+        `sudo mkdir -p ${shellQuote(sslDir)}`,
+        'sudo apt-get update',
+        'sudo apt-get install -y certbot',
+        `sudo certbot certonly --manual --preferred-challenges dns --email encryption.public@neupgroup.com --agree-tos --no-eff-email ${domainFlags} --cert-name ${quotedCertName} --force-renewal`,
+        'CERTBOT_EXIT=$?',
+        'if [ $CERTBOT_EXIT -eq 0 ]; then',
+        `  if [ -f ${shellQuote(`/etc/letsencrypt/live/${certName}/fullchain.pem`)} ] && [ -f ${shellQuote(`/etc/letsencrypt/live/${certName}/privkey.pem`)} ]; then`,
+        `    sudo cp -L ${shellQuote(`/etc/letsencrypt/live/${certName}/fullchain.pem`)} ${shellQuote(`${sslDir}/${certName}.pem`)}`,
+        `    sudo cp -L ${shellQuote(`/etc/letsencrypt/live/${certName}/privkey.pem`)} ${shellQuote(`${sslDir}/${certName}.key`)}`,
+        `    sudo chmod 644 ${shellQuote(`${sslDir}/${certName}.pem`)}`,
+        `    sudo chmod 600 ${shellQuote(`${sslDir}/${certName}.key`)}`,
+        `    echo "SUCCESS: Certificate issued and saved as ${sslDir}/${certName}.pem and ${sslDir}/${certName}.key"`,
+        '  else',
+        '    echo "ERROR: Certbot succeeded but the issued certificate files were not found in /etc/letsencrypt/live."',
+        '    exit 1',
+        '  fi',
+        'else',
+        '  echo "ERROR: Certbot failed. Review the output above before retrying."',
+        'fi',
+        'exit $CERTBOT_EXIT',
+    ].join('\n');
+
+    const command = `bash -lc ${shellQuote(script)}`;
+
+    await sendContinuityCommand(serverId, session.sessionId, command);
+
+    return {
+        success: true,
+        sessionId: session.sessionId,
+        message: 'Continuity certificate session started.',
+    };
 }

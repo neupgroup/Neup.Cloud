@@ -164,6 +164,7 @@ export function CreateCertificateDialog({ serverId: serverIdFromProps, onSuccess
 
         if (includeWildcard) {
             domainList.push(`*.${normalizedMainDomain}`);
+            return Array.from(new Set(domainList));
         }
 
         if (subdomains.trim()) {
@@ -367,19 +368,27 @@ export function CreateCertificateDialog({ serverId: serverIdFromProps, onSuccess
                             <p className="text-xs text-muted-foreground">The certificate will be named after this domain.</p>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="subdomains">Additional Subdomains (Optional)</Label>
-                            <Textarea
-                                id="subdomains"
-                                placeholder="www&#10;api&#10;blog"
-                                value={subdomains}
-                                onChange={(e) => setSubdomains(e.target.value)}
-                                className="font-mono"
-                                rows={2}
-                            />
-                            <p className="text-xs text-muted-foreground">
-                                Enter specific subdomains separated by new lines, spaces, or commas.
-                            </p>
+                        <div
+                            className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${includeWildcard ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'}`}
+                            aria-hidden={includeWildcard}
+                        >
+                            <div className="min-h-0 overflow-hidden">
+                                <div className="space-y-2 pb-1">
+                                    <Label htmlFor="subdomains">Additional Subdomains (Optional)</Label>
+                                    <Textarea
+                                        id="subdomains"
+                                        placeholder="www&#10;api&#10;blog"
+                                        value={subdomains}
+                                        onChange={(e) => setSubdomains(e.target.value)}
+                                        className="font-mono"
+                                        rows={2}
+                                        disabled={includeWildcard}
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Enter specific subdomains separated by new lines, spaces, or commas.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="flex items-center space-x-2 pt-2">

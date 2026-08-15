@@ -277,6 +277,46 @@ export async function sendContinuityCommand(serverId: string, sessionId: string,
   return getContinuitySessionSnapshot(serverId, safeSessionId);
 }
 
+export async function sendContinuityEnter(serverId: string, sessionId: string) {
+  const safeSessionId = assertValidContinuitySessionId(sessionId);
+  const quotedSessionId = shellQuote(safeSessionId);
+
+  const result = await runContinuityCommand(
+    serverId,
+    [
+      'if ! command -v tmux >/dev/null 2>&1; then',
+      '  echo "__NEUP_CONTINUITY_TMUX_MISSING__";',
+      '  exit 0;',
+      'fi',
+      `if ! tmux has-session -t ${quotedSessionId} 2>/dev/null; then`,
+      '  echo "__NEUP_CONTINUITY_MISSING__";',
+      '  exit 0;',
+      'fi',
+      `tmux send-keys -t ${quotedSessionId} Enter`,
+    ].join('\n')
+  );
+
+  if (result.stdout.includes('__NEUP_CONTINUITY_TMUX_MISSING__')) {
+    throw new Error('tmux is not installed on the selected server.');
+  }
+
+  if (result.stdout.includes('__NEUP_CONTINUITY_MISSING__')) {
+    return {
+      exists: false,
+      sessionId: safeSessionId,
+      cwd: '~',
+      content: '',
+    } satisfies ContinuitySessionSnapshot;
+  }
+
+  if (result.code !== 0) {
+    throw new Error(result.stderr || 'Failed to send Enter to the continuity session.');
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  return getContinuitySessionSnapshot(serverId, safeSessionId);
+}
+
 export async function terminateContinuitySession(serverId: string, sessionId: string) {
   const safeSessionId = assertValidContinuitySessionId(sessionId);
   const quotedSessionId = shellQuote(safeSessionId);
