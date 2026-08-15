@@ -37,15 +37,18 @@ import {
   checkInitializePorts,
   checkInitializeStatusLogger,
   installInitializeRequirement,
+  repairInitializeRequirement,
   type InitializeApplicationLauncherChecks,
   type InitializeInstallTarget,
   type InitializeInstallationCheck,
+  type InitializeMode,
   type InitializePortCheck,
 } from '@/services/server/initialize-service';
 
 type InitializeClientProps = {
   serverId?: string | null;
   serverName?: string | null;
+  mode: InitializeMode;
 };
 
 type StepId = 'ports' | 'launcher' | 'logger';
@@ -111,7 +114,7 @@ function StepShell({
   );
 }
 
-export function InitializeClient({ serverId, serverName }: InitializeClientProps) {
+export function InitializeClient({ serverId, serverName, mode }: InitializeClientProps) {
   const [currentStep, setCurrentStep] = useState<StepId>('ports');
   const [portChecks, setPortChecks] = useState<InitializePortCheck[]>([]);
   const [launcherChecks, setLauncherChecks] = useState<InitializeApplicationLauncherChecks>(() => defaultLauncherChecks());
@@ -183,6 +186,8 @@ export function InitializeClient({ serverId, serverName }: InitializeClientProps
     runCurrentStep('logger');
   };
 
+  const isRepairMode = mode === 'repair';
+
   const handleInstall = (target: InitializeInstallTarget, step: StepId) => {
     if (!serverId) {
       setError('Select a server before installing requirements.');
@@ -193,7 +198,9 @@ export function InitializeClient({ serverId, serverName }: InitializeClientProps
     setInstallingTarget(target);
     startInstalling(async () => {
       try {
-        const result = await installInitializeRequirement(serverId, target);
+        const result = target === 'system-logger' && isRepairMode
+          ? await repairInitializeRequirement(serverId, target)
+          : await installInitializeRequirement(serverId, target);
         if (!result.success) {
           setError(result.message);
           return;
@@ -217,7 +224,9 @@ export function InitializeClient({ serverId, serverName }: InitializeClientProps
             Initialize Server
           </span>
         }
-        description="Before continuing, complete these checks so your journey gets easier with the server."
+        description={isRepairMode
+          ? 'Repair the selected server setup by re-running the key initialization steps.'
+          : 'Before continuing, complete these checks so your journey gets easier with the server.'}
         serverName={serverName}
       />
 
@@ -341,7 +350,9 @@ export function InitializeClient({ serverId, serverName }: InitializeClientProps
         <StepShell
           active
           title="Status logging application"
-          description="Check for the installation of the status logging application."
+          description={isRepairMode
+            ? 'Repair the status logger by removing the current setup and installing it again.'
+            : 'Check for the installation of the status logging application.'}
         >
           <CardContent className="pt-6">
             <div className="flex items-start gap-3 rounded-lg border bg-background p-4">
@@ -353,7 +364,7 @@ export function InitializeClient({ serverId, serverName }: InitializeClientProps
                 </div>
                 <div className="text-sm text-muted-foreground">{loggerCheck.message}</div>
               </div>
-              {loggerCheck.checked && !loggerCheck.installed ? (
+              {loggerCheck.checked && (isRepairMode || !loggerCheck.installed) ? (
                 <Button
                   type="button"
                   variant="outline"
@@ -361,7 +372,7 @@ export function InitializeClient({ serverId, serverName }: InitializeClientProps
                   disabled={!serverId || isInstalling}
                 >
                   {isInstalling && installingTarget === 'system-logger' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Install
+                  {isRepairMode ? 'Repair Install' : 'Install'}
                 </Button>
               ) : null}
             </div>

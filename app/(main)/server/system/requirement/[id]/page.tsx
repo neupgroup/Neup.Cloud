@@ -17,10 +17,18 @@ import { useState, useEffect } from 'react';
 import { checkRequirementStep, installRequirementStep, uninstallRequirementStep, updateRequirementStep } from '../runner';
 import * as Icons from 'lucide-react';
 import { cn } from '@/core/utils';
-import { Loader2, CheckCircle2, XCircle, Trash2, AlertTriangle } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useServerName } from '@/inapp/hooks/use-server-name';
 import { useSelectedServerHref, useSelectedServerId } from '@/inapp/hooks/use-selected-server';
+
+type StepState = 'pending' | 'checking' | 'installing' | 'uninstalling' | 'verifying' | 'completed' | 'failed';
+
+type StepActivity = {
+    state: StepState;
+    detail: string;
+    output?: string;
+};
 
 const Icon = ({ name, className }: { name: string, className?: string }) => {
     // @ts-ignore
@@ -76,7 +84,7 @@ export default function RequirementDetailPage() {
     const serverId = useSelectedServerId();
     const withSelectedServer = useSelectedServerHref();
 
-    const [stepStatus, setStepStatus] = useState<Record<number, 'pending' | 'checking' | 'completed' | 'failed'>>({});
+    const [stepActivity, setStepActivity] = useState<Record<number, StepActivity>>({});
     const [isLoading, setIsLoading] = useState(false);
     const [isInstalling, setIsInstalling] = useState(false);
     const [isUninstalling, setIsUninstalling] = useState(false);
@@ -87,29 +95,42 @@ export default function RequirementDetailPage() {
 
     useEffect(() => {
         if (config && serverId) {
-            checkAllSteps();
+            void checkAllSteps();
         } else {
             setIsLoading(false);
         }
     }, [config, serverId]);
 
+    const setStep = (index: number, state: StepState, detail: string, output?: string) => {
+        setStepActivity(prev => ({
+            ...prev,
+            [index]: {
+                state,
+                detail,
+                output,
+            },
+        }));
+    };
+
+    const getStepState = (index: number): StepState => stepActivity[index]?.state ?? 'pending';
+
     const checkAllSteps = async () => {
         if (!config || !serverId) return;
 
         setIsLoading(true);
-        setStepStatus({}); // Reset status
+        setStepActivity({});
 
         for (let i = 0; i < config.steps.length; i++) {
-            setStepStatus(prev => ({ ...prev, [i]: 'checking' }));
+            setStep(i, 'checking', 'Checking current server state...');
 
             const res = await checkRequirementStep(serverId, config.steps[i].checkCommand);
 
             if (res.error) {
-                setStepStatus(prev => ({ ...prev, [i]: 'failed' }));
+                setStep(i, 'failed', 'Status check failed.', res.error);
             } else if (res.completed) {
-                setStepStatus(prev => ({ ...prev, [i]: 'completed' }));
+                setStep(i, 'completed', 'Installed and verified.', res.output);
             } else {
-                setStepStatus(prev => ({ ...prev, [i]: 'pending' }));
+                setStep(i, 'pending', 'Not installed yet.');
             }
         }
 
@@ -121,31 +142,30 @@ export default function RequirementDetailPage() {
         setIsInstalling(true);
 
         for (let i = 0; i < config.steps.length; i++) {
-            // Check if step is already completed
-            setStepStatus(prev => ({ ...prev, [i]: 'checking' }));
+            setStep(i, 'checking', 'Checking whether this step is already configured...');
             const preCheckRes = await checkRequirementStep(serverId, config.steps[i].checkCommand);
 
             if (preCheckRes.completed) {
-                setStepStatus(prev => ({ ...prev, [i]: 'completed' }));
+                setStep(i, 'completed', 'Already installed. Skipping this step.', preCheckRes.output);
                 continue;
             }
 
-            // Not completed, proceed to install
+            setStep(i, 'installing', `Installing step ${i + 1}: ${config.steps[i].name}...`);
             const installRes = await installRequirementStep(serverId, config.steps[i].installCommand, id);
             if (installRes.error) {
                 toast({ variant: 'destructive', title: `Step ${i + 1} Failed`, description: installRes.error });
-                setStepStatus(prev => ({ ...prev, [i]: 'failed' }));
+                setStep(i, 'failed', 'Installation failed.', installRes.error);
                 setIsInstalling(false);
                 return;
             }
 
-            // Verify
+            setStep(i, 'verifying', 'Verifying installation...', installRes.output?.trim() || undefined);
             const postCheckRes = await checkRequirementStep(serverId, config.steps[i].checkCommand);
             if (postCheckRes.completed) {
-                setStepStatus(prev => ({ ...prev, [i]: 'completed' }));
+                setStep(i, 'completed', 'Installed and verified.', postCheckRes.output || installRes.output);
             } else {
                 toast({ variant: 'destructive', title: `Step ${i + 1} Verification Failed`, description: "Command ran but check failed." });
-                setStepStatus(prev => ({ ...prev, [i]: 'failed' }));
+                setStep(i, 'failed', 'Verification failed after install.', postCheckRes.error || installRes.output);
                 setIsInstalling(false);
                 return;
             }
@@ -170,21 +190,23 @@ export default function RequirementDetailPage() {
             const step = config.steps[i];
             if (!step.uninstallCommand) continue;
 
-            setStepStatus(prev => ({ ...prev, [i]: 'checking' }));
+            setStep(i, 'uninstalling', `Removing step ${i + 1}: ${step.name}...`);
 
             const uninstallRes = await uninstallRequirementStep(serverId, step.uninstallCommand, id);
             if (uninstallRes.error) {
                 // We warn but continue, as partial uninstalls are common/messy
                 toast({ variant: 'destructive', title: `Uninstall Step ${i + 1} Warning`, description: uninstallRes.error });
+                setStep(i, 'failed', 'Removal command reported an error.', uninstallRes.error);
             }
 
             // Verify it's gone (checkCommand should fail/return false)
+            setStep(i, 'verifying', 'Verifying that the step was removed...', uninstallRes.output?.trim() || undefined);
             const postCheckRes = await checkRequirementStep(serverId, step.checkCommand);
             if (!postCheckRes.completed) {
-                setStepStatus(prev => ({ ...prev, [i]: 'pending' })); // Reset to pending
+                setStep(i, 'pending', 'Removed successfully. Ready to install again.');
             } else {
                 // If check still passes, uninstall might have failed
-                setStepStatus(prev => ({ ...prev, [i]: 'failed' }));
+                setStep(i, 'failed', 'Removal verification failed. The step still appears installed.', postCheckRes.output);
             }
         }
 
@@ -207,7 +229,7 @@ export default function RequirementDetailPage() {
             const step = config.steps[i];
             if (!step.uninstallCommand) continue;
 
-            setStepStatus(prev => ({ ...prev, [i]: 'checking' }));
+            setStep(i, 'uninstalling', `Repair phase 1 of 2: removing step ${i + 1}...`);
 
             const uninstallRes = await uninstallRequirementStep(serverId, step.uninstallCommand, id);
             if (uninstallRes.error) {
@@ -216,19 +238,21 @@ export default function RequirementDetailPage() {
                     title: `Repair Uninstall Step ${i + 1} Warning`,
                     description: uninstallRes.error,
                 });
+                setStep(i, 'failed', 'Repair removal command reported an error.', uninstallRes.error);
             }
 
+            setStep(i, 'verifying', 'Verifying that the old setup is gone...', uninstallRes.output?.trim() || undefined);
             const postCheckRes = await checkRequirementStep(serverId, step.checkCommand);
             if (!postCheckRes.completed) {
-                setStepStatus(prev => ({ ...prev, [i]: 'pending' }));
+                setStep(i, 'pending', 'Removed. Waiting for fresh install.');
             } else {
-                setStepStatus(prev => ({ ...prev, [i]: 'failed' }));
+                setStep(i, 'failed', 'Repair removal verification failed.', postCheckRes.output);
             }
         }
 
         // 2) Re-install and verify each step in order.
         for (let i = 0; i < config.steps.length; i++) {
-            setStepStatus(prev => ({ ...prev, [i]: 'checking' }));
+            setStep(i, 'installing', `Repair phase 2 of 2: installing step ${i + 1}...`);
             const installRes = await installRequirementStep(serverId, config.steps[i].installCommand, id);
 
             if (installRes.error) {
@@ -237,21 +261,22 @@ export default function RequirementDetailPage() {
                     title: `Repair Install Step ${i + 1} Failed`,
                     description: installRes.error,
                 });
-                setStepStatus(prev => ({ ...prev, [i]: 'failed' }));
+                setStep(i, 'failed', 'Fresh install failed during repair.', installRes.error);
                 setIsRepairing(false);
                 return;
             }
 
+            setStep(i, 'verifying', 'Verifying the fresh install...', installRes.output?.trim() || undefined);
             const verifyRes = await checkRequirementStep(serverId, config.steps[i].checkCommand);
             if (verifyRes.completed) {
-                setStepStatus(prev => ({ ...prev, [i]: 'completed' }));
+                setStep(i, 'completed', 'Reinstalled and verified.', verifyRes.output || installRes.output);
             } else {
                 toast({
                     variant: 'destructive',
                     title: `Repair Verification Step ${i + 1} Failed`,
                     description: verifyRes.error || 'Command ran but check failed.',
                 });
-                setStepStatus(prev => ({ ...prev, [i]: 'failed' }));
+                setStep(i, 'failed', 'Repair verification failed.', verifyRes.error || installRes.output);
                 setIsRepairing(false);
                 return;
             }
@@ -321,7 +346,15 @@ export default function RequirementDetailPage() {
         return <div className="p-8 text-center text-muted-foreground">Please select a server first.</div>;
     }
 
-    const allCompleted = config.steps.every((_, i) => stepStatus[i] === 'completed');
+    const allCompleted = config.steps.every((_, i) => getStepState(i) === 'completed');
+    const canRemove = config.steps.some(step => step.uninstallCommand);
+    const showStandaloneRemove = canRemove && id !== 'system-logger';
+    const isBusy = isInstalling || isUninstalling || isRepairing || isUpdating;
+    const repairTitle = id === 'system-logger' ? 'Remove and Install Again' : 'Repair';
+    const repairDescription = id === 'system-logger'
+        ? 'Stops the logger, removes the current service and files, then installs a fresh copy step by step.'
+        : 'Uninstalls and installs this requirement in one action.';
+
     return (
         <div className="space-y-8 max-w-5xl animate-in fade-in duration-500 pb-10">
             <PageTitleBack
@@ -349,10 +382,24 @@ export default function RequirementDetailPage() {
                     ) : (
                         // Real Steps
                         config.steps.map((step, index) => {
-                            const status = stepStatus[index] || 'pending';
+                            const activity = stepActivity[index];
+                            const status = activity?.state || 'pending';
                             const isCompleted = status === 'completed';
-                            const isChecking = status === 'checking';
+                            const isChecking = ['checking', 'installing', 'uninstalling', 'verifying'].includes(status);
                             const isFailed = status === 'failed';
+                            const badgeLabel = status === 'installing'
+                                ? 'Installing'
+                                : status === 'uninstalling'
+                                    ? 'Removing'
+                                    : status === 'verifying'
+                                        ? 'Verifying'
+                                        : status === 'checking'
+                                            ? 'Checking'
+                                            : isCompleted
+                                                ? 'Done'
+                                                : isFailed
+                                                    ? 'Failed'
+                                                    : 'Pending';
 
                             return (
                                 <div
@@ -388,11 +435,36 @@ export default function RequirementDetailPage() {
                                             isCompleted && "text-green-900",
                                             isFailed && "text-red-900"
                                         )}>
-                                            {step.name}
+                                            {index + 1}. {step.name}
                                         </h4>
                                         <p className="text-sm text-muted-foreground">
                                             {step.description}
                                         </p>
+                                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                                            <span
+                                                className={cn(
+                                                    'inline-flex items-center rounded-full px-2.5 py-1 font-medium',
+                                                    isCompleted && 'bg-green-100 text-green-800',
+                                                    isFailed && 'bg-red-100 text-red-800',
+                                                    !isCompleted && !isFailed && status !== 'pending' && 'bg-blue-100 text-blue-800',
+                                                    status === 'pending' && 'bg-muted text-muted-foreground'
+                                                )}
+                                            >
+                                                {badgeLabel}
+                                            </span>
+                                            <span className={cn(
+                                                'text-muted-foreground',
+                                                isFailed && 'text-red-700',
+                                                isCompleted && 'text-green-700'
+                                            )}>
+                                                {activity?.detail || 'Waiting to run this step.'}
+                                            </span>
+                                        </div>
+                                        {activity?.output ? (
+                                            <pre className="mt-2 overflow-x-auto rounded-md bg-muted/60 px-3 py-2 text-xs text-muted-foreground whitespace-pre-wrap break-words">
+                                                {activity.output}
+                                            </pre>
+                                        ) : null}
                                     </div>
                                 </div>
                             );
@@ -411,13 +483,13 @@ export default function RequirementDetailPage() {
                         </div>
                     ) : (
                         <div
-                            onClick={!allCompleted && !isInstalling && !isUninstalling && !isRepairing && !isUpdating ? handleInstall : undefined}
+                            onClick={!allCompleted && !isBusy ? handleInstall : undefined}
                             className={cn(
                                 "flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t transition-all",
                                 allCompleted
                                     ? "bg-muted/5 opacity-70 cursor-not-allowed"
                                     : "hover:bg-muted/50 cursor-pointer bg-muted/10",
-                                (isInstalling || isUninstalling || isRepairing || isUpdating) && "opacity-70 cursor-not-allowed"
+                                isBusy && "opacity-70 cursor-not-allowed"
                             )}
                         >
                             <div className="space-y-1 text-center sm:text-left flex-1">
@@ -444,12 +516,34 @@ export default function RequirementDetailPage() {
                         </div>
                     )}
 
-                    {!isLoading && config.steps.some(s => s.uninstallCommand) && (
+                    {!isLoading && showStandaloneRemove && (
                         <div
-                            onClick={!isRepairing && !isInstalling && !isUninstalling && !isUpdating ? handleRepair : undefined}
+                            onClick={!isBusy ? handleUninstall : undefined}
+                            className={cn(
+                                "flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t transition-all bg-red-50/60",
+                                !isBusy
+                                    ? "hover:bg-red-100/60 cursor-pointer"
+                                    : "opacity-70 cursor-not-allowed"
+                            )}
+                        >
+                            <div className="space-y-1 text-center sm:text-left flex-1">
+                                <h3 className="font-medium flex items-center gap-2 text-red-900 justify-center sm:justify-start">
+                                    <Icons.Trash2 className="h-4 w-4" />
+                                    {isUninstalling ? 'Removing Setup...' : 'Remove Setup'}
+                                </h3>
+                                <p className="text-sm text-red-800/80">
+                                    Completely remove the current setup from this server.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {!isLoading && canRemove && (
+                        <div
+                            onClick={!isBusy ? handleRepair : undefined}
                             className={cn(
                                 "flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t transition-all bg-amber-50/60",
-                                (!isRepairing && !isInstalling && !isUninstalling && !isUpdating)
+                                !isBusy
                                     ? "hover:bg-amber-100/60 cursor-pointer"
                                     : "opacity-70 cursor-not-allowed"
                             )}
@@ -457,10 +551,10 @@ export default function RequirementDetailPage() {
                             <div className="space-y-1 text-center sm:text-left flex-1">
                                 <h3 className="font-medium flex items-center gap-2 text-amber-900 justify-center sm:justify-start">
                                     <Icons.Wrench className="h-4 w-4" />
-                                    {isRepairing ? "Repairing..." : "Repair"}
+                                    {isRepairing ? 'Repairing...' : repairTitle}
                                 </h3>
                                 <p className="text-sm text-amber-800/80">
-                                    Uninstalls and installs in one action.
+                                    {repairDescription}
                                 </p>
                             </div>
                         </div>
@@ -560,79 +654,6 @@ export default function RequirementDetailPage() {
                 </div>
             )}
 
-            {/* Uninstall Section - Show if any step is installed or failed (partial install) and uninstall commands exist */}
-            {config.steps.some(s => s.uninstallCommand) && (
-                <div className="space-y-4 pt-8">
-                    <div className="flex items-center gap-2 px-1 text-destructive">
-                        <Trash2 className="h-5 w-5" />
-                        <h3 className="text-xl font-semibold">Uninstall Steps</h3>
-                    </div>
-
-                    <div className="rounded-lg border border-destructive/20 bg-card text-card-foreground shadow-sm overflow-hidden">
-                        {config.steps.slice().reverse().map((step, rIndex) => {
-                            if (!step.uninstallCommand) return null;
-                            const index = config.steps.length - 1 - rIndex;
-                            const status = stepStatus[index] || 'pending';
-                            const isGone = status === 'pending';
-                            const isChecking = status === 'checking';
-
-                            return (
-                                <div
-                                    key={index}
-                                    className={cn(
-                                        "flex items-center gap-4 p-4 border-b last:border-0 transition-all border-destructive/10",
-                                        isGone ? "bg-muted/50 opacity-60" : "bg-destructive/5"
-                                    )}
-                                >
-                                    <div className="shrink-0">
-                                        {isChecking ? (
-                                            <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                                                <Loader2 className="h-5 w-5 text-destructive animate-spin" />
-                                            </div>
-                                        ) : isGone ? (
-                                            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center border">
-                                                <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
-                                            </div>
-                                        ) : (
-                                            <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center border border-destructive/20">
-                                                <Trash2 className="h-5 w-5 text-destructive/70" />
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="text-base font-medium text-destructive/90 mb-1">
-                                            Revert: {step.name}
-                                        </h4>
-                                        <p className="text-sm text-destructive/70">
-                                            Removes configurations and packages.
-                                        </p>
-                                    </div>
-                                </div>
-                            );
-                        })}
-
-                        {/* Uninstall Action Item */}
-                        <div
-                            onClick={!isUninstalling && !isInstalling && !isRepairing && !isUpdating ? handleUninstall : undefined}
-                            className={cn(
-                                "flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-destructive/10 transition-all hover:bg-destructive/10 cursor-pointer bg-destructive/5",
-                                (isUninstalling || isInstalling || isRepairing || isUpdating) && "opacity-70 cursor-not-allowed hover:bg-destructive/5"
-                            )}
-                        >
-                            <div className="space-y-1 text-center sm:text-left flex-1">
-                                <h3 className="font-medium text-destructive flex items-center justify-center sm:justify-start gap-2">
-                                    <AlertTriangle className="h-4 w-4" />
-                                    {isUninstalling ? "Wiping Application..." : "Uninstall Application"}
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Completely remove {config.title}. This action is destructive.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

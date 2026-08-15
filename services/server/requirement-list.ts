@@ -343,6 +343,8 @@ sudo -n chmod +x /.status/logger.sh
 if systemctl list-unit-files 2>/dev/null | grep -q '^neup-logger.service'; then
     sudo systemctl restart neup-logger || true
 fi`
+                ,
+                uninstallCommand: 'sudo -n rm -f /.status/logger.sh /.status/cpu.usage /.status/ram.usage /.status/network.usage /.status/temperature.usage && sudo -n rmdir /.status 2>/dev/null || true'
             },
             {
                 name: 'Configure System Service',
@@ -365,14 +367,16 @@ RestartSec=10
 [Install]
 WantedBy=multi-user.target
 EOF
-sudo systemctl daemon-reload`
+sudo systemctl daemon-reload`,
+                uninstallCommand: 'sudo -n rm -f /etc/systemd/system/neup-logger.service && sudo -n systemctl daemon-reload && sudo -n systemctl reset-failed neup-logger || true'
             },
             {
                 name: 'Enable and Start',
                 description: 'Activate the monitoring service.',
                 icon: 'Play',
                 checkCommand: 'sudo systemctl is-active neup-logger && sudo systemctl is-enabled neup-logger',
-                installCommand: 'sudo systemctl enable neup-logger && sudo systemctl start neup-logger'
+                installCommand: 'sudo systemctl enable neup-logger && sudo systemctl start neup-logger',
+                uninstallCommand: 'sudo -n systemctl disable --now neup-logger || sudo -n systemctl stop neup-logger || true'
             }
         ]
     },

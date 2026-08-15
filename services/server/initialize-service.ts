@@ -53,12 +53,97 @@ export type InitializeApplicationLauncherChecks = {
   supervisor: InitializeInstallationCheck;
 };
 
+export type InitializeMode = 'onboard' | 'repair';
+
 export type InitializeInstallTarget = 'pm2' | 'supervisor' | 'system-logger';
 
 export type InitializeInstallResult = {
   success: boolean;
   message: string;
 };
+
+async function installRequirementSteps(
+  serverId: string,
+  target: InitializeInstallTarget,
+  mode: InitializeMode
+): Promise<InitializeInstallResult> {
+  const requirement = requirements.find((item) => item.id === target);
+  if (!requirement) {
+    return {
+      success: false,
+      message: 'Initialization requirement is not configured.',
+    };
+  }
+
+  if (mode === 'repair') {
+    for (let index = requirement.steps.length - 1; index >= 0; index -= 1) {
+      const step = requirement.steps[index];
+      const uninstallCommand = step.uninstallCommand?.trim();
+      if (!uninstallCommand) {
+        continue;
+      }
+
+      const result = await executeCommand(
+        serverId,
+        uninstallCommand,
+        `Repair ${requirement.title}: remove ${step.name}`,
+        uninstallCommand,
+        `initialize:${target}:repair:remove`
+      );
+
+      if (result.error) {
+        return {
+          success: false,
+          message: result.error,
+        };
+      }
+    }
+  }
+
+  for (const step of requirement.steps) {
+    const existing = await runReadOnlyInitializeCommand(serverId, step.checkCommand);
+    const existingResult = 'result' in existing ? existing.result : undefined;
+    if (existingResult?.code === 0) {
+      continue;
+    }
+
+    const installCommand = step.installCommand?.trim();
+    if (!installCommand) {
+      continue;
+    }
+
+    const result = await executeCommand(
+      serverId,
+      installCommand,
+      `Initialize ${requirement.title}: ${step.name}`,
+      installCommand,
+      `initialize:${target}:${mode}`
+    );
+
+    if (result.error) {
+      return {
+        success: false,
+        message: result.error,
+      };
+    }
+
+    const verified = await runReadOnlyInitializeCommand(serverId, step.checkCommand);
+    const verifiedResult = 'result' in verified ? verified.result : undefined;
+    if (!verifiedResult || verifiedResult.code !== 0) {
+      return {
+        success: false,
+        message: `${requirement.title} installation did not complete for step "${step.name}".`,
+      };
+    }
+  }
+
+  return {
+    success: true,
+    message: mode === 'repair'
+      ? `${requirement.title} repaired successfully.`
+      : `${requirement.title} installed successfully.`,
+  };
+}
 
 async function runReadOnlyInitializeCommand(
   serverId: string,
@@ -228,53 +313,12 @@ export async function installInitializeRequirement(
   serverId: string,
   target: InitializeInstallTarget
 ): Promise<InitializeInstallResult> {
-  const requirement = requirements.find((item) => item.id === target);
-  if (!requirement) {
-    return {
-      success: false,
-      message: 'Initialization requirement is not configured.',
-    };
-  }
+  return installRequirementSteps(serverId, target, 'onboard');
+}
 
-  for (const step of requirement.steps) {
-    const existing = await runReadOnlyInitializeCommand(serverId, step.checkCommand);
-    const existingResult = 'result' in existing ? existing.result : undefined;
-    if (existingResult?.code === 0) {
-      continue;
-    }
-
-    const installCommand = step.installCommand?.trim();
-    if (!installCommand) {
-      continue;
-    }
-
-    const result = await executeCommand(
-      serverId,
-      installCommand,
-      `Initialize ${requirement.title}: ${step.name}`,
-      installCommand,
-      `initialize:${target}:install`
-    );
-
-    if (result.error) {
-      return {
-        success: false,
-        message: result.error,
-      };
-    }
-
-    const verified = await runReadOnlyInitializeCommand(serverId, step.checkCommand);
-    const verifiedResult = 'result' in verified ? verified.result : undefined;
-    if (!verifiedResult || verifiedResult.code !== 0) {
-      return {
-        success: false,
-        message: `${requirement.title} installation did not complete for step "${step.name}".`,
-      };
-    }
-  }
-
-  return {
-    success: true,
-    message: `${requirement.title} installed successfully.`,
-  };
+export async function repairInitializeRequirement(
+  serverId: string,
+  target: InitializeInstallTarget
+): Promise<InitializeInstallResult> {
+  return installRequirementSteps(serverId, target, 'repair');
 }
