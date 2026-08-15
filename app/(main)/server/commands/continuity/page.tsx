@@ -43,6 +43,32 @@ type ServerOption = {
   publicIp?: string | null;
 };
 
+const CONTINUITY_SESSION_ID_PATTERN = /^continuity_[A-Za-z0-9_.]+$/u;
+
+function decodeContinuitySessionQueryValue(value: string) {
+  let decoded = value.trim();
+
+  for (let index = 0; index < 2; index += 1) {
+    try {
+      const nextDecoded = decodeURIComponent(decoded);
+      if (nextDecoded === decoded) {
+        break;
+      }
+
+      decoded = nextDecoded.trim();
+    } catch {
+      break;
+    }
+  }
+
+  return decoded;
+}
+
+function getContinuitySessionIdFromQuery(value: string) {
+  const candidate = decodeContinuitySessionQueryValue(value).split(/\\t|\t/u, 1)[0]?.trim() ?? '';
+  return CONTINUITY_SESSION_ID_PATTERN.test(candidate) ? candidate : '';
+}
+
 /*
 ::neup.documentation::server-commands-continuity-client
 ::private
@@ -58,7 +84,8 @@ export default function ContinuityPage() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const selectedServerFromUrl = useSelectedServerId();
-  const requestedSessionId = searchParams.get('session')?.trim() || '';
+  const rawRequestedSessionId = searchParams.get('session')?.trim() || '';
+  const requestedSessionId = getContinuitySessionIdFromQuery(rawRequestedSessionId);
 
   const [servers, setServers] = useState<ServerOption[]>([]);
   const [sessions, setSessions] = useState<ContinuitySession[]>([]);
@@ -130,6 +157,22 @@ export default function ContinuityPage() {
 
     router.replace(withSelectedServerQuery('/server/commands/continuity', servers[0].id), { scroll: false });
   }, [isLoadingServers, router, selectedServerId, servers]);
+
+  useEffect(() => {
+    if (!selectedServerId || !rawRequestedSessionId) {
+      return;
+    }
+
+    if (!requestedSessionId) {
+      setSnapshot(null);
+      router.replace(withSelectedServerQuery('/server/commands/continuity', selectedServerId), { scroll: false });
+      return;
+    }
+
+    if (rawRequestedSessionId !== requestedSessionId) {
+      router.replace(withSelectedServerQuery(`/server/commands/continuity?session=${encodeURIComponent(requestedSessionId)}`, selectedServerId), { scroll: false });
+    }
+  }, [rawRequestedSessionId, requestedSessionId, router, selectedServerId]);
 
   useEffect(() => {
     if (!selectedServerId) {

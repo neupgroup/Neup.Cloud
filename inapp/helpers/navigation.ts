@@ -28,6 +28,7 @@ const SELECTED_SERVER_SESSION_KEY = 'selectedServer:lastKnown';
 const SELECTED_SERVER_ROUTE_PREFIXES = [
   '/home',
   '/server/home',
+  '/server/initialize',
   '/server/status',
   '/server/applications',
   '/server/database',

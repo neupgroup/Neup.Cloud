@@ -16,7 +16,7 @@ Use `getContinuitySessionSnapshot()` to render the current pane contents and `te
 
 ::private
 
-Continuity sessions are namespaced with the `continuity-` prefix and run over the existing SSH service on the selected server.
+Continuity sessions are namespaced with the `continuity_` prefix and run over the existing SSH service on the selected server.
 
 The service captures terminal output from tmux panes instead of holding a separate terminal transcript in the application database.
 
@@ -32,8 +32,10 @@ import { createServerLog } from '@/services/logs/server';
 import { getServerForRunner } from '@/services/server/server-runtime';
 import { runCommandOnServer } from '@/services/server/ssh';
 
-const CONTINUITY_PREFIX = 'continuity-';
+const CONTINUITY_PREFIX = 'continuity_';
 const SNAPSHOT_LINE_COUNT = 200;
+const CONTINUITY_SESSION_SEPARATOR = '__NEUP_CONTINUITY_FIELD__';
+const CONTINUITY_SESSION_ID_PATTERN = /^continuity_[A-Za-z0-9_.]+$/u;
 
 export type ContinuitySession = {
   id: string;
@@ -51,6 +53,25 @@ export type ContinuitySessionSnapshot = {
 
 function shellQuote(value: string) {
   return `'${value.replace(/'/g, `'\"'\"'`)}'`;
+}
+
+function decodeContinuitySessionId(value: string) {
+  let decoded = value.trim();
+
+  for (let index = 0; index < 2; index += 1) {
+    try {
+      const nextDecoded = decodeURIComponent(decoded);
+      if (nextDecoded === decoded) {
+        break;
+      }
+
+      decoded = nextDecoded.trim();
+    } catch {
+      break;
+    }
+  }
+
+  return decoded.split(/\\t|\t/u, 1)[0]?.trim() ?? '';
 }
 
 async function runContinuityCommand(serverId: string, command: string) {
@@ -82,16 +103,25 @@ async function runContinuityCommand(serverId: string, command: string) {
 }
 
 function assertValidContinuitySessionId(sessionId: string) {
-  const trimmed = sessionId.trim();
-  if (!trimmed.startsWith(CONTINUITY_PREFIX)) {
+  const candidate = decodeContinuitySessionId(sessionId);
+  if (!candidate.startsWith(CONTINUITY_PREFIX)) {
     throw new Error('Invalid continuity session ID.');
   }
 
-  if (!/^continuity-[a-z0-9-]+$/i.test(trimmed)) {
+  if (!CONTINUITY_SESSION_ID_PATTERN.test(candidate)) {
     throw new Error('Continuity session ID contains unsupported characters.');
   }
 
-  return trimmed;
+  return candidate;
+}
+
+function createMissingContinuitySnapshot(sessionId: string): ContinuitySessionSnapshot {
+  return {
+    exists: false,
+    sessionId: decodeContinuitySessionId(sessionId),
+    cwd: '~',
+    content: '',
+  };
 }
 
 function parseContinuitySessions(stdout: string) {
@@ -100,7 +130,10 @@ function parseContinuitySessions(stdout: string) {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [id, windowsValue, attachedValue, createdAtValue] = line.split('\t');
+      const [rawId, windowsValue, attachedValue, createdAtValue] = line.includes(CONTINUITY_SESSION_SEPARATOR)
+        ? line.split(CONTINUITY_SESSION_SEPARATOR)
+        : line.split(/\\t|\t/u);
+      const id = rawId?.trim() ?? '';
       const windows = Number.parseInt(windowsValue ?? '0', 10);
       const attachedClients = Number.parseInt(attachedValue ?? '0', 10);
       const createdAtEpoch = Number.parseInt(createdAtValue ?? '', 10);
@@ -113,6 +146,7 @@ function parseContinuitySessions(stdout: string) {
       } satisfies ContinuitySession;
     })
     .filter((session) => session.id.startsWith(CONTINUITY_PREFIX))
+    .filter((session) => CONTINUITY_SESSION_ID_PATTERN.test(session.id))
     .sort((left, right) => {
       const leftCreated = left.createdAtEpoch ?? 0;
       const rightCreated = right.createdAtEpoch ?? 0;
@@ -128,7 +162,7 @@ export async function listContinuitySessions(serverId: string): Promise<Continui
       '  echo "__NEUP_CONTINUITY_TMUX_MISSING__";',
       '  exit 0;',
       'fi',
-      `tmux list-sessions -F '#{session_name}\\t#{session_windows}\\t#{session_attached}\\t#{session_created}' 2>/dev/null || true`,
+      `tmux list-sessions -F '#{session_name}${CONTINUITY_SESSION_SEPARATOR}#{session_windows}${CONTINUITY_SESSION_SEPARATOR}#{session_attached}${CONTINUITY_SESSION_SEPARATOR}#{session_created}' 2>/dev/null || true`,
     ].join('\n')
   );
 
@@ -170,7 +204,13 @@ export async function getContinuitySessionSnapshot(
   sessionId: string,
   lineCount = SNAPSHOT_LINE_COUNT
 ): Promise<ContinuitySessionSnapshot> {
-  const safeSessionId = assertValidContinuitySessionId(sessionId);
+  let safeSessionId: string;
+  try {
+    safeSessionId = assertValidContinuitySessionId(sessionId);
+  } catch {
+    return createMissingContinuitySnapshot(sessionId);
+  }
+
   const safeLineCount = Number.isFinite(lineCount) ? Math.max(20, Math.min(1000, Math.floor(lineCount))) : SNAPSHOT_LINE_COUNT;
   const quotedSessionId = shellQuote(safeSessionId);
 
