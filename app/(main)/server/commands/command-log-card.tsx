@@ -66,6 +66,7 @@ function getSourceInfo(log: CommandLogItem): { label: string; href: string } | n
     return { label: appName, href: `/server/applications/${id}` };
   }
   if (src === 'commands:custom') return { label: 'Commands', href: '/server/commands' };
+  if (src === 'commands:continuity') return { label: 'Commands', href: '/server/commands' };
   if (src.startsWith('webservices')) return { label: 'Webservices', href: '/server/webservices' };
   if (src.startsWith('requirement:')) return { label: 'System', href: '/server/system' };
   return null;
