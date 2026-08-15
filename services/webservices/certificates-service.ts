@@ -21,13 +21,13 @@ export async function getCertificates(selectedServerId?: string | null) {
         throw new Error("No server selected");
     }
 
-    // Command to list certificates in /etc/nginx/ssl
+    // Command to list certificates in /.neup/certificates/ssl
     // We assume .pem files are certs. We can use openssl to get details.
     // For now, let's just list the files and maybe their dates.
     // Using a simple ls format to parse easily.
     const command = `
-        if [ -d /etc/nginx/ssl ]; then
-            for f in /etc/nginx/ssl/*.pem; do
+        if [ -d /.neup/certificates/ssl ]; then
+            for f in /.neup/certificates/ssl/*.pem; do
                 [ -e "$f" ] || continue
                 echo "File: $(basename "$f")"
                 openssl x509 -in "$f" -noout -dates -subject -issuer
@@ -101,7 +101,7 @@ export async function getCertificate(fileName: string, selectedServerId?: string
         throw new Error("Invalid filename");
     }
 
-    const filePath = `/etc/nginx/ssl/${fileName}`;
+    const filePath = `/.neup/certificates/ssl/${fileName}`;
     const command = `
         if [ -f "${filePath}" ]; then
             echo "EXISTS"
@@ -178,14 +178,14 @@ export async function deleteCertificate(fileName: string, selectedServerId?: str
 
     /**
      * Deletion Strategy:
-     * 1. Remove local copies in /etc/nginx/ssl
+     * 1. Remove local copies in /.neup/certificates/ssl
      * 2. Use 'certbot delete' to properly remove from Let's Encrypt renewal logic (live/archive/renew params)
      * 3. Fallback manual cleanup if certbot fails or if they were manual files
      */
     const command = `
-        # 1. Remove files in /etc/nginx/ssl
-        sudo rm -f /etc/nginx/ssl/${certNamePem}
-        sudo rm -f /etc/nginx/ssl/${certNameKey}
+        # 1. Remove files in /.neup/certificates/ssl
+        sudo rm -f /.neup/certificates/ssl/${certNamePem}
+        sudo rm -f /.neup/certificates/ssl/${certNameKey}
         
         # 2. Try Certbot delete
         if sudo certbot certificates | grep -q "${certName}"; then
@@ -229,7 +229,7 @@ export async function reissueCertificate(fileName: string, domain: string, selec
 
     const cleanDomain = domain.trim();
     const certName = fileName.replace('.pem', '');
-    const sslDir = '/etc/nginx/ssl';
+    const sslDir = '/.neup/certificates/ssl';
     const certPath = `${sslDir}/${certName}.pem`;
     const keyPath = `${sslDir}/${certName}.key`;
 
@@ -237,7 +237,7 @@ export async function reissueCertificate(fileName: string, domain: string, selec
      * Reissuance Strategy:
      * 1. Delete the existing certificate (nginx/ssl files + certbot records)
      * 2. Issue a brand new certificate via certbot --standalone
-     * 3. Copy the new cert into /etc/nginx/ssl, replacing the old one
+     * 3. Copy the new cert into /.neup/certificates/ssl, replacing the old one
      */
     const certbotCommand = `sudo certbot certonly --standalone --force-renewal --non-interactive --agree-tos -m encryption.cloud@neupgroup.com -d ${cleanDomain} --cert-name ${certName}`;
 
@@ -261,7 +261,7 @@ export async function reissueCertificate(fileName: string, domain: string, selec
         CERTBOT_EXIT=$?
 
         if [ $CERTBOT_EXIT -eq 0 ]; then
-            # Step 4: Copy new cert into /etc/nginx/ssl
+            # Step 4: Copy new cert into /.neup/certificates/ssl
             sudo cp -L /etc/letsencrypt/live/${certName}/fullchain.pem ${certPath} && \
             sudo cp -L /etc/letsencrypt/live/${certName}/privkey.pem ${keyPath} && \
             sudo chmod 644 ${certPath} && \

@@ -6,8 +6,8 @@
 set -e
 
 # Default values
-CERT_PATH="${1:-/etc/nginx/ssl/default.crt}"
-KEY_PATH="${2:-/etc/nginx/ssl/default.key}"
+CERT_PATH="${1:-/.neup/certificates/ssl/default.pem}"
+KEY_PATH="${2:-/.neup/certificates/ssl/default.key}"
 REDIRECT_URL="${3:-https://neupgroup.com/cloud}"
 
 # Colors for output

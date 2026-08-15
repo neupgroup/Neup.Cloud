@@ -25,8 +25,8 @@ export default function DefaultNginxConfigClient({ serverId, serverName }: Defau
     const { toast } = useToast();
 
     // Fixed SSL directory and paths
-    const sslDir = '/etc/nginx/ssl';
-    const certPath = `${sslDir}/default.crt`;
+    const sslDir = '/.neup/certificates/ssl';
+    const certPath = `${sslDir}/default.pem`;
     const keyPath = `${sslDir}/default.key`;
 
     const [redirectUrl, setRedirectUrl] = useState('https://neupgroup.com/cloud');

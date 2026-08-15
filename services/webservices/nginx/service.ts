@@ -8,6 +8,8 @@ import { getServerForRunner } from '@/services/server/server-service';
 import { getServerPublicIp as getServerPublicIpLogic } from '@/services/webservices/service';
 import { generateNginxConfigFromContext as generateNginxConfigFromContextLogic } from '@/services/webservices/nginx/config-generator';
 
+const SSL_CERTIFICATES_DIR = '/.neup/certificates/ssl';
+
 export interface SubPath {
     id: string;
     path: string;
@@ -298,8 +300,8 @@ export async function generateSslCertificate(
             };
         }
 
-        const sslDir = '/etc/nginx/ssl';
-        const certName = configName;
+        const certName = assertSafeCertificateName(configName);
+        const sslDir = SSL_CERTIFICATES_DIR;
         const keyPath = `${sslDir}/${certName}.key`;
         const certPath = `${sslDir}/${certName}.pem`;
 
@@ -345,6 +347,7 @@ export async function generateSslCertificate(
                 CERTBOT_EXIT=$?
                 
                 if [ $CERTBOT_EXIT -eq 0 ]; then
+                    sudo mkdir -p ${sslDir} && \
                     sudo cp -L /etc/letsencrypt/live/${configName}/privkey.pem ${keyPath} && \
                     sudo cp -L /etc/letsencrypt/live/${configName}/fullchain.pem ${certPath} && \
                     sudo chmod 600 ${keyPath} && \
@@ -552,6 +555,7 @@ chmod +x ${hookScriptPath}
             // Check Result
             const copyAndCheckCmd = `
                 if [ -f /etc/letsencrypt/live/${configName}/fullchain.pem ]; then
+                   sudo mkdir -p ${sslDir} && \
                    sudo cp -L /etc/letsencrypt/live/${configName}/privkey.pem ${keyPath} && \
                    sudo cp -L /etc/letsencrypt/live/${configName}/fullchain.pem ${certPath} && \
                    sudo chmod 600 ${keyPath} && \
@@ -675,7 +679,7 @@ export async function startContinuitySslCertificateSession(
     }
 
     const certName = assertSafeCertificateName(configName);
-    const sslDir = '/etc/nginx/ssl';
+    const sslDir = SSL_CERTIFICATES_DIR;
     const domainFlags = safeDomains.map((domain) => `-d ${shellQuote(domain)}`).join(' ');
     const quotedCertName = shellQuote(certName);
     const session = await createContinuitySession(serverId);

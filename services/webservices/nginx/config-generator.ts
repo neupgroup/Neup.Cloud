@@ -52,22 +52,12 @@ function buildServerName(subdomain: string | undefined, domainName: string): str
   return `${subdomain}.${domainName}`;
 }
 
-function buildSslPaths(sslCertificateFile: string) {
-  const certificateFileInput = sslCertificateFile.trim();
-  const certFileNameOnly = certificateFileInput.includes('/')
-    ? certificateFileInput.split('/').pop() || certificateFileInput
-    : certificateFileInput;
-
-  const certFileName = /\.[^.]+$/.test(certFileNameOnly)
-    ? certFileNameOnly
-    : `${certFileNameOnly}.pem`;
-
-  const certBaseName = certFileName.replace(/\.[^.]+$/, '');
-  const keyFileName = `${certBaseName}.key`;
+function buildSslPaths(configName: string) {
+  const certBaseName = configName.trim();
 
   return {
-    certPath: `/etc/nginx/ssl/${certFileName}`,
-    keyPath: `/etc/nginx/ssl/${keyFileName}`,
+    certPath: `/.neup/certificates/ssl/${certBaseName}.pem`,
+    keyPath: `/.neup/certificates/ssl/${certBaseName}.key`,
   };
 }
 
@@ -149,14 +139,14 @@ export function generateNginxConfigFromContext(config: NginxConfiguration): Gene
     const renderedClientMaxBodySize = renderClientMaxBodySize(block.clientMaxBodySizeEnabled, block.clientMaxBodySize);
 
     if (block.sslEnabled) {
-      if (!block.sslCertificateFile) {
+      if (!config.configName.trim()) {
         return {
           success: false,
-          error: `SSL is enabled for ${serverName} but no certificate file is selected.`,
+          error: `SSL is enabled for ${serverName} but no configuration name is set.`,
         };
       }
 
-      const { certPath, keyPath } = buildSslPaths(block.sslCertificateFile);
+      const { certPath, keyPath } = buildSslPaths(config.configName);
 
       if (block.httpsRedirection) {
         nginxConfig += `

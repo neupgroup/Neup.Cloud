@@ -8,8 +8,8 @@ import { runCommandOnServer } from '@/services/server/ssh';
  */
 export async function generateDefaultSSLCertificate(
     serverId: string,
-    certPath: string = '/etc/nginx/ssl/default.crt',
-    keyPath: string = '/etc/nginx/ssl/default.key'
+    certPath: string = '/.neup/certificates/ssl/default.pem',
+    keyPath: string = '/.neup/certificates/ssl/default.key'
 ) {
     try {
         const server = await getServerForRunner(serverId);
@@ -158,8 +158,8 @@ export async function deployDefaultNginxConfig(
  * Generate the default Nginx configuration content
  */
 export async function generateDefaultConfigContent(
-    certPath: string = '/etc/nginx/ssl/default.crt',
-    keyPath: string = '/etc/nginx/ssl/default.key',
+    certPath: string = '/.neup/certificates/ssl/default.pem',
+    keyPath: string = '/.neup/certificates/ssl/default.key',
     redirectUrl: string = 'https://neupgroup.com/cloud'
 ) {
     const config = `# DEFAULT CATCH-ALL HANDLER

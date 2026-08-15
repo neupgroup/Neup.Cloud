@@ -191,33 +191,23 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
     const [loadingCerts, setLoadingCerts] = useState(false);
     const isEditMode = !!configId && configId !== 'new';
     const isReservedConfigName = configName.trim().toLowerCase() === 'new';
+    const expectedCertificateFileName = configName.trim() ? `${configName.trim()}.pem` : '';
 
     // Auto-link certificates when available
     useEffect(() => {
-        if (loadingCerts || availableCertificates.length === 0) return;
+        if (loadingCerts || availableCertificates.length === 0 || !expectedCertificateFileName) return;
 
         let changed = false;
         const newBlocks = domainBlocks.map(block => {
-            // Only act if SSL enabled or if we want to pre-fill? Better only if enabled or if user turns it on.
             if (!block.sslEnabled) return block;
 
-            // If already set and valid, skip
-            if (block.sslCertificateFile && availableCertificates.some(c => c.fileName === block.sslCertificateFile)) {
+            if (block.sslCertificateFile === expectedCertificateFileName) {
                 return block;
             }
 
-            // Find matching cert:
-            // 1. Exact match on Common Name
-            // 2. Exact match on Filename (minus .pem)
-            // 3. Filename starts with domain
-            const cert = availableCertificates.find(c =>
-                c.commonName === block.domainName ||
-                c.fileName === `${block.domainName}.pem` ||
-                c.fileName === `${block.domainName}`
-            );
+            const cert = availableCertificates.find(c => c.fileName === expectedCertificateFileName);
 
-            if (cert && block.sslCertificateFile !== cert.fileName) {
-                console.log(`Auto-linking cert ${cert.fileName} to block ${block.domainName}`);
+            if (cert) {
                 changed = true;
                 return { ...block, sslCertificateFile: cert.fileName };
             }
@@ -228,7 +218,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
         if (changed) {
             setDomainBlocks(newBlocks);
         }
-    }, [availableCertificates, domainBlocks, loadingCerts]);
+    }, [availableCertificates, domainBlocks, expectedCertificateFileName, loadingCerts]);
 
     // Fetch certificates when server changes
     useEffect(() => {
@@ -263,7 +253,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                 // Update: `handleServerSelect` sets state. We should probably update cookie too if we want backend tools to work.
                 document.cookie = `selected_server=${selectedServerId}; path=/`;
 
-                const certs = await getCertificates();
+                const certs = await getCertificates(selectedServerId);
                 setAvailableCertificates(certs);
             } catch (e) {
                 console.error("Failed to fetch certs", e);
@@ -1109,8 +1099,25 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                         title: 'Certificate Success',
                         description: result.message,
                     });
-                    updateDomainBlock(blockId, 'sslEnabled', true);
-                    updateDomainBlock(blockId, 'httpsRedirection', true);
+                    setDomainBlocks(prevBlocks => prevBlocks.map(currentBlock =>
+                        currentBlock.id === blockId
+                            ? {
+                                ...currentBlock,
+                                sslEnabled: true,
+                                httpsRedirection: true,
+                                sslCertificateFile: expectedCertificateFileName,
+                            }
+                            : currentBlock
+                    ));
+                    setGeneratedConfig('');
+                    setShowPreview(false);
+
+                    try {
+                        const certs = await getCertificates(selectedServerId);
+                        setAvailableCertificates(certs);
+                    } catch (error) {
+                        console.error("Failed to refresh certs", error);
+                    }
 
                     // Clear pending validation
                     if (pendingValidation) {
@@ -1204,7 +1211,25 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
 
         setDeploying(true);
         try {
-            const result = await deployNginxConfig(selectedServerId, generatedConfig, configName);
+            const currentConfig = {
+                serverIp: selectedServerIp,
+                configName: configName,
+                blocks: domainBlocks,
+                domainRedirects: domainRedirects,
+            };
+            const generatedResult = await generateNginxConfigFromContext(currentConfig);
+
+            if (!generatedResult.success || !generatedResult.config) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Configuration Error',
+                    description: generatedResult.error || 'Failed to generate nginx configuration.',
+                });
+                return;
+            }
+
+            setGeneratedConfig(generatedResult.config);
+            const result = await deployNginxConfig(selectedServerId, generatedResult.config, configName);
 
             if (result.success) {
                 toast({
@@ -1647,10 +1672,10 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                                 </div>
                                                 {block.sslEnabled && (
                                                     <div className="pl-1 pt-2 space-y-2 animate-in slide-in-from-top-2">
-                                                        <div className={`flex items-center justify-between p-3 bg-muted/40 rounded-lg border ${!block.sslCertificateFile ? 'border-amber-500/50 bg-amber-500/5' : ''}`}>
+                                                        <div className={`flex items-center justify-between p-3 bg-muted/40 rounded-lg border ${block.sslCertificateFile !== expectedCertificateFileName ? 'border-amber-500/50 bg-amber-500/5' : ''}`}>
                                                             <div className="space-y-0.5">
                                                                 <Label className="text-sm font-medium flex items-center gap-2">
-                                                                    {block.sslCertificateFile ? (
+                                                                    {block.sslCertificateFile === expectedCertificateFileName ? (
                                                                         <FileKey className="h-4 w-4 text-primary" />
                                                                     ) : (
                                                                         <ShieldAlert className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -1658,24 +1683,24 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                                                     SSL Certificate
                                                                 </Label>
                                                                 <div className="text-[10px] text-muted-foreground">
-                                                                    {block.sslCertificateFile ? (
+                                                                    {block.sslCertificateFile === expectedCertificateFileName ? (
                                                                         <span>
-                                                                            Selected <span className="font-semibold text-foreground">"{block.sslCertificateFile.replace('.pem', '')}"</span> from certificates
+                                                                            Using <span className="font-semibold text-foreground">/.neup/certificates/ssl/{expectedCertificateFileName}</span>
                                                                         </span>
                                                                     ) : (
                                                                         <span className="text-amber-600 dark:text-amber-400">
-                                                                            No matching certificate found for <strong>{block.domainName}</strong>
+                                                                            Expected certificate: <strong>/.neup/certificates/ssl/{expectedCertificateFileName || '{configName}.pem'}</strong>
                                                                         </span>
                                                                     )}
                                                                 </div>
                                                             </div>
                                                             <Link href="/server/webservices/certificates" target="_blank">
                                                                 <Button
-                                                                    variant={block.sslCertificateFile ? "outline" : "default"}
+                                                                    variant={block.sslCertificateFile === expectedCertificateFileName ? "outline" : "default"}
                                                                     size="sm"
-                                                                    className={`h-7 text-xs ${!block.sslCertificateFile ? 'bg-amber-600 hover:bg-amber-700 text-white' : ''}`}
+                                                                    className={`h-7 text-xs ${block.sslCertificateFile !== expectedCertificateFileName ? 'bg-amber-600 hover:bg-amber-700 text-white' : ''}`}
                                                                 >
-                                                                    {block.sslCertificateFile ? "Change" : "Create One"}
+                                                                    {block.sslCertificateFile === expectedCertificateFileName ? "Open" : "Create One"}
                                                                 </Button>
                                                             </Link>
                                                         </div>
