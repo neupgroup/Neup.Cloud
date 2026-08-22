@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
   // Exclude server-only packages from webpack bundling
   serverExternalPackages: ['ssh2', 'node-ssh', 'cpu-features'],
   experimental: {
+    proxyClientMaxBodySize: '100mb',
     serverActions: {
       bodySizeLimit: '100mb',
     },

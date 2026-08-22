@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function handleDownloadPost(request: NextRequest) {
     try {
         const cookieStore = await cookies();
-        const serverId = cookieStore.get('selected_server')?.value;
+        const serverId = request.nextUrl.searchParams.get('server')?.trim() || cookieStore.get('selected_server')?.value;
         if (!serverId) {
             return NextResponse.json({ error: 'No server selected' }, { status: 400 });
         }

@@ -97,6 +97,27 @@ function formatBytes(bytes: number, decimals = 2) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
+function makeCurrentBasePathUrl(pathname: string, path: string): string {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+  if (typeof window === 'undefined') {
+    return normalizedPath;
+  }
+
+  const currentPath = window.location.pathname;
+  if (currentPath !== '/' && pathname !== '/' && currentPath.endsWith(pathname)) {
+    const basePath = currentPath.slice(0, Math.max(0, currentPath.length - pathname.length));
+    return `${basePath}${normalizedPath}`;
+  }
+
+  return normalizedPath;
+}
+
+function appendQueryParameter(url: string, key: string, value: string): string {
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+}
+
 function ServerFilesBrowser({ serverId }: { serverId: string }) {
   const { toast } = useToast();
   const router = useRouter();
@@ -668,7 +689,13 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
         currentPath.endsWith('/') ? currentPath + name : currentPath + '/' + name
       );
 
-      const response = await fetch('/api/download', {
+      const downloadUrl = appendQueryParameter(
+        makeCurrentBasePathUrl(pathname, '/bridge/api.v1/download'),
+        'server',
+        serverId
+      );
+
+      const response = await fetch(downloadUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
