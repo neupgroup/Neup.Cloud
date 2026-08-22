@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Loader2, PlusCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { ApplicationCard, ApplicationCardSkeleton } from './card';
+import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 import { getApplicationItems } from '@/services/server/applications/queries';
 import type { ApplicationItem, ApplicationSource, ApplicationStatusFilter } from '@/services/server/applications/queries';
 
@@ -35,6 +36,7 @@ export function ApplicationSection({
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const isFirstLoadRef = useRef(true);
   const statusFilterKey = Array.isArray(statusFilter) ? statusFilter.join('|') : statusFilter;
+  const withSelectedServerHref = useSelectedServerHref();
 
   useEffect(() => {
     let cancelled = false;
@@ -85,7 +87,10 @@ export function ApplicationSection({
 
       <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
         {showAddButton && (
-          <Link href="/server/applications/deploy" className="block p-4 border-b border-border hover:bg-muted/50 transition-colors group">
+          <Link
+            href={withSelectedServerHref('/server/applications/deploy')}
+            className="block p-4 border-b border-border hover:bg-muted/50 transition-colors group"
+          >
             <div className="flex items-center gap-4">
               <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <PlusCircle className="h-5 w-5 text-primary" />
@@ -112,7 +117,7 @@ export function ApplicationSection({
               <ApplicationCard
                 application={item.application}
                 status={item.status}
-                href={item.href}
+                href={withSelectedServerHref(item.href)}
                 sourceLabel={item.sourceLabel}
               />
             </div>
