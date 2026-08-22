@@ -4,6 +4,7 @@
 
 
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { promisify } from 'node:util';
 import { execFile as execFileCallback } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
@@ -148,6 +149,16 @@ export async function selectServer(serverId: string, serverName: string) {
   if (isServerExpired(server.moreDetails)) {
     throw new Error('This server is expired and cannot be selected.');
   }
+
+  const cookieStore = await cookies();
+  cookieStore.set('selected_server', serverId, {
+    path: '/',
+    sameSite: 'lax',
+  });
+  cookieStore.set('selected_server_name', serverName, {
+    path: '/',
+    sameSite: 'lax',
+  });
 
   revalidatePath('/');
   revalidatePath('/server/list');

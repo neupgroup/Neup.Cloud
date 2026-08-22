@@ -187,6 +187,7 @@ export default function Home() {
     await selectServer(id, name);
     setServerId(id);
     router.replace(withSelectedServerQuery(pathname, id), { scroll: false });
+    router.refresh();
     // Optionally close the list or reset search
     // setShowAllServers(false);
   };

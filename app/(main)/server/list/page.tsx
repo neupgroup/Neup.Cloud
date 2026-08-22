@@ -149,6 +149,7 @@ function ServerListContent() {
         description: `You are now managing ${server.name}.`,
       });
       router.push(withSelectedServerQuery(redirectTo ?? "/server/home", server.id), { scroll: false });
+      router.refresh();
     } catch (error) {
       console.error(error);
       toast({

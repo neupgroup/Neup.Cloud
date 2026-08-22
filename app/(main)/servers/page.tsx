@@ -54,9 +54,13 @@ export default function ServersPage() {
 
   const handleSwitch = async (id: string, name: string) => {
     setSwitchingId(id);
-    await selectServer(id, name);
-    setSwitchingId(null);
-    router.push(withSelectedServerQuery('/server/home', id));
+    try {
+      await selectServer(id, name);
+      router.push(withSelectedServerQuery('/server/home', id));
+      router.refresh();
+    } finally {
+      setSwitchingId(null);
+    }
   };
 
   return (

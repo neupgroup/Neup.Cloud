@@ -1,12 +1,13 @@
 // Moved from /app/(main)/servers/server-card.tsx
 'use client';
 
-import { ChevronRight, ServerIcon, User, Check, Loader2 } from "lucide-react";
+import { ChevronRight, ServerIcon, Check, Loader2 } from "lucide-react";
 import React, { useState } from "react";
-import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/core/hooks/useToast';
+import { shouldPreserveSelectedServer, withSelectedServerQuery } from "@/inapp/helpers/navigation";
 import { deleteServer, selectServer } from '@/services/server/server-service';
 import type { Server } from '@/services/server/types';
 import { cn } from "@/core/utils";
@@ -22,6 +23,9 @@ type ServerCardProps = {
 };
 
 export function ServerCard({ server, onServerDeleted, onServerSelected, isSelected, className }: ServerCardProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isSwitching, setIsSwitching] = useState(false);
 
@@ -54,6 +58,11 @@ export function ServerCard({ server, onServerDeleted, onServerSelected, isSelect
         description: `You are now managing \"${server.name}\".`,
       });
       onServerSelected(server.id);
+      const currentUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+      if (shouldPreserveSelectedServer(pathname)) {
+        router.replace(withSelectedServerQuery(currentUrl, server.id), { scroll: false });
+      }
+      router.refresh();
     } catch (error) {
       console.error("Error selecting server: ", error);
       toast({
