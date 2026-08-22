@@ -6,7 +6,7 @@ import { Database, ShieldCheck } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { PageTitleBack } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import {
   checkDatabaseConnection,
   deleteDatabaseConnection,

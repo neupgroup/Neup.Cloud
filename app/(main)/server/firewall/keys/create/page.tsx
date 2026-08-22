@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Download, KeyRound, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { generateSSHKeyPair, addAuthorizedKey } from "@/services/server/firewall-keys-service";
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { getRandomWord } from "@/core/dictionary";

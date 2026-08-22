@@ -15,7 +15,7 @@ import {
 import { getCertificates } from '@/services/webservices/certificates-service';
 import { getWebOrServerNginxConfig } from '@/services/webservices/service';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import {
     Loader2,
     Plus,

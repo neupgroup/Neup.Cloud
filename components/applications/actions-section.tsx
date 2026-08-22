@@ -1,4 +1,4 @@
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { useState } from "react";
 

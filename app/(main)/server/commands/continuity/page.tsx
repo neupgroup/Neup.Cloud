@@ -31,7 +31,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { createContinuitySession, getContinuitySessionSnapshot, listContinuitySessions, sendContinuityCommand, terminateContinuitySession, type ContinuitySession, type ContinuitySessionSnapshot } from '@/services/server/continuity-service';

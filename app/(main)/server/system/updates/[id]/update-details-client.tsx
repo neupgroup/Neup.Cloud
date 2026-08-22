@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { AlertCircle, Package, ArrowUpCircle, CheckCircle2, Loader2, Play } from 'lucide-react';
 import { getPackageDetails, updatePackage } from '@/services/server/system-updates';
 

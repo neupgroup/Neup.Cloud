@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { executeDatabaseShellQuery, getDatabaseShellMeta } from '@/services/database/management';
 import type { DatabaseConnectionType, DatabaseShellQueryResult } from '@/services/database/types';
 

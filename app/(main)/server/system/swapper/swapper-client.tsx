@@ -9,7 +9,7 @@ import { createRecurringSwap, deleteRecurringSwap, deleteSwapFile, listSwapFiles
 import type { SwapFileEntry } from '@/services/server/system-swap';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import {
     Zap,
     RefreshCw,

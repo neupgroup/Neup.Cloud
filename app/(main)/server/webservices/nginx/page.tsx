@@ -11,7 +11,7 @@ import { PageTitleBack } from '@/components/page-header';
 import { cn } from '@/core/utils';
 import { restartNginxService } from './restart-action';
 import { testNginxConfiguration } from './test-action';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 

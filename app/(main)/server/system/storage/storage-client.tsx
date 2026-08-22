@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getStorageBreakdown, getStorageOverview } from '@/services/server/system-storage';
 import type { StorageInfo, StorageSection } from '@/services/server/system-storage';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {

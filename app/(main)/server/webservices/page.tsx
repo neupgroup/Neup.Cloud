@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getServer } from '@/services/server/server-service';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { Loader2, Globe, Wind, Server, ArrowRight, Settings, FileKey } from 'lucide-react';
 import Link from 'next/link';
 

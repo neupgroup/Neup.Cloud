@@ -37,7 +37,7 @@ import { Label } from '@/components/ui/label';
 import { getServers } from '@/services/server/server-service';
 import { getSavedCommands, deleteSavedCommand, executeSavedCommand } from '@/services/server/commands/server-command-service';
 import type { SavedCommand } from '@/services/saved-commands/types';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { PageTitleBack } from '@/components/page-header';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { resolveSelectedServerValue, withSelectedServerQuery } from '@/inapp/helpers/navigation';

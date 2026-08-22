@@ -26,7 +26,7 @@ import { getServerLogs } from '@/services/server/server-file-service';
 import { runCustomCommandOnServer } from '@/services/server/server-file-service';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import {
   Dialog,
   DialogContent,

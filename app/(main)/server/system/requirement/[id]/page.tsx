@@ -12,7 +12,7 @@ actions bound to the selected server from the URL-backed server context.
 import { useParams } from 'next/navigation';
 import { requirements } from '@/services/server/requirement-list';
 import { PageTitleBack } from '@/components/page-header';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { useState, useEffect } from 'react';
 import { checkRequirementStep, installRequirementStep, uninstallRequirementStep, updateRequirementStep } from '../runner';
 import * as Icons from 'lucide-react';

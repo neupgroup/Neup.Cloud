@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
 import { useState } from 'react';
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 
 import { ReactNode } from "react";

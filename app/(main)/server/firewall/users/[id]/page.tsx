@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Save, Trash2, Key } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getUserDetails, updateUserPassword, toggleSudo, deleteUser, SystemUser } from "@/services/server/firewall-users-service";
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { useRouter } from "next/navigation";
 import {
     AlertDialog,

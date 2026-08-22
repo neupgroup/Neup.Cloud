@@ -11,7 +11,7 @@ import { getDomain, getDomainDNSRecords, getDomainNameservers, verifyDomain, del
 import type { ManagedDomain, DNSRecord } from '@/services/domains/types';
 import { useEffect, useState } from "react";
 import { PageTitleBack } from "@/components/page-header";
-import { useToast } from '@/core/hooks/use-toast';
+import { useToast } from '@/core/hooks/useToast';
 import { useRouter } from "next/navigation";
 import {
     AlertDialog,
