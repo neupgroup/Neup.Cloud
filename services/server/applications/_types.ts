@@ -10,6 +10,7 @@ export type ApplicationServerSyncInfo = {
 };
 
 export interface ApplicationInformation extends Record<string, any> {
+  locationType?: 'folder' | 'executable';
   repoInfo?: {
     isPrivate?: boolean;
     provider?: 'github';

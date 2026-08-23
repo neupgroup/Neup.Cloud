@@ -23,6 +23,65 @@ import React, { useRef, useState } from 'react';
 import { updateApplication } from '@/services/server/applications/service';
 import { normalizeApplicationNameInput } from '@/services/server/applications/name';
 
+type ApplicationLocationType = 'folder' | 'executable';
+
+function trimTrailingSlashes(value: string) {
+    if (value === '/') return value;
+    return value.replace(/\/+$/, '');
+}
+
+function buildExecutablePath(directory: string, entryFile: string) {
+    const normalizedDirectory = trimTrailingSlashes(directory.trim());
+    const normalizedEntryFile = entryFile.trim().replace(/^\.\//, '');
+
+    if (!normalizedDirectory) return normalizedEntryFile;
+    if (!normalizedEntryFile) return normalizedDirectory;
+    if (normalizedDirectory === '/') return `/${normalizedEntryFile}`;
+    return `${normalizedDirectory}/${normalizedEntryFile}`;
+}
+
+function splitExecutablePath(value: string) {
+    const normalizedPath = trimTrailingSlashes(value.trim());
+    if (!normalizedPath || normalizedPath === '/') return null;
+
+    const lastSlashIndex = normalizedPath.lastIndexOf('/');
+    if (lastSlashIndex === -1) {
+        return { location: '.', entryFile: normalizedPath };
+    }
+
+    const location = normalizedPath.slice(0, lastSlashIndex) || '/';
+    const entryFile = normalizedPath.slice(lastSlashIndex + 1);
+    if (!entryFile) return null;
+
+    return { location, entryFile };
+}
+
+function getDefaultCommands(
+    frameworkId: string,
+    locationType: ApplicationLocationType,
+    locationInput: string,
+) {
+    if (frameworkId === 'go' && locationType === 'executable') {
+        const executablePath = trimTrailingSlashes(locationInput.trim());
+        return executablePath
+            ? [{ name: 'start', description: 'Start the executable', value: executablePath }]
+            : [];
+    }
+
+    const framework = FRAMEWORKS.find((item) => item.id === frameworkId);
+    return framework ? [...framework.defaultCommands] : [];
+}
+
+function areCommandsEqual(left: CommandItem[], right: CommandItem[]) {
+    return left.length === right.length && left.every((command, index) => {
+        const other = right[index];
+        return other
+            && command.name === other.name
+            && command.description === other.description
+            && command.value === other.value;
+    });
+}
+
 const FRAMEWORKS = [
     {
         id: 'next', name: 'Next.js', defaultCommands: [
@@ -79,9 +138,14 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
     const [isLoading, setIsLoading] = useState(false);
 
     // Application Basics
+    const storedLocationType = application.information?.locationType === 'executable' ? 'executable' : 'folder';
+    const initialLocation = storedLocationType === 'executable' && application.information?.entryFile
+        ? buildExecutablePath(application.location || '', application.information.entryFile)
+        : application.location || '';
     const [appName, setAppName] = useState(application.name || '');
     const [appIcon, setAppIcon] = useState(application.appIcon || '');
-    const [appLocation, setAppLocation] = useState(application.location || '');
+    const [appLocation, setAppLocation] = useState(initialLocation);
+    const [locationType, setLocationType] = useState<ApplicationLocationType>(storedLocationType);
     const [errorfile, setErrorfile] = useState(application.information?.errorfile || '');
     const appIconInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -128,7 +192,10 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
         });
     }
 
+    const initialDefaultCommands = getDefaultCommands(application.language || '', storedLocationType, initialLocation);
+    const shouldAutoManageCommands = initialCommands.length === 0 || areCommandsEqual(initialCommands, initialDefaultCommands);
     const [commands, setCommands] = useState<CommandItem[]>(initialCommands);
+    const [commandsTouched, setCommandsTouched] = useState(!shouldAutoManageCommands);
 
     // Custom Command Input State
     const [newCmdName, setNewCmdName] = useState('');
@@ -143,9 +210,15 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
         setSelectedFramework(val);
 
         // Optional: Propose default commands if list is empty?
-        if (commands.length === 0) {
-            const fw = FRAMEWORKS.find(f => f.id === val);
-            if (fw) setCommands([...fw.defaultCommands]);
+        if (!commandsTouched) {
+            setCommands(getDefaultCommands(val, locationType, appLocation));
+        }
+    };
+
+    const handleLocationTypeChange = (value: ApplicationLocationType) => {
+        setLocationType(value);
+        if (!commandsTouched) {
+            setCommands(getDefaultCommands(selectedFramework, value, appLocation));
         }
     };
 
@@ -172,12 +245,14 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
             return;
         }
         setCommands([...commands, { name: newCmdName, description: newCmdDesc, value: newCmdValue }]);
+        setCommandsTouched(true);
         setNewCmdName('');
         setNewCmdDesc('');
         setNewCmdValue('');
     };
 
     const removeCommand = (index: number) => {
+        setCommandsTouched(true);
         setCommands(commands.filter((_, i) => i !== index));
     };
 
@@ -199,6 +274,21 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
 
         if (!appName || !appLocation || !selectedFramework) {
             toast({ variant: "destructive", title: "Missing fields", description: "Name, Location and Framework are required." });
+            setIsLoading(false);
+            return;
+        }
+
+        const normalizedLocationInput = appLocation.trim();
+        const locationDetails = locationType === 'executable'
+            ? splitExecutablePath(normalizedLocationInput)
+            : { location: normalizedLocationInput, entryFile: undefined };
+
+        if (!locationDetails) {
+            toast({
+                variant: "destructive",
+                title: "Invalid executable path",
+                description: "Provide the full path to the executable file.",
+            });
             setIsLoading(false);
             return;
         }
@@ -243,16 +333,18 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
         const updatedData = {
             name: appName.trim(),
             appIcon: appIcon || undefined,
-            location: appLocation,
+            location: locationDetails.location,
             language: selectedFramework,
             repository: repoLocation,
             networkAccess: requiresNetwork ? preferredPorts.map(p => p.toString()) : undefined,
             commands: simpleCommands,
             information: {
                 ...application.information,
+                locationType,
                 repoInfo: updatedRepoInfo,
                 networkInfo,
                 commandsList: formattedCommands,
+                entryFile: locationDetails.entryFile,
                 errorfile: errorfile.trim() || undefined,
             },
             updatedAt: new Date().toISOString(),
@@ -320,7 +412,35 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="appLocation">Location in Server</Label>
-                            <Input id="appLocation" placeholder="/var/www/my-app" value={appLocation} onChange={e => setAppLocation(e.target.value)} />
+                            <Input
+                                id="appLocation"
+                                placeholder={locationType === 'executable' ? '/var/www/my-app/app-binary' : '/var/www/my-app'}
+                                value={appLocation}
+                                onChange={e => {
+                                    const nextValue = e.target.value;
+                                    setAppLocation(nextValue);
+                                    if (!commandsTouched) {
+                                        setCommands(getDefaultCommands(selectedFramework, locationType, nextValue));
+                                    }
+                                }}
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="locationType">What is this path?</Label>
+                            <Select value={locationType} onValueChange={value => handleLocationTypeChange(value as ApplicationLocationType)}>
+                                <SelectTrigger id="locationType">
+                                    <SelectValue placeholder="Select path type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="folder">Folder</SelectItem>
+                                    <SelectItem value="executable">Executable file</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                                {locationType === 'executable'
+                                    ? 'Use the full path to the binary. Go applications will run this executable directly.'
+                                    : 'Use the application directory path. Runtime commands will execute from inside this folder.'}
+                            </p>
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="errorfile">Error / Log File <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label>

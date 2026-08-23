@@ -23,6 +23,9 @@ import { generateSslCertificate, getWildcardCertificateSession } from '@/service
 interface CreateCertificateDialogProps {
     serverId: string | null;
     onSuccess: () => void;
+    defaultOpen?: boolean;
+    hideTrigger?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
 interface WildcardTerminalSession {
@@ -55,9 +58,15 @@ function buildLiveTerminalHref(serverId: string, sessionId: string) {
     return `/server/commands/live?${params.toString()}`;
 }
 
-export function CreateCertificateDialog({ serverId: serverIdFromProps, onSuccess }: CreateCertificateDialogProps) {
+export function CreateCertificateDialog({
+    serverId: serverIdFromProps,
+    onSuccess,
+    defaultOpen = false,
+    hideTrigger = false,
+    onOpenChange,
+}: CreateCertificateDialogProps) {
     const { toast } = useToast();
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(defaultOpen);
     const [mainDomain, setMainDomain] = useState('');
     const [subdomains, setSubdomains] = useState('');
     const [includeWildcard, setIncludeWildcard] = useState(false);
@@ -81,6 +90,10 @@ export function CreateCertificateDialog({ serverId: serverIdFromProps, onSuccess
             setFallbackServerId(parts.pop()?.split(';').shift() || null);
         }
     }, [serverIdFromProps]);
+
+    useEffect(() => {
+        setOpen(defaultOpen);
+    }, [defaultOpen]);
 
     const persistSession = (session: WildcardTerminalSession) => {
         if (!serverId) {
@@ -314,17 +327,20 @@ export function CreateCertificateDialog({ serverId: serverIdFromProps, onSuccess
             open={open}
             onOpenChange={(value) => {
                 setOpen(value);
+                onOpenChange?.(value);
                 if (!value) {
                     resetForm();
                 }
             }}
         >
-            <DialogTrigger asChild>
-                <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Certificate
-                </Button>
-            </DialogTrigger>
+            {!hideTrigger ? (
+                <DialogTrigger asChild>
+                    <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Certificate
+                    </Button>
+                </DialogTrigger>
+            ) : null}
             <DialogContent className="sm:max-w-xl">
                 <DialogHeader>
                     <DialogTitle>Create SSL Certificate</DialogTitle>

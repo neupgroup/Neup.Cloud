@@ -18,36 +18,46 @@ export const getCommands = (context: CommandContext): CommandDefinition[] => {
     const stopMatchingServicesScript = getStopMatchingSupervisorServicesScript(context.applicationId);
     const refreshSupervisorServiceScript = getStartOrRestartSupervisorServiceScript(supervisorServiceName);
     const portsStr = context.preferredPorts?.join(' ') || '';
+    const isExecutable = context.locationType === 'executable';
     // For Go, entryFile might be main.go, or the directory '.'
     const entryFile = context.entryFile || '.';
+    const runtimeEntryFile = entryFile.replace(/^\.\//, '');
     // We'll use the sanitizedAppName as the binary name
     // User request: use the same name for the build as well (preserve case/length if possible)
     // UPDATE: User requested to use the exact same name for consistency with supervisor service
     const binaryName = sanitizedAppName;
+    const startCommand = isExecutable
+        ? `${context.appLocation}/${runtimeEntryFile}`
+        : `${context.appLocation}/${binaryName}`;
 
     const portCheckScript = getPortCheckScript(portsStr);
     const preStartScript = `${stopMatchingServicesScript}\n\n${portCheckScript}`.trim();
 
     return [
-        // Build Command
-        {
-            title: 'Build',
-            description: 'Build the Go application',
-            icon: 'Hammer',
-            status: 'published',
-            type: 'normal',
-            command: {
-                preCommand: null,
-                mainCommand: `cd ${context.appLocation} && 
+        ...(
+            isExecutable
+                ? []
+                : [{
+                    title: 'Build',
+                    description: 'Build the Go application',
+                    icon: 'Hammer',
+                    status: 'published' as const,
+                    type: 'normal' as const,
+                    command: {
+                        preCommand: null,
+                        mainCommand: `cd ${context.appLocation} && 
                 go mod tidy && 
                 go build -o ${binaryName} ${entryFile}`
-            }
-        },
+                    }
+                }]
+        ),
 
         // Start Command (Production)
         {
             title: 'Start',
-            description: 'Start the Go application using Supervisor',
+            description: isExecutable
+                ? 'Start the Go executable using Supervisor'
+                : 'Start the Go application using Supervisor',
             icon: 'PlayCircle',
             status: 'published',
             type: 'success',
@@ -60,7 +70,7 @@ USER_NAME=$(whoami)
 
 cat <<EOF | sudo tee $CONF_FILE
 [program:${supervisorServiceName}]
-command=${context.appLocation}/${binaryName}
+command=${startCommand}
 directory=${context.appLocation}
 user=$USER_NAME
 autostart=true

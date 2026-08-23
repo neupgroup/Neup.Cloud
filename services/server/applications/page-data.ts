@@ -55,6 +55,7 @@ export async function getApplicationDetailPageData(
     appLocation: application.location,
     preferredPorts: uniquePorts,
     entryFile: application.information?.entryFile,
+    locationType: application.information?.locationType,
     supervisorServiceName: application.information?.supervisorServiceName,
   };
 

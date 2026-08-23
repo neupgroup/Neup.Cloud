@@ -18,6 +18,14 @@ export async function updateApplication(id: string, data: UpdateApplicationData)
             (existing.information as Record<string, any> | null)?.supervisorServiceName,
         };
 
+  if (mergedInformation && data.information) {
+    Object.entries(data.information).forEach(([key, value]) => {
+      if (value === undefined) {
+        delete mergedInformation[key];
+      }
+    });
+  }
+
   const record = await prisma.application.update({
     where: { id },
     data: {

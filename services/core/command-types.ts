@@ -17,5 +17,6 @@ export interface CommandContext {
     appLocation: string;
     preferredPorts?: number[];
     entryFile?: string;
+    locationType?: 'folder' | 'executable';
     supervisorServiceName?: string;
 }
