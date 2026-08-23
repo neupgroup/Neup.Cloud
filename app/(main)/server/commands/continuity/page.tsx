@@ -26,6 +26,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Plus, Server, SquareTerminal } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
+import { PageTitle } from '@/components/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/core/hooks/useToast';
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
@@ -135,36 +136,18 @@ export default function ContinuityPage() {
     router.push(withSelectedServerQuery(`/server/commands/continuity/${encodeURIComponent(sessionId)}`, selectedServerId));
   };
 
-  const stackCardClassName = (index: number, total: number) => {
-    if (total <= 1) {
-      return 'rounded-xl';
-    }
-
-    if (index === 0) {
-      return 'rounded-t-xl rounded-b-none';
-    }
-
-    if (index === total - 1) {
-      return 'rounded-b-xl rounded-t-none';
-    }
-
-    return 'rounded-none';
-  };
-
-  const sessionCardCount = isLoadingSessions ? 3 : Math.max(sessions.length, 1);
-  const totalCardCount = 1 + sessionCardCount;
-
   return (
-    <div className="space-y-0">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Continuity Sessions</h1>
-      </div>
+    <div className="space-y-8">
+      <PageTitle
+        title="Continuity Sessions"
+        description="Manage persistent terminal sessions on the selected server."
+      />
 
       <button
         type="button"
         onClick={handleCreateSession}
         disabled={!selectedServerId || isCreatingSession}
-        className={`flex w-full items-center justify-between gap-4 border bg-card p-5 text-left transition hover:bg-muted/40 disabled:cursor-not-allowed disabled:opacity-60 ${stackCardClassName(0, totalCardCount)}`}
+        className="flex w-full items-center justify-between gap-4 rounded-lg border bg-card p-5 text-left transition hover:bg-muted/40 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <div className="min-w-0">
           <div className="text-base font-semibold">New Continuity Terminal</div>
@@ -186,7 +169,7 @@ export default function ContinuityPage() {
       ) : null}
 
       {!selectedServerId ? (
-        <div className={`flex min-h-[50vh] items-center justify-center border bg-card p-8 text-center ${stackCardClassName(1, totalCardCount)}`}>
+        <div className="flex min-h-[50vh] items-center justify-center rounded-lg border bg-card p-8 text-center">
           <div className="space-y-3">
             <Server className="mx-auto h-8 w-8 text-muted-foreground" />
             <div className="text-lg font-medium">No server selected</div>
@@ -196,24 +179,24 @@ export default function ContinuityPage() {
           </div>
         </div>
       ) : (
-        <div>
+        <div className="space-y-4">
           {isLoadingSessions ? (
             <>
-              <Skeleton className={`h-20 w-full ${stackCardClassName(1, totalCardCount)}`} />
-              <Skeleton className={`h-20 w-full ${stackCardClassName(2, totalCardCount)}`} />
-              <Skeleton className={`h-20 w-full ${stackCardClassName(3, totalCardCount)}`} />
+              <Skeleton className="h-20 w-full rounded-lg" />
+              <Skeleton className="h-20 w-full rounded-lg" />
+              <Skeleton className="h-20 w-full rounded-lg" />
             </>
           ) : sessions.length === 0 ? (
-            <div className={`border border-dashed p-6 text-center text-sm text-muted-foreground ${stackCardClassName(1, totalCardCount)}`}>
+            <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
               No continuity terminals are open on this server.
             </div>
           ) : (
-            sessions.map((session, index) => (
+            sessions.map((session) => (
               <button
                 key={session.id}
                 type="button"
                 onClick={() => handleOpenSession(session.id)}
-                className={`w-full border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40 ${stackCardClassName(index + 1, totalCardCount)}`}
+                className="w-full rounded-lg border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
