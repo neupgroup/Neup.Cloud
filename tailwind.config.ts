@@ -13,9 +13,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['DM Sans', 'sans-serif'],
-        headline: ['DM Sans', 'sans-serif'],
-        sans: ['DM Sans', 'sans-serif'],
+        body: ['Outfit', 'sans-serif'],
+        headline: ['Outfit', 'sans-serif'],
+        sans: ['Outfit', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
