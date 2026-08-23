@@ -921,7 +921,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
 	                                </CardContent>
 	                            </Card>
 
-                            <Card>
+                            <Card className="hidden">
                                 <CardHeader>
                                     <div className="flex justify-between items-center">
                                         <div>
@@ -997,7 +997,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                 </CardContent>
                             </Card>
 
-                            <div className="grid gap-6">
+                            <div className="grid gap-6 hidden">
                                 <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
                                     <CardHeader>
                                         <CardTitle className="font-headline">Top Processes (RAM)</CardTitle>
@@ -1072,7 +1072,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                         )}
                                         <div className="p-4 border-t border-border">
                                             <Button asChild variant="outline" className="w-full">
-                                                <Link href="/server/status/processes">View more</Link>
+                                                <Link href={withSelectedServerQuery('/server/processes', serverId)}>View more</Link>
                                             </Button>
                                         </div>
                                     </CardContent>
@@ -1149,7 +1149,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                         )}
                                         <div className="p-4 border-t border-border">
                                             <Button asChild variant="outline" size="sm" className="w-auto">
-                                                <Link href="/server/status/network">View more</Link>
+                                                <Link href={withSelectedServerQuery('/server/processes', serverId)}>View more</Link>
                                             </Button>
                                         </div>
                                     </CardContent>

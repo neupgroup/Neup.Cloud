@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { cn } from "@/core/utils";
 
 import {
@@ -13,11 +12,10 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, Hash, User, Cpu, XCircle, ArrowLeft, Search, Server } from "lucide-react";
+import { Loader2, Hash, User, Cpu, XCircle, Search } from "lucide-react";
 import { getProcesses, killProcess } from '@/services/processes/processes-service';
 import type { Process } from '@/services/processes/types';
 import { useToast } from '@/core/hooks/useToast';
-import { PageTitleWithComponent } from '@/components/page-header';
 import { Input } from '@/components/ui/input';
 
 function ProcessesList({ processes, onKill, killingPid }: { processes: Process[], onKill: (pid: string) => void, killingPid: string | null }) {
@@ -94,7 +92,21 @@ function ProcessesLoadingSkeleton() {
     )
 }
 
-export default function ProcessesClient({ serverId, serverName }: { serverId?: string, serverName?: string }) {
+export default function ProcessesClient({
+    serverId,
+    onCountChange,
+    showLoadMore = true,
+    search: externalSearch,
+    onSearchChange,
+    showSearch = true,
+}: {
+    serverId: string;
+    onCountChange?: (count: number) => void;
+    showLoadMore?: boolean;
+    search?: string;
+    onSearchChange?: (value: string) => void;
+    showSearch?: boolean;
+}) {
     const { toast } = useToast();
 
     const [processes, setProcesses] = useState<Process[]>([]);
@@ -102,6 +114,7 @@ export default function ProcessesClient({ serverId, serverName }: { serverId?: s
     const [search, setSearch] = useState('');
     const [visibleCount, setVisibleCount] = useState(10);
     const [killingPid, setKillingPid] = useState<string | null>(null);
+    const activeSearch = externalSearch ?? search;
 
     useEffect(() => {
         if (!serverId) {
@@ -117,7 +130,9 @@ export default function ProcessesClient({ serverId, serverName }: { serverId?: s
                     toast({ variant: 'destructive', title: 'Error', description: result.error });
                     setProcesses([]);
                 } else {
-                    setProcesses(Array.isArray(result.processes) ? result.processes : []);
+                    const nextProcesses = Array.isArray(result.processes) ? result.processes : [];
+                    setProcesses(nextProcesses);
+                    onCountChange?.(nextProcesses.length);
                 }
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch processes' });
@@ -132,7 +147,7 @@ export default function ProcessesClient({ serverId, serverName }: { serverId?: s
 
     useEffect(() => {
         setVisibleCount(10);
-    }, [search, serverId]);
+    }, [activeSearch, serverId]);
 
     const handleKillProcess = async (pid: string) => {
         if (!serverId) return;
@@ -149,53 +164,15 @@ export default function ProcessesClient({ serverId, serverName }: { serverId?: s
     };
 
     const filteredProcesses = (Array.isArray(processes) ? processes : []).filter(p =>
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.user.toLowerCase().includes(search.toLowerCase()) ||
-        p.pid.toString().includes(search)
+        p.name.toLowerCase().includes(activeSearch.toLowerCase()) ||
+        p.user.toLowerCase().includes(activeSearch.toLowerCase()) ||
+        p.pid.toString().includes(activeSearch)
     );
 
     const visibleProcesses = filteredProcesses.slice(0, visibleCount);
 
-    if (!serverId) {
-        return (
-            <div className="grid gap-6">
-                <Button asChild variant="ghost" className="w-fit">
-                    <Link href="/server/status">
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back to Status
-                    </Link>
-                </Button>
-
-                <Card className="text-center p-8">
-                    <Server className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-medium">No Server Selected</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        Please go to the status page and try again.
-                    </p>
-                    <Button asChild className="mt-4">
-                        <Link href="/server/status">Go to Status</Link>
-                    </Button>
-                </Card>
-            </div>
-        );
-    }
-
     return (
         <div className="grid gap-6">
-            <Button asChild variant="ghost" className="w-fit">
-                <Link href="/server/status">
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Status
-                </Link>
-            </Button>
-
-            <PageTitleWithComponent
-                title="Server Processes"
-                description="View and manage running processes on your server"
-                serverName={serverName}
-                actionComponent={undefined}
-            />
-
             {isLoading ? (
                 <ProcessesLoadingSkeleton />
             ) : processes.length === 0 ? (
@@ -204,20 +181,19 @@ export default function ProcessesClient({ serverId, serverName }: { serverId?: s
                 </Card>
             ) : (
                 <>
-                    <div className="relative">
+                    {showSearch && <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Search by process name, user, or PID..."
                             type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            value={activeSearch}
+                            onChange={(e) => {
+                                setSearch(e.target.value);
+                                onSearchChange?.(e.target.value);
+                            }}
                             className="pl-10"
                         />
-                    </div>
-
-                    <div className="text-sm text-muted-foreground">
-                        Found {filteredProcesses.length} process{filteredProcesses.length !== 1 ? 'es' : ''} {search && `matching "${search}"`}
-                    </div>
+                    </div>}
 
                     {visibleProcesses.length > 0 ? (
                         <>
@@ -227,7 +203,7 @@ export default function ProcessesClient({ serverId, serverName }: { serverId?: s
                                 killingPid={killingPid}
                             />
 
-                            {visibleProcesses.length < filteredProcesses.length && (
+                            {showLoadMore && visibleProcesses.length < filteredProcesses.length && (
                                 <div className="text-center">
                                     <Button
                                         variant="outline"

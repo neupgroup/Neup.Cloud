@@ -31,6 +31,7 @@ const SELECTED_SERVER_ROUTE_PREFIXES = [
   '/server/home',
   '/server/initialize',
   '/server/status',
+  '/server/processes',
   '/server/applications',
   '/server/database',
   '/server/mail',

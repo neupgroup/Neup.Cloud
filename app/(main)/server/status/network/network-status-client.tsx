@@ -14,6 +14,13 @@ import { getNetworkConnections, type NetworkConnection } from '@/services/server
 
 type NetworkStatusClientProps = {
   serverId: string;
+  onCountChange?: (count: number) => void;
+  showSummary?: boolean;
+  showRefresh?: boolean;
+  showCount?: boolean;
+  search?: string;
+  onSearchChange?: (value: string) => void;
+  showSearch?: boolean;
 };
 
 function getStateClass(state: string) {
@@ -143,12 +150,22 @@ function ConnectionList({ connections }: { connections: NetworkConnection[] }) {
   );
 }
 
-export default function NetworkStatusClient({ serverId }: NetworkStatusClientProps) {
+export default function NetworkStatusClient({
+  serverId,
+  onCountChange,
+  showSummary = true,
+  showRefresh = true,
+  showCount = true,
+  search: externalSearch,
+  onSearchChange,
+  showSearch = true,
+}: NetworkStatusClientProps) {
   const { toast } = useToast();
   const [connections, setConnections] = useState<NetworkConnection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [search, setSearch] = useState('');
+  const activeSearch = externalSearch ?? search;
 
   const fetchConnections = async ({ quiet = false } = {}) => {
     if (quiet) {
@@ -163,7 +180,9 @@ export default function NetworkStatusClient({ serverId }: NetworkStatusClientPro
         setConnections([]);
         toast({ variant: 'destructive', title: 'Error', description: result.error });
       } else {
-        setConnections(Array.isArray(result.connections) ? result.connections : []);
+        const nextConnections = Array.isArray(result.connections) ? result.connections : [];
+        setConnections(nextConnections);
+        onCountChange?.(nextConnections.length);
       }
     } catch {
       setConnections([]);
@@ -179,7 +198,7 @@ export default function NetworkStatusClient({ serverId }: NetworkStatusClientPro
   }, [serverId]);
 
   const filteredConnections = useMemo(() => {
-    const query = search.trim().toLowerCase();
+    const query = activeSearch.trim().toLowerCase();
     if (!query) return connections;
 
     return connections.filter((connection) =>
@@ -191,7 +210,7 @@ export default function NetworkStatusClient({ serverId }: NetworkStatusClientPro
       connection.localAddress.toLowerCase().includes(query) ||
       connection.peerAddress.toLowerCase().includes(query)
     );
-  }, [connections, search]);
+  }, [connections, activeSearch]);
 
   const listeningCount = connections.filter((connection) => connection.state.toUpperCase() === 'LISTEN').length;
   const activeCount = connections.filter((connection) => connection.state.toUpperCase() === 'ESTAB').length;
@@ -199,23 +218,28 @@ export default function NetworkStatusClient({ serverId }: NetworkStatusClientPro
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
-        <SummaryCard label="Listening Ports" value={listeningCount} icon={Network} />
-        <SummaryCard label="Active Connections" value={activeCount} icon={Activity} />
-        <SummaryCard label="Unique Port Bindings" value={uniquePortsCount} icon={Hash} />
-      </div>
+      {showSummary && (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <SummaryCard label="Listening Ports" value={listeningCount} icon={Network} />
+          <SummaryCard label="Active Connections" value={activeCount} icon={Activity} />
+          <SummaryCard label="Unique Port Bindings" value={uniquePortsCount} icon={Hash} />
+        </div>
+      )}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
+        {showSearch && <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            value={activeSearch}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              onSearchChange?.(event.target.value);
+            }}
             placeholder="Search process, PID, port, protocol, state, or address..."
             className="pl-10"
           />
-        </div>
-        <Button
+        </div>}
+        {showRefresh && <Button
           type="button"
           variant="outline"
           onClick={() => fetchConnections({ quiet: true })}
@@ -228,12 +252,12 @@ export default function NetworkStatusClient({ serverId }: NetworkStatusClientPro
             <RefreshCw className="mr-2 h-4 w-4" />
           )}
           Refresh
-        </Button>
+        </Button>}
       </div>
 
-      <div className="text-sm text-muted-foreground">
+      {showCount && <div className="text-sm text-muted-foreground">
         Showing {filteredConnections.length} of {connections.length} network connection{connections.length === 1 ? '' : 's'}.
-      </div>
+      </div>}
 
       {isLoading ? (
         <NetworkLoadingSkeleton />

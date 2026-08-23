@@ -144,3 +144,56 @@ export async function getNetworkConnections(serverId: string): Promise<{ connect
         return { error: `Failed to get network stats: ${e.message}` };
     }
 }
+
+export async function findNetworkConnectionPid(
+    serverId: string,
+    connection: Pick<NetworkConnection, 'protocol' | 'port'>,
+): Promise<{ pid?: string; process?: string; error?: string }> {
+    const port = connection.port.trim();
+    const protocol = connection.protocol.trim().toLowerCase();
+
+    if (!/^\d+$/.test(port) || !['tcp', 'udp'].includes(protocol)) {
+        return { error: 'A numeric port and supported network protocol are required.' };
+    }
+
+    const server = await getServerForRunner(serverId);
+    if (!server) return { error: 'Server not found.' };
+    if (!server.username) return { error: 'No username or SSH authentication configured for this server.' };
+
+    const commands = [
+        `sudo lsof -nP -t -i${protocol.toUpperCase()}:${port} 2>/dev/null | head -n 1`,
+        `lsof -nP -t -i${protocol.toUpperCase()}:${port} 2>/dev/null | head -n 1`,
+    ];
+
+    try {
+        for (const command of commands) {
+            const result = await runCommandOnServer(
+                server.publicIp,
+                server.username,
+                server.privateKey,
+                command,
+                undefined,
+                undefined,
+                true,
+            );
+            const pid = result.stdout.trim().split(/\s+/).find((value) => /^\d+$/.test(value));
+            if (!pid) continue;
+
+            const processResult = await runCommandOnServer(
+                server.publicIp,
+                server.username,
+                server.privateKey,
+                `ps -p ${pid} -o comm= 2>/dev/null | head -n 1`,
+                undefined,
+                undefined,
+                true,
+            );
+
+            return { pid, process: processResult.stdout.trim() || undefined };
+        }
+
+        return { error: 'No process PID was found for this network connection.' };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : 'Failed to find the network process PID.' };
+    }
+}

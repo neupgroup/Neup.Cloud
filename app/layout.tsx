@@ -171,6 +171,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, selectedSe
   const serverLinks = [
     { href: "/server/home", label: "Home", icon: Home },
     { href: "/server/status", label: "Status", icon: HeartPulse },
+    { href: "/server/processes", label: "Processes", icon: Network },
     { href: "/server/applications", label: "Applications", icon: Activity },
     { href: "/server/database", label: "Databases", icon: Database },
     { href: "/server/mail", label: "Mail", icon: Mail },
@@ -342,15 +343,15 @@ function Header({ isMobileMenuOpen, toggleMobileMenu }: { isMobileMenuOpen: bool
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center border-b bg-background shadow-[0_16px_40px_rgba(15,23,42,0.10)]">
       <div className="mx-auto flex w-full max-w-[1440px] items-center px-4 sm:px-6 md:px-8">
-        <div className="flex items-center gap-4 md:hidden">
+        <div className="flex items-center gap-4 lg:hidden">
           <Button variant="ghost" size="icon" onClick={toggleMobileMenu}>
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
         </div>
-        <div className="hidden md:flex">
+        <div className="hidden lg:flex">
           <Logo />
         </div>
-        <div className="flex w-full items-center md:hidden">
+        <div className="flex w-full items-center lg:hidden">
           <div className="mx-auto">
             <Logo />
           </div>
@@ -434,7 +435,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Header isMobileMenuOpen={isMobileMenuOpen} toggleMobileMenu={toggleMobileMenu} />
 
             <div className={cn(
-              "fixed top-16 left-0 right-0 bottom-0 z-30 bg-background/95 backdrop-blur-sm transition-all duration-300 ease-in-out md:hidden",
+              "fixed top-16 left-0 right-0 bottom-0 z-30 bg-background/95 backdrop-blur-sm transition-all duration-300 ease-in-out lg:hidden",
               isMobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
             )}>
               <ScrollArea className="h-full">

@@ -21,10 +21,10 @@ export function PageTitle({ title, description, serverName, className, children 
     return (
         <div className={cn("space-y-1.5", className)}>
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold font-headline tracking-tight">{title}</h1>
+                <h1 className="min-w-0 break-words text-3xl font-bold font-headline tracking-tight">{title}</h1>
                 {children}
             </div>
-            {displayDescription && <div className="text-muted-foreground text-lg">{displayDescription}</div>}
+            {displayDescription && <div className="break-words text-muted-foreground text-lg">{displayDescription}</div>}
         </div>
     );
 }
