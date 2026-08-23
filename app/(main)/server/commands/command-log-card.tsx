@@ -7,10 +7,23 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { cn } from '@/core/utils';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
-import { useEffect, useState } from 'react';
-import { getAccountName } from '@/services/account';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+
+function getCurrentProfileName(): string | null {
+  if (typeof document === 'undefined') return null;
+  const cookie = document.cookie
+    .split(';')
+    .map((part) => part.trim())
+    .find((part) => part.startsWith('neup_profile_display_name='));
+  if (!cookie) return null;
+
+  try {
+    return decodeURIComponent(cookie.slice('neup_profile_display_name='.length)).trim() || null;
+  } catch {
+    return cookie.slice('neup_profile_display_name='.length).trim() || null;
+  }
+}
 
 export type CommandLogItem = {
   id: string;
@@ -20,6 +33,7 @@ export type CommandLogItem = {
   output?: string;
   status: 'Success' | 'Error' | 'pending';
   runAt: string;
+  actorName?: string | null;
 };
 
 function LogStatusBadge({ status }: { status: CommandLogItem['status'] }) {
@@ -80,12 +94,8 @@ function getDisplayName(command: string, commandName?: string) {
 
 export function CommandLogCard({ log }: { log: CommandLogItem }) {
   const sourceInfo = getSourceInfo(log);
-  const [userName, setUserName] = useState<string | null>(null);
   const selectedServerId = useSelectedServerId();
-
-  useEffect(() => {
-    getAccountName().then(setUserName);
-  }, []);
+  const currentProfileName = getCurrentProfileName();
 
   return (
     <AccordionItem key={log.id} value={log.id} className="border-0">
@@ -117,7 +127,7 @@ export function CommandLogCard({ log }: { log: CommandLogItem }) {
                 <LogStatusBadge status={log.status} />
                 <span className="text-xs text-muted-foreground">
                   {formatDate(log.runAt)}
-                  {' '}by <span className="font-medium text-foreground">{userName ?? 'Unknown User'}</span>
+                  {' '}by <span className="font-medium text-foreground">{log.actorName ?? currentProfileName ?? 'Unknown User'}</span>
                 </span>
               </div>
             </div>
@@ -143,12 +153,8 @@ export function CommandLogCard({ log }: { log: CommandLogItem }) {
 }
 
 export function CommandLogList({ logs, showSourceLink = true }: { logs: CommandLogItem[]; showSourceLink?: boolean }) {
-  const [userName, setUserName] = useState<string | null>(null);
   const selectedServerId = useSelectedServerId();
-
-  useEffect(() => {
-    getAccountName().then(setUserName);
-  }, []);
+  const currentProfileName = getCurrentProfileName();
 
   return (
     <Card className="w-full overflow-hidden border-border">
@@ -178,7 +184,7 @@ export function CommandLogList({ logs, showSourceLink = true }: { logs: CommandL
                       <LogStatusBadge status={log.status} />
                       <span className="text-xs text-muted-foreground">
                         {formatDate(log.runAt)}
-                        {' '}by <span className="font-medium text-foreground">{userName ?? 'Unknown User'}</span>
+                        {' '}by <span className="font-medium text-foreground">{log.actorName ?? currentProfileName ?? 'Unknown User'}</span>
                       </span>
                     </div>
                   </div>

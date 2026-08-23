@@ -23,6 +23,7 @@ environment hooks, and returns the database-backed row.
 
 import { prisma } from '@/core/database/prisma';
 import logica from '@/logica';
+import { getCookie } from '@/core/helpers/cookie';
 
 export type AccountProfile = {
   id: string;
@@ -68,6 +69,60 @@ export async function getStoredAccountProfile(accountId: string): Promise<Accoun
   `;
 
   return rows[0] ? normalizeProfileRow(rows[0]) : null;
+}
+
+export async function getAccountDisplayName(accountId: string): Promise<string | null> {
+  const normalizedAccountId = accountId.trim();
+  if (!normalizedAccountId) return null;
+
+  const storedProfile = await getStoredAccountProfile(normalizedAccountId);
+  if (storedProfile?.displayName) return storedProfile.displayName;
+
+  try {
+    const response = await logica.account.lookup.byId(normalizedAccountId).get(['displayName']);
+    if (!response.ok || !response.body.success) return null;
+    return normalizeString(response.body.displayName);
+  } catch {
+    return null;
+  }
+}
+
+export async function getCurrentAccountId(): Promise<string | null> {
+  try {
+    const authAccountToken = await getCookie('auth_account');
+    if (authAccountToken) {
+      try {
+        const accountId = await logica.account.current.id.get(authAccountToken);
+        if (accountId?.trim()) return accountId.trim();
+      } catch {
+        // Fall through to local token and account-context cookie lookup.
+      }
+    }
+
+    const authentication = await logica.account.self.isAuthenticated('local');
+    if (authentication.authenticated && 'payload' in authentication) {
+      const accountId = authentication.payload.aid;
+      if (typeof accountId === 'string' && accountId.trim()) return accountId.trim();
+    }
+
+    for (const cookieName of ['accountId', 'account_id', 'neup_account_id', 'selected_account_id']) {
+      const value = await getCookie(cookieName);
+      if (value?.trim()) return value.trim();
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getCurrentAccountDisplayName(): Promise<string | null> {
+  try {
+    const displayName = await getCookie('neup_profile_display_name');
+    return normalizeString(displayName);
+  } catch {
+    return null;
+  }
 }
 
 async function fetchAccountProfileFromNeupAccount(

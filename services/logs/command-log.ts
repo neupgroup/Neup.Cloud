@@ -2,6 +2,7 @@
 
 import { prisma } from '@/core/database/prisma';
 import { stripToMainOutput, hasMainMarkers } from '@/services/saved-commands/saved-commands-service';
+import { getAccountDisplayName, getCurrentAccountDisplayName } from '@/services/account-profile';
 
 export type CommandLogFilter = {
   serverId?: string | null;
@@ -24,6 +25,7 @@ export type CommandLog = {
   runAt: string;
   source?: string | null;
   accountId?: string | null;
+  actorName?: string | null;
 };
 
 export async function getCommandLog(filter: CommandLogFilter): Promise<CommandLog[]> {
@@ -48,6 +50,21 @@ export async function getCommandLog(filter: CommandLogFilter): Promise<CommandLo
     ...(filter.offset ? { skip: filter.offset } : {}),
   });
 
+  const actorNames = new Map<string, string | null>();
+  const currentActorName = await getCurrentAccountDisplayName();
+  const accountIds = [
+    ...new Set(
+      logs
+        .map((log: any) => log.accountId)
+        .filter((accountId): accountId is string => typeof accountId === 'string' && Boolean(accountId.trim())),
+    ),
+  ];
+  await Promise.all(
+    accountIds.map(async (accountId) => {
+      actorNames.set(accountId, await getAccountDisplayName(accountId));
+    }),
+  );
+
   return logs.map((log: any) => {
     const rawOutput = log.output ?? undefined;
     const output = rawOutput && hasMainMarkers(rawOutput) ? stripToMainOutput(rawOutput) : rawOutput;
@@ -61,6 +78,7 @@ export async function getCommandLog(filter: CommandLogFilter): Promise<CommandLo
       runAt: log.runAt.toISOString(),
       source: log.source ?? null,
       accountId: log.accountId ?? null,
+      actorName: log.accountId ? actorNames.get(log.accountId) ?? null : currentActorName,
     };
   });
 }

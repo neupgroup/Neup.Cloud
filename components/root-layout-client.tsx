@@ -39,7 +39,8 @@ import {
   Play,
   Bot,
   Workflow,
-  Mail
+  Mail,
+  Bell
 } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/core/utils';
@@ -112,6 +113,7 @@ function NavLink({
 function MainNavContent({ currentPath, onLinkClick, isServerSelected, selectedServerId }: { currentPath: string, onLinkClick?: () => void, isServerSelected: boolean, selectedServerId: string | null }) {
   const navLinks = [
     { href: "/home", label: "Dashboard", icon: Home },
+    { href: "/notifications", label: "Notifications", icon: Bell },
   ];
 
   const intelligenceLinks = [

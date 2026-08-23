@@ -1,5 +1,6 @@
 import { stringUuid } from '@/core/data/uuid';
 import { prisma } from '@/core/database/prisma';
+import { getCurrentAccountId } from '@/services/account-profile';
 
 export async function createServerLog(data: {
   serverId: string;
@@ -11,6 +12,8 @@ export async function createServerLog(data: {
   source?: string | null;
   accountId?: string | null;
 }) {
+  const accountId = data.accountId ?? await getCurrentAccountId();
+
   return prisma.serverLog.create({
     data: {
       id: stringUuid(),
@@ -21,7 +24,7 @@ export async function createServerLog(data: {
       status: data.status,
       runAt: data.runAt ?? new Date(),
       source: data.source ?? null,
-      accountId: data.accountId ?? null,
+      accountId,
     },
   });
 }
