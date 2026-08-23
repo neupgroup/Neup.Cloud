@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Server, Loader2, Play, Search, ChevronRight, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { Server, Loader2, Play, Search, ChevronRight, CheckCircle2, XCircle, Clock, SquareTerminal } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -398,6 +398,26 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
     }
   };
 
+  const handleOpenContinuityTerminal = () => {
+    if (!effectiveSelectedServer) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please select a server first.',
+      });
+      return;
+    }
+
+    const continuityHref = withSelectedServerQuery(
+      customCommand.trim()
+        ? `/server/commands/continuity?pretypecommand=${encodeURIComponent(customCommand)}`
+        : '/server/commands/continuity',
+      effectiveSelectedServer
+    );
+
+    router.push(continuityHref);
+  };
+
   const mergedCommands: MergedCommandItem[] = savedCommands.map((cmd) => ({
       id: cmd.id,
       name: cmd.name,
@@ -482,12 +502,19 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
 
   return (
     <div className="grid gap-6">
-          <div
+      <div
         className="cursor-pointer hover:opacity-80 transition-opacity"
         onClick={() => router.push('/servers')}
       >
         <h1 className="text-3xl font-bold font-headline tracking-tight">Commands</h1>
         <p className="text-muted-foreground">Create, run, and track commands for '<span className="font-semibold text-foreground">{selectedServerName}</span>'</p>
+      </div>
+
+      <div className="flex justify-start">
+        <Button variant="outline" onClick={handleOpenContinuityTerminal}>
+          <SquareTerminal className="mr-2 h-4 w-4" />
+          Open Continuous Terminal
+        </Button>
       </div>
 
       <div className="relative">
@@ -517,7 +544,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
               }}
               className="font-mono text-sm min-h-[100px]"
             />
-            <div className="flex justify-start">
+            <div className="flex flex-wrap justify-start gap-3">
               <Button onClick={handleRunCustomCommand} disabled={isRunningCustom}>
                 {isRunningCustom ? (
                   <>
@@ -530,6 +557,10 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
                     Run Custom Command
                   </>
                 )}
+              </Button>
+              <Button variant="outline" onClick={handleOpenContinuityTerminal}>
+                <SquareTerminal className="mr-2 h-4 w-4" />
+                Run in Continuous Mode
               </Button>
             </div>
           </div>

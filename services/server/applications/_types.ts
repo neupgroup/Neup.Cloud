@@ -12,8 +12,8 @@ export type ApplicationServerSyncInfo = {
 export interface ApplicationInformation extends Record<string, any> {
   repoInfo?: {
     isPrivate?: boolean;
-    accessKey?: string;
-    username?: string;
+    provider?: 'github';
+    authMode?: 'linked_account';
   };
   supervisorServiceName?: string;
   serverSync?: ApplicationServerSyncInfo;

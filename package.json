@@ -12,7 +12,10 @@
     "start": "next start --port 25683",
     "postinstall": "patch-package",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+
+    "gen.key": "mkdir keys && cd keys && mkdir communication && cd communication && mkdir github && cd github && openssl genpkey -algorithm RSA -out ./private.pem -pkeyopt rsa_keygen_bits:4096 && openssl pkey -in ./private.pem -pubout -out ./public.pem"
+  
   },
   "dependencies": {
     "@genkit-ai/google-genai": "^1.31.0",

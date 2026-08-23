@@ -86,6 +86,7 @@ export default function ContinuityPage() {
   const selectedServerFromUrl = useSelectedServerId();
   const rawRequestedSessionId = searchParams.get('session')?.trim() || '';
   const requestedSessionId = getContinuitySessionIdFromQuery(rawRequestedSessionId);
+  const pretypedCommand = searchParams.get('pretypecommand') ?? '';
 
   const [servers, setServers] = useState<ServerOption[]>([]);
   const [sessions, setSessions] = useState<ContinuitySession[]>([]);
@@ -173,6 +174,14 @@ export default function ContinuityPage() {
       router.replace(withSelectedServerQuery(`/server/commands/continuity?session=${encodeURIComponent(requestedSessionId)}`, selectedServerId), { scroll: false });
     }
   }, [rawRequestedSessionId, requestedSessionId, router, selectedServerId]);
+
+  useEffect(() => {
+    if (!pretypedCommand) {
+      return;
+    }
+
+    setCommand(pretypedCommand);
+  }, [pretypedCommand]);
 
   useEffect(() => {
     if (!selectedServerId) {

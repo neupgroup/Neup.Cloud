@@ -283,3 +283,89 @@ export GIT_SSH_COMMAND="ssh -i ${keyPath} -o StrictHostKeyChecking=no -o UserKno
 git fetch --all
 git reset --hard "${targetRef}"
 `;
+
+export const getAuthenticatedCloneCommand = (appLocation: string, repoUrl: string) => `
+set -e
+
+if [ -z "${repoUrl}" ]; then
+  echo "ERROR: Repository URL is missing"
+  exit 1
+fi
+
+if [ -z "\${GITHUB_AUTH_HEADER:-}" ]; then
+  echo "ERROR: GitHub auth header is missing"
+  exit 1
+fi
+
+mkdir -p "${appLocation}"
+cd "${appLocation}"
+
+TEMP_DIR="temp_clone_$(date +%s)"
+
+cleanup() {
+  rm -rf "$TEMP_DIR"
+}
+trap cleanup EXIT
+
+echo "Cloning private repository..."
+if ! git -c http.https://github.com/.extraheader="$GITHUB_AUTH_HEADER" clone "${repoUrl}" "$TEMP_DIR"; then
+  echo "ERROR: Private git clone failed"
+  exit 1
+fi
+
+shopt -s dotglob
+cp -rf "$TEMP_DIR"/* .
+shopt -u dotglob
+
+echo "Clone completed successfully"
+`;
+
+export const getAuthenticatedPullCommand = (appLocation: string, repoUrl: string, branch: string) => `
+set -e
+
+if [ -z "\${GITHUB_AUTH_HEADER:-}" ]; then
+  echo "ERROR: GitHub auth header is missing"
+  exit 1
+fi
+
+cd "${appLocation}"
+git -c http.https://github.com/.extraheader="$GITHUB_AUTH_HEADER" pull "${repoUrl}" "${branch}"
+`;
+
+export const getAuthenticatedPullForceCommand = (appLocation: string, repoUrl: string, branch: string) => `
+set -e
+
+if [ -z "\${GITHUB_AUTH_HEADER:-}" ]; then
+  echo "ERROR: GitHub auth header is missing"
+  exit 1
+fi
+
+cd "${appLocation}"
+git -c http.https://github.com/.extraheader="$GITHUB_AUTH_HEADER" fetch "${repoUrl}" "${branch}"
+git reset --hard FETCH_HEAD
+`;
+
+export const getAuthenticatedResetCommand = (appLocation: string, repoUrl: string, branch: string) => `
+set -e
+
+if [ -z "\${GITHUB_AUTH_HEADER:-}" ]; then
+  echo "ERROR: GitHub auth header is missing"
+  exit 1
+fi
+
+cd "${appLocation}"
+git -c http.https://github.com/.extraheader="$GITHUB_AUTH_HEADER" fetch "${repoUrl}" "${branch}"
+git reset --hard FETCH_HEAD
+`;
+
+export const getAuthenticatedPushCommand = (appLocation: string, repoUrl: string, branch: string) => `
+set -e
+
+if [ -z "\${GITHUB_AUTH_HEADER:-}" ]; then
+  echo "ERROR: GitHub auth header is missing"
+  exit 1
+fi
+
+cd "${appLocation}"
+git -c http.https://github.com/.extraheader="$GITHUB_AUTH_HEADER" push "${repoUrl}" "HEAD:${branch}"
+`;

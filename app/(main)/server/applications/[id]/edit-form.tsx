@@ -17,10 +17,10 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/core/hooks/useToast';
-import { Copy, ExternalLink, Key, Plus, Trash, X, Upload, AppWindow } from 'lucide-react';
+import { Plus, Trash, X, Upload, AppWindow, Github } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useRef, useState } from 'react';
-import { generateRepositoryKeys, updateApplication } from '@/services/server/applications/service';
+import { updateApplication } from '@/services/server/applications/service';
 import { normalizeApplicationNameInput } from '@/services/server/applications/name';
 
 const FRAMEWORKS = [
@@ -89,10 +89,6 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
     const repoInfo = application.information?.repoInfo || {};
     const [repoLocation, setRepoLocation] = useState(application.repository || '');
     const [isPrivate, setIsPrivate] = useState(repoInfo.isPrivate || false);
-    const [accessKey, setAccessKey] = useState(repoInfo.accessKey || '');
-    const [username, setUsername] = useState(repoInfo.username || '');
-    const [generatedPublicKey, setGeneratedPublicKey] = useState<string | null>(null);
-    const [isGeneratingKey, setIsGeneratingKey] = useState(false);
 
     // Language/Framework
     const [selectedFramework, setSelectedFramework] = useState(application.language || '');
@@ -185,26 +181,6 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
         setCommands(commands.filter((_, i) => i !== index));
     };
 
-    const handleGenerateKey = async () => {
-        setIsGeneratingKey(true);
-        try {
-            const keys = await generateRepositoryKeys();
-            setAccessKey(keys.privateKey);
-            setGeneratedPublicKey(keys.publicKey);
-            toast({ title: "Key Generated", description: "New access key pair generated. Don't forget to save changes." });
-        } catch (e) {
-            console.error(e);
-            toast({ variant: "destructive", title: "Error", description: "Failed to generate key." });
-        } finally {
-            setIsGeneratingKey(false);
-        }
-    };
-
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        toast({ description: "Public key copied to clipboard." });
-    };
-
     const handleAppIconUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -230,8 +206,8 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
         const updatedRepoInfo = {
             location: repoLocation,
             isPrivate,
-            accessKey: isPrivate ? accessKey : undefined,
-            username: isPrivate ? username : undefined,
+            provider: isPrivate ? 'github' as const : undefined,
+            authMode: isPrivate ? 'linked_account' as const : undefined,
         };
 
         const networkInfo = {
@@ -372,45 +348,19 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
                         </div>
 
                         {isPrivate && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-top-2">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="accessKey">
-                                        Access Key / Private Key
-                                    </Label>
-                                    <div className="flex gap-2">
-                                        <Input id="accessKey" type="password" placeholder="-----BEGIN OPENSSH PRIVATE KEY-----" value={accessKey} onChange={e => setAccessKey(e.target.value)} />
-                                        <Button type="button" variant="outline" size="icon" onClick={handleGenerateKey} disabled={isGeneratingKey} title="Generate new key pair">
-                                            <Key className="h-4 w-4" />
-                                        </Button>
+                            <div className="rounded-lg border bg-muted/40 p-4 text-sm animate-in slide-in-from-top-2">
+                                <div className="flex items-start gap-3">
+                                    <Github className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                                    <div className="space-y-1">
+                                        <p className="font-medium">Linked GitHub account required</p>
+                                        <p className="text-muted-foreground">
+                                            Private repository clone, pull, and push operations use the current account&apos;s linked GitHub token.
+                                            The token is resolved through <code className="font-mono">logica.account.linked.github.get()</code> and decrypted server-side with <code className="font-mono">keys/communication/github/private.pem</code>.
+                                        </p>
+                                        <p className="text-muted-foreground">
+                                            Use a GitHub repository URL here. No deploy key is stored in this application anymore.
+                                        </p>
                                     </div>
-                                    {generatedPublicKey && (
-                                        <div className="mt-2 p-3 bg-muted rounded-md text-xs space-y-2 border border-primary/20 animate-in fade-in zoom-in-95">
-                                            <div className="flex items-center justify-between font-medium">
-                                                <span className="text-primary flex items-center gap-1.5">
-                                                    <Key className="h-3 w-3" /> Public Key (Deploy Key)
-                                                </span>
-                                                <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(generatedPublicKey)}>
-                                                    <Copy className="h-3 w-3" />
-                                                </Button>
-                                            </div>
-                                            <div className="font-mono break-all text-muted-foreground bg-background p-2 rounded border">
-                                                {generatedPublicKey}
-                                            </div>
-                                            <div className="flex items-center gap-2 pt-1">
-                                                <a href="https://github.com/settings/ssh/new" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline flex items-center gap-1">
-                                                    GitHub SSH Settings <ExternalLink className="h-3 w-3" />
-                                                </a>
-                                                <span className="text-muted-foreground hidden sm:inline">or</span>
-                                                <a href="https://gitlab.com/-/profile/keys" target="_blank" rel="noreferrer" className="text-orange-500 hover:underline flex items-center gap-1">
-                                                    GitLab Keys <ExternalLink className="h-3 w-3" />
-                                                </a>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="username">Username (Optional)</Label>
-                                    <Input id="username" placeholder="git-user" value={username} onChange={e => setUsername(e.target.value)} />
                                 </div>
                             </div>
                         )}
