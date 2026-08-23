@@ -1,6 +1,7 @@
 'use server';
 
 import { executeCommand } from '@/services/saved-commands/saved-commands-service';
+import logica from '@/logica';
 
 import { getApplication } from './crud';
 import { upsertApplicationServerStatus } from './server-map';
@@ -11,6 +12,26 @@ function sanitizeStageName(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '') || 'custom_command';
+}
+
+async function createBuildNotification(
+  applicationId: string,
+  accountId: string,
+  success: boolean,
+) {
+  const result = await logica.notification.data({
+    accountId,
+    action: `cloud.server.application.${applicationId}.build.${success ? 'success' : 'failed'}`,
+    type: success ? 'success' : 'error',
+    title: success ? 'Application build completed' : 'Application build failed',
+    message: success
+      ? 'The application build completed successfully.'
+      : 'The application build failed. Check the command logs for details.',
+  }).create();
+
+  if (!result.ok || !result.body?.success) {
+    throw new Error(result.body?.error_description || result.body?.error || `Notification request failed with status ${result.status}.`);
+  }
 }
 
 export async function executeApplicationCommand(
@@ -108,5 +129,19 @@ exit $COMMAND_EXIT_CODE
   // Fire-and-forget: kick off the SSH execution without awaiting it so the
   // log record (created with status "pending") is immediately visible in the
   // command history poll. The background promise handles its own error logging.
-  void executeCommand(serverId, updateStatusCommand, formattedCommandName, displayCommand || command, `application:${applicationId}`);
+  const execution = executeCommand(
+    serverId,
+    updateStatusCommand,
+    formattedCommandName,
+    displayCommand || command,
+    `application:${applicationId}`,
+  );
+
+  if (normalizedCommandName.includes('build')) {
+    void execution.then((result) => createBuildNotification(applicationId, app.owner, !result.error)).catch((error) => {
+      console.error('[applications] failed to create build notification', error);
+    });
+  } else {
+    void execution;
+  }
 }
