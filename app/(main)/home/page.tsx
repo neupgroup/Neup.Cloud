@@ -38,9 +38,19 @@ export default function Home() {
   const [serversLoading, setServersLoading] = useState(true);
   const [allServers, setAllServers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [firstName, setFirstName] = useState('there');
 
   useEffect(() => {
     document.title = 'Homepage, Neup.Cloud';
+
+    const profileCookie = document.cookie
+      .split('; ')
+      .find((part) => part.startsWith('neup_profile_display_name='));
+    const displayName = profileCookie
+      ? decodeURIComponent(profileCookie.slice('neup_profile_display_name='.length)).trim()
+      : '';
+    const firstWord = displayName.split(/\s+/).filter(Boolean)[0];
+    if (firstWord) setFirstName(firstWord);
   }, []);
 
   useEffect(() => {
@@ -98,7 +108,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-8">
       <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">Welcome</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Welcome back, {firstName}</h1>
         <p className="text-muted-foreground">Select a server to manage your infrastructure.</p>
       </div>
 
@@ -123,7 +133,7 @@ export default function Home() {
                 <Server className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent className="p-4 pt-0">
-                <div className="truncate text-lg font-bold">{server.publicIp}</div>
+                <div className="truncate text-lg font-semibold">{server.publicIp}</div>
                 <p className="truncate text-xs text-muted-foreground">{server.provider}</p>
               </CardContent>
             </Card>

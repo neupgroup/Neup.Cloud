@@ -15,12 +15,9 @@ import {
 } from 'lucide-react';
 
 import { PageTitle } from '@/components/page-header';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -90,38 +87,11 @@ export default function IntelligencePage() {
   return (
     <div className="grid gap-8">
       <div className="space-y-4">
-        <Badge variant="secondary" className="w-fit">
-          Always on
-        </Badge>
         <PageTitle
-          title={
-            <span className="flex items-center gap-3">
-              <Sparkles className="h-8 w-8 text-primary" />
-              Intelligence
-            </span>
-          }
+          title="Intelligence"
           description="A site-wide space for insights and ideas that does not depend on any selected server."
         />
       </div>
-
-      <Card className="border-primary/15 bg-gradient-to-br from-primary/5 via-background to-background">
-        <CardHeader className="space-y-3">
-          <CardTitle className="text-2xl font-headline">
-            A dedicated place for non-server intelligence
-          </CardTitle>
-          <CardDescription className="max-w-2xl text-base">
-            This route is intentionally separate from server operations. It is available at all times and can be expanded later with recommendations, research notes, summaries, or AI-powered helpers.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3 sm:flex-row">
-          <Button asChild>
-            <Link href="/home">Back to Dashboard</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/servers">View Servers</Link>
-          </Button>
-        </CardContent>
-      </Card>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {intelligenceCards.map(({ title, description, icon: Icon, href }) => (
