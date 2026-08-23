@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { CommandsContent } from '../page';
+import { CommandsContent } from '../commands-content';
 
 export const metadata: Metadata = {
   title: 'Saved Commands, Neup.Cloud',

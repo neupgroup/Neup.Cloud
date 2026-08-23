@@ -117,13 +117,6 @@ export default async function NotificationsPage() {
       .wildcard({ accountId })
       .get();
 
-    console.log('[notifications] account response', {
-      accountId,
-      ok: response.ok,
-      status: response.status,
-      body: response.body,
-    });
-
     if (!response.ok) {
       throw new Error(`Notifications request failed with status ${response.status}.`);
     }
@@ -133,13 +126,7 @@ export default async function NotificationsPage() {
     }
 
     notifications = response.body.data;
-    console.log('[notifications] resolved actions', notifications.map((notification) => ({
-      id: notification.id,
-      action: notification.action,
-      href: getNotificationAppHref(notification),
-    })));
   } catch (error) {
-    console.error('[notifications] account request failed', error);
     loadError = error instanceof Error ? error.message : 'Unable to load notifications.';
   }
 

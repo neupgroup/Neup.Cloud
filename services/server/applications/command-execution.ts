@@ -2,6 +2,7 @@
 
 import { executeCommand } from '@/services/saved-commands/saved-commands-service';
 import logica from '@/logica';
+import { getCookie } from '@/core/helpers/cookie';
 
 import { getApplication } from './crud';
 import { upsertApplicationServerStatus } from './server-map';
@@ -34,6 +35,18 @@ async function createBuildNotification(
   }
 }
 
+async function resolveNotificationAccountId(fallbackAccountId: string) {
+  const authAccountToken = await getCookie('auth_account');
+  if (!authAccountToken) return fallbackAccountId;
+
+  const authentication = await logica.account.auth.verify(authAccountToken);
+  if (authentication.valid && typeof authentication.payload.aid === 'string' && authentication.payload.aid.trim()) {
+    return authentication.payload.aid.trim();
+  }
+
+  return fallbackAccountId;
+}
+
 export async function executeApplicationCommand(
   applicationId: string,
   command: string,
@@ -50,6 +63,7 @@ export async function executeApplicationCommand(
   }
 
   const normalizedCommandName = (commandName || '').toLowerCase();
+  const notificationAccountId = await resolveNotificationAccountId(app.owner);
   if (
     normalizedCommandName.includes('start') ||
     normalizedCommandName.includes('restart') ||
@@ -138,7 +152,7 @@ exit $COMMAND_EXIT_CODE
   );
 
   if (normalizedCommandName.includes('build')) {
-    void execution.then((result) => createBuildNotification(applicationId, app.owner, !result.error)).catch((error) => {
+    void execution.then((result) => createBuildNotification(applicationId, notificationAccountId, !result.error)).catch((error) => {
       console.error('[applications] failed to create build notification', error);
     });
   } else {
