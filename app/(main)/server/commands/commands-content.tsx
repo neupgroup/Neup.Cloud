@@ -112,10 +112,10 @@ const LogStatusBadge = ({ status }: { status: CommandHistoryItem['status'] }) =>
   );
 };
 
-function LoadingSkeleton() {
+function LoadingSkeleton({ rows = 9 }: { rows?: number }) {
   return (
     <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm">
-      {[...Array(9)].map((_, i) => (
+      {[...Array(rows)].map((_, i) => (
         <div
           key={i}
           className={cn('p-4 min-w-0 w-full', i !== 8 && 'border-b border-border')}
@@ -452,7 +452,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
 
   const visibleCommands =
     mode === 'dashboard'
-      ? filteredCommands.slice(0, 3)
+      ? filteredCommands.slice(0, 5)
       : filteredCommands.slice((currentCommandPage - 1) * PAGE_SIZE, currentCommandPage * PAGE_SIZE);
 
   const visibleHistory =
@@ -508,6 +508,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
         <PageTitle
           title="Command History"
           description="Your recent command executions."
+          className="-mb-2"
         />
       ) : (
         <div
@@ -518,26 +519,6 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
           <p className="text-muted-foreground">Create, run, and track commands for '<span className="font-semibold text-foreground">{selectedServerName}</span>'</p>
         </div>
       )}
-
-      <div className="flex justify-start">
-        <Button variant="outline" onClick={handleOpenContinuityTerminal}>
-          <SquareTerminal className="mr-2 h-4 w-4" />
-          Open Continuous Terminal
-        </Button>
-      </div>
-
-      <div className="relative">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search commands..."
-          value={searchQuery}
-          onChange={(e) => {
-            handleSearchChange(e.target.value);
-          }}
-          className="pl-9"
-          autoFocus={!!searchQuery}
-        />
-      </div>
 
       {showDashboard && effectiveSelectedServer && (
         <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm">
@@ -577,12 +558,10 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
       )}
 
       {isLoading ? (
-        <LoadingSkeleton />
-      ) : (
         <div className="grid gap-6">
           {showSavedCommands && (
             <>
-              <div className="mt-6">
+              <div className="mt-6 -mb-2">
                 <h2 className="text-2xl font-bold font-headline tracking-tight">
                   {showDashboard ? 'Run saved commands.' : 'Saved Commands'}
                 </h2>
@@ -590,6 +569,48 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
                   {showDashboard ? 'Run saved commands and commands set.' : 'Browse and run saved commands.'}
                 </p>
               </div>
+              <LoadingSkeleton rows={3} />
+            </>
+          )}
+
+          {showHistory && showDashboard && (
+            <div className="mt-6 -mb-2">
+              <h2 className="text-2xl font-bold font-headline tracking-tight">Command History</h2>
+              <p className="text-muted-foreground">Your recent command executions.</p>
+            </div>
+          )}
+
+          {showHistory && (
+            <CommandLogListSkeleton rows={showDashboard ? 3 : 5} />
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-6">
+          {showSavedCommands && (
+            <>
+              <div className="mt-6 -mb-2">
+                <h2 className="text-2xl font-bold font-headline tracking-tight">
+                  {showDashboard ? 'Run saved commands.' : 'Saved Commands'}
+                </h2>
+                <p className="text-muted-foreground">
+                  {showDashboard ? 'Run saved commands and commands set.' : 'Browse and run saved commands.'}
+                </p>
+              </div>
+
+              {savedCommands.length >= 5 && (
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search commands..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      handleSearchChange(e.target.value);
+                    }}
+                    className="pl-9"
+                    autoFocus={!!searchQuery}
+                  />
+                </div>
+              )}
 
               <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm">
                 <div
@@ -678,7 +699,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
                 )}
               </Card>
 
-              {showDashboard && (
+              {showDashboard && savedCommands.length >= 5 && (
                 <div className="flex justify-start">
                     <Button variant="outline" asChild>
                       <Link href={withSelectedServerQuery(savedCommandsHref, effectiveSelectedServer)}>View more</Link>
@@ -691,9 +712,24 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
           {showHistory && (
             <>
               {!isHistoryPage && (
-                <div className="mt-6">
+                <div className="mt-6 -mb-2">
                   <h2 className="text-2xl font-bold font-headline tracking-tight">Command History</h2>
                   <p className="text-muted-foreground">Your recent command executions.</p>
+                </div>
+              )}
+
+              {isHistoryPage && (
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search commands..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      handleSearchChange(e.target.value);
+                    }}
+                    className="pl-9"
+                    autoFocus={!!searchQuery}
+                  />
                 </div>
               )}
 
