@@ -8,22 +8,23 @@ Application-specific navigation helpers for selected-server query context.
 
 Use `withSelectedServerQuery()` when an app link should carry the active selected server.
 
-Use `getSelectedServerId()` to read the selected server from query parameters or the browser session cache.
+Use `getSelectedServerId()` to read the selected server from the URL query parameter.
 
 ::public end
 
 ::private
 
-This module owns the selected-server query parameter and browser session fallback for app routes.
+This module owns selected-server route matching and compatibility wrappers for app routes.
 
 ::private end
 
 ::end
 */
 
-export const SELECTED_SERVER_QUERY_KEY = 'selectedServer';
-
-const SELECTED_SERVER_SESSION_KEY = 'selectedServer:lastKnown';
+import {
+  getSelectedServer,
+  selectServer,
+} from '@/inapp/helpers/selection';
 
 const SELECTED_SERVER_ROUTE_PREFIXES = [
   '/home',
@@ -51,35 +52,6 @@ type ServerSelectionCandidate = {
 function trimValue(value: string | null | undefined) {
   const next = value?.trim();
   return next ? next : null;
-}
-
-function splitHref(href: string) {
-  const hashIndex = href.indexOf('#');
-  const beforeHash = hashIndex === -1 ? href : href.slice(0, hashIndex);
-  const hash = hashIndex === -1 ? '' : href.slice(hashIndex);
-  const queryIndex = beforeHash.indexOf('?');
-
-  return {
-    basePath: queryIndex === -1 ? beforeHash : beforeHash.slice(0, queryIndex),
-    query: queryIndex === -1 ? '' : beforeHash.slice(queryIndex + 1),
-    hash,
-  };
-}
-
-function getSearchParameters(source?: Pick<URLSearchParams, 'toString'> | string | null) {
-  if (typeof source === 'string') {
-    return new URLSearchParams(splitHref(source).query);
-  }
-
-  if (source?.toString) {
-    return new URLSearchParams(source.toString());
-  }
-
-  if (typeof window !== 'undefined') {
-    return new URLSearchParams(window.location.search);
-  }
-
-  return new URLSearchParams();
 }
 
 export function getServerSelectionCandidates(value: string | null | undefined) {
@@ -138,32 +110,11 @@ export function resolveSelectedServerValue<T extends ServerSelectionCandidate>(
 }
 
 export function getSelectedServerFromParams(searchParams?: Pick<URLSearchParams, 'toString'> | string | null) {
-  return trimValue(getSearchParameters(searchParams).get(SELECTED_SERVER_QUERY_KEY));
-}
-
-export function getCachedSelectedServerId() {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  return trimValue(window.sessionStorage.getItem(SELECTED_SERVER_SESSION_KEY));
-}
-
-export function cacheSelectedServerId(serverId: string | null | undefined) {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const next = trimValue(serverId);
-  if (next) {
-    window.sessionStorage.setItem(SELECTED_SERVER_SESSION_KEY, next);
-  } else {
-    window.sessionStorage.removeItem(SELECTED_SERVER_SESSION_KEY);
-  }
+  return getSelectedServer(searchParams);
 }
 
 export function getSelectedServerId(searchParams?: Pick<URLSearchParams, 'toString'> | string | null) {
-  return getSelectedServerFromParams(searchParams) ?? getCachedSelectedServerId();
+  return getSelectedServer(searchParams);
 }
 
 export function shouldPreserveSelectedServer(pathname: string | null | undefined) {
@@ -177,15 +128,5 @@ export function shouldPreserveSelectedServer(pathname: string | null | undefined
 }
 
 export function withSelectedServerQuery(href: string, selectedServerId?: string | null) {
-  const nextSelectedServerId = trimValue(selectedServerId);
-  if (!nextSelectedServerId) {
-    return href;
-  }
-
-  const { basePath, query, hash } = splitHref(href);
-  const params = new URLSearchParams(query);
-  params.set(SELECTED_SERVER_QUERY_KEY, nextSelectedServerId);
-
-  const nextQuery = params.toString();
-  return `${basePath}${nextQuery ? `?${nextQuery}` : ''}${hash}`;
+  return selectServer(href, selectedServerId);
 }

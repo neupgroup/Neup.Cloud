@@ -8,7 +8,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/core/hooks/useToast';
 import { shouldPreserveSelectedServer, withSelectedServerQuery } from "@/inapp/helpers/navigation";
-import { deleteServer, selectServer } from '@/services/server/server-service';
+import { deleteServer } from '@/services/server/server-service';
 import type { Server } from '@/services/server/types';
 import { cn } from "@/core/utils";
 
@@ -52,7 +52,6 @@ export function ServerCard({ server, onServerDeleted, onServerSelected, isSelect
     if (isSelected || isSwitching) return;
     setIsSwitching(true);
     try {
-      await selectServer(server.id, server.name);
       toast({
         title: "Server Selected",
         description: `You are now managing \"${server.name}\".`,
@@ -62,13 +61,11 @@ export function ServerCard({ server, onServerDeleted, onServerSelected, isSelect
       if (shouldPreserveSelectedServer(pathname)) {
         router.replace(withSelectedServerQuery(currentUrl, server.id), { scroll: false });
       }
-      router.refresh();
     } catch (error) {
-      console.error("Error selecting server: ", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "There was a problem selecting the server.",
+        description: error instanceof Error ? error.message : "There was a problem selecting the server.",
       });
     } finally {
       setIsSwitching(false);

@@ -41,7 +41,7 @@ import {
   Workflow,
   Mail
 } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/core/utils';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect, Suspense } from 'react';
@@ -54,14 +54,11 @@ import { ProgressBar } from '@/components/progress-bar';
 import NProgress from 'nprogress';
 
 import { findLongestMatch } from '@/services/core/findLongestMatch';
-import { ServerQueryPreserver } from '@/components/server-query-preserver';
 import {
-  cacheSelectedServerId,
-  getSelectedServerFromParams,
-  getSelectedServerId,
   shouldPreserveSelectedServer,
   withSelectedServerQuery,
 } from '@/inapp/helpers/navigation';
+import { getSelectedServer } from '@/inapp/helpers/selection';
 
 type CurrentAccountProfile = {
   displayName: string | null;
@@ -381,6 +378,7 @@ function Header({ isMobileMenuOpen, toggleMobileMenu }: { isMobileMenuOpen: bool
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isServerSelected, setIsServerSelected] = useState(false);
@@ -393,15 +391,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       return;
     }
 
-    const search = typeof window === 'undefined' ? '' : window.location.search;
-    const selectedFromUrl = getSelectedServerFromParams(search);
-    if (selectedFromUrl) {
-      cacheSelectedServerId(selectedFromUrl);
-    }
-    const nextSelectedServerId = getSelectedServerId(search);
+    const nextSelectedServerId = getSelectedServer(searchParams);
     setSelectedServerId(nextSelectedServerId);
     setIsServerSelected(Boolean(nextSelectedServerId));
-  }, [pathname]);
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -434,9 +427,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased bg-white">
-        <Suspense fallback={null}>
-          <ServerQueryPreserver />
-        </Suspense>
         {isPlainRoute ? (
           <div className="min-h-screen w-full bg-white text-foreground">{children}</div>
         ) : (

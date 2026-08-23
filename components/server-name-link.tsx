@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/core/utils';
-import { getSelectedServerId, withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { getSelectedServer, selectServer } from '@/inapp/helpers/selection';
 
 export function ServerNameLink({ name, className }: { name: string; className?: string }) {
     const router = useRouter();
@@ -16,8 +16,8 @@ export function ServerNameLink({ name, className }: { name: string; className?: 
             )}
             onClick={() => {
                 const query = typeof window === 'undefined' ? '' : window.location.search;
-                const selectedServerId = getSelectedServerId(query);
-                const currentPath = withSelectedServerQuery(query ? `${pathname}${query}` : pathname, selectedServerId);
+                const selectedServerId = getSelectedServer(query);
+                const currentPath = selectServer(query ? `${pathname}${query}` : pathname, selectedServerId);
                 router.push(`/server/list?redirects=${encodeURIComponent(currentPath)}`);
             }}
         >

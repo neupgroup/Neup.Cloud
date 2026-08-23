@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/core/hooks/useToast";
 import { useSelectedServerId } from "@/inapp/hooks/use-selected-server";
-import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
-import { getServersWithRunningApplications, selectServer } from "@/services/server/server-service";
+import { selectServer } from "@/inapp/helpers/selection";
+import { getServersWithRunningApplications } from "@/services/server/server-service";
 import { getServerExpiration } from "@/services/server/server-metadata";
 import type { Server } from "@/services/server/types";
 function sanitizeRedirect(value: string | null) {
@@ -143,13 +143,11 @@ function ServerListContent() {
 
     setSwitchingId(server.id);
     try {
-      await selectServer(server.id, server.name);
       toast({
         title: "Server switched",
         description: `You are now managing ${server.name}.`,
       });
-      router.push(withSelectedServerQuery(redirectTo ?? "/server/home", server.id), { scroll: false });
-      router.refresh();
+      router.push(selectServer(redirectTo ?? "/server/home", server.id), { scroll: false });
     } catch (error) {
       console.error(error);
       toast({

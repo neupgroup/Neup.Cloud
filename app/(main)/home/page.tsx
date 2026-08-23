@@ -31,7 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getServers, selectServer, getServer, getSystemStats } from '@/services/server/server-service';
+import { getServers, getServer, getSystemStats } from '@/services/server/server-service';
 import { getServerUptime } from "@/services/server/status";
 import { getCommandLog, type CommandLog } from '@/services/logs/command-log';
 import { cn } from '@/core/utils';
@@ -40,7 +40,7 @@ import { ServerNameLink } from "@/components/server-name-link";
 import { CommandLogList, CommandLogListSkeleton } from '@/app/(main)/server/commands/command-log-card';
 import { ApplicationSection } from '@/components/specifics/application/section';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { selectServer } from '@/inapp/helpers/selection';
 
 type ServerAlert = {
   id: string;
@@ -101,7 +101,6 @@ export default function Home() {
   const selectedServerId = useSelectedServerId();
   const [userFirstName, setUserFirstName] = useState<string>("User");
   const [loading, setLoading] = useState(true);
-  const [serverId, setServerId] = useState<string | null>(null);
   const [allServers, setAllServers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [logsLoading, setLogsLoading] = useState(false);
@@ -119,32 +118,45 @@ export default function Home() {
   useEffect(() => { document.title = 'Homepage, Neup.Cloud'; }, []);
 
   useEffect(() => {
-    setServerId(selectedServerId);
+    let cancelled = false;
+
+    setLoading(true);
+    setServerInfo(null);
+    setUptime(null);
+    setActivityLogs([]);
+    setSystemStats(null);
 
     const init = async () => {
       try {
-        const servers = await getServers();
-        setAllServers(servers);
+        // Keep the server list and selected-server dashboard independent. A
+        // server switch should start loading its details immediately instead
+        // of waiting for another server-list request to finish first.
+        const serversPromise = getServers();
+        const dashboardPromise = selectedServerId
+          ? fetchServerDashboardData(selectedServerId, () => !cancelled)
+          : Promise.resolve();
+        const [servers] = await Promise.all([serversPromise, dashboardPromise]);
 
-        if (selectedServerId) {
-          await fetchServerDashboardData(selectedServerId);
-        }
+        if (!cancelled) setAllServers(servers);
       } catch (err) {
-        console.error("Initialization failed", err);
+        if (!cancelled) console.error("Initialization failed", err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     init();
 
     const interval = setInterval(() => {
-      if (selectedServerId) fetchStats(selectedServerId);
+      if (selectedServerId) fetchStats(selectedServerId, () => !cancelled);
     }, 15000);
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [selectedServerId]);
 
-  const fetchServerDashboardData = async (id: string) => {
+  const fetchServerDashboardData = async (id: string, isCurrent = () => true) => {
     setLogsLoading(true);
     try {
       const [info, activity] = await Promise.all([
@@ -152,45 +164,44 @@ export default function Home() {
         getCommandLog({ serverId: id, limit: 5, offset: 0 })
       ]);
 
-      if (info) {
+      if (info && isCurrent()) {
         setServerInfo(info);
         if (typeof info.name === 'string' && info.name.trim()) {
           setUserFirstName(info.name.split(' ')[0]);
         }
       }
-      setActivityLogs(activity);
+      if (isCurrent()) setActivityLogs(activity);
 
-      fetchStats(id);
+      fetchStats(id, isCurrent);
       const uptimeRes = await getServerUptime(id);
-      if (uptimeRes.uptime) setUptime(uptimeRes.uptime);
+      if (uptimeRes.uptime && isCurrent()) setUptime(uptimeRes.uptime);
 
     } catch (err) {
-      console.error("Failed to fetch dashboard data", err);
+      if (isCurrent()) console.error("Failed to fetch dashboard data", err);
     } finally {
-      setLogsLoading(false);
+      if (isCurrent()) setLogsLoading(false);
     }
   };
 
-  const fetchStats = async (id: string) => {
+  const fetchStats = async (id: string, isCurrent = () => true) => {
     try {
       const stats = await getSystemStats(id);
-      if (stats && !stats.error && stats.cpuUsage !== undefined) {
+      if (isCurrent() && stats && !stats.error && stats.cpuUsage !== undefined) {
         setSystemStats(stats as any);
       }
     } catch (err) {
-      console.error("Failed to fetch system stats", err);
+      if (isCurrent()) console.error("Failed to fetch system stats", err);
     }
   };
 
-  const handleSelectServer = async (id: string, name: string) => {
+  const handleSelectServer = (id: string) => {
     if (id === serverId) return; // Already selected
-    await selectServer(id, name);
-    setServerId(id);
-    router.replace(withSelectedServerQuery(pathname, id), { scroll: false });
-    router.refresh();
+    router.replace(selectServer(pathname, id), { scroll: false });
     // Optionally close the list or reset search
     // setShowAllServers(false);
   };
+
+  const serverId = selectedServerId;
 
   const filteredServers = allServers.filter(s =>
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -380,7 +391,7 @@ export default function Home() {
             {serversToDisplay.map((s) => (
               <Card
                 key={s.id}
-                onClick={() => handleSelectServer(s.id, s.name)}
+                onClick={() => handleSelectServer(s.id)}
                 className={cn(
                   "cursor-pointer hover:border-primary transition-all",
                   serverId === s.id ? "border-primary bg-primary/5 check-mark-indicator" : ""
@@ -435,7 +446,7 @@ export default function Home() {
           <div className="flex justify-start">
             <Button
               variant="outline"
-              onClick={() => router.push(withSelectedServerQuery('/server/commands/history', serverId))}
+              onClick={() => router.push(selectServer('/server/commands/history', serverId))}
             >
               See all activities
             </Button>

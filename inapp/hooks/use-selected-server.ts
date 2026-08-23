@@ -23,40 +23,24 @@ These hooks live in `inapp` because selected-server navigation is application co
 ::end
 */
 
-import { useEffect, useMemo } from 'react';
-import { usePathname } from 'next/navigation';
-import {
-  cacheSelectedServerId,
-  getSelectedServerId,
-  getSelectedServerFromParams,
-  withSelectedServerQuery,
-} from '@/inapp/helpers/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { getSelectedServer, selectServer } from '@/inapp/helpers/selection';
 
-export { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+export { selectServer as withSelectedServerQuery } from '@/inapp/helpers/selection';
 
 function getCurrentSearch() {
   return typeof window === 'undefined' ? '' : window.location.search;
 }
 
 export function useSelectedServerId() {
-  const pathname = usePathname();
-
-  const selectedServerId = useMemo(() => getSelectedServerId(getCurrentSearch()), [pathname]);
-
-  useEffect(() => {
-    const selectedServerFromUrl = getSelectedServerFromParams(getCurrentSearch());
-    if (selectedServerFromUrl) {
-      cacheSelectedServerId(selectedServerFromUrl);
-    }
-  }, [pathname]);
-
-  return selectedServerId;
+  const searchParams = useSearchParams();
+  return getSelectedServer(searchParams);
 }
 
 export function useSelectedServerHref() {
   const selectedServerId = useSelectedServerId();
 
-  return (href: string) => withSelectedServerQuery(href, selectedServerId ?? getSelectedServerFromParams(getCurrentSearch()));
+  return (href: string) => selectServer(href, selectedServerId);
 }
 
 export function useSelectedServerUrlUpdater() {
@@ -65,7 +49,7 @@ export function useSelectedServerUrlUpdater() {
 
   return (nextSelectedServerId: string | null | undefined) => {
     const search = getCurrentSearch();
-    return withSelectedServerQuery(
+    return selectServer(
       `${pathname}${search}`,
       nextSelectedServerId ?? selectedServerId
     );

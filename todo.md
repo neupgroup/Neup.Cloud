@@ -26,3 +26,4 @@
 - [ ] Resolve duplicate export in [services/logs/logs-service.ts](/Users/neupkishor/Code/neup.cloud/services/logs/logs-service.ts).
 - [ ] Fix implicit `any` in [services/webservices/runtime.ts](/Users/neupkishor/Code/neup.cloud/services/webservices/runtime.ts).
 - [ ] Fix invalid void handling in [services/webservices/service.ts](/Users/neupkishor/Code/neup.cloud/services/webservices/service.ts).
+- [ ] Remove remaining selected-server cookie dependencies from server-side routes and actions now that client-side server selection is URL-only.

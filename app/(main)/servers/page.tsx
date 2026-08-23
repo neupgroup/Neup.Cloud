@@ -18,9 +18,9 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, Loader2, ServerIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { getServers, selectServer } from '@/services/server/server-service';
+import { getServers } from '@/services/server/server-service';
 import type { Server } from '@/services/server/types';
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { selectServer } from '@/inapp/helpers/selection';
 
 export default function ServersPage() {
   const router = useRouter();
@@ -52,12 +52,10 @@ export default function ServersPage() {
     };
   }, []);
 
-  const handleSwitch = async (id: string, name: string) => {
+  const handleSwitch = async (id: string) => {
     setSwitchingId(id);
     try {
-      await selectServer(id, name);
-      router.push(withSelectedServerQuery('/server/home', id));
-      router.refresh();
+      router.push(selectServer('/server/home', id));
     } finally {
       setSwitchingId(null);
     }
@@ -101,7 +99,7 @@ export default function ServersPage() {
                   variant="ghost"
                   className="flex items-center justify-between"
                   disabled={Boolean(switchingId)}
-                  onClick={() => handleSwitch(server.id, server.name)}
+                  onClick={() => handleSwitch(server.id)}
                 >
                   <span className="flex items-center gap-2">
                     <ServerIcon className="h-4 w-4" />
