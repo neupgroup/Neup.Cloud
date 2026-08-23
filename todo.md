@@ -23,6 +23,7 @@
 - [ ] Fix invalid database type exports consumed by [services/database/management.ts](/Users/neupkishor/Code/neup.cloud/services/database/management.ts).
 - [ ] Fix implicit `any` in [services/errors/errors-service.ts](/Users/neupkishor/Code/neup.cloud/services/errors/errors-service.ts).
 - [ ] Fix command log typing in [services/home-service.ts](/Users/neupkishor/Code/neup.cloud/services/home-service.ts).
+- [ ] Fix application information metadata indexing typing in [services/server/applications/update.ts](/Users/neupkishor/Code/neup.cloud/services/server/applications/update.ts).
 - [ ] Resolve duplicate export in [services/logs/logs-service.ts](/Users/neupkishor/Code/neup.cloud/services/logs/logs-service.ts).
 - [ ] Fix implicit `any` in [services/webservices/runtime.ts](/Users/neupkishor/Code/neup.cloud/services/webservices/runtime.ts).
 - [ ] Fix invalid void handling in [services/webservices/service.ts](/Users/neupkishor/Code/neup.cloud/services/webservices/service.ts).

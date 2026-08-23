@@ -54,6 +54,17 @@ export function getServerExpiration(value?: string | null) {
   return metadata.validTill ?? metadata.expiresAt ?? null;
 }
 
+export function isServerDisabled(value?: string | null) {
+  const metadata = parseServerMetadata(value);
+  const disabled = metadata.disabled;
+
+  return (
+    disabled === true ||
+    (typeof disabled === 'string' && disabled.trim().toLowerCase() === 'true') ||
+    (typeof metadata.status === 'string' && metadata.status.trim().toLowerCase() === 'disabled')
+  );
+}
+
 export function getServerSshPassphrase(value?: string | null) {
   const raw = parseServerMetadata(value).sshPassphrase;
   if (typeof raw !== 'string') {

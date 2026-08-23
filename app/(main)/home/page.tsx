@@ -23,7 +23,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getServers } from '@/services/server/server-service';
+import { getServerExpiration, isServerDisabled } from '@/services/server/server-metadata';
 import { selectServer } from '@/inapp/helpers/selection';
+
+function isExpired(value?: string | null) {
+  if (!value) return false;
+
+  const date = new Date(value);
+  return !Number.isNaN(date.getTime()) && date.getTime() <= Date.now();
+}
 
 export default function Home() {
   const router = useRouter();
@@ -57,7 +65,12 @@ export default function Home() {
     };
   }, []);
 
-  const filteredServers = allServers.filter((server) => {
+  const availableServers = allServers.filter(
+    (server) =>
+      !isServerDisabled(server.moreDetails) &&
+      !isExpired(getServerExpiration(server.moreDetails))
+  );
+  const filteredServers = availableServers.filter((server) => {
     const query = searchQuery.trim().toLowerCase();
     return !query || server.name.toLowerCase().includes(query) || server.publicIp.includes(query);
   });
@@ -89,7 +102,7 @@ export default function Home() {
         <p className="text-muted-foreground">Select a server to manage your infrastructure.</p>
       </div>
 
-      {allServers.length > 0 && (
+      {availableServers.length > 0 && (
         <div className="relative max-w-md">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -125,11 +138,11 @@ export default function Home() {
         </Card>
       </div>
 
-      {!serversLoading && allServers.length > 0 && filteredServers.length === 0 && (
+      {!serversLoading && availableServers.length > 0 && filteredServers.length === 0 && (
         <p className="text-sm text-muted-foreground">No servers match your search.</p>
       )}
 
-      {!serversLoading && allServers.length === 0 && (
+      {!serversLoading && availableServers.length === 0 && (
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">No servers found.</p>
           <Button onClick={() => router.push('/servers/add')}>Add a server</Button>
