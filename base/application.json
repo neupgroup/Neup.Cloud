@@ -25,7 +25,14 @@
         "backgroundColor": "#F5F5F5",
         "textColor": "#212121"
     },
-    "updates": {
+    "appInterface": {
+        "borderRadius": "medium",
+        "boxShadow": "0 2px 4px rgba(0, 0, 0, 0.1)",
+        "fontFamily": "'Outfit', sans-serif",
+        "fontSize": "14px",
+        "lineHeight": "1.5"
+    },
+    "updateInfo": {
         "lastUpdate": "2024-06-01:00:00:00Z",
         "updateNotes": "Initial release of Neup.Cloud with core features for cloud resource management."
     }
