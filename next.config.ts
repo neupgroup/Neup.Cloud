@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   basePath: '/cloud',
+  turbopack: {
+    root: __dirname,
+  },
   // assetPrefix: '/account/',
   images: {
     remotePatterns: [

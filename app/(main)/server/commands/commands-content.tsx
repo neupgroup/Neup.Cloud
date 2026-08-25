@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
@@ -50,9 +50,9 @@ import { PageTitle } from '@/components/page-header';
 ::private
 
 The server commands page reads the active server from `selectedServer`, runs
-saved or custom commands through server services, and accepts `pretypecommand`
-to prefill the custom command textarea for flows such as File Manager's Open
-Terminal Here action.
+saved or custom commands through server services, and consumes `pretypecommand`
+once to prefill the custom command textarea for flows such as File Manager's
+Open Terminal Here action.
 
 ::private end
 ::end
@@ -151,6 +151,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
   const [runtimeVariableValues, setRuntimeVariableValues] = useState<Record<string, string>>({});
   const [customCommand, setCustomCommand] = useState<string>('');
   const [isRunningCustom, setIsRunningCustom] = useState(false);
+  const consumedPretypeCommand = useRef<string | null>(null);
   const effectiveSelectedServer = useMemo(
     () => resolveSelectedServerValue(selectedServer || selectedServerFromUrl, servers) ?? '',
     [selectedServer, selectedServerFromUrl, servers]
@@ -164,10 +165,18 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
 
   useEffect(() => {
     const pretypeCommand = searchParams.get('pretypecommand');
-    if (pretypeCommand !== null) {
-      setCustomCommand(pretypeCommand);
+    if (pretypeCommand === null || consumedPretypeCommand.current === pretypeCommand) {
+      return;
     }
-  }, [searchParams]);
+
+    consumedPretypeCommand.current = pretypeCommand;
+    setCustomCommand(pretypeCommand);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('pretypecommand');
+    const queryString = params.toString();
+    router.replace(queryString ? `?${queryString}` : window.location.pathname, { scroll: false });
+  }, [router, searchParams]);
 
   useEffect(() => {
     const query = searchParams.get('query');

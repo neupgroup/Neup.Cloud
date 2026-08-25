@@ -22,26 +22,19 @@ The page validates the route session ID, polls pane output, and sends commands i
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition, type KeyboardEvent } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, RefreshCcw, Server, SquareTerminal, XCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, Server, SquareTerminal, XCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/core/hooks/useToast';
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { useServerName } from '@/inapp/hooks/use-server-name';
-import { getContinuitySessionSnapshot, sendContinuityCommand, terminateContinuitySession, type ContinuitySessionSnapshot } from '@/services/server/continuity-service';
+import { getContinuitySessionSnapshot, sendContinuityCommand, sendContinuityEnter, terminateContinuitySession, type ContinuitySessionSnapshot } from '@/services/server/continuity-service';
 import { getServer } from '@/services/server/server-service';
-
-type ServerOption = {
-  id: string;
-  name: string;
-  publicIp?: string | null;
-};
 
 const CONTINUITY_SESSION_ID_PATTERN = /^continuity_[A-Za-z0-9_.]+$/u;
 
@@ -88,7 +81,6 @@ export default function ContinuitySessionPage() {
   const selectedServerName = useServerName();
   const pretypedCommand = searchParams.get('pretypecommand') ?? '';
 
-  const [selectedServer, setSelectedServer] = useState<ServerOption | null>(null);
   const [snapshot, setSnapshot] = useState<ContinuitySessionSnapshot | null>(null);
   const [command, setCommand] = useState('');
   const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(false);
@@ -106,7 +98,6 @@ export default function ContinuitySessionPage() {
     let cancelled = false;
 
     if (!selectedServerId) {
-      setSelectedServer(null);
       setPageError(null);
       return;
     }
@@ -118,16 +109,10 @@ export default function ContinuitySessionPage() {
         }
 
         if (!server) {
-          setSelectedServer(null);
           setPageError('Selected server was not found.');
           return;
         }
 
-        setSelectedServer({
-          id: server.id,
-          name: server.name,
-          publicIp: server.publicIp,
-        });
         setPageError(null);
       })
       .catch((error: Error) => {
@@ -135,7 +120,6 @@ export default function ContinuitySessionPage() {
           return;
         }
 
-        setSelectedServer(null);
         setPageError(error.message || 'Failed to load the selected server.');
       });
 
@@ -222,33 +206,16 @@ export default function ContinuitySessionPage() {
     terminalScrollRef.current.scrollTop = terminalScrollRef.current.scrollHeight;
   }, [snapshot?.content]);
 
-  const handleRefreshSnapshot = () => {
-    if (!selectedServerId || !requestedSessionId) {
-      return;
-    }
-
-    setIsLoadingSnapshot(true);
-    void getContinuitySessionSnapshot(selectedServerId, requestedSessionId)
-      .then((nextSnapshot) => {
-        setSnapshot(nextSnapshot);
-        setPageError(null);
-      })
-      .catch((error: Error) => {
-        setPageError(error.message || 'Failed to load the continuity terminal.');
-      })
-      .finally(() => {
-        setIsLoadingSnapshot(false);
-      });
-  };
-
   const handleSendCommand = () => {
-    if (!selectedServerId || !requestedSessionId || !command.trim()) {
+    if (!selectedServerId || !requestedSessionId) {
       return;
     }
 
     startSendingCommand(async () => {
       try {
-        const nextSnapshot = await sendContinuityCommand(selectedServerId, requestedSessionId, command);
+        const nextSnapshot = command.trim()
+          ? await sendContinuityCommand(selectedServerId, requestedSessionId, command)
+          : await sendContinuityEnter(selectedServerId, requestedSessionId);
         setCommand('');
         setSnapshot(nextSnapshot);
       } catch (error: any) {
@@ -282,25 +249,59 @@ export default function ContinuitySessionPage() {
   };
 
   const activeSessionExists = snapshot?.exists ?? false;
+  const terminalContent = snapshot?.content?.replace(/\s+$/u, '') || 'Session is open. Waiting for tmux output...';
+
+  const handleTerminalKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!activeSessionExists || isSendingCommand) {
+      return;
+    }
+
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleSendCommand();
+      return;
+    }
+
+    if (event.key === 'Backspace') {
+      event.preventDefault();
+      setCommand((currentCommand) => currentCommand.slice(0, -1));
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setCommand('');
+      return;
+    }
+
+    if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      setCommand((currentCommand) => currentCommand + event.key);
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Continuity Terminal</h1>
+        <div className="space-y-2">
+          <Button asChild variant="ghost" size="sm" className="px-0 text-muted-foreground hover:text-foreground">
+            <Link href={withSelectedServerQuery('/server/commands/continuity', selectedServerId)}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Continuity Terminal{' '}
+            <Link href="/server/list" className="text-muted-foreground transition-colors duration-[time:600ms] hover:text-foreground">
+              for{' '}
+              {selectedServerName ?? 'Server'}
+            </Link>
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Active tmux-backed continuity terminal for the server from `selectedServer`.
+            You're currently working on session "{requestedSessionId || 'SessionID'}"
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 text-right">
-          <div className="text-sm font-medium">
-            {selectedServerName ?? selectedServer?.name ?? 'No server selected'}
-          </div>
-          {selectedServer?.publicIp ? (
-            <div className="text-xs text-muted-foreground">{selectedServer.publicIp}</div>
-          ) : null}
-        </div>
       </div>
 
       {pageError ? (
@@ -331,94 +332,57 @@ export default function ContinuitySessionPage() {
             </div>
           </div>
         ) : (
-          <div className="flex h-full min-h-[72vh] flex-col bg-zinc-950 text-zinc-100">
-            <div className="flex flex-col gap-3 border-b border-zinc-800 bg-zinc-900/70 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="min-w-0">
-                <div className="truncate text-sm font-semibold text-white">{requestedSessionId}</div>
-                <div className="text-xs text-zinc-400">
-                  {selectedServerName ?? selectedServer?.name ?? 'Server'}{selectedServer?.publicIp ? ` • ${selectedServer.publicIp}` : ''}
-                  {snapshot?.cwd ? ` • ${snapshot.cwd}` : ''}
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="border-zinc-700 bg-transparent text-zinc-100 hover:bg-zinc-800 hover:text-white"
-                  onClick={handleRefreshSnapshot}
-                  disabled={isLoadingSnapshot}
-                >
-                  {isLoadingSnapshot ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
-                  Refresh
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={handleEndSession}
-                  disabled={isEndingSession}
-                >
-                  {isEndingSession ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
-                  End Session
-                </Button>
-              </div>
-            </div>
-
-            <div ref={terminalScrollRef} className="flex-1 overflow-auto px-4 py-4">
+          <div className="flex h-full min-h-[72vh] flex-col text-foreground">
+            <div
+              ref={terminalScrollRef}
+              className="flex-1 overflow-auto px-4 py-4 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              tabIndex={0}
+              autoFocus
+              role="textbox"
+              aria-label="Continuity terminal"
+              onClick={() => terminalScrollRef.current?.focus()}
+              onKeyDown={handleTerminalKeyDown}
+            >
               {isLoadingSnapshot && !snapshot ? (
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-full bg-zinc-800" />
-                  <Skeleton className="h-4 w-5/6 bg-zinc-800" />
-                  <Skeleton className="h-4 w-4/6 bg-zinc-800" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                  <Skeleton className="h-4 w-4/6" />
                 </div>
               ) : activeSessionExists ? (
-                <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-6 text-zinc-200">
-                  {snapshot?.content || 'Session is open. Waiting for tmux output...'}
+                <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-6 text-foreground">
+                  {terminalContent}
+                  {' '}
+                  {command}
+                  {isSendingCommand ? (
+                    <Loader2 className="ml-1 inline-block h-4 w-4 animate-spin align-[-0.15em]" aria-label="Processing command" />
+                  ) : (
+                    <span className="animate-pulse" aria-hidden="true">▌</span>
+                  )}
                 </pre>
               ) : (
                 <div className="space-y-3 text-center">
-                  <div className="text-lg font-medium text-white">Session not found</div>
-                  <p className="text-sm text-zinc-400">
+                  <div className="text-lg font-medium">Session not found</div>
+                  <p className="text-sm text-muted-foreground">
                     This continuity terminal is no longer running on the selected server.
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="border-t border-zinc-800 bg-zinc-900/80 px-4 py-3">
-              <div className="mb-2 text-xs text-zinc-500">
-                Commands are sent into tmux and remain available when you reopen this session.
-              </div>
-              <div className="flex gap-3">
-                <Input
-                  value={command}
-                  onChange={(event) => setCommand(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' && !event.shiftKey) {
-                      event.preventDefault();
-                      handleSendCommand();
-                    }
-                  }}
-                  placeholder="Enter a command and press Enter"
-                  className="border-zinc-700 bg-zinc-950 text-zinc-50 placeholder:text-zinc-500"
-                  disabled={!activeSessionExists || isSendingCommand}
-                />
-                <Button onClick={handleSendCommand} disabled={!activeSessionExists || isSendingCommand || !command.trim()}>
-                  {isSendingCommand ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Send
-                </Button>
-              </div>
-            </div>
           </div>
         )}
       </Card>
 
-      <div className="text-sm text-muted-foreground">
-        <Link href={withSelectedServerQuery('/server/commands/continuity', selectedServerId)} className="underline underline-offset-4">
-          Back to continuity sessions
-        </Link>
-      </div>
+      {selectedServerId && requestedSessionId ? (
+        <div className="flex justify-start">
+          <Button type="button" variant="destructive" onClick={handleEndSession} disabled={isEndingSession}>
+            {isEndingSession ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
+            End Session
+          </Button>
+        </div>
+      ) : null}
+
     </div>
   );
 }

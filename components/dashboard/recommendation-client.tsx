@@ -31,9 +31,9 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { getInfrastructureRecommendations } from "@/core/ai/flows/infrastructure-recommendations";
+import { getInfrastructureRecommendations } from "@/core/intelligence/flows/infrastructure-recommendations";
 import { Loader2, Zap } from "lucide-react";
-import type { InfrastructureRecommendationsOutput } from "@/core/ai/flows/infrastructure-recommendations";
+import type { InfrastructureRecommendationsOutput } from "@/core/intelligence/flows/infrastructure-recommendations";
 import Link from "next/link";
 import { Skeleton } from "../ui/skeleton";
 
