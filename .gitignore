@@ -50,3 +50,6 @@ core
 neup.core
 logica
 neup.logica
+
+# certificates and signing keys.
+/keys
