@@ -134,15 +134,10 @@ export type AuthzCapability = $Result.DefaultSelection<Prisma.$AuthzCapabilityPa
  */
 export type AuthzRoleCapability = $Result.DefaultSelection<Prisma.$AuthzRoleCapabilityPayload>
 /**
- * Model AuthzAccountAccessGrant
+ * Model AuthzAccess
  * 
  */
-export type AuthzAccountAccessGrant = $Result.DefaultSelection<Prisma.$AuthzAccountAccessGrantPayload>
-/**
- * Model AuthzAssetsAccessGrant
- * 
- */
-export type AuthzAssetsAccessGrant = $Result.DefaultSelection<Prisma.$AuthzAssetsAccessGrantPayload>
+export type AuthzAccess = $Result.DefaultSelection<Prisma.$AuthzAccessPayload>
 
 /**
  * Enums
@@ -524,24 +519,14 @@ export class PrismaClient<
   get authzRoleCapability(): Prisma.AuthzRoleCapabilityDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.authzAccountAccessGrant`: Exposes CRUD operations for the **AuthzAccountAccessGrant** model.
+   * `prisma.authzAccess`: Exposes CRUD operations for the **AuthzAccess** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more AuthzAccountAccessGrants
-    * const authzAccountAccessGrants = await prisma.authzAccountAccessGrant.findMany()
+    * // Fetch zero or more AuthzAccesses
+    * const authzAccesses = await prisma.authzAccess.findMany()
     * ```
     */
-  get authzAccountAccessGrant(): Prisma.AuthzAccountAccessGrantDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.authzAssetsAccessGrant`: Exposes CRUD operations for the **AuthzAssetsAccessGrant** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more AuthzAssetsAccessGrants
-    * const authzAssetsAccessGrants = await prisma.authzAssetsAccessGrant.findMany()
-    * ```
-    */
-  get authzAssetsAccessGrant(): Prisma.AuthzAssetsAccessGrantDelegate<ExtArgs, ClientOptions>;
+  get authzAccess(): Prisma.AuthzAccessDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1000,8 +985,7 @@ export namespace Prisma {
     AuthzRole: 'AuthzRole',
     AuthzCapability: 'AuthzCapability',
     AuthzRoleCapability: 'AuthzRoleCapability',
-    AuthzAccountAccessGrant: 'AuthzAccountAccessGrant',
-    AuthzAssetsAccessGrant: 'AuthzAssetsAccessGrant'
+    AuthzAccess: 'AuthzAccess'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1017,7 +1001,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "server" | "serverLog" | "savedCommand" | "application" | "applicationServerMap" | "domain" | "environmentVariable" | "appError" | "project" | "loggerActivity" | "liveSession" | "accessToken" | "intelligenceModel" | "intelligenceAccess" | "intelligenceLog" | "openFlowUsageLog" | "pipeline" | "pipelineLog" | "database" | "account" | "permit" | "authzRole" | "authzCapability" | "authzRoleCapability" | "authzAccountAccessGrant" | "authzAssetsAccessGrant"
+      modelProps: "server" | "serverLog" | "savedCommand" | "application" | "applicationServerMap" | "domain" | "environmentVariable" | "appError" | "project" | "loggerActivity" | "liveSession" | "accessToken" | "intelligenceModel" | "intelligenceAccess" | "intelligenceLog" | "openFlowUsageLog" | "pipeline" | "pipelineLog" | "database" | "account" | "permit" | "authzRole" | "authzCapability" | "authzRoleCapability" | "authzAccess"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2797,151 +2781,77 @@ export namespace Prisma {
           }
         }
       }
-      AuthzAccountAccessGrant: {
-        payload: Prisma.$AuthzAccountAccessGrantPayload<ExtArgs>
-        fields: Prisma.AuthzAccountAccessGrantFieldRefs
+      AuthzAccess: {
+        payload: Prisma.$AuthzAccessPayload<ExtArgs>
+        fields: Prisma.AuthzAccessFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.AuthzAccountAccessGrantFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAccountAccessGrantPayload> | null
+            args: Prisma.AuthzAccessFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthzAccessPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.AuthzAccountAccessGrantFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAccountAccessGrantPayload>
+            args: Prisma.AuthzAccessFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthzAccessPayload>
           }
           findFirst: {
-            args: Prisma.AuthzAccountAccessGrantFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAccountAccessGrantPayload> | null
+            args: Prisma.AuthzAccessFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthzAccessPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.AuthzAccountAccessGrantFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAccountAccessGrantPayload>
+            args: Prisma.AuthzAccessFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthzAccessPayload>
           }
           findMany: {
-            args: Prisma.AuthzAccountAccessGrantFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAccountAccessGrantPayload>[]
+            args: Prisma.AuthzAccessFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthzAccessPayload>[]
           }
           create: {
-            args: Prisma.AuthzAccountAccessGrantCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAccountAccessGrantPayload>
+            args: Prisma.AuthzAccessCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthzAccessPayload>
           }
           createMany: {
-            args: Prisma.AuthzAccountAccessGrantCreateManyArgs<ExtArgs>
+            args: Prisma.AuthzAccessCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
           createManyAndReturn: {
-            args: Prisma.AuthzAccountAccessGrantCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAccountAccessGrantPayload>[]
+            args: Prisma.AuthzAccessCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthzAccessPayload>[]
           }
           delete: {
-            args: Prisma.AuthzAccountAccessGrantDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAccountAccessGrantPayload>
+            args: Prisma.AuthzAccessDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthzAccessPayload>
           }
           update: {
-            args: Prisma.AuthzAccountAccessGrantUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAccountAccessGrantPayload>
+            args: Prisma.AuthzAccessUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthzAccessPayload>
           }
           deleteMany: {
-            args: Prisma.AuthzAccountAccessGrantDeleteManyArgs<ExtArgs>
+            args: Prisma.AuthzAccessDeleteManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateMany: {
-            args: Prisma.AuthzAccountAccessGrantUpdateManyArgs<ExtArgs>
+            args: Prisma.AuthzAccessUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateManyAndReturn: {
-            args: Prisma.AuthzAccountAccessGrantUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAccountAccessGrantPayload>[]
+            args: Prisma.AuthzAccessUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthzAccessPayload>[]
           }
           upsert: {
-            args: Prisma.AuthzAccountAccessGrantUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAccountAccessGrantPayload>
+            args: Prisma.AuthzAccessUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthzAccessPayload>
           }
           aggregate: {
-            args: Prisma.AuthzAccountAccessGrantAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateAuthzAccountAccessGrant>
+            args: Prisma.AuthzAccessAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAuthzAccess>
           }
           groupBy: {
-            args: Prisma.AuthzAccountAccessGrantGroupByArgs<ExtArgs>
-            result: $Utils.Optional<AuthzAccountAccessGrantGroupByOutputType>[]
+            args: Prisma.AuthzAccessGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AuthzAccessGroupByOutputType>[]
           }
           count: {
-            args: Prisma.AuthzAccountAccessGrantCountArgs<ExtArgs>
-            result: $Utils.Optional<AuthzAccountAccessGrantCountAggregateOutputType> | number
-          }
-        }
-      }
-      AuthzAssetsAccessGrant: {
-        payload: Prisma.$AuthzAssetsAccessGrantPayload<ExtArgs>
-        fields: Prisma.AuthzAssetsAccessGrantFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.AuthzAssetsAccessGrantFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAssetsAccessGrantPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.AuthzAssetsAccessGrantFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAssetsAccessGrantPayload>
-          }
-          findFirst: {
-            args: Prisma.AuthzAssetsAccessGrantFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAssetsAccessGrantPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.AuthzAssetsAccessGrantFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAssetsAccessGrantPayload>
-          }
-          findMany: {
-            args: Prisma.AuthzAssetsAccessGrantFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAssetsAccessGrantPayload>[]
-          }
-          create: {
-            args: Prisma.AuthzAssetsAccessGrantCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAssetsAccessGrantPayload>
-          }
-          createMany: {
-            args: Prisma.AuthzAssetsAccessGrantCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.AuthzAssetsAccessGrantCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAssetsAccessGrantPayload>[]
-          }
-          delete: {
-            args: Prisma.AuthzAssetsAccessGrantDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAssetsAccessGrantPayload>
-          }
-          update: {
-            args: Prisma.AuthzAssetsAccessGrantUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAssetsAccessGrantPayload>
-          }
-          deleteMany: {
-            args: Prisma.AuthzAssetsAccessGrantDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.AuthzAssetsAccessGrantUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.AuthzAssetsAccessGrantUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAssetsAccessGrantPayload>[]
-          }
-          upsert: {
-            args: Prisma.AuthzAssetsAccessGrantUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuthzAssetsAccessGrantPayload>
-          }
-          aggregate: {
-            args: Prisma.AuthzAssetsAccessGrantAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateAuthzAssetsAccessGrant>
-          }
-          groupBy: {
-            args: Prisma.AuthzAssetsAccessGrantGroupByArgs<ExtArgs>
-            result: $Utils.Optional<AuthzAssetsAccessGrantGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.AuthzAssetsAccessGrantCountArgs<ExtArgs>
-            result: $Utils.Optional<AuthzAssetsAccessGrantCountAggregateOutputType> | number
+            args: Prisma.AuthzAccessCountArgs<ExtArgs>
+            result: $Utils.Optional<AuthzAccessCountAggregateOutputType> | number
           }
         }
       }
@@ -3077,8 +2987,7 @@ export namespace Prisma {
     authzRole?: AuthzRoleOmit
     authzCapability?: AuthzCapabilityOmit
     authzRoleCapability?: AuthzRoleCapabilityOmit
-    authzAccountAccessGrant?: AuthzAccountAccessGrantOmit
-    authzAssetsAccessGrant?: AuthzAssetsAccessGrantOmit
+    authzAccess?: AuthzAccessOmit
   }
 
   /* Types for Logging */
@@ -3160,10 +3069,12 @@ export namespace Prisma {
 
   export type ServerCountOutputType = {
     applicationServerMaps: number
+    authzAccesses: number
   }
 
   export type ServerCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     applicationServerMaps?: boolean | ServerCountOutputTypeCountApplicationServerMapsArgs
+    authzAccesses?: boolean | ServerCountOutputTypeCountAuthzAccessesArgs
   }
 
   // Custom InputTypes
@@ -3182,6 +3093,13 @@ export namespace Prisma {
    */
   export type ServerCountOutputTypeCountApplicationServerMapsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ApplicationServerMapWhereInput
+  }
+
+  /**
+   * ServerCountOutputType without action
+   */
+  export type ServerCountOutputTypeCountAuthzAccessesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AuthzAccessWhereInput
   }
 
 
@@ -3284,10 +3202,12 @@ export namespace Prisma {
 
   export type AccountCountOutputType = {
     permits: number
+    authzAccesses: number
   }
 
   export type AccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     permits?: boolean | AccountCountOutputTypeCountPermitsArgs
+    authzAccesses?: boolean | AccountCountOutputTypeCountAuthzAccessesArgs
   }
 
   // Custom InputTypes
@@ -3306,6 +3226,44 @@ export namespace Prisma {
    */
   export type AccountCountOutputTypeCountPermitsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PermitWhereInput
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
+  export type AccountCountOutputTypeCountAuthzAccessesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AuthzAccessWhereInput
+  }
+
+
+  /**
+   * Count Type AuthzRoleCountOutputType
+   */
+
+  export type AuthzRoleCountOutputType = {
+    authzAccesses: number
+  }
+
+  export type AuthzRoleCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    authzAccesses?: boolean | AuthzRoleCountOutputTypeCountAuthzAccessesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * AuthzRoleCountOutputType without action
+   */
+  export type AuthzRoleCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthzRoleCountOutputType
+     */
+    select?: AuthzRoleCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AuthzRoleCountOutputType without action
+   */
+  export type AuthzRoleCountOutputTypeCountAuthzAccessesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AuthzAccessWhereInput
   }
 
 
@@ -3550,6 +3508,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     applicationServerMaps?: boolean | Server$applicationServerMapsArgs<ExtArgs>
+    authzAccesses?: boolean | Server$authzAccessesArgs<ExtArgs>
     _count?: boolean | ServerCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["server"]>
 
@@ -3607,6 +3566,7 @@ export namespace Prisma {
   export type ServerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "username" | "type" | "provider" | "moreDetails" | "publicIp" | "privateIp" | "privateKey" | "publicKey" | "proxyHandler" | "loadBalancer" | "createdAt" | "updatedAt", ExtArgs["result"]["server"]>
   export type ServerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     applicationServerMaps?: boolean | Server$applicationServerMapsArgs<ExtArgs>
+    authzAccesses?: boolean | Server$authzAccessesArgs<ExtArgs>
     _count?: boolean | ServerCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ServerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -3616,6 +3576,7 @@ export namespace Prisma {
     name: "Server"
     objects: {
       applicationServerMaps: Prisma.$ApplicationServerMapPayload<ExtArgs>[]
+      authzAccesses: Prisma.$AuthzAccessPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4027,6 +3988,7 @@ export namespace Prisma {
   export interface Prisma__ServerClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     applicationServerMaps<T extends Server$applicationServerMapsArgs<ExtArgs> = {}>(args?: Subset<T, Server$applicationServerMapsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationServerMapPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    authzAccesses<T extends Server$authzAccessesArgs<ExtArgs> = {}>(args?: Subset<T, Server$authzAccessesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4484,6 +4446,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ApplicationServerMapScalarFieldEnum | ApplicationServerMapScalarFieldEnum[]
+  }
+
+  /**
+   * Server.authzAccesses
+   */
+  export type Server$authzAccessesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthzAccess
+     */
+    select?: AuthzAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthzAccess
+     */
+    omit?: AuthzAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzAccessInclude<ExtArgs> | null
+    where?: AuthzAccessWhereInput
+    orderBy?: AuthzAccessOrderByWithRelationInput | AuthzAccessOrderByWithRelationInput[]
+    cursor?: AuthzAccessWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AuthzAccessScalarFieldEnum | AuthzAccessScalarFieldEnum[]
   }
 
   /**
@@ -23700,6 +23686,7 @@ export namespace Prisma {
     displayImage?: boolean
     neupid?: boolean
     permits?: boolean | Account$permitsArgs<ExtArgs>
+    authzAccesses?: boolean | Account$authzAccessesArgs<ExtArgs>
     _count?: boolean | AccountCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["account"]>
 
@@ -23727,6 +23714,7 @@ export namespace Prisma {
   export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "displayName" | "displayImage" | "neupid", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     permits?: boolean | Account$permitsArgs<ExtArgs>
+    authzAccesses?: boolean | Account$authzAccessesArgs<ExtArgs>
     _count?: boolean | AccountCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AccountIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -23736,6 +23724,7 @@ export namespace Prisma {
     name: "Account"
     objects: {
       permits: Prisma.$PermitPayload<ExtArgs>[]
+      authzAccesses: Prisma.$AuthzAccessPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -24137,6 +24126,7 @@ export namespace Prisma {
   export interface Prisma__AccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     permits<T extends Account$permitsArgs<ExtArgs> = {}>(args?: Subset<T, Account$permitsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PermitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    authzAccesses<T extends Account$authzAccessesArgs<ExtArgs> = {}>(args?: Subset<T, Account$authzAccessesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -24584,6 +24574,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PermitScalarFieldEnum | PermitScalarFieldEnum[]
+  }
+
+  /**
+   * Account.authzAccesses
+   */
+  export type Account$authzAccessesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthzAccess
+     */
+    select?: AuthzAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthzAccess
+     */
+    omit?: AuthzAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzAccessInclude<ExtArgs> | null
+    where?: AuthzAccessWhereInput
+    orderBy?: AuthzAccessOrderByWithRelationInput | AuthzAccessOrderByWithRelationInput[]
+    cursor?: AuthzAccessWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AuthzAccessScalarFieldEnum | AuthzAccessScalarFieldEnum[]
   }
 
   /**
@@ -25837,6 +25851,8 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     scope?: boolean
+    authzAccesses?: boolean | AuthzRole$authzAccessesArgs<ExtArgs>
+    _count?: boolean | AuthzRoleCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["authzRole"]>
 
   export type AuthzRoleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -25861,10 +25877,18 @@ export namespace Prisma {
   }
 
   export type AuthzRoleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "scope", ExtArgs["result"]["authzRole"]>
+  export type AuthzRoleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    authzAccesses?: boolean | AuthzRole$authzAccessesArgs<ExtArgs>
+    _count?: boolean | AuthzRoleCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type AuthzRoleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type AuthzRoleIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $AuthzRolePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "AuthzRole"
-    objects: {}
+    objects: {
+      authzAccesses: Prisma.$AuthzAccessPayload<ExtArgs>[]
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
@@ -26264,6 +26288,7 @@ export namespace Prisma {
    */
   export interface Prisma__AuthzRoleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    authzAccesses<T extends AuthzRole$authzAccessesArgs<ExtArgs> = {}>(args?: Subset<T, AuthzRole$authzAccessesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -26314,6 +26339,10 @@ export namespace Prisma {
      */
     omit?: AuthzRoleOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzRoleInclude<ExtArgs> | null
+    /**
      * Filter, which AuthzRole to fetch.
      */
     where: AuthzRoleWhereUniqueInput
@@ -26332,6 +26361,10 @@ export namespace Prisma {
      */
     omit?: AuthzRoleOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzRoleInclude<ExtArgs> | null
+    /**
      * Filter, which AuthzRole to fetch.
      */
     where: AuthzRoleWhereUniqueInput
@@ -26349,6 +26382,10 @@ export namespace Prisma {
      * Omit specific fields from the AuthzRole
      */
     omit?: AuthzRoleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzRoleInclude<ExtArgs> | null
     /**
      * Filter, which AuthzRole to fetch.
      */
@@ -26398,6 +26435,10 @@ export namespace Prisma {
      */
     omit?: AuthzRoleOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzRoleInclude<ExtArgs> | null
+    /**
      * Filter, which AuthzRole to fetch.
      */
     where?: AuthzRoleWhereInput
@@ -26445,6 +26486,10 @@ export namespace Prisma {
      * Omit specific fields from the AuthzRole
      */
     omit?: AuthzRoleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzRoleInclude<ExtArgs> | null
     /**
      * Filter, which AuthzRoles to fetch.
      */
@@ -26494,6 +26539,10 @@ export namespace Prisma {
      */
     omit?: AuthzRoleOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzRoleInclude<ExtArgs> | null
+    /**
      * The data needed to create a AuthzRole.
      */
     data: XOR<AuthzRoleCreateInput, AuthzRoleUncheckedCreateInput>
@@ -26541,6 +26590,10 @@ export namespace Prisma {
      * Omit specific fields from the AuthzRole
      */
     omit?: AuthzRoleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzRoleInclude<ExtArgs> | null
     /**
      * The data needed to update a AuthzRole.
      */
@@ -26608,6 +26661,10 @@ export namespace Prisma {
      */
     omit?: AuthzRoleOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzRoleInclude<ExtArgs> | null
+    /**
      * The filter to search for the AuthzRole to update in case it exists.
      */
     where: AuthzRoleWhereUniqueInput
@@ -26634,6 +26691,10 @@ export namespace Prisma {
      */
     omit?: AuthzRoleOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzRoleInclude<ExtArgs> | null
+    /**
      * Filter which AuthzRole to delete.
      */
     where: AuthzRoleWhereUniqueInput
@@ -26654,6 +26715,30 @@ export namespace Prisma {
   }
 
   /**
+   * AuthzRole.authzAccesses
+   */
+  export type AuthzRole$authzAccessesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthzAccess
+     */
+    select?: AuthzAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthzAccess
+     */
+    omit?: AuthzAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzAccessInclude<ExtArgs> | null
+    where?: AuthzAccessWhereInput
+    orderBy?: AuthzAccessOrderByWithRelationInput | AuthzAccessOrderByWithRelationInput[]
+    cursor?: AuthzAccessWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AuthzAccessScalarFieldEnum | AuthzAccessScalarFieldEnum[]
+  }
+
+  /**
    * AuthzRole without action
    */
   export type AuthzRoleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -26665,6 +26750,10 @@ export namespace Prisma {
      * Omit specific fields from the AuthzRole
      */
     omit?: AuthzRoleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzRoleInclude<ExtArgs> | null
   }
 
 
@@ -28665,336 +28754,372 @@ export namespace Prisma {
 
 
   /**
-   * Model AuthzAccountAccessGrant
+   * Model AuthzAccess
    */
 
-  export type AggregateAuthzAccountAccessGrant = {
-    _count: AuthzAccountAccessGrantCountAggregateOutputType | null
-    _min: AuthzAccountAccessGrantMinAggregateOutputType | null
-    _max: AuthzAccountAccessGrantMaxAggregateOutputType | null
+  export type AggregateAuthzAccess = {
+    _count: AuthzAccessCountAggregateOutputType | null
+    _min: AuthzAccessMinAggregateOutputType | null
+    _max: AuthzAccessMaxAggregateOutputType | null
   }
 
-  export type AuthzAccountAccessGrantMinAggregateOutputType = {
+  export type AuthzAccessMinAggregateOutputType = {
     id: string | null
-    ownerAccountId: string | null
-    targetAccountId: string | null
+    toAccountId: string | null
+    forServerId: string | null
     roleId: string | null
-    portfolioId: string | null
+    status: string | null
   }
 
-  export type AuthzAccountAccessGrantMaxAggregateOutputType = {
+  export type AuthzAccessMaxAggregateOutputType = {
     id: string | null
-    ownerAccountId: string | null
-    targetAccountId: string | null
+    toAccountId: string | null
+    forServerId: string | null
     roleId: string | null
-    portfolioId: string | null
+    status: string | null
   }
 
-  export type AuthzAccountAccessGrantCountAggregateOutputType = {
+  export type AuthzAccessCountAggregateOutputType = {
     id: number
-    ownerAccountId: number
-    targetAccountId: number
+    toAccountId: number
+    forServerId: number
     roleId: number
-    portfolioId: number
+    status: number
+    moreDetails: number
     _all: number
   }
 
 
-  export type AuthzAccountAccessGrantMinAggregateInputType = {
+  export type AuthzAccessMinAggregateInputType = {
     id?: true
-    ownerAccountId?: true
-    targetAccountId?: true
+    toAccountId?: true
+    forServerId?: true
     roleId?: true
-    portfolioId?: true
+    status?: true
   }
 
-  export type AuthzAccountAccessGrantMaxAggregateInputType = {
+  export type AuthzAccessMaxAggregateInputType = {
     id?: true
-    ownerAccountId?: true
-    targetAccountId?: true
+    toAccountId?: true
+    forServerId?: true
     roleId?: true
-    portfolioId?: true
+    status?: true
   }
 
-  export type AuthzAccountAccessGrantCountAggregateInputType = {
+  export type AuthzAccessCountAggregateInputType = {
     id?: true
-    ownerAccountId?: true
-    targetAccountId?: true
+    toAccountId?: true
+    forServerId?: true
     roleId?: true
-    portfolioId?: true
+    status?: true
+    moreDetails?: true
     _all?: true
   }
 
-  export type AuthzAccountAccessGrantAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which AuthzAccountAccessGrant to aggregate.
+     * Filter which AuthzAccess to aggregate.
      */
-    where?: AuthzAccountAccessGrantWhereInput
+    where?: AuthzAccessWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of AuthzAccountAccessGrants to fetch.
+     * Determine the order of AuthzAccesses to fetch.
      */
-    orderBy?: AuthzAccountAccessGrantOrderByWithRelationInput | AuthzAccountAccessGrantOrderByWithRelationInput[]
+    orderBy?: AuthzAccessOrderByWithRelationInput | AuthzAccessOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the start position
      */
-    cursor?: AuthzAccountAccessGrantWhereUniqueInput
+    cursor?: AuthzAccessWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` AuthzAccountAccessGrants from the position of the cursor.
+     * Take `±n` AuthzAccesses from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` AuthzAccountAccessGrants.
+     * Skip the first `n` AuthzAccesses.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Count returned AuthzAccountAccessGrants
+     * Count returned AuthzAccesses
     **/
-    _count?: true | AuthzAccountAccessGrantCountAggregateInputType
+    _count?: true | AuthzAccessCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the minimum value
     **/
-    _min?: AuthzAccountAccessGrantMinAggregateInputType
+    _min?: AuthzAccessMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the maximum value
     **/
-    _max?: AuthzAccountAccessGrantMaxAggregateInputType
+    _max?: AuthzAccessMaxAggregateInputType
   }
 
-  export type GetAuthzAccountAccessGrantAggregateType<T extends AuthzAccountAccessGrantAggregateArgs> = {
-        [P in keyof T & keyof AggregateAuthzAccountAccessGrant]: P extends '_count' | 'count'
+  export type GetAuthzAccessAggregateType<T extends AuthzAccessAggregateArgs> = {
+        [P in keyof T & keyof AggregateAuthzAccess]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
-        : GetScalarType<T[P], AggregateAuthzAccountAccessGrant[P]>
-      : GetScalarType<T[P], AggregateAuthzAccountAccessGrant[P]>
+        : GetScalarType<T[P], AggregateAuthzAccess[P]>
+      : GetScalarType<T[P], AggregateAuthzAccess[P]>
   }
 
 
 
 
-  export type AuthzAccountAccessGrantGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: AuthzAccountAccessGrantWhereInput
-    orderBy?: AuthzAccountAccessGrantOrderByWithAggregationInput | AuthzAccountAccessGrantOrderByWithAggregationInput[]
-    by: AuthzAccountAccessGrantScalarFieldEnum[] | AuthzAccountAccessGrantScalarFieldEnum
-    having?: AuthzAccountAccessGrantScalarWhereWithAggregatesInput
+  export type AuthzAccessGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AuthzAccessWhereInput
+    orderBy?: AuthzAccessOrderByWithAggregationInput | AuthzAccessOrderByWithAggregationInput[]
+    by: AuthzAccessScalarFieldEnum[] | AuthzAccessScalarFieldEnum
+    having?: AuthzAccessScalarWhereWithAggregatesInput
     take?: number
     skip?: number
-    _count?: AuthzAccountAccessGrantCountAggregateInputType | true
-    _min?: AuthzAccountAccessGrantMinAggregateInputType
-    _max?: AuthzAccountAccessGrantMaxAggregateInputType
+    _count?: AuthzAccessCountAggregateInputType | true
+    _min?: AuthzAccessMinAggregateInputType
+    _max?: AuthzAccessMaxAggregateInputType
   }
 
-  export type AuthzAccountAccessGrantGroupByOutputType = {
+  export type AuthzAccessGroupByOutputType = {
     id: string
-    ownerAccountId: string
-    targetAccountId: string
+    toAccountId: string
+    forServerId: string
     roleId: string
-    portfolioId: string | null
-    _count: AuthzAccountAccessGrantCountAggregateOutputType | null
-    _min: AuthzAccountAccessGrantMinAggregateOutputType | null
-    _max: AuthzAccountAccessGrantMaxAggregateOutputType | null
+    status: string
+    moreDetails: JsonValue
+    _count: AuthzAccessCountAggregateOutputType | null
+    _min: AuthzAccessMinAggregateOutputType | null
+    _max: AuthzAccessMaxAggregateOutputType | null
   }
 
-  type GetAuthzAccountAccessGrantGroupByPayload<T extends AuthzAccountAccessGrantGroupByArgs> = Prisma.PrismaPromise<
+  type GetAuthzAccessGroupByPayload<T extends AuthzAccessGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<AuthzAccountAccessGrantGroupByOutputType, T['by']> &
+      PickEnumerable<AuthzAccessGroupByOutputType, T['by']> &
         {
-          [P in ((keyof T) & (keyof AuthzAccountAccessGrantGroupByOutputType))]: P extends '_count'
+          [P in ((keyof T) & (keyof AuthzAccessGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
-              : GetScalarType<T[P], AuthzAccountAccessGrantGroupByOutputType[P]>
-            : GetScalarType<T[P], AuthzAccountAccessGrantGroupByOutputType[P]>
+              : GetScalarType<T[P], AuthzAccessGroupByOutputType[P]>
+            : GetScalarType<T[P], AuthzAccessGroupByOutputType[P]>
         }
       >
     >
 
 
-  export type AuthzAccountAccessGrantSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type AuthzAccessSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    ownerAccountId?: boolean
-    targetAccountId?: boolean
+    toAccountId?: boolean
+    forServerId?: boolean
     roleId?: boolean
-    portfolioId?: boolean
-  }, ExtArgs["result"]["authzAccountAccessGrant"]>
+    status?: boolean
+    moreDetails?: boolean
+    toAccount?: boolean | AccountDefaultArgs<ExtArgs>
+    forServer?: boolean | ServerDefaultArgs<ExtArgs>
+    role?: boolean | AuthzRoleDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["authzAccess"]>
 
-  export type AuthzAccountAccessGrantSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type AuthzAccessSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    ownerAccountId?: boolean
-    targetAccountId?: boolean
+    toAccountId?: boolean
+    forServerId?: boolean
     roleId?: boolean
-    portfolioId?: boolean
-  }, ExtArgs["result"]["authzAccountAccessGrant"]>
+    status?: boolean
+    moreDetails?: boolean
+    toAccount?: boolean | AccountDefaultArgs<ExtArgs>
+    forServer?: boolean | ServerDefaultArgs<ExtArgs>
+    role?: boolean | AuthzRoleDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["authzAccess"]>
 
-  export type AuthzAccountAccessGrantSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type AuthzAccessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    ownerAccountId?: boolean
-    targetAccountId?: boolean
+    toAccountId?: boolean
+    forServerId?: boolean
     roleId?: boolean
-    portfolioId?: boolean
-  }, ExtArgs["result"]["authzAccountAccessGrant"]>
+    status?: boolean
+    moreDetails?: boolean
+    toAccount?: boolean | AccountDefaultArgs<ExtArgs>
+    forServer?: boolean | ServerDefaultArgs<ExtArgs>
+    role?: boolean | AuthzRoleDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["authzAccess"]>
 
-  export type AuthzAccountAccessGrantSelectScalar = {
+  export type AuthzAccessSelectScalar = {
     id?: boolean
-    ownerAccountId?: boolean
-    targetAccountId?: boolean
+    toAccountId?: boolean
+    forServerId?: boolean
     roleId?: boolean
-    portfolioId?: boolean
+    status?: boolean
+    moreDetails?: boolean
   }
 
-  export type AuthzAccountAccessGrantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ownerAccountId" | "targetAccountId" | "roleId" | "portfolioId", ExtArgs["result"]["authzAccountAccessGrant"]>
+  export type AuthzAccessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "toAccountId" | "forServerId" | "roleId" | "status" | "moreDetails", ExtArgs["result"]["authzAccess"]>
+  export type AuthzAccessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    toAccount?: boolean | AccountDefaultArgs<ExtArgs>
+    forServer?: boolean | ServerDefaultArgs<ExtArgs>
+    role?: boolean | AuthzRoleDefaultArgs<ExtArgs>
+  }
+  export type AuthzAccessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    toAccount?: boolean | AccountDefaultArgs<ExtArgs>
+    forServer?: boolean | ServerDefaultArgs<ExtArgs>
+    role?: boolean | AuthzRoleDefaultArgs<ExtArgs>
+  }
+  export type AuthzAccessIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    toAccount?: boolean | AccountDefaultArgs<ExtArgs>
+    forServer?: boolean | ServerDefaultArgs<ExtArgs>
+    role?: boolean | AuthzRoleDefaultArgs<ExtArgs>
+  }
 
-  export type $AuthzAccountAccessGrantPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "AuthzAccountAccessGrant"
-    objects: {}
+  export type $AuthzAccessPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AuthzAccess"
+    objects: {
+      toAccount: Prisma.$AccountPayload<ExtArgs>
+      forServer: Prisma.$ServerPayload<ExtArgs>
+      role: Prisma.$AuthzRolePayload<ExtArgs>
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      ownerAccountId: string
-      targetAccountId: string
+      toAccountId: string
+      forServerId: string
       roleId: string
-      portfolioId: string | null
-    }, ExtArgs["result"]["authzAccountAccessGrant"]>
+      status: string
+      moreDetails: Prisma.JsonValue
+    }, ExtArgs["result"]["authzAccess"]>
     composites: {}
   }
 
-  type AuthzAccountAccessGrantGetPayload<S extends boolean | null | undefined | AuthzAccountAccessGrantDefaultArgs> = $Result.GetResult<Prisma.$AuthzAccountAccessGrantPayload, S>
+  type AuthzAccessGetPayload<S extends boolean | null | undefined | AuthzAccessDefaultArgs> = $Result.GetResult<Prisma.$AuthzAccessPayload, S>
 
-  type AuthzAccountAccessGrantCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<AuthzAccountAccessGrantFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: AuthzAccountAccessGrantCountAggregateInputType | true
+  type AuthzAccessCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AuthzAccessFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AuthzAccessCountAggregateInputType | true
     }
 
-  export interface AuthzAccountAccessGrantDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AuthzAccountAccessGrant'], meta: { name: 'AuthzAccountAccessGrant' } }
+  export interface AuthzAccessDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AuthzAccess'], meta: { name: 'AuthzAccess' } }
     /**
-     * Find zero or one AuthzAccountAccessGrant that matches the filter.
-     * @param {AuthzAccountAccessGrantFindUniqueArgs} args - Arguments to find a AuthzAccountAccessGrant
+     * Find zero or one AuthzAccess that matches the filter.
+     * @param {AuthzAccessFindUniqueArgs} args - Arguments to find a AuthzAccess
      * @example
-     * // Get one AuthzAccountAccessGrant
-     * const authzAccountAccessGrant = await prisma.authzAccountAccessGrant.findUnique({
+     * // Get one AuthzAccess
+     * const authzAccess = await prisma.authzAccess.findUnique({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUnique<T extends AuthzAccountAccessGrantFindUniqueArgs>(args: SelectSubset<T, AuthzAccountAccessGrantFindUniqueArgs<ExtArgs>>): Prisma__AuthzAccountAccessGrantClient<$Result.GetResult<Prisma.$AuthzAccountAccessGrantPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends AuthzAccessFindUniqueArgs>(args: SelectSubset<T, AuthzAccessFindUniqueArgs<ExtArgs>>): Prisma__AuthzAccessClient<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one AuthzAccountAccessGrant that matches the filter or throw an error with `error.code='P2025'`
+     * Find one AuthzAccess that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {AuthzAccountAccessGrantFindUniqueOrThrowArgs} args - Arguments to find a AuthzAccountAccessGrant
+     * @param {AuthzAccessFindUniqueOrThrowArgs} args - Arguments to find a AuthzAccess
      * @example
-     * // Get one AuthzAccountAccessGrant
-     * const authzAccountAccessGrant = await prisma.authzAccountAccessGrant.findUniqueOrThrow({
+     * // Get one AuthzAccess
+     * const authzAccess = await prisma.authzAccess.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUniqueOrThrow<T extends AuthzAccountAccessGrantFindUniqueOrThrowArgs>(args: SelectSubset<T, AuthzAccountAccessGrantFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AuthzAccountAccessGrantClient<$Result.GetResult<Prisma.$AuthzAccountAccessGrantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends AuthzAccessFindUniqueOrThrowArgs>(args: SelectSubset<T, AuthzAccessFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AuthzAccessClient<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first AuthzAccountAccessGrant that matches the filter.
+     * Find the first AuthzAccess that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAccountAccessGrantFindFirstArgs} args - Arguments to find a AuthzAccountAccessGrant
+     * @param {AuthzAccessFindFirstArgs} args - Arguments to find a AuthzAccess
      * @example
-     * // Get one AuthzAccountAccessGrant
-     * const authzAccountAccessGrant = await prisma.authzAccountAccessGrant.findFirst({
+     * // Get one AuthzAccess
+     * const authzAccess = await prisma.authzAccess.findFirst({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirst<T extends AuthzAccountAccessGrantFindFirstArgs>(args?: SelectSubset<T, AuthzAccountAccessGrantFindFirstArgs<ExtArgs>>): Prisma__AuthzAccountAccessGrantClient<$Result.GetResult<Prisma.$AuthzAccountAccessGrantPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends AuthzAccessFindFirstArgs>(args?: SelectSubset<T, AuthzAccessFindFirstArgs<ExtArgs>>): Prisma__AuthzAccessClient<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first AuthzAccountAccessGrant that matches the filter or
+     * Find the first AuthzAccess that matches the filter or
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAccountAccessGrantFindFirstOrThrowArgs} args - Arguments to find a AuthzAccountAccessGrant
+     * @param {AuthzAccessFindFirstOrThrowArgs} args - Arguments to find a AuthzAccess
      * @example
-     * // Get one AuthzAccountAccessGrant
-     * const authzAccountAccessGrant = await prisma.authzAccountAccessGrant.findFirstOrThrow({
+     * // Get one AuthzAccess
+     * const authzAccess = await prisma.authzAccess.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirstOrThrow<T extends AuthzAccountAccessGrantFindFirstOrThrowArgs>(args?: SelectSubset<T, AuthzAccountAccessGrantFindFirstOrThrowArgs<ExtArgs>>): Prisma__AuthzAccountAccessGrantClient<$Result.GetResult<Prisma.$AuthzAccountAccessGrantPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends AuthzAccessFindFirstOrThrowArgs>(args?: SelectSubset<T, AuthzAccessFindFirstOrThrowArgs<ExtArgs>>): Prisma__AuthzAccessClient<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find zero or more AuthzAccountAccessGrants that matches the filter.
+     * Find zero or more AuthzAccesses that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAccountAccessGrantFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @param {AuthzAccessFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
-     * // Get all AuthzAccountAccessGrants
-     * const authzAccountAccessGrants = await prisma.authzAccountAccessGrant.findMany()
+     * // Get all AuthzAccesses
+     * const authzAccesses = await prisma.authzAccess.findMany()
      * 
-     * // Get first 10 AuthzAccountAccessGrants
-     * const authzAccountAccessGrants = await prisma.authzAccountAccessGrant.findMany({ take: 10 })
+     * // Get first 10 AuthzAccesses
+     * const authzAccesses = await prisma.authzAccess.findMany({ take: 10 })
      * 
      * // Only select the `id`
-     * const authzAccountAccessGrantWithIdOnly = await prisma.authzAccountAccessGrant.findMany({ select: { id: true } })
+     * const authzAccessWithIdOnly = await prisma.authzAccess.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends AuthzAccountAccessGrantFindManyArgs>(args?: SelectSubset<T, AuthzAccountAccessGrantFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAccountAccessGrantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends AuthzAccessFindManyArgs>(args?: SelectSubset<T, AuthzAccessFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
-     * Create a AuthzAccountAccessGrant.
-     * @param {AuthzAccountAccessGrantCreateArgs} args - Arguments to create a AuthzAccountAccessGrant.
+     * Create a AuthzAccess.
+     * @param {AuthzAccessCreateArgs} args - Arguments to create a AuthzAccess.
      * @example
-     * // Create one AuthzAccountAccessGrant
-     * const AuthzAccountAccessGrant = await prisma.authzAccountAccessGrant.create({
+     * // Create one AuthzAccess
+     * const AuthzAccess = await prisma.authzAccess.create({
      *   data: {
-     *     // ... data to create a AuthzAccountAccessGrant
+     *     // ... data to create a AuthzAccess
      *   }
      * })
      * 
      */
-    create<T extends AuthzAccountAccessGrantCreateArgs>(args: SelectSubset<T, AuthzAccountAccessGrantCreateArgs<ExtArgs>>): Prisma__AuthzAccountAccessGrantClient<$Result.GetResult<Prisma.$AuthzAccountAccessGrantPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends AuthzAccessCreateArgs>(args: SelectSubset<T, AuthzAccessCreateArgs<ExtArgs>>): Prisma__AuthzAccessClient<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Create many AuthzAccountAccessGrants.
-     * @param {AuthzAccountAccessGrantCreateManyArgs} args - Arguments to create many AuthzAccountAccessGrants.
+     * Create many AuthzAccesses.
+     * @param {AuthzAccessCreateManyArgs} args - Arguments to create many AuthzAccesses.
      * @example
-     * // Create many AuthzAccountAccessGrants
-     * const authzAccountAccessGrant = await prisma.authzAccountAccessGrant.createMany({
+     * // Create many AuthzAccesses
+     * const authzAccess = await prisma.authzAccess.createMany({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *     
      */
-    createMany<T extends AuthzAccountAccessGrantCreateManyArgs>(args?: SelectSubset<T, AuthzAccountAccessGrantCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends AuthzAccessCreateManyArgs>(args?: SelectSubset<T, AuthzAccessCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many AuthzAccountAccessGrants and returns the data saved in the database.
-     * @param {AuthzAccountAccessGrantCreateManyAndReturnArgs} args - Arguments to create many AuthzAccountAccessGrants.
+     * Create many AuthzAccesses and returns the data saved in the database.
+     * @param {AuthzAccessCreateManyAndReturnArgs} args - Arguments to create many AuthzAccesses.
      * @example
-     * // Create many AuthzAccountAccessGrants
-     * const authzAccountAccessGrant = await prisma.authzAccountAccessGrant.createManyAndReturn({
+     * // Create many AuthzAccesses
+     * const authzAccess = await prisma.authzAccess.createManyAndReturn({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      * 
-     * // Create many AuthzAccountAccessGrants and only return the `id`
-     * const authzAccountAccessGrantWithIdOnly = await prisma.authzAccountAccessGrant.createManyAndReturn({
+     * // Create many AuthzAccesses and only return the `id`
+     * const authzAccessWithIdOnly = await prisma.authzAccess.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -29004,28 +29129,28 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends AuthzAccountAccessGrantCreateManyAndReturnArgs>(args?: SelectSubset<T, AuthzAccountAccessGrantCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAccountAccessGrantPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends AuthzAccessCreateManyAndReturnArgs>(args?: SelectSubset<T, AuthzAccessCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Delete a AuthzAccountAccessGrant.
-     * @param {AuthzAccountAccessGrantDeleteArgs} args - Arguments to delete one AuthzAccountAccessGrant.
+     * Delete a AuthzAccess.
+     * @param {AuthzAccessDeleteArgs} args - Arguments to delete one AuthzAccess.
      * @example
-     * // Delete one AuthzAccountAccessGrant
-     * const AuthzAccountAccessGrant = await prisma.authzAccountAccessGrant.delete({
+     * // Delete one AuthzAccess
+     * const AuthzAccess = await prisma.authzAccess.delete({
      *   where: {
-     *     // ... filter to delete one AuthzAccountAccessGrant
+     *     // ... filter to delete one AuthzAccess
      *   }
      * })
      * 
      */
-    delete<T extends AuthzAccountAccessGrantDeleteArgs>(args: SelectSubset<T, AuthzAccountAccessGrantDeleteArgs<ExtArgs>>): Prisma__AuthzAccountAccessGrantClient<$Result.GetResult<Prisma.$AuthzAccountAccessGrantPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends AuthzAccessDeleteArgs>(args: SelectSubset<T, AuthzAccessDeleteArgs<ExtArgs>>): Prisma__AuthzAccessClient<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Update one AuthzAccountAccessGrant.
-     * @param {AuthzAccountAccessGrantUpdateArgs} args - Arguments to update one AuthzAccountAccessGrant.
+     * Update one AuthzAccess.
+     * @param {AuthzAccessUpdateArgs} args - Arguments to update one AuthzAccess.
      * @example
-     * // Update one AuthzAccountAccessGrant
-     * const authzAccountAccessGrant = await prisma.authzAccountAccessGrant.update({
+     * // Update one AuthzAccess
+     * const authzAccess = await prisma.authzAccess.update({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -29035,30 +29160,30 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends AuthzAccountAccessGrantUpdateArgs>(args: SelectSubset<T, AuthzAccountAccessGrantUpdateArgs<ExtArgs>>): Prisma__AuthzAccountAccessGrantClient<$Result.GetResult<Prisma.$AuthzAccountAccessGrantPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends AuthzAccessUpdateArgs>(args: SelectSubset<T, AuthzAccessUpdateArgs<ExtArgs>>): Prisma__AuthzAccessClient<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Delete zero or more AuthzAccountAccessGrants.
-     * @param {AuthzAccountAccessGrantDeleteManyArgs} args - Arguments to filter AuthzAccountAccessGrants to delete.
+     * Delete zero or more AuthzAccesses.
+     * @param {AuthzAccessDeleteManyArgs} args - Arguments to filter AuthzAccesses to delete.
      * @example
-     * // Delete a few AuthzAccountAccessGrants
-     * const { count } = await prisma.authzAccountAccessGrant.deleteMany({
+     * // Delete a few AuthzAccesses
+     * const { count } = await prisma.authzAccess.deleteMany({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      * 
      */
-    deleteMany<T extends AuthzAccountAccessGrantDeleteManyArgs>(args?: SelectSubset<T, AuthzAccountAccessGrantDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends AuthzAccessDeleteManyArgs>(args?: SelectSubset<T, AuthzAccessDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more AuthzAccountAccessGrants.
+     * Update zero or more AuthzAccesses.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAccountAccessGrantUpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {AuthzAccessUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
-     * // Update many AuthzAccountAccessGrants
-     * const authzAccountAccessGrant = await prisma.authzAccountAccessGrant.updateMany({
+     * // Update many AuthzAccesses
+     * const authzAccess = await prisma.authzAccess.updateMany({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -29068,14 +29193,14 @@ export namespace Prisma {
      * })
      * 
      */
-    updateMany<T extends AuthzAccountAccessGrantUpdateManyArgs>(args: SelectSubset<T, AuthzAccountAccessGrantUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends AuthzAccessUpdateManyArgs>(args: SelectSubset<T, AuthzAccessUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more AuthzAccountAccessGrants and returns the data updated in the database.
-     * @param {AuthzAccountAccessGrantUpdateManyAndReturnArgs} args - Arguments to update many AuthzAccountAccessGrants.
+     * Update zero or more AuthzAccesses and returns the data updated in the database.
+     * @param {AuthzAccessUpdateManyAndReturnArgs} args - Arguments to update many AuthzAccesses.
      * @example
-     * // Update many AuthzAccountAccessGrants
-     * const authzAccountAccessGrant = await prisma.authzAccountAccessGrant.updateManyAndReturn({
+     * // Update many AuthzAccesses
+     * const authzAccess = await prisma.authzAccess.updateManyAndReturn({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -29084,8 +29209,8 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more AuthzAccountAccessGrants and only return the `id`
-     * const authzAccountAccessGrantWithIdOnly = await prisma.authzAccountAccessGrant.updateManyAndReturn({
+     * // Update zero or more AuthzAccesses and only return the `id`
+     * const authzAccessWithIdOnly = await prisma.authzAccess.updateManyAndReturn({
      *   select: { id: true },
      *   where: {
      *     // ... provide filter here
@@ -29098,56 +29223,56 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends AuthzAccountAccessGrantUpdateManyAndReturnArgs>(args: SelectSubset<T, AuthzAccountAccessGrantUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAccountAccessGrantPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends AuthzAccessUpdateManyAndReturnArgs>(args: SelectSubset<T, AuthzAccessUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Create or update one AuthzAccountAccessGrant.
-     * @param {AuthzAccountAccessGrantUpsertArgs} args - Arguments to update or create a AuthzAccountAccessGrant.
+     * Create or update one AuthzAccess.
+     * @param {AuthzAccessUpsertArgs} args - Arguments to update or create a AuthzAccess.
      * @example
-     * // Update or create a AuthzAccountAccessGrant
-     * const authzAccountAccessGrant = await prisma.authzAccountAccessGrant.upsert({
+     * // Update or create a AuthzAccess
+     * const authzAccess = await prisma.authzAccess.upsert({
      *   create: {
-     *     // ... data to create a AuthzAccountAccessGrant
+     *     // ... data to create a AuthzAccess
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
-     *     // ... the filter for the AuthzAccountAccessGrant we want to update
+     *     // ... the filter for the AuthzAccess we want to update
      *   }
      * })
      */
-    upsert<T extends AuthzAccountAccessGrantUpsertArgs>(args: SelectSubset<T, AuthzAccountAccessGrantUpsertArgs<ExtArgs>>): Prisma__AuthzAccountAccessGrantClient<$Result.GetResult<Prisma.$AuthzAccountAccessGrantPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends AuthzAccessUpsertArgs>(args: SelectSubset<T, AuthzAccessUpsertArgs<ExtArgs>>): Prisma__AuthzAccessClient<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
-     * Count the number of AuthzAccountAccessGrants.
+     * Count the number of AuthzAccesses.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAccountAccessGrantCountArgs} args - Arguments to filter AuthzAccountAccessGrants to count.
+     * @param {AuthzAccessCountArgs} args - Arguments to filter AuthzAccesses to count.
      * @example
-     * // Count the number of AuthzAccountAccessGrants
-     * const count = await prisma.authzAccountAccessGrant.count({
+     * // Count the number of AuthzAccesses
+     * const count = await prisma.authzAccess.count({
      *   where: {
-     *     // ... the filter for the AuthzAccountAccessGrants we want to count
+     *     // ... the filter for the AuthzAccesses we want to count
      *   }
      * })
     **/
-    count<T extends AuthzAccountAccessGrantCountArgs>(
-      args?: Subset<T, AuthzAccountAccessGrantCountArgs>,
+    count<T extends AuthzAccessCountArgs>(
+      args?: Subset<T, AuthzAccessCountArgs>,
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
-          : GetScalarType<T['select'], AuthzAccountAccessGrantCountAggregateOutputType>
+          : GetScalarType<T['select'], AuthzAccessCountAggregateOutputType>
         : number
     >
 
     /**
-     * Allows you to perform aggregations operations on a AuthzAccountAccessGrant.
+     * Allows you to perform aggregations operations on a AuthzAccess.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAccountAccessGrantAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @param {AuthzAccessAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -29167,13 +29292,13 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
-    aggregate<T extends AuthzAccountAccessGrantAggregateArgs>(args: Subset<T, AuthzAccountAccessGrantAggregateArgs>): Prisma.PrismaPromise<GetAuthzAccountAccessGrantAggregateType<T>>
+    aggregate<T extends AuthzAccessAggregateArgs>(args: Subset<T, AuthzAccessAggregateArgs>): Prisma.PrismaPromise<GetAuthzAccessAggregateType<T>>
 
     /**
-     * Group by AuthzAccountAccessGrant.
+     * Group by AuthzAccess.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAccountAccessGrantGroupByArgs} args - Group by arguments.
+     * @param {AuthzAccessGroupByArgs} args - Group by arguments.
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -29188,14 +29313,14 @@ export namespace Prisma {
      * 
     **/
     groupBy<
-      T extends AuthzAccountAccessGrantGroupByArgs,
+      T extends AuthzAccessGroupByArgs,
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: AuthzAccountAccessGrantGroupByArgs['orderBy'] }
-        : { orderBy?: AuthzAccountAccessGrantGroupByArgs['orderBy'] },
+        ? { orderBy: AuthzAccessGroupByArgs['orderBy'] }
+        : { orderBy?: AuthzAccessGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -29244,21 +29369,24 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
-    >(args: SubsetIntersection<T, AuthzAccountAccessGrantGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAuthzAccountAccessGrantGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+    >(args: SubsetIntersection<T, AuthzAccessGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAuthzAccessGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
-   * Fields of the AuthzAccountAccessGrant model
+   * Fields of the AuthzAccess model
    */
-  readonly fields: AuthzAccountAccessGrantFieldRefs;
+  readonly fields: AuthzAccessFieldRefs;
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for AuthzAccountAccessGrant.
+   * The delegate class that acts as a "Promise-like" for AuthzAccess.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__AuthzAccountAccessGrantClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__AuthzAccessClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    toAccount<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    forServer<T extends ServerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ServerDefaultArgs<ExtArgs>>): Prisma__ServerClient<$Result.GetResult<Prisma.$ServerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    role<T extends AuthzRoleDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AuthzRoleDefaultArgs<ExtArgs>>): Prisma__AuthzRoleClient<$Result.GetResult<Prisma.$AuthzRolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -29285,1395 +29413,431 @@ export namespace Prisma {
 
 
   /**
-   * Fields of the AuthzAccountAccessGrant model
+   * Fields of the AuthzAccess model
    */
-  interface AuthzAccountAccessGrantFieldRefs {
-    readonly id: FieldRef<"AuthzAccountAccessGrant", 'String'>
-    readonly ownerAccountId: FieldRef<"AuthzAccountAccessGrant", 'String'>
-    readonly targetAccountId: FieldRef<"AuthzAccountAccessGrant", 'String'>
-    readonly roleId: FieldRef<"AuthzAccountAccessGrant", 'String'>
-    readonly portfolioId: FieldRef<"AuthzAccountAccessGrant", 'String'>
+  interface AuthzAccessFieldRefs {
+    readonly id: FieldRef<"AuthzAccess", 'String'>
+    readonly toAccountId: FieldRef<"AuthzAccess", 'String'>
+    readonly forServerId: FieldRef<"AuthzAccess", 'String'>
+    readonly roleId: FieldRef<"AuthzAccess", 'String'>
+    readonly status: FieldRef<"AuthzAccess", 'String'>
+    readonly moreDetails: FieldRef<"AuthzAccess", 'Json'>
   }
     
 
   // Custom InputTypes
   /**
-   * AuthzAccountAccessGrant findUnique
+   * AuthzAccess findUnique
    */
-  export type AuthzAccountAccessGrantFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AuthzAccountAccessGrant
+     * Select specific fields to fetch from the AuthzAccess
      */
-    select?: AuthzAccountAccessGrantSelect<ExtArgs> | null
+    select?: AuthzAccessSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AuthzAccountAccessGrant
+     * Omit specific fields from the AuthzAccess
      */
-    omit?: AuthzAccountAccessGrantOmit<ExtArgs> | null
+    omit?: AuthzAccessOmit<ExtArgs> | null
     /**
-     * Filter, which AuthzAccountAccessGrant to fetch.
+     * Choose, which related nodes to fetch as well
      */
-    where: AuthzAccountAccessGrantWhereUniqueInput
+    include?: AuthzAccessInclude<ExtArgs> | null
+    /**
+     * Filter, which AuthzAccess to fetch.
+     */
+    where: AuthzAccessWhereUniqueInput
   }
 
   /**
-   * AuthzAccountAccessGrant findUniqueOrThrow
+   * AuthzAccess findUniqueOrThrow
    */
-  export type AuthzAccountAccessGrantFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AuthzAccountAccessGrant
+     * Select specific fields to fetch from the AuthzAccess
      */
-    select?: AuthzAccountAccessGrantSelect<ExtArgs> | null
+    select?: AuthzAccessSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AuthzAccountAccessGrant
+     * Omit specific fields from the AuthzAccess
      */
-    omit?: AuthzAccountAccessGrantOmit<ExtArgs> | null
+    omit?: AuthzAccessOmit<ExtArgs> | null
     /**
-     * Filter, which AuthzAccountAccessGrant to fetch.
+     * Choose, which related nodes to fetch as well
      */
-    where: AuthzAccountAccessGrantWhereUniqueInput
+    include?: AuthzAccessInclude<ExtArgs> | null
+    /**
+     * Filter, which AuthzAccess to fetch.
+     */
+    where: AuthzAccessWhereUniqueInput
   }
 
   /**
-   * AuthzAccountAccessGrant findFirst
+   * AuthzAccess findFirst
    */
-  export type AuthzAccountAccessGrantFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AuthzAccountAccessGrant
+     * Select specific fields to fetch from the AuthzAccess
      */
-    select?: AuthzAccountAccessGrantSelect<ExtArgs> | null
+    select?: AuthzAccessSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AuthzAccountAccessGrant
+     * Omit specific fields from the AuthzAccess
      */
-    omit?: AuthzAccountAccessGrantOmit<ExtArgs> | null
+    omit?: AuthzAccessOmit<ExtArgs> | null
     /**
-     * Filter, which AuthzAccountAccessGrant to fetch.
+     * Choose, which related nodes to fetch as well
      */
-    where?: AuthzAccountAccessGrantWhereInput
+    include?: AuthzAccessInclude<ExtArgs> | null
+    /**
+     * Filter, which AuthzAccess to fetch.
+     */
+    where?: AuthzAccessWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of AuthzAccountAccessGrants to fetch.
+     * Determine the order of AuthzAccesses to fetch.
      */
-    orderBy?: AuthzAccountAccessGrantOrderByWithRelationInput | AuthzAccountAccessGrantOrderByWithRelationInput[]
+    orderBy?: AuthzAccessOrderByWithRelationInput | AuthzAccessOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for AuthzAccountAccessGrants.
+     * Sets the position for searching for AuthzAccesses.
      */
-    cursor?: AuthzAccountAccessGrantWhereUniqueInput
+    cursor?: AuthzAccessWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` AuthzAccountAccessGrants from the position of the cursor.
+     * Take `±n` AuthzAccesses from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` AuthzAccountAccessGrants.
+     * Skip the first `n` AuthzAccesses.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of AuthzAccountAccessGrants.
+     * Filter by unique combinations of AuthzAccesses.
      */
-    distinct?: AuthzAccountAccessGrantScalarFieldEnum | AuthzAccountAccessGrantScalarFieldEnum[]
+    distinct?: AuthzAccessScalarFieldEnum | AuthzAccessScalarFieldEnum[]
   }
 
   /**
-   * AuthzAccountAccessGrant findFirstOrThrow
+   * AuthzAccess findFirstOrThrow
    */
-  export type AuthzAccountAccessGrantFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AuthzAccountAccessGrant
+     * Select specific fields to fetch from the AuthzAccess
      */
-    select?: AuthzAccountAccessGrantSelect<ExtArgs> | null
+    select?: AuthzAccessSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AuthzAccountAccessGrant
+     * Omit specific fields from the AuthzAccess
      */
-    omit?: AuthzAccountAccessGrantOmit<ExtArgs> | null
+    omit?: AuthzAccessOmit<ExtArgs> | null
     /**
-     * Filter, which AuthzAccountAccessGrant to fetch.
+     * Choose, which related nodes to fetch as well
      */
-    where?: AuthzAccountAccessGrantWhereInput
+    include?: AuthzAccessInclude<ExtArgs> | null
+    /**
+     * Filter, which AuthzAccess to fetch.
+     */
+    where?: AuthzAccessWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of AuthzAccountAccessGrants to fetch.
+     * Determine the order of AuthzAccesses to fetch.
      */
-    orderBy?: AuthzAccountAccessGrantOrderByWithRelationInput | AuthzAccountAccessGrantOrderByWithRelationInput[]
+    orderBy?: AuthzAccessOrderByWithRelationInput | AuthzAccessOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for AuthzAccountAccessGrants.
+     * Sets the position for searching for AuthzAccesses.
      */
-    cursor?: AuthzAccountAccessGrantWhereUniqueInput
+    cursor?: AuthzAccessWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` AuthzAccountAccessGrants from the position of the cursor.
+     * Take `±n` AuthzAccesses from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` AuthzAccountAccessGrants.
+     * Skip the first `n` AuthzAccesses.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of AuthzAccountAccessGrants.
+     * Filter by unique combinations of AuthzAccesses.
      */
-    distinct?: AuthzAccountAccessGrantScalarFieldEnum | AuthzAccountAccessGrantScalarFieldEnum[]
+    distinct?: AuthzAccessScalarFieldEnum | AuthzAccessScalarFieldEnum[]
   }
 
   /**
-   * AuthzAccountAccessGrant findMany
+   * AuthzAccess findMany
    */
-  export type AuthzAccountAccessGrantFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AuthzAccountAccessGrant
+     * Select specific fields to fetch from the AuthzAccess
      */
-    select?: AuthzAccountAccessGrantSelect<ExtArgs> | null
+    select?: AuthzAccessSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AuthzAccountAccessGrant
+     * Omit specific fields from the AuthzAccess
      */
-    omit?: AuthzAccountAccessGrantOmit<ExtArgs> | null
+    omit?: AuthzAccessOmit<ExtArgs> | null
     /**
-     * Filter, which AuthzAccountAccessGrants to fetch.
+     * Choose, which related nodes to fetch as well
      */
-    where?: AuthzAccountAccessGrantWhereInput
+    include?: AuthzAccessInclude<ExtArgs> | null
+    /**
+     * Filter, which AuthzAccesses to fetch.
+     */
+    where?: AuthzAccessWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of AuthzAccountAccessGrants to fetch.
+     * Determine the order of AuthzAccesses to fetch.
      */
-    orderBy?: AuthzAccountAccessGrantOrderByWithRelationInput | AuthzAccountAccessGrantOrderByWithRelationInput[]
+    orderBy?: AuthzAccessOrderByWithRelationInput | AuthzAccessOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for listing AuthzAccountAccessGrants.
+     * Sets the position for listing AuthzAccesses.
      */
-    cursor?: AuthzAccountAccessGrantWhereUniqueInput
+    cursor?: AuthzAccessWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` AuthzAccountAccessGrants from the position of the cursor.
+     * Take `±n` AuthzAccesses from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` AuthzAccountAccessGrants.
+     * Skip the first `n` AuthzAccesses.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of AuthzAccountAccessGrants.
+     * Filter by unique combinations of AuthzAccesses.
      */
-    distinct?: AuthzAccountAccessGrantScalarFieldEnum | AuthzAccountAccessGrantScalarFieldEnum[]
+    distinct?: AuthzAccessScalarFieldEnum | AuthzAccessScalarFieldEnum[]
   }
 
   /**
-   * AuthzAccountAccessGrant create
+   * AuthzAccess create
    */
-  export type AuthzAccountAccessGrantCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AuthzAccountAccessGrant
+     * Select specific fields to fetch from the AuthzAccess
      */
-    select?: AuthzAccountAccessGrantSelect<ExtArgs> | null
+    select?: AuthzAccessSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AuthzAccountAccessGrant
+     * Omit specific fields from the AuthzAccess
      */
-    omit?: AuthzAccountAccessGrantOmit<ExtArgs> | null
+    omit?: AuthzAccessOmit<ExtArgs> | null
     /**
-     * The data needed to create a AuthzAccountAccessGrant.
+     * Choose, which related nodes to fetch as well
      */
-    data: XOR<AuthzAccountAccessGrantCreateInput, AuthzAccountAccessGrantUncheckedCreateInput>
+    include?: AuthzAccessInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AuthzAccess.
+     */
+    data: XOR<AuthzAccessCreateInput, AuthzAccessUncheckedCreateInput>
   }
 
   /**
-   * AuthzAccountAccessGrant createMany
+   * AuthzAccess createMany
    */
-  export type AuthzAccountAccessGrantCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to create many AuthzAccountAccessGrants.
+     * The data used to create many AuthzAccesses.
      */
-    data: AuthzAccountAccessGrantCreateManyInput | AuthzAccountAccessGrantCreateManyInput[]
+    data: AuthzAccessCreateManyInput | AuthzAccessCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * AuthzAccountAccessGrant createManyAndReturn
+   * AuthzAccess createManyAndReturn
    */
-  export type AuthzAccountAccessGrantCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AuthzAccountAccessGrant
+     * Select specific fields to fetch from the AuthzAccess
      */
-    select?: AuthzAccountAccessGrantSelectCreateManyAndReturn<ExtArgs> | null
+    select?: AuthzAccessSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the AuthzAccountAccessGrant
+     * Omit specific fields from the AuthzAccess
      */
-    omit?: AuthzAccountAccessGrantOmit<ExtArgs> | null
+    omit?: AuthzAccessOmit<ExtArgs> | null
     /**
-     * The data used to create many AuthzAccountAccessGrants.
+     * The data used to create many AuthzAccesses.
      */
-    data: AuthzAccountAccessGrantCreateManyInput | AuthzAccountAccessGrantCreateManyInput[]
+    data: AuthzAccessCreateManyInput | AuthzAccessCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzAccessIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * AuthzAccountAccessGrant update
+   * AuthzAccess update
    */
-  export type AuthzAccountAccessGrantUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AuthzAccountAccessGrant
+     * Select specific fields to fetch from the AuthzAccess
      */
-    select?: AuthzAccountAccessGrantSelect<ExtArgs> | null
+    select?: AuthzAccessSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AuthzAccountAccessGrant
+     * Omit specific fields from the AuthzAccess
      */
-    omit?: AuthzAccountAccessGrantOmit<ExtArgs> | null
+    omit?: AuthzAccessOmit<ExtArgs> | null
     /**
-     * The data needed to update a AuthzAccountAccessGrant.
+     * Choose, which related nodes to fetch as well
      */
-    data: XOR<AuthzAccountAccessGrantUpdateInput, AuthzAccountAccessGrantUncheckedUpdateInput>
+    include?: AuthzAccessInclude<ExtArgs> | null
     /**
-     * Choose, which AuthzAccountAccessGrant to update.
+     * The data needed to update a AuthzAccess.
      */
-    where: AuthzAccountAccessGrantWhereUniqueInput
+    data: XOR<AuthzAccessUpdateInput, AuthzAccessUncheckedUpdateInput>
+    /**
+     * Choose, which AuthzAccess to update.
+     */
+    where: AuthzAccessWhereUniqueInput
   }
 
   /**
-   * AuthzAccountAccessGrant updateMany
+   * AuthzAccess updateMany
    */
-  export type AuthzAccountAccessGrantUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to update AuthzAccountAccessGrants.
+     * The data used to update AuthzAccesses.
      */
-    data: XOR<AuthzAccountAccessGrantUpdateManyMutationInput, AuthzAccountAccessGrantUncheckedUpdateManyInput>
+    data: XOR<AuthzAccessUpdateManyMutationInput, AuthzAccessUncheckedUpdateManyInput>
     /**
-     * Filter which AuthzAccountAccessGrants to update
+     * Filter which AuthzAccesses to update
      */
-    where?: AuthzAccountAccessGrantWhereInput
+    where?: AuthzAccessWhereInput
     /**
-     * Limit how many AuthzAccountAccessGrants to update.
+     * Limit how many AuthzAccesses to update.
      */
     limit?: number
   }
 
   /**
-   * AuthzAccountAccessGrant updateManyAndReturn
+   * AuthzAccess updateManyAndReturn
    */
-  export type AuthzAccountAccessGrantUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AuthzAccountAccessGrant
+     * Select specific fields to fetch from the AuthzAccess
      */
-    select?: AuthzAccountAccessGrantSelectUpdateManyAndReturn<ExtArgs> | null
+    select?: AuthzAccessSelectUpdateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the AuthzAccountAccessGrant
+     * Omit specific fields from the AuthzAccess
      */
-    omit?: AuthzAccountAccessGrantOmit<ExtArgs> | null
+    omit?: AuthzAccessOmit<ExtArgs> | null
     /**
-     * The data used to update AuthzAccountAccessGrants.
+     * The data used to update AuthzAccesses.
      */
-    data: XOR<AuthzAccountAccessGrantUpdateManyMutationInput, AuthzAccountAccessGrantUncheckedUpdateManyInput>
+    data: XOR<AuthzAccessUpdateManyMutationInput, AuthzAccessUncheckedUpdateManyInput>
     /**
-     * Filter which AuthzAccountAccessGrants to update
+     * Filter which AuthzAccesses to update
      */
-    where?: AuthzAccountAccessGrantWhereInput
+    where?: AuthzAccessWhereInput
     /**
-     * Limit how many AuthzAccountAccessGrants to update.
+     * Limit how many AuthzAccesses to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzAccessIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AuthzAccess upsert
+   */
+  export type AuthzAccessUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthzAccess
+     */
+    select?: AuthzAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthzAccess
+     */
+    omit?: AuthzAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzAccessInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AuthzAccess to update in case it exists.
+     */
+    where: AuthzAccessWhereUniqueInput
+    /**
+     * In case the AuthzAccess found by the `where` argument doesn't exist, create a new AuthzAccess with this data.
+     */
+    create: XOR<AuthzAccessCreateInput, AuthzAccessUncheckedCreateInput>
+    /**
+     * In case the AuthzAccess was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AuthzAccessUpdateInput, AuthzAccessUncheckedUpdateInput>
+  }
+
+  /**
+   * AuthzAccess delete
+   */
+  export type AuthzAccessDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthzAccess
+     */
+    select?: AuthzAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthzAccess
+     */
+    omit?: AuthzAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzAccessInclude<ExtArgs> | null
+    /**
+     * Filter which AuthzAccess to delete.
+     */
+    where: AuthzAccessWhereUniqueInput
+  }
+
+  /**
+   * AuthzAccess deleteMany
+   */
+  export type AuthzAccessDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AuthzAccesses to delete
+     */
+    where?: AuthzAccessWhereInput
+    /**
+     * Limit how many AuthzAccesses to delete.
      */
     limit?: number
   }
 
   /**
-   * AuthzAccountAccessGrant upsert
+   * AuthzAccess without action
    */
-  export type AuthzAccountAccessGrantUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AuthzAccessDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AuthzAccountAccessGrant
+     * Select specific fields to fetch from the AuthzAccess
      */
-    select?: AuthzAccountAccessGrantSelect<ExtArgs> | null
+    select?: AuthzAccessSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AuthzAccountAccessGrant
+     * Omit specific fields from the AuthzAccess
      */
-    omit?: AuthzAccountAccessGrantOmit<ExtArgs> | null
+    omit?: AuthzAccessOmit<ExtArgs> | null
     /**
-     * The filter to search for the AuthzAccountAccessGrant to update in case it exists.
+     * Choose, which related nodes to fetch as well
      */
-    where: AuthzAccountAccessGrantWhereUniqueInput
-    /**
-     * In case the AuthzAccountAccessGrant found by the `where` argument doesn't exist, create a new AuthzAccountAccessGrant with this data.
-     */
-    create: XOR<AuthzAccountAccessGrantCreateInput, AuthzAccountAccessGrantUncheckedCreateInput>
-    /**
-     * In case the AuthzAccountAccessGrant was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<AuthzAccountAccessGrantUpdateInput, AuthzAccountAccessGrantUncheckedUpdateInput>
-  }
-
-  /**
-   * AuthzAccountAccessGrant delete
-   */
-  export type AuthzAccountAccessGrantDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAccountAccessGrant
-     */
-    select?: AuthzAccountAccessGrantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAccountAccessGrant
-     */
-    omit?: AuthzAccountAccessGrantOmit<ExtArgs> | null
-    /**
-     * Filter which AuthzAccountAccessGrant to delete.
-     */
-    where: AuthzAccountAccessGrantWhereUniqueInput
-  }
-
-  /**
-   * AuthzAccountAccessGrant deleteMany
-   */
-  export type AuthzAccountAccessGrantDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which AuthzAccountAccessGrants to delete
-     */
-    where?: AuthzAccountAccessGrantWhereInput
-    /**
-     * Limit how many AuthzAccountAccessGrants to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * AuthzAccountAccessGrant without action
-   */
-  export type AuthzAccountAccessGrantDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAccountAccessGrant
-     */
-    select?: AuthzAccountAccessGrantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAccountAccessGrant
-     */
-    omit?: AuthzAccountAccessGrantOmit<ExtArgs> | null
-  }
-
-
-  /**
-   * Model AuthzAssetsAccessGrant
-   */
-
-  export type AggregateAuthzAssetsAccessGrant = {
-    _count: AuthzAssetsAccessGrantCountAggregateOutputType | null
-    _min: AuthzAssetsAccessGrantMinAggregateOutputType | null
-    _max: AuthzAssetsAccessGrantMaxAggregateOutputType | null
-  }
-
-  export type AuthzAssetsAccessGrantMinAggregateOutputType = {
-    id: string | null
-    assetId: string | null
-    accountId: string | null
-    roleId: string | null
-    portfolioId: string | null
-    assetType: string | null
-  }
-
-  export type AuthzAssetsAccessGrantMaxAggregateOutputType = {
-    id: string | null
-    assetId: string | null
-    accountId: string | null
-    roleId: string | null
-    portfolioId: string | null
-    assetType: string | null
-  }
-
-  export type AuthzAssetsAccessGrantCountAggregateOutputType = {
-    id: number
-    assetId: number
-    accountId: number
-    roleId: number
-    portfolioId: number
-    assetType: number
-    _all: number
-  }
-
-
-  export type AuthzAssetsAccessGrantMinAggregateInputType = {
-    id?: true
-    assetId?: true
-    accountId?: true
-    roleId?: true
-    portfolioId?: true
-    assetType?: true
-  }
-
-  export type AuthzAssetsAccessGrantMaxAggregateInputType = {
-    id?: true
-    assetId?: true
-    accountId?: true
-    roleId?: true
-    portfolioId?: true
-    assetType?: true
-  }
-
-  export type AuthzAssetsAccessGrantCountAggregateInputType = {
-    id?: true
-    assetId?: true
-    accountId?: true
-    roleId?: true
-    portfolioId?: true
-    assetType?: true
-    _all?: true
-  }
-
-  export type AuthzAssetsAccessGrantAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which AuthzAssetsAccessGrant to aggregate.
-     */
-    where?: AuthzAssetsAccessGrantWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of AuthzAssetsAccessGrants to fetch.
-     */
-    orderBy?: AuthzAssetsAccessGrantOrderByWithRelationInput | AuthzAssetsAccessGrantOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: AuthzAssetsAccessGrantWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` AuthzAssetsAccessGrants from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` AuthzAssetsAccessGrants.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned AuthzAssetsAccessGrants
-    **/
-    _count?: true | AuthzAssetsAccessGrantCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: AuthzAssetsAccessGrantMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: AuthzAssetsAccessGrantMaxAggregateInputType
-  }
-
-  export type GetAuthzAssetsAccessGrantAggregateType<T extends AuthzAssetsAccessGrantAggregateArgs> = {
-        [P in keyof T & keyof AggregateAuthzAssetsAccessGrant]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateAuthzAssetsAccessGrant[P]>
-      : GetScalarType<T[P], AggregateAuthzAssetsAccessGrant[P]>
-  }
-
-
-
-
-  export type AuthzAssetsAccessGrantGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: AuthzAssetsAccessGrantWhereInput
-    orderBy?: AuthzAssetsAccessGrantOrderByWithAggregationInput | AuthzAssetsAccessGrantOrderByWithAggregationInput[]
-    by: AuthzAssetsAccessGrantScalarFieldEnum[] | AuthzAssetsAccessGrantScalarFieldEnum
-    having?: AuthzAssetsAccessGrantScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: AuthzAssetsAccessGrantCountAggregateInputType | true
-    _min?: AuthzAssetsAccessGrantMinAggregateInputType
-    _max?: AuthzAssetsAccessGrantMaxAggregateInputType
-  }
-
-  export type AuthzAssetsAccessGrantGroupByOutputType = {
-    id: string
-    assetId: string
-    accountId: string
-    roleId: string
-    portfolioId: string | null
-    assetType: string | null
-    _count: AuthzAssetsAccessGrantCountAggregateOutputType | null
-    _min: AuthzAssetsAccessGrantMinAggregateOutputType | null
-    _max: AuthzAssetsAccessGrantMaxAggregateOutputType | null
-  }
-
-  type GetAuthzAssetsAccessGrantGroupByPayload<T extends AuthzAssetsAccessGrantGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<AuthzAssetsAccessGrantGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof AuthzAssetsAccessGrantGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], AuthzAssetsAccessGrantGroupByOutputType[P]>
-            : GetScalarType<T[P], AuthzAssetsAccessGrantGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type AuthzAssetsAccessGrantSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    assetId?: boolean
-    accountId?: boolean
-    roleId?: boolean
-    portfolioId?: boolean
-    assetType?: boolean
-  }, ExtArgs["result"]["authzAssetsAccessGrant"]>
-
-  export type AuthzAssetsAccessGrantSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    assetId?: boolean
-    accountId?: boolean
-    roleId?: boolean
-    portfolioId?: boolean
-    assetType?: boolean
-  }, ExtArgs["result"]["authzAssetsAccessGrant"]>
-
-  export type AuthzAssetsAccessGrantSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    assetId?: boolean
-    accountId?: boolean
-    roleId?: boolean
-    portfolioId?: boolean
-    assetType?: boolean
-  }, ExtArgs["result"]["authzAssetsAccessGrant"]>
-
-  export type AuthzAssetsAccessGrantSelectScalar = {
-    id?: boolean
-    assetId?: boolean
-    accountId?: boolean
-    roleId?: boolean
-    portfolioId?: boolean
-    assetType?: boolean
-  }
-
-  export type AuthzAssetsAccessGrantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "assetId" | "accountId" | "roleId" | "portfolioId" | "assetType", ExtArgs["result"]["authzAssetsAccessGrant"]>
-
-  export type $AuthzAssetsAccessGrantPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "AuthzAssetsAccessGrant"
-    objects: {}
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      assetId: string
-      accountId: string
-      roleId: string
-      portfolioId: string | null
-      assetType: string | null
-    }, ExtArgs["result"]["authzAssetsAccessGrant"]>
-    composites: {}
-  }
-
-  type AuthzAssetsAccessGrantGetPayload<S extends boolean | null | undefined | AuthzAssetsAccessGrantDefaultArgs> = $Result.GetResult<Prisma.$AuthzAssetsAccessGrantPayload, S>
-
-  type AuthzAssetsAccessGrantCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<AuthzAssetsAccessGrantFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: AuthzAssetsAccessGrantCountAggregateInputType | true
-    }
-
-  export interface AuthzAssetsAccessGrantDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AuthzAssetsAccessGrant'], meta: { name: 'AuthzAssetsAccessGrant' } }
-    /**
-     * Find zero or one AuthzAssetsAccessGrant that matches the filter.
-     * @param {AuthzAssetsAccessGrantFindUniqueArgs} args - Arguments to find a AuthzAssetsAccessGrant
-     * @example
-     * // Get one AuthzAssetsAccessGrant
-     * const authzAssetsAccessGrant = await prisma.authzAssetsAccessGrant.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends AuthzAssetsAccessGrantFindUniqueArgs>(args: SelectSubset<T, AuthzAssetsAccessGrantFindUniqueArgs<ExtArgs>>): Prisma__AuthzAssetsAccessGrantClient<$Result.GetResult<Prisma.$AuthzAssetsAccessGrantPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one AuthzAssetsAccessGrant that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {AuthzAssetsAccessGrantFindUniqueOrThrowArgs} args - Arguments to find a AuthzAssetsAccessGrant
-     * @example
-     * // Get one AuthzAssetsAccessGrant
-     * const authzAssetsAccessGrant = await prisma.authzAssetsAccessGrant.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends AuthzAssetsAccessGrantFindUniqueOrThrowArgs>(args: SelectSubset<T, AuthzAssetsAccessGrantFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AuthzAssetsAccessGrantClient<$Result.GetResult<Prisma.$AuthzAssetsAccessGrantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first AuthzAssetsAccessGrant that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAssetsAccessGrantFindFirstArgs} args - Arguments to find a AuthzAssetsAccessGrant
-     * @example
-     * // Get one AuthzAssetsAccessGrant
-     * const authzAssetsAccessGrant = await prisma.authzAssetsAccessGrant.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends AuthzAssetsAccessGrantFindFirstArgs>(args?: SelectSubset<T, AuthzAssetsAccessGrantFindFirstArgs<ExtArgs>>): Prisma__AuthzAssetsAccessGrantClient<$Result.GetResult<Prisma.$AuthzAssetsAccessGrantPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first AuthzAssetsAccessGrant that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAssetsAccessGrantFindFirstOrThrowArgs} args - Arguments to find a AuthzAssetsAccessGrant
-     * @example
-     * // Get one AuthzAssetsAccessGrant
-     * const authzAssetsAccessGrant = await prisma.authzAssetsAccessGrant.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends AuthzAssetsAccessGrantFindFirstOrThrowArgs>(args?: SelectSubset<T, AuthzAssetsAccessGrantFindFirstOrThrowArgs<ExtArgs>>): Prisma__AuthzAssetsAccessGrantClient<$Result.GetResult<Prisma.$AuthzAssetsAccessGrantPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more AuthzAssetsAccessGrants that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAssetsAccessGrantFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all AuthzAssetsAccessGrants
-     * const authzAssetsAccessGrants = await prisma.authzAssetsAccessGrant.findMany()
-     * 
-     * // Get first 10 AuthzAssetsAccessGrants
-     * const authzAssetsAccessGrants = await prisma.authzAssetsAccessGrant.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const authzAssetsAccessGrantWithIdOnly = await prisma.authzAssetsAccessGrant.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends AuthzAssetsAccessGrantFindManyArgs>(args?: SelectSubset<T, AuthzAssetsAccessGrantFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAssetsAccessGrantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a AuthzAssetsAccessGrant.
-     * @param {AuthzAssetsAccessGrantCreateArgs} args - Arguments to create a AuthzAssetsAccessGrant.
-     * @example
-     * // Create one AuthzAssetsAccessGrant
-     * const AuthzAssetsAccessGrant = await prisma.authzAssetsAccessGrant.create({
-     *   data: {
-     *     // ... data to create a AuthzAssetsAccessGrant
-     *   }
-     * })
-     * 
-     */
-    create<T extends AuthzAssetsAccessGrantCreateArgs>(args: SelectSubset<T, AuthzAssetsAccessGrantCreateArgs<ExtArgs>>): Prisma__AuthzAssetsAccessGrantClient<$Result.GetResult<Prisma.$AuthzAssetsAccessGrantPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many AuthzAssetsAccessGrants.
-     * @param {AuthzAssetsAccessGrantCreateManyArgs} args - Arguments to create many AuthzAssetsAccessGrants.
-     * @example
-     * // Create many AuthzAssetsAccessGrants
-     * const authzAssetsAccessGrant = await prisma.authzAssetsAccessGrant.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends AuthzAssetsAccessGrantCreateManyArgs>(args?: SelectSubset<T, AuthzAssetsAccessGrantCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many AuthzAssetsAccessGrants and returns the data saved in the database.
-     * @param {AuthzAssetsAccessGrantCreateManyAndReturnArgs} args - Arguments to create many AuthzAssetsAccessGrants.
-     * @example
-     * // Create many AuthzAssetsAccessGrants
-     * const authzAssetsAccessGrant = await prisma.authzAssetsAccessGrant.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many AuthzAssetsAccessGrants and only return the `id`
-     * const authzAssetsAccessGrantWithIdOnly = await prisma.authzAssetsAccessGrant.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends AuthzAssetsAccessGrantCreateManyAndReturnArgs>(args?: SelectSubset<T, AuthzAssetsAccessGrantCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAssetsAccessGrantPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a AuthzAssetsAccessGrant.
-     * @param {AuthzAssetsAccessGrantDeleteArgs} args - Arguments to delete one AuthzAssetsAccessGrant.
-     * @example
-     * // Delete one AuthzAssetsAccessGrant
-     * const AuthzAssetsAccessGrant = await prisma.authzAssetsAccessGrant.delete({
-     *   where: {
-     *     // ... filter to delete one AuthzAssetsAccessGrant
-     *   }
-     * })
-     * 
-     */
-    delete<T extends AuthzAssetsAccessGrantDeleteArgs>(args: SelectSubset<T, AuthzAssetsAccessGrantDeleteArgs<ExtArgs>>): Prisma__AuthzAssetsAccessGrantClient<$Result.GetResult<Prisma.$AuthzAssetsAccessGrantPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one AuthzAssetsAccessGrant.
-     * @param {AuthzAssetsAccessGrantUpdateArgs} args - Arguments to update one AuthzAssetsAccessGrant.
-     * @example
-     * // Update one AuthzAssetsAccessGrant
-     * const authzAssetsAccessGrant = await prisma.authzAssetsAccessGrant.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends AuthzAssetsAccessGrantUpdateArgs>(args: SelectSubset<T, AuthzAssetsAccessGrantUpdateArgs<ExtArgs>>): Prisma__AuthzAssetsAccessGrantClient<$Result.GetResult<Prisma.$AuthzAssetsAccessGrantPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more AuthzAssetsAccessGrants.
-     * @param {AuthzAssetsAccessGrantDeleteManyArgs} args - Arguments to filter AuthzAssetsAccessGrants to delete.
-     * @example
-     * // Delete a few AuthzAssetsAccessGrants
-     * const { count } = await prisma.authzAssetsAccessGrant.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends AuthzAssetsAccessGrantDeleteManyArgs>(args?: SelectSubset<T, AuthzAssetsAccessGrantDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more AuthzAssetsAccessGrants.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAssetsAccessGrantUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many AuthzAssetsAccessGrants
-     * const authzAssetsAccessGrant = await prisma.authzAssetsAccessGrant.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends AuthzAssetsAccessGrantUpdateManyArgs>(args: SelectSubset<T, AuthzAssetsAccessGrantUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more AuthzAssetsAccessGrants and returns the data updated in the database.
-     * @param {AuthzAssetsAccessGrantUpdateManyAndReturnArgs} args - Arguments to update many AuthzAssetsAccessGrants.
-     * @example
-     * // Update many AuthzAssetsAccessGrants
-     * const authzAssetsAccessGrant = await prisma.authzAssetsAccessGrant.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more AuthzAssetsAccessGrants and only return the `id`
-     * const authzAssetsAccessGrantWithIdOnly = await prisma.authzAssetsAccessGrant.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends AuthzAssetsAccessGrantUpdateManyAndReturnArgs>(args: SelectSubset<T, AuthzAssetsAccessGrantUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAssetsAccessGrantPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one AuthzAssetsAccessGrant.
-     * @param {AuthzAssetsAccessGrantUpsertArgs} args - Arguments to update or create a AuthzAssetsAccessGrant.
-     * @example
-     * // Update or create a AuthzAssetsAccessGrant
-     * const authzAssetsAccessGrant = await prisma.authzAssetsAccessGrant.upsert({
-     *   create: {
-     *     // ... data to create a AuthzAssetsAccessGrant
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the AuthzAssetsAccessGrant we want to update
-     *   }
-     * })
-     */
-    upsert<T extends AuthzAssetsAccessGrantUpsertArgs>(args: SelectSubset<T, AuthzAssetsAccessGrantUpsertArgs<ExtArgs>>): Prisma__AuthzAssetsAccessGrantClient<$Result.GetResult<Prisma.$AuthzAssetsAccessGrantPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of AuthzAssetsAccessGrants.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAssetsAccessGrantCountArgs} args - Arguments to filter AuthzAssetsAccessGrants to count.
-     * @example
-     * // Count the number of AuthzAssetsAccessGrants
-     * const count = await prisma.authzAssetsAccessGrant.count({
-     *   where: {
-     *     // ... the filter for the AuthzAssetsAccessGrants we want to count
-     *   }
-     * })
-    **/
-    count<T extends AuthzAssetsAccessGrantCountArgs>(
-      args?: Subset<T, AuthzAssetsAccessGrantCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], AuthzAssetsAccessGrantCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a AuthzAssetsAccessGrant.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAssetsAccessGrantAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends AuthzAssetsAccessGrantAggregateArgs>(args: Subset<T, AuthzAssetsAccessGrantAggregateArgs>): Prisma.PrismaPromise<GetAuthzAssetsAccessGrantAggregateType<T>>
-
-    /**
-     * Group by AuthzAssetsAccessGrant.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuthzAssetsAccessGrantGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends AuthzAssetsAccessGrantGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: AuthzAssetsAccessGrantGroupByArgs['orderBy'] }
-        : { orderBy?: AuthzAssetsAccessGrantGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, AuthzAssetsAccessGrantGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAuthzAssetsAccessGrantGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the AuthzAssetsAccessGrant model
-   */
-  readonly fields: AuthzAssetsAccessGrantFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for AuthzAssetsAccessGrant.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__AuthzAssetsAccessGrantClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the AuthzAssetsAccessGrant model
-   */
-  interface AuthzAssetsAccessGrantFieldRefs {
-    readonly id: FieldRef<"AuthzAssetsAccessGrant", 'String'>
-    readonly assetId: FieldRef<"AuthzAssetsAccessGrant", 'String'>
-    readonly accountId: FieldRef<"AuthzAssetsAccessGrant", 'String'>
-    readonly roleId: FieldRef<"AuthzAssetsAccessGrant", 'String'>
-    readonly portfolioId: FieldRef<"AuthzAssetsAccessGrant", 'String'>
-    readonly assetType: FieldRef<"AuthzAssetsAccessGrant", 'String'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * AuthzAssetsAccessGrant findUnique
-   */
-  export type AuthzAssetsAccessGrantFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAssetsAccessGrant
-     */
-    select?: AuthzAssetsAccessGrantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAssetsAccessGrant
-     */
-    omit?: AuthzAssetsAccessGrantOmit<ExtArgs> | null
-    /**
-     * Filter, which AuthzAssetsAccessGrant to fetch.
-     */
-    where: AuthzAssetsAccessGrantWhereUniqueInput
-  }
-
-  /**
-   * AuthzAssetsAccessGrant findUniqueOrThrow
-   */
-  export type AuthzAssetsAccessGrantFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAssetsAccessGrant
-     */
-    select?: AuthzAssetsAccessGrantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAssetsAccessGrant
-     */
-    omit?: AuthzAssetsAccessGrantOmit<ExtArgs> | null
-    /**
-     * Filter, which AuthzAssetsAccessGrant to fetch.
-     */
-    where: AuthzAssetsAccessGrantWhereUniqueInput
-  }
-
-  /**
-   * AuthzAssetsAccessGrant findFirst
-   */
-  export type AuthzAssetsAccessGrantFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAssetsAccessGrant
-     */
-    select?: AuthzAssetsAccessGrantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAssetsAccessGrant
-     */
-    omit?: AuthzAssetsAccessGrantOmit<ExtArgs> | null
-    /**
-     * Filter, which AuthzAssetsAccessGrant to fetch.
-     */
-    where?: AuthzAssetsAccessGrantWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of AuthzAssetsAccessGrants to fetch.
-     */
-    orderBy?: AuthzAssetsAccessGrantOrderByWithRelationInput | AuthzAssetsAccessGrantOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for AuthzAssetsAccessGrants.
-     */
-    cursor?: AuthzAssetsAccessGrantWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` AuthzAssetsAccessGrants from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` AuthzAssetsAccessGrants.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of AuthzAssetsAccessGrants.
-     */
-    distinct?: AuthzAssetsAccessGrantScalarFieldEnum | AuthzAssetsAccessGrantScalarFieldEnum[]
-  }
-
-  /**
-   * AuthzAssetsAccessGrant findFirstOrThrow
-   */
-  export type AuthzAssetsAccessGrantFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAssetsAccessGrant
-     */
-    select?: AuthzAssetsAccessGrantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAssetsAccessGrant
-     */
-    omit?: AuthzAssetsAccessGrantOmit<ExtArgs> | null
-    /**
-     * Filter, which AuthzAssetsAccessGrant to fetch.
-     */
-    where?: AuthzAssetsAccessGrantWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of AuthzAssetsAccessGrants to fetch.
-     */
-    orderBy?: AuthzAssetsAccessGrantOrderByWithRelationInput | AuthzAssetsAccessGrantOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for AuthzAssetsAccessGrants.
-     */
-    cursor?: AuthzAssetsAccessGrantWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` AuthzAssetsAccessGrants from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` AuthzAssetsAccessGrants.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of AuthzAssetsAccessGrants.
-     */
-    distinct?: AuthzAssetsAccessGrantScalarFieldEnum | AuthzAssetsAccessGrantScalarFieldEnum[]
-  }
-
-  /**
-   * AuthzAssetsAccessGrant findMany
-   */
-  export type AuthzAssetsAccessGrantFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAssetsAccessGrant
-     */
-    select?: AuthzAssetsAccessGrantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAssetsAccessGrant
-     */
-    omit?: AuthzAssetsAccessGrantOmit<ExtArgs> | null
-    /**
-     * Filter, which AuthzAssetsAccessGrants to fetch.
-     */
-    where?: AuthzAssetsAccessGrantWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of AuthzAssetsAccessGrants to fetch.
-     */
-    orderBy?: AuthzAssetsAccessGrantOrderByWithRelationInput | AuthzAssetsAccessGrantOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing AuthzAssetsAccessGrants.
-     */
-    cursor?: AuthzAssetsAccessGrantWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` AuthzAssetsAccessGrants from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` AuthzAssetsAccessGrants.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of AuthzAssetsAccessGrants.
-     */
-    distinct?: AuthzAssetsAccessGrantScalarFieldEnum | AuthzAssetsAccessGrantScalarFieldEnum[]
-  }
-
-  /**
-   * AuthzAssetsAccessGrant create
-   */
-  export type AuthzAssetsAccessGrantCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAssetsAccessGrant
-     */
-    select?: AuthzAssetsAccessGrantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAssetsAccessGrant
-     */
-    omit?: AuthzAssetsAccessGrantOmit<ExtArgs> | null
-    /**
-     * The data needed to create a AuthzAssetsAccessGrant.
-     */
-    data: XOR<AuthzAssetsAccessGrantCreateInput, AuthzAssetsAccessGrantUncheckedCreateInput>
-  }
-
-  /**
-   * AuthzAssetsAccessGrant createMany
-   */
-  export type AuthzAssetsAccessGrantCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many AuthzAssetsAccessGrants.
-     */
-    data: AuthzAssetsAccessGrantCreateManyInput | AuthzAssetsAccessGrantCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * AuthzAssetsAccessGrant createManyAndReturn
-   */
-  export type AuthzAssetsAccessGrantCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAssetsAccessGrant
-     */
-    select?: AuthzAssetsAccessGrantSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAssetsAccessGrant
-     */
-    omit?: AuthzAssetsAccessGrantOmit<ExtArgs> | null
-    /**
-     * The data used to create many AuthzAssetsAccessGrants.
-     */
-    data: AuthzAssetsAccessGrantCreateManyInput | AuthzAssetsAccessGrantCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * AuthzAssetsAccessGrant update
-   */
-  export type AuthzAssetsAccessGrantUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAssetsAccessGrant
-     */
-    select?: AuthzAssetsAccessGrantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAssetsAccessGrant
-     */
-    omit?: AuthzAssetsAccessGrantOmit<ExtArgs> | null
-    /**
-     * The data needed to update a AuthzAssetsAccessGrant.
-     */
-    data: XOR<AuthzAssetsAccessGrantUpdateInput, AuthzAssetsAccessGrantUncheckedUpdateInput>
-    /**
-     * Choose, which AuthzAssetsAccessGrant to update.
-     */
-    where: AuthzAssetsAccessGrantWhereUniqueInput
-  }
-
-  /**
-   * AuthzAssetsAccessGrant updateMany
-   */
-  export type AuthzAssetsAccessGrantUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update AuthzAssetsAccessGrants.
-     */
-    data: XOR<AuthzAssetsAccessGrantUpdateManyMutationInput, AuthzAssetsAccessGrantUncheckedUpdateManyInput>
-    /**
-     * Filter which AuthzAssetsAccessGrants to update
-     */
-    where?: AuthzAssetsAccessGrantWhereInput
-    /**
-     * Limit how many AuthzAssetsAccessGrants to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * AuthzAssetsAccessGrant updateManyAndReturn
-   */
-  export type AuthzAssetsAccessGrantUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAssetsAccessGrant
-     */
-    select?: AuthzAssetsAccessGrantSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAssetsAccessGrant
-     */
-    omit?: AuthzAssetsAccessGrantOmit<ExtArgs> | null
-    /**
-     * The data used to update AuthzAssetsAccessGrants.
-     */
-    data: XOR<AuthzAssetsAccessGrantUpdateManyMutationInput, AuthzAssetsAccessGrantUncheckedUpdateManyInput>
-    /**
-     * Filter which AuthzAssetsAccessGrants to update
-     */
-    where?: AuthzAssetsAccessGrantWhereInput
-    /**
-     * Limit how many AuthzAssetsAccessGrants to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * AuthzAssetsAccessGrant upsert
-   */
-  export type AuthzAssetsAccessGrantUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAssetsAccessGrant
-     */
-    select?: AuthzAssetsAccessGrantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAssetsAccessGrant
-     */
-    omit?: AuthzAssetsAccessGrantOmit<ExtArgs> | null
-    /**
-     * The filter to search for the AuthzAssetsAccessGrant to update in case it exists.
-     */
-    where: AuthzAssetsAccessGrantWhereUniqueInput
-    /**
-     * In case the AuthzAssetsAccessGrant found by the `where` argument doesn't exist, create a new AuthzAssetsAccessGrant with this data.
-     */
-    create: XOR<AuthzAssetsAccessGrantCreateInput, AuthzAssetsAccessGrantUncheckedCreateInput>
-    /**
-     * In case the AuthzAssetsAccessGrant was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<AuthzAssetsAccessGrantUpdateInput, AuthzAssetsAccessGrantUncheckedUpdateInput>
-  }
-
-  /**
-   * AuthzAssetsAccessGrant delete
-   */
-  export type AuthzAssetsAccessGrantDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAssetsAccessGrant
-     */
-    select?: AuthzAssetsAccessGrantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAssetsAccessGrant
-     */
-    omit?: AuthzAssetsAccessGrantOmit<ExtArgs> | null
-    /**
-     * Filter which AuthzAssetsAccessGrant to delete.
-     */
-    where: AuthzAssetsAccessGrantWhereUniqueInput
-  }
-
-  /**
-   * AuthzAssetsAccessGrant deleteMany
-   */
-  export type AuthzAssetsAccessGrantDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which AuthzAssetsAccessGrants to delete
-     */
-    where?: AuthzAssetsAccessGrantWhereInput
-    /**
-     * Limit how many AuthzAssetsAccessGrants to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * AuthzAssetsAccessGrant without action
-   */
-  export type AuthzAssetsAccessGrantDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuthzAssetsAccessGrant
-     */
-    select?: AuthzAssetsAccessGrantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuthzAssetsAccessGrant
-     */
-    omit?: AuthzAssetsAccessGrantOmit<ExtArgs> | null
+    include?: AuthzAccessInclude<ExtArgs> | null
   }
 
 
@@ -31001,27 +30165,16 @@ export namespace Prisma {
   export type AuthzRoleCapabilityScalarFieldEnum = (typeof AuthzRoleCapabilityScalarFieldEnum)[keyof typeof AuthzRoleCapabilityScalarFieldEnum]
 
 
-  export const AuthzAccountAccessGrantScalarFieldEnum: {
+  export const AuthzAccessScalarFieldEnum: {
     id: 'id',
-    ownerAccountId: 'ownerAccountId',
-    targetAccountId: 'targetAccountId',
+    toAccountId: 'toAccountId',
+    forServerId: 'forServerId',
     roleId: 'roleId',
-    portfolioId: 'portfolioId'
+    status: 'status',
+    moreDetails: 'moreDetails'
   };
 
-  export type AuthzAccountAccessGrantScalarFieldEnum = (typeof AuthzAccountAccessGrantScalarFieldEnum)[keyof typeof AuthzAccountAccessGrantScalarFieldEnum]
-
-
-  export const AuthzAssetsAccessGrantScalarFieldEnum: {
-    id: 'id',
-    assetId: 'assetId',
-    accountId: 'accountId',
-    roleId: 'roleId',
-    portfolioId: 'portfolioId',
-    assetType: 'assetType'
-  };
-
-  export type AuthzAssetsAccessGrantScalarFieldEnum = (typeof AuthzAssetsAccessGrantScalarFieldEnum)[keyof typeof AuthzAssetsAccessGrantScalarFieldEnum]
+  export type AuthzAccessScalarFieldEnum = (typeof AuthzAccessScalarFieldEnum)[keyof typeof AuthzAccessScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -31204,6 +30357,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Server"> | Date | string
     updatedAt?: DateTimeFilter<"Server"> | Date | string
     applicationServerMaps?: ApplicationServerMapListRelationFilter
+    authzAccesses?: AuthzAccessListRelationFilter
   }
 
   export type ServerOrderByWithRelationInput = {
@@ -31222,6 +30376,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     applicationServerMaps?: ApplicationServerMapOrderByRelationAggregateInput
+    authzAccesses?: AuthzAccessOrderByRelationAggregateInput
   }
 
   export type ServerWhereUniqueInput = Prisma.AtLeast<{
@@ -31243,6 +30398,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Server"> | Date | string
     updatedAt?: DateTimeFilter<"Server"> | Date | string
     applicationServerMaps?: ApplicationServerMapListRelationFilter
+    authzAccesses?: AuthzAccessListRelationFilter
   }, "id">
 
   export type ServerOrderByWithAggregationInput = {
@@ -32453,6 +31609,7 @@ export namespace Prisma {
     displayImage?: StringNullableFilter<"Account"> | string | null
     neupid?: StringNullableFilter<"Account"> | string | null
     permits?: PermitListRelationFilter
+    authzAccesses?: AuthzAccessListRelationFilter
   }
 
   export type AccountOrderByWithRelationInput = {
@@ -32461,6 +31618,7 @@ export namespace Prisma {
     displayImage?: SortOrderInput | SortOrder
     neupid?: SortOrderInput | SortOrder
     permits?: PermitOrderByRelationAggregateInput
+    authzAccesses?: AuthzAccessOrderByRelationAggregateInput
   }
 
   export type AccountWhereUniqueInput = Prisma.AtLeast<{
@@ -32472,6 +31630,7 @@ export namespace Prisma {
     displayImage?: StringNullableFilter<"Account"> | string | null
     neupid?: StringNullableFilter<"Account"> | string | null
     permits?: PermitListRelationFilter
+    authzAccesses?: AuthzAccessListRelationFilter
   }, "id">
 
   export type AccountOrderByWithAggregationInput = {
@@ -32562,6 +31721,7 @@ export namespace Prisma {
     name?: StringFilter<"AuthzRole"> | string
     description?: StringNullableFilter<"AuthzRole"> | string | null
     scope?: StringNullableFilter<"AuthzRole"> | string | null
+    authzAccesses?: AuthzAccessListRelationFilter
   }
 
   export type AuthzRoleOrderByWithRelationInput = {
@@ -32569,6 +31729,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrderInput | SortOrder
     scope?: SortOrderInput | SortOrder
+    authzAccesses?: AuthzAccessOrderByRelationAggregateInput
   }
 
   export type AuthzRoleWhereUniqueInput = Prisma.AtLeast<{
@@ -32579,6 +31740,7 @@ export namespace Prisma {
     name?: StringFilter<"AuthzRole"> | string
     description?: StringNullableFilter<"AuthzRole"> | string | null
     scope?: StringNullableFilter<"AuthzRole"> | string | null
+    authzAccesses?: AuthzAccessListRelationFilter
   }, "id">
 
   export type AuthzRoleOrderByWithAggregationInput = {
@@ -32705,113 +31867,70 @@ export namespace Prisma {
     roleName?: StringNullableWithAggregatesFilter<"AuthzRoleCapability"> | string | null
   }
 
-  export type AuthzAccountAccessGrantWhereInput = {
-    AND?: AuthzAccountAccessGrantWhereInput | AuthzAccountAccessGrantWhereInput[]
-    OR?: AuthzAccountAccessGrantWhereInput[]
-    NOT?: AuthzAccountAccessGrantWhereInput | AuthzAccountAccessGrantWhereInput[]
-    id?: StringFilter<"AuthzAccountAccessGrant"> | string
-    ownerAccountId?: StringFilter<"AuthzAccountAccessGrant"> | string
-    targetAccountId?: StringFilter<"AuthzAccountAccessGrant"> | string
-    roleId?: StringFilter<"AuthzAccountAccessGrant"> | string
-    portfolioId?: StringNullableFilter<"AuthzAccountAccessGrant"> | string | null
+  export type AuthzAccessWhereInput = {
+    AND?: AuthzAccessWhereInput | AuthzAccessWhereInput[]
+    OR?: AuthzAccessWhereInput[]
+    NOT?: AuthzAccessWhereInput | AuthzAccessWhereInput[]
+    id?: StringFilter<"AuthzAccess"> | string
+    toAccountId?: StringFilter<"AuthzAccess"> | string
+    forServerId?: StringFilter<"AuthzAccess"> | string
+    roleId?: StringFilter<"AuthzAccess"> | string
+    status?: StringFilter<"AuthzAccess"> | string
+    moreDetails?: JsonFilter<"AuthzAccess">
+    toAccount?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    forServer?: XOR<ServerScalarRelationFilter, ServerWhereInput>
+    role?: XOR<AuthzRoleScalarRelationFilter, AuthzRoleWhereInput>
   }
 
-  export type AuthzAccountAccessGrantOrderByWithRelationInput = {
+  export type AuthzAccessOrderByWithRelationInput = {
     id?: SortOrder
-    ownerAccountId?: SortOrder
-    targetAccountId?: SortOrder
+    toAccountId?: SortOrder
+    forServerId?: SortOrder
     roleId?: SortOrder
-    portfolioId?: SortOrderInput | SortOrder
+    status?: SortOrder
+    moreDetails?: SortOrder
+    toAccount?: AccountOrderByWithRelationInput
+    forServer?: ServerOrderByWithRelationInput
+    role?: AuthzRoleOrderByWithRelationInput
   }
 
-  export type AuthzAccountAccessGrantWhereUniqueInput = Prisma.AtLeast<{
+  export type AuthzAccessWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    AND?: AuthzAccountAccessGrantWhereInput | AuthzAccountAccessGrantWhereInput[]
-    OR?: AuthzAccountAccessGrantWhereInput[]
-    NOT?: AuthzAccountAccessGrantWhereInput | AuthzAccountAccessGrantWhereInput[]
-    ownerAccountId?: StringFilter<"AuthzAccountAccessGrant"> | string
-    targetAccountId?: StringFilter<"AuthzAccountAccessGrant"> | string
-    roleId?: StringFilter<"AuthzAccountAccessGrant"> | string
-    portfolioId?: StringNullableFilter<"AuthzAccountAccessGrant"> | string | null
+    AND?: AuthzAccessWhereInput | AuthzAccessWhereInput[]
+    OR?: AuthzAccessWhereInput[]
+    NOT?: AuthzAccessWhereInput | AuthzAccessWhereInput[]
+    toAccountId?: StringFilter<"AuthzAccess"> | string
+    forServerId?: StringFilter<"AuthzAccess"> | string
+    roleId?: StringFilter<"AuthzAccess"> | string
+    status?: StringFilter<"AuthzAccess"> | string
+    moreDetails?: JsonFilter<"AuthzAccess">
+    toAccount?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    forServer?: XOR<ServerScalarRelationFilter, ServerWhereInput>
+    role?: XOR<AuthzRoleScalarRelationFilter, AuthzRoleWhereInput>
   }, "id">
 
-  export type AuthzAccountAccessGrantOrderByWithAggregationInput = {
+  export type AuthzAccessOrderByWithAggregationInput = {
     id?: SortOrder
-    ownerAccountId?: SortOrder
-    targetAccountId?: SortOrder
+    toAccountId?: SortOrder
+    forServerId?: SortOrder
     roleId?: SortOrder
-    portfolioId?: SortOrderInput | SortOrder
-    _count?: AuthzAccountAccessGrantCountOrderByAggregateInput
-    _max?: AuthzAccountAccessGrantMaxOrderByAggregateInput
-    _min?: AuthzAccountAccessGrantMinOrderByAggregateInput
+    status?: SortOrder
+    moreDetails?: SortOrder
+    _count?: AuthzAccessCountOrderByAggregateInput
+    _max?: AuthzAccessMaxOrderByAggregateInput
+    _min?: AuthzAccessMinOrderByAggregateInput
   }
 
-  export type AuthzAccountAccessGrantScalarWhereWithAggregatesInput = {
-    AND?: AuthzAccountAccessGrantScalarWhereWithAggregatesInput | AuthzAccountAccessGrantScalarWhereWithAggregatesInput[]
-    OR?: AuthzAccountAccessGrantScalarWhereWithAggregatesInput[]
-    NOT?: AuthzAccountAccessGrantScalarWhereWithAggregatesInput | AuthzAccountAccessGrantScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"AuthzAccountAccessGrant"> | string
-    ownerAccountId?: StringWithAggregatesFilter<"AuthzAccountAccessGrant"> | string
-    targetAccountId?: StringWithAggregatesFilter<"AuthzAccountAccessGrant"> | string
-    roleId?: StringWithAggregatesFilter<"AuthzAccountAccessGrant"> | string
-    portfolioId?: StringNullableWithAggregatesFilter<"AuthzAccountAccessGrant"> | string | null
-  }
-
-  export type AuthzAssetsAccessGrantWhereInput = {
-    AND?: AuthzAssetsAccessGrantWhereInput | AuthzAssetsAccessGrantWhereInput[]
-    OR?: AuthzAssetsAccessGrantWhereInput[]
-    NOT?: AuthzAssetsAccessGrantWhereInput | AuthzAssetsAccessGrantWhereInput[]
-    id?: StringFilter<"AuthzAssetsAccessGrant"> | string
-    assetId?: StringFilter<"AuthzAssetsAccessGrant"> | string
-    accountId?: StringFilter<"AuthzAssetsAccessGrant"> | string
-    roleId?: StringFilter<"AuthzAssetsAccessGrant"> | string
-    portfolioId?: StringNullableFilter<"AuthzAssetsAccessGrant"> | string | null
-    assetType?: StringNullableFilter<"AuthzAssetsAccessGrant"> | string | null
-  }
-
-  export type AuthzAssetsAccessGrantOrderByWithRelationInput = {
-    id?: SortOrder
-    assetId?: SortOrder
-    accountId?: SortOrder
-    roleId?: SortOrder
-    portfolioId?: SortOrderInput | SortOrder
-    assetType?: SortOrderInput | SortOrder
-  }
-
-  export type AuthzAssetsAccessGrantWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: AuthzAssetsAccessGrantWhereInput | AuthzAssetsAccessGrantWhereInput[]
-    OR?: AuthzAssetsAccessGrantWhereInput[]
-    NOT?: AuthzAssetsAccessGrantWhereInput | AuthzAssetsAccessGrantWhereInput[]
-    assetId?: StringFilter<"AuthzAssetsAccessGrant"> | string
-    accountId?: StringFilter<"AuthzAssetsAccessGrant"> | string
-    roleId?: StringFilter<"AuthzAssetsAccessGrant"> | string
-    portfolioId?: StringNullableFilter<"AuthzAssetsAccessGrant"> | string | null
-    assetType?: StringNullableFilter<"AuthzAssetsAccessGrant"> | string | null
-  }, "id">
-
-  export type AuthzAssetsAccessGrantOrderByWithAggregationInput = {
-    id?: SortOrder
-    assetId?: SortOrder
-    accountId?: SortOrder
-    roleId?: SortOrder
-    portfolioId?: SortOrderInput | SortOrder
-    assetType?: SortOrderInput | SortOrder
-    _count?: AuthzAssetsAccessGrantCountOrderByAggregateInput
-    _max?: AuthzAssetsAccessGrantMaxOrderByAggregateInput
-    _min?: AuthzAssetsAccessGrantMinOrderByAggregateInput
-  }
-
-  export type AuthzAssetsAccessGrantScalarWhereWithAggregatesInput = {
-    AND?: AuthzAssetsAccessGrantScalarWhereWithAggregatesInput | AuthzAssetsAccessGrantScalarWhereWithAggregatesInput[]
-    OR?: AuthzAssetsAccessGrantScalarWhereWithAggregatesInput[]
-    NOT?: AuthzAssetsAccessGrantScalarWhereWithAggregatesInput | AuthzAssetsAccessGrantScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"AuthzAssetsAccessGrant"> | string
-    assetId?: StringWithAggregatesFilter<"AuthzAssetsAccessGrant"> | string
-    accountId?: StringWithAggregatesFilter<"AuthzAssetsAccessGrant"> | string
-    roleId?: StringWithAggregatesFilter<"AuthzAssetsAccessGrant"> | string
-    portfolioId?: StringNullableWithAggregatesFilter<"AuthzAssetsAccessGrant"> | string | null
-    assetType?: StringNullableWithAggregatesFilter<"AuthzAssetsAccessGrant"> | string | null
+  export type AuthzAccessScalarWhereWithAggregatesInput = {
+    AND?: AuthzAccessScalarWhereWithAggregatesInput | AuthzAccessScalarWhereWithAggregatesInput[]
+    OR?: AuthzAccessScalarWhereWithAggregatesInput[]
+    NOT?: AuthzAccessScalarWhereWithAggregatesInput | AuthzAccessScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AuthzAccess"> | string
+    toAccountId?: StringWithAggregatesFilter<"AuthzAccess"> | string
+    forServerId?: StringWithAggregatesFilter<"AuthzAccess"> | string
+    roleId?: StringWithAggregatesFilter<"AuthzAccess"> | string
+    status?: StringWithAggregatesFilter<"AuthzAccess"> | string
+    moreDetails?: JsonWithAggregatesFilter<"AuthzAccess">
   }
 
   export type ServerCreateInput = {
@@ -32830,6 +31949,7 @@ export namespace Prisma {
     createdAt: Date | string
     updatedAt: Date | string
     applicationServerMaps?: ApplicationServerMapCreateNestedManyWithoutServerInput
+    authzAccesses?: AuthzAccessCreateNestedManyWithoutForServerInput
   }
 
   export type ServerUncheckedCreateInput = {
@@ -32848,6 +31968,7 @@ export namespace Prisma {
     createdAt: Date | string
     updatedAt: Date | string
     applicationServerMaps?: ApplicationServerMapUncheckedCreateNestedManyWithoutServerInput
+    authzAccesses?: AuthzAccessUncheckedCreateNestedManyWithoutForServerInput
   }
 
   export type ServerUpdateInput = {
@@ -32866,6 +31987,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     applicationServerMaps?: ApplicationServerMapUpdateManyWithoutServerNestedInput
+    authzAccesses?: AuthzAccessUpdateManyWithoutForServerNestedInput
   }
 
   export type ServerUncheckedUpdateInput = {
@@ -32884,6 +32006,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     applicationServerMaps?: ApplicationServerMapUncheckedUpdateManyWithoutServerNestedInput
+    authzAccesses?: AuthzAccessUncheckedUpdateManyWithoutForServerNestedInput
   }
 
   export type ServerCreateManyInput = {
@@ -34225,6 +33348,7 @@ export namespace Prisma {
     displayImage?: string | null
     neupid?: string | null
     permits?: PermitCreateNestedManyWithoutAccountInput
+    authzAccesses?: AuthzAccessCreateNestedManyWithoutToAccountInput
   }
 
   export type AccountUncheckedCreateInput = {
@@ -34233,6 +33357,7 @@ export namespace Prisma {
     displayImage?: string | null
     neupid?: string | null
     permits?: PermitUncheckedCreateNestedManyWithoutAccountInput
+    authzAccesses?: AuthzAccessUncheckedCreateNestedManyWithoutToAccountInput
   }
 
   export type AccountUpdateInput = {
@@ -34241,6 +33366,7 @@ export namespace Prisma {
     displayImage?: NullableStringFieldUpdateOperationsInput | string | null
     neupid?: NullableStringFieldUpdateOperationsInput | string | null
     permits?: PermitUpdateManyWithoutAccountNestedInput
+    authzAccesses?: AuthzAccessUpdateManyWithoutToAccountNestedInput
   }
 
   export type AccountUncheckedUpdateInput = {
@@ -34249,6 +33375,7 @@ export namespace Prisma {
     displayImage?: NullableStringFieldUpdateOperationsInput | string | null
     neupid?: NullableStringFieldUpdateOperationsInput | string | null
     permits?: PermitUncheckedUpdateManyWithoutAccountNestedInput
+    authzAccesses?: AuthzAccessUncheckedUpdateManyWithoutToAccountNestedInput
   }
 
   export type AccountCreateManyInput = {
@@ -34339,6 +33466,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     scope?: string | null
+    authzAccesses?: AuthzAccessCreateNestedManyWithoutRoleInput
   }
 
   export type AuthzRoleUncheckedCreateInput = {
@@ -34346,6 +33474,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     scope?: string | null
+    authzAccesses?: AuthzAccessUncheckedCreateNestedManyWithoutRoleInput
   }
 
   export type AuthzRoleUpdateInput = {
@@ -34353,6 +33482,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
+    authzAccesses?: AuthzAccessUpdateManyWithoutRoleNestedInput
   }
 
   export type AuthzRoleUncheckedUpdateInput = {
@@ -34360,6 +33490,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
+    authzAccesses?: AuthzAccessUncheckedUpdateManyWithoutRoleNestedInput
   }
 
   export type AuthzRoleCreateManyInput = {
@@ -34495,123 +33626,64 @@ export namespace Prisma {
     roleName?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type AuthzAccountAccessGrantCreateInput = {
+  export type AuthzAccessCreateInput = {
     id?: string
-    ownerAccountId: string
-    targetAccountId: string
-    roleId: string
-    portfolioId?: string | null
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
+    toAccount: AccountCreateNestedOneWithoutAuthzAccessesInput
+    forServer: ServerCreateNestedOneWithoutAuthzAccessesInput
+    role: AuthzRoleCreateNestedOneWithoutAuthzAccessesInput
   }
 
-  export type AuthzAccountAccessGrantUncheckedCreateInput = {
+  export type AuthzAccessUncheckedCreateInput = {
     id?: string
-    ownerAccountId: string
-    targetAccountId: string
+    toAccountId: string
+    forServerId: string
     roleId: string
-    portfolioId?: string | null
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
   }
 
-  export type AuthzAccountAccessGrantUpdateInput = {
+  export type AuthzAccessUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    ownerAccountId?: StringFieldUpdateOperationsInput | string
-    targetAccountId?: StringFieldUpdateOperationsInput | string
-    roleId?: StringFieldUpdateOperationsInput | string
-    portfolioId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
+    toAccount?: AccountUpdateOneRequiredWithoutAuthzAccessesNestedInput
+    forServer?: ServerUpdateOneRequiredWithoutAuthzAccessesNestedInput
+    role?: AuthzRoleUpdateOneRequiredWithoutAuthzAccessesNestedInput
   }
 
-  export type AuthzAccountAccessGrantUncheckedUpdateInput = {
+  export type AuthzAccessUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    ownerAccountId?: StringFieldUpdateOperationsInput | string
-    targetAccountId?: StringFieldUpdateOperationsInput | string
+    toAccountId?: StringFieldUpdateOperationsInput | string
+    forServerId?: StringFieldUpdateOperationsInput | string
     roleId?: StringFieldUpdateOperationsInput | string
-    portfolioId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
   }
 
-  export type AuthzAccountAccessGrantCreateManyInput = {
+  export type AuthzAccessCreateManyInput = {
     id?: string
-    ownerAccountId: string
-    targetAccountId: string
+    toAccountId: string
+    forServerId: string
     roleId: string
-    portfolioId?: string | null
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
   }
 
-  export type AuthzAccountAccessGrantUpdateManyMutationInput = {
+  export type AuthzAccessUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    ownerAccountId?: StringFieldUpdateOperationsInput | string
-    targetAccountId?: StringFieldUpdateOperationsInput | string
-    roleId?: StringFieldUpdateOperationsInput | string
-    portfolioId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
   }
 
-  export type AuthzAccountAccessGrantUncheckedUpdateManyInput = {
+  export type AuthzAccessUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    ownerAccountId?: StringFieldUpdateOperationsInput | string
-    targetAccountId?: StringFieldUpdateOperationsInput | string
+    toAccountId?: StringFieldUpdateOperationsInput | string
+    forServerId?: StringFieldUpdateOperationsInput | string
     roleId?: StringFieldUpdateOperationsInput | string
-    portfolioId?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type AuthzAssetsAccessGrantCreateInput = {
-    id?: string
-    assetId: string
-    accountId: string
-    roleId: string
-    portfolioId?: string | null
-    assetType?: string | null
-  }
-
-  export type AuthzAssetsAccessGrantUncheckedCreateInput = {
-    id?: string
-    assetId: string
-    accountId: string
-    roleId: string
-    portfolioId?: string | null
-    assetType?: string | null
-  }
-
-  export type AuthzAssetsAccessGrantUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    assetId?: StringFieldUpdateOperationsInput | string
-    accountId?: StringFieldUpdateOperationsInput | string
-    roleId?: StringFieldUpdateOperationsInput | string
-    portfolioId?: NullableStringFieldUpdateOperationsInput | string | null
-    assetType?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type AuthzAssetsAccessGrantUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    assetId?: StringFieldUpdateOperationsInput | string
-    accountId?: StringFieldUpdateOperationsInput | string
-    roleId?: StringFieldUpdateOperationsInput | string
-    portfolioId?: NullableStringFieldUpdateOperationsInput | string | null
-    assetType?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type AuthzAssetsAccessGrantCreateManyInput = {
-    id?: string
-    assetId: string
-    accountId: string
-    roleId: string
-    portfolioId?: string | null
-    assetType?: string | null
-  }
-
-  export type AuthzAssetsAccessGrantUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    assetId?: StringFieldUpdateOperationsInput | string
-    accountId?: StringFieldUpdateOperationsInput | string
-    roleId?: StringFieldUpdateOperationsInput | string
-    portfolioId?: NullableStringFieldUpdateOperationsInput | string | null
-    assetType?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type AuthzAssetsAccessGrantUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    assetId?: StringFieldUpdateOperationsInput | string
-    accountId?: StringFieldUpdateOperationsInput | string
-    roleId?: StringFieldUpdateOperationsInput | string
-    portfolioId?: NullableStringFieldUpdateOperationsInput | string | null
-    assetType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -34661,12 +33733,22 @@ export namespace Prisma {
     none?: ApplicationServerMapWhereInput
   }
 
+  export type AuthzAccessListRelationFilter = {
+    every?: AuthzAccessWhereInput
+    some?: AuthzAccessWhereInput
+    none?: AuthzAccessWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
   }
 
   export type ApplicationServerMapOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AuthzAccessOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -35782,55 +34864,34 @@ export namespace Prisma {
     roleName?: SortOrder
   }
 
-  export type AuthzAccountAccessGrantCountOrderByAggregateInput = {
-    id?: SortOrder
-    ownerAccountId?: SortOrder
-    targetAccountId?: SortOrder
-    roleId?: SortOrder
-    portfolioId?: SortOrder
+  export type AuthzRoleScalarRelationFilter = {
+    is?: AuthzRoleWhereInput
+    isNot?: AuthzRoleWhereInput
   }
 
-  export type AuthzAccountAccessGrantMaxOrderByAggregateInput = {
+  export type AuthzAccessCountOrderByAggregateInput = {
     id?: SortOrder
-    ownerAccountId?: SortOrder
-    targetAccountId?: SortOrder
+    toAccountId?: SortOrder
+    forServerId?: SortOrder
     roleId?: SortOrder
-    portfolioId?: SortOrder
+    status?: SortOrder
+    moreDetails?: SortOrder
   }
 
-  export type AuthzAccountAccessGrantMinOrderByAggregateInput = {
+  export type AuthzAccessMaxOrderByAggregateInput = {
     id?: SortOrder
-    ownerAccountId?: SortOrder
-    targetAccountId?: SortOrder
+    toAccountId?: SortOrder
+    forServerId?: SortOrder
     roleId?: SortOrder
-    portfolioId?: SortOrder
+    status?: SortOrder
   }
 
-  export type AuthzAssetsAccessGrantCountOrderByAggregateInput = {
+  export type AuthzAccessMinOrderByAggregateInput = {
     id?: SortOrder
-    assetId?: SortOrder
-    accountId?: SortOrder
+    toAccountId?: SortOrder
+    forServerId?: SortOrder
     roleId?: SortOrder
-    portfolioId?: SortOrder
-    assetType?: SortOrder
-  }
-
-  export type AuthzAssetsAccessGrantMaxOrderByAggregateInput = {
-    id?: SortOrder
-    assetId?: SortOrder
-    accountId?: SortOrder
-    roleId?: SortOrder
-    portfolioId?: SortOrder
-    assetType?: SortOrder
-  }
-
-  export type AuthzAssetsAccessGrantMinOrderByAggregateInput = {
-    id?: SortOrder
-    assetId?: SortOrder
-    accountId?: SortOrder
-    roleId?: SortOrder
-    portfolioId?: SortOrder
-    assetType?: SortOrder
+    status?: SortOrder
   }
 
   export type ApplicationServerMapCreateNestedManyWithoutServerInput = {
@@ -35840,11 +34901,25 @@ export namespace Prisma {
     connect?: ApplicationServerMapWhereUniqueInput | ApplicationServerMapWhereUniqueInput[]
   }
 
+  export type AuthzAccessCreateNestedManyWithoutForServerInput = {
+    create?: XOR<AuthzAccessCreateWithoutForServerInput, AuthzAccessUncheckedCreateWithoutForServerInput> | AuthzAccessCreateWithoutForServerInput[] | AuthzAccessUncheckedCreateWithoutForServerInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutForServerInput | AuthzAccessCreateOrConnectWithoutForServerInput[]
+    createMany?: AuthzAccessCreateManyForServerInputEnvelope
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+  }
+
   export type ApplicationServerMapUncheckedCreateNestedManyWithoutServerInput = {
     create?: XOR<ApplicationServerMapCreateWithoutServerInput, ApplicationServerMapUncheckedCreateWithoutServerInput> | ApplicationServerMapCreateWithoutServerInput[] | ApplicationServerMapUncheckedCreateWithoutServerInput[]
     connectOrCreate?: ApplicationServerMapCreateOrConnectWithoutServerInput | ApplicationServerMapCreateOrConnectWithoutServerInput[]
     createMany?: ApplicationServerMapCreateManyServerInputEnvelope
     connect?: ApplicationServerMapWhereUniqueInput | ApplicationServerMapWhereUniqueInput[]
+  }
+
+  export type AuthzAccessUncheckedCreateNestedManyWithoutForServerInput = {
+    create?: XOR<AuthzAccessCreateWithoutForServerInput, AuthzAccessUncheckedCreateWithoutForServerInput> | AuthzAccessCreateWithoutForServerInput[] | AuthzAccessUncheckedCreateWithoutForServerInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutForServerInput | AuthzAccessCreateOrConnectWithoutForServerInput[]
+    createMany?: AuthzAccessCreateManyForServerInputEnvelope
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -35873,6 +34948,20 @@ export namespace Prisma {
     deleteMany?: ApplicationServerMapScalarWhereInput | ApplicationServerMapScalarWhereInput[]
   }
 
+  export type AuthzAccessUpdateManyWithoutForServerNestedInput = {
+    create?: XOR<AuthzAccessCreateWithoutForServerInput, AuthzAccessUncheckedCreateWithoutForServerInput> | AuthzAccessCreateWithoutForServerInput[] | AuthzAccessUncheckedCreateWithoutForServerInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutForServerInput | AuthzAccessCreateOrConnectWithoutForServerInput[]
+    upsert?: AuthzAccessUpsertWithWhereUniqueWithoutForServerInput | AuthzAccessUpsertWithWhereUniqueWithoutForServerInput[]
+    createMany?: AuthzAccessCreateManyForServerInputEnvelope
+    set?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    disconnect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    delete?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    update?: AuthzAccessUpdateWithWhereUniqueWithoutForServerInput | AuthzAccessUpdateWithWhereUniqueWithoutForServerInput[]
+    updateMany?: AuthzAccessUpdateManyWithWhereWithoutForServerInput | AuthzAccessUpdateManyWithWhereWithoutForServerInput[]
+    deleteMany?: AuthzAccessScalarWhereInput | AuthzAccessScalarWhereInput[]
+  }
+
   export type ApplicationServerMapUncheckedUpdateManyWithoutServerNestedInput = {
     create?: XOR<ApplicationServerMapCreateWithoutServerInput, ApplicationServerMapUncheckedCreateWithoutServerInput> | ApplicationServerMapCreateWithoutServerInput[] | ApplicationServerMapUncheckedCreateWithoutServerInput[]
     connectOrCreate?: ApplicationServerMapCreateOrConnectWithoutServerInput | ApplicationServerMapCreateOrConnectWithoutServerInput[]
@@ -35885,6 +34974,20 @@ export namespace Prisma {
     update?: ApplicationServerMapUpdateWithWhereUniqueWithoutServerInput | ApplicationServerMapUpdateWithWhereUniqueWithoutServerInput[]
     updateMany?: ApplicationServerMapUpdateManyWithWhereWithoutServerInput | ApplicationServerMapUpdateManyWithWhereWithoutServerInput[]
     deleteMany?: ApplicationServerMapScalarWhereInput | ApplicationServerMapScalarWhereInput[]
+  }
+
+  export type AuthzAccessUncheckedUpdateManyWithoutForServerNestedInput = {
+    create?: XOR<AuthzAccessCreateWithoutForServerInput, AuthzAccessUncheckedCreateWithoutForServerInput> | AuthzAccessCreateWithoutForServerInput[] | AuthzAccessUncheckedCreateWithoutForServerInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutForServerInput | AuthzAccessCreateOrConnectWithoutForServerInput[]
+    upsert?: AuthzAccessUpsertWithWhereUniqueWithoutForServerInput | AuthzAccessUpsertWithWhereUniqueWithoutForServerInput[]
+    createMany?: AuthzAccessCreateManyForServerInputEnvelope
+    set?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    disconnect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    delete?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    update?: AuthzAccessUpdateWithWhereUniqueWithoutForServerInput | AuthzAccessUpdateWithWhereUniqueWithoutForServerInput[]
+    updateMany?: AuthzAccessUpdateManyWithWhereWithoutForServerInput | AuthzAccessUpdateManyWithWhereWithoutForServerInput[]
+    deleteMany?: AuthzAccessScalarWhereInput | AuthzAccessScalarWhereInput[]
   }
 
   export type SavedCommandCreatenextCommandsInput = {
@@ -36147,11 +35250,25 @@ export namespace Prisma {
     connect?: PermitWhereUniqueInput | PermitWhereUniqueInput[]
   }
 
+  export type AuthzAccessCreateNestedManyWithoutToAccountInput = {
+    create?: XOR<AuthzAccessCreateWithoutToAccountInput, AuthzAccessUncheckedCreateWithoutToAccountInput> | AuthzAccessCreateWithoutToAccountInput[] | AuthzAccessUncheckedCreateWithoutToAccountInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutToAccountInput | AuthzAccessCreateOrConnectWithoutToAccountInput[]
+    createMany?: AuthzAccessCreateManyToAccountInputEnvelope
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+  }
+
   export type PermitUncheckedCreateNestedManyWithoutAccountInput = {
     create?: XOR<PermitCreateWithoutAccountInput, PermitUncheckedCreateWithoutAccountInput> | PermitCreateWithoutAccountInput[] | PermitUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: PermitCreateOrConnectWithoutAccountInput | PermitCreateOrConnectWithoutAccountInput[]
     createMany?: PermitCreateManyAccountInputEnvelope
     connect?: PermitWhereUniqueInput | PermitWhereUniqueInput[]
+  }
+
+  export type AuthzAccessUncheckedCreateNestedManyWithoutToAccountInput = {
+    create?: XOR<AuthzAccessCreateWithoutToAccountInput, AuthzAccessUncheckedCreateWithoutToAccountInput> | AuthzAccessCreateWithoutToAccountInput[] | AuthzAccessUncheckedCreateWithoutToAccountInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutToAccountInput | AuthzAccessCreateOrConnectWithoutToAccountInput[]
+    createMany?: AuthzAccessCreateManyToAccountInputEnvelope
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
   }
 
   export type PermitUpdateManyWithoutAccountNestedInput = {
@@ -36168,6 +35285,20 @@ export namespace Prisma {
     deleteMany?: PermitScalarWhereInput | PermitScalarWhereInput[]
   }
 
+  export type AuthzAccessUpdateManyWithoutToAccountNestedInput = {
+    create?: XOR<AuthzAccessCreateWithoutToAccountInput, AuthzAccessUncheckedCreateWithoutToAccountInput> | AuthzAccessCreateWithoutToAccountInput[] | AuthzAccessUncheckedCreateWithoutToAccountInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutToAccountInput | AuthzAccessCreateOrConnectWithoutToAccountInput[]
+    upsert?: AuthzAccessUpsertWithWhereUniqueWithoutToAccountInput | AuthzAccessUpsertWithWhereUniqueWithoutToAccountInput[]
+    createMany?: AuthzAccessCreateManyToAccountInputEnvelope
+    set?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    disconnect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    delete?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    update?: AuthzAccessUpdateWithWhereUniqueWithoutToAccountInput | AuthzAccessUpdateWithWhereUniqueWithoutToAccountInput[]
+    updateMany?: AuthzAccessUpdateManyWithWhereWithoutToAccountInput | AuthzAccessUpdateManyWithWhereWithoutToAccountInput[]
+    deleteMany?: AuthzAccessScalarWhereInput | AuthzAccessScalarWhereInput[]
+  }
+
   export type PermitUncheckedUpdateManyWithoutAccountNestedInput = {
     create?: XOR<PermitCreateWithoutAccountInput, PermitUncheckedCreateWithoutAccountInput> | PermitCreateWithoutAccountInput[] | PermitUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: PermitCreateOrConnectWithoutAccountInput | PermitCreateOrConnectWithoutAccountInput[]
@@ -36182,6 +35313,20 @@ export namespace Prisma {
     deleteMany?: PermitScalarWhereInput | PermitScalarWhereInput[]
   }
 
+  export type AuthzAccessUncheckedUpdateManyWithoutToAccountNestedInput = {
+    create?: XOR<AuthzAccessCreateWithoutToAccountInput, AuthzAccessUncheckedCreateWithoutToAccountInput> | AuthzAccessCreateWithoutToAccountInput[] | AuthzAccessUncheckedCreateWithoutToAccountInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutToAccountInput | AuthzAccessCreateOrConnectWithoutToAccountInput[]
+    upsert?: AuthzAccessUpsertWithWhereUniqueWithoutToAccountInput | AuthzAccessUpsertWithWhereUniqueWithoutToAccountInput[]
+    createMany?: AuthzAccessCreateManyToAccountInputEnvelope
+    set?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    disconnect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    delete?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    update?: AuthzAccessUpdateWithWhereUniqueWithoutToAccountInput | AuthzAccessUpdateWithWhereUniqueWithoutToAccountInput[]
+    updateMany?: AuthzAccessUpdateManyWithWhereWithoutToAccountInput | AuthzAccessUpdateManyWithWhereWithoutToAccountInput[]
+    deleteMany?: AuthzAccessScalarWhereInput | AuthzAccessScalarWhereInput[]
+  }
+
   export type AccountCreateNestedOneWithoutPermitsInput = {
     create?: XOR<AccountCreateWithoutPermitsInput, AccountUncheckedCreateWithoutPermitsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutPermitsInput
@@ -36194,6 +35339,90 @@ export namespace Prisma {
     upsert?: AccountUpsertWithoutPermitsInput
     connect?: AccountWhereUniqueInput
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutPermitsInput, AccountUpdateWithoutPermitsInput>, AccountUncheckedUpdateWithoutPermitsInput>
+  }
+
+  export type AuthzAccessCreateNestedManyWithoutRoleInput = {
+    create?: XOR<AuthzAccessCreateWithoutRoleInput, AuthzAccessUncheckedCreateWithoutRoleInput> | AuthzAccessCreateWithoutRoleInput[] | AuthzAccessUncheckedCreateWithoutRoleInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutRoleInput | AuthzAccessCreateOrConnectWithoutRoleInput[]
+    createMany?: AuthzAccessCreateManyRoleInputEnvelope
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+  }
+
+  export type AuthzAccessUncheckedCreateNestedManyWithoutRoleInput = {
+    create?: XOR<AuthzAccessCreateWithoutRoleInput, AuthzAccessUncheckedCreateWithoutRoleInput> | AuthzAccessCreateWithoutRoleInput[] | AuthzAccessUncheckedCreateWithoutRoleInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutRoleInput | AuthzAccessCreateOrConnectWithoutRoleInput[]
+    createMany?: AuthzAccessCreateManyRoleInputEnvelope
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+  }
+
+  export type AuthzAccessUpdateManyWithoutRoleNestedInput = {
+    create?: XOR<AuthzAccessCreateWithoutRoleInput, AuthzAccessUncheckedCreateWithoutRoleInput> | AuthzAccessCreateWithoutRoleInput[] | AuthzAccessUncheckedCreateWithoutRoleInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutRoleInput | AuthzAccessCreateOrConnectWithoutRoleInput[]
+    upsert?: AuthzAccessUpsertWithWhereUniqueWithoutRoleInput | AuthzAccessUpsertWithWhereUniqueWithoutRoleInput[]
+    createMany?: AuthzAccessCreateManyRoleInputEnvelope
+    set?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    disconnect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    delete?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    update?: AuthzAccessUpdateWithWhereUniqueWithoutRoleInput | AuthzAccessUpdateWithWhereUniqueWithoutRoleInput[]
+    updateMany?: AuthzAccessUpdateManyWithWhereWithoutRoleInput | AuthzAccessUpdateManyWithWhereWithoutRoleInput[]
+    deleteMany?: AuthzAccessScalarWhereInput | AuthzAccessScalarWhereInput[]
+  }
+
+  export type AuthzAccessUncheckedUpdateManyWithoutRoleNestedInput = {
+    create?: XOR<AuthzAccessCreateWithoutRoleInput, AuthzAccessUncheckedCreateWithoutRoleInput> | AuthzAccessCreateWithoutRoleInput[] | AuthzAccessUncheckedCreateWithoutRoleInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutRoleInput | AuthzAccessCreateOrConnectWithoutRoleInput[]
+    upsert?: AuthzAccessUpsertWithWhereUniqueWithoutRoleInput | AuthzAccessUpsertWithWhereUniqueWithoutRoleInput[]
+    createMany?: AuthzAccessCreateManyRoleInputEnvelope
+    set?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    disconnect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    delete?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    update?: AuthzAccessUpdateWithWhereUniqueWithoutRoleInput | AuthzAccessUpdateWithWhereUniqueWithoutRoleInput[]
+    updateMany?: AuthzAccessUpdateManyWithWhereWithoutRoleInput | AuthzAccessUpdateManyWithWhereWithoutRoleInput[]
+    deleteMany?: AuthzAccessScalarWhereInput | AuthzAccessScalarWhereInput[]
+  }
+
+  export type AccountCreateNestedOneWithoutAuthzAccessesInput = {
+    create?: XOR<AccountCreateWithoutAuthzAccessesInput, AccountUncheckedCreateWithoutAuthzAccessesInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAuthzAccessesInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type ServerCreateNestedOneWithoutAuthzAccessesInput = {
+    create?: XOR<ServerCreateWithoutAuthzAccessesInput, ServerUncheckedCreateWithoutAuthzAccessesInput>
+    connectOrCreate?: ServerCreateOrConnectWithoutAuthzAccessesInput
+    connect?: ServerWhereUniqueInput
+  }
+
+  export type AuthzRoleCreateNestedOneWithoutAuthzAccessesInput = {
+    create?: XOR<AuthzRoleCreateWithoutAuthzAccessesInput, AuthzRoleUncheckedCreateWithoutAuthzAccessesInput>
+    connectOrCreate?: AuthzRoleCreateOrConnectWithoutAuthzAccessesInput
+    connect?: AuthzRoleWhereUniqueInput
+  }
+
+  export type AccountUpdateOneRequiredWithoutAuthzAccessesNestedInput = {
+    create?: XOR<AccountCreateWithoutAuthzAccessesInput, AccountUncheckedCreateWithoutAuthzAccessesInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAuthzAccessesInput
+    upsert?: AccountUpsertWithoutAuthzAccessesInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAuthzAccessesInput, AccountUpdateWithoutAuthzAccessesInput>, AccountUncheckedUpdateWithoutAuthzAccessesInput>
+  }
+
+  export type ServerUpdateOneRequiredWithoutAuthzAccessesNestedInput = {
+    create?: XOR<ServerCreateWithoutAuthzAccessesInput, ServerUncheckedCreateWithoutAuthzAccessesInput>
+    connectOrCreate?: ServerCreateOrConnectWithoutAuthzAccessesInput
+    upsert?: ServerUpsertWithoutAuthzAccessesInput
+    connect?: ServerWhereUniqueInput
+    update?: XOR<XOR<ServerUpdateToOneWithWhereWithoutAuthzAccessesInput, ServerUpdateWithoutAuthzAccessesInput>, ServerUncheckedUpdateWithoutAuthzAccessesInput>
+  }
+
+  export type AuthzRoleUpdateOneRequiredWithoutAuthzAccessesNestedInput = {
+    create?: XOR<AuthzRoleCreateWithoutAuthzAccessesInput, AuthzRoleUncheckedCreateWithoutAuthzAccessesInput>
+    connectOrCreate?: AuthzRoleCreateOrConnectWithoutAuthzAccessesInput
+    upsert?: AuthzRoleUpsertWithoutAuthzAccessesInput
+    connect?: AuthzRoleWhereUniqueInput
+    update?: XOR<XOR<AuthzRoleUpdateToOneWithWhereWithoutAuthzAccessesInput, AuthzRoleUpdateWithoutAuthzAccessesInput>, AuthzRoleUncheckedUpdateWithoutAuthzAccessesInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -36527,6 +35756,32 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type AuthzAccessCreateWithoutForServerInput = {
+    id?: string
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
+    toAccount: AccountCreateNestedOneWithoutAuthzAccessesInput
+    role: AuthzRoleCreateNestedOneWithoutAuthzAccessesInput
+  }
+
+  export type AuthzAccessUncheckedCreateWithoutForServerInput = {
+    id?: string
+    toAccountId: string
+    roleId: string
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
+  }
+
+  export type AuthzAccessCreateOrConnectWithoutForServerInput = {
+    where: AuthzAccessWhereUniqueInput
+    create: XOR<AuthzAccessCreateWithoutForServerInput, AuthzAccessUncheckedCreateWithoutForServerInput>
+  }
+
+  export type AuthzAccessCreateManyForServerInputEnvelope = {
+    data: AuthzAccessCreateManyForServerInput | AuthzAccessCreateManyForServerInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ApplicationServerMapUpsertWithWhereUniqueWithoutServerInput = {
     where: ApplicationServerMapWhereUniqueInput
     update: XOR<ApplicationServerMapUpdateWithoutServerInput, ApplicationServerMapUncheckedUpdateWithoutServerInput>
@@ -36552,6 +35807,34 @@ export namespace Prisma {
     applicationId?: StringFilter<"ApplicationServerMap"> | string
     status?: EnumApplicationServerMapStatusFilter<"ApplicationServerMap"> | $Enums.ApplicationServerMapStatus
     isPrimary?: BoolFilter<"ApplicationServerMap"> | boolean
+  }
+
+  export type AuthzAccessUpsertWithWhereUniqueWithoutForServerInput = {
+    where: AuthzAccessWhereUniqueInput
+    update: XOR<AuthzAccessUpdateWithoutForServerInput, AuthzAccessUncheckedUpdateWithoutForServerInput>
+    create: XOR<AuthzAccessCreateWithoutForServerInput, AuthzAccessUncheckedCreateWithoutForServerInput>
+  }
+
+  export type AuthzAccessUpdateWithWhereUniqueWithoutForServerInput = {
+    where: AuthzAccessWhereUniqueInput
+    data: XOR<AuthzAccessUpdateWithoutForServerInput, AuthzAccessUncheckedUpdateWithoutForServerInput>
+  }
+
+  export type AuthzAccessUpdateManyWithWhereWithoutForServerInput = {
+    where: AuthzAccessScalarWhereInput
+    data: XOR<AuthzAccessUpdateManyMutationInput, AuthzAccessUncheckedUpdateManyWithoutForServerInput>
+  }
+
+  export type AuthzAccessScalarWhereInput = {
+    AND?: AuthzAccessScalarWhereInput | AuthzAccessScalarWhereInput[]
+    OR?: AuthzAccessScalarWhereInput[]
+    NOT?: AuthzAccessScalarWhereInput | AuthzAccessScalarWhereInput[]
+    id?: StringFilter<"AuthzAccess"> | string
+    toAccountId?: StringFilter<"AuthzAccess"> | string
+    forServerId?: StringFilter<"AuthzAccess"> | string
+    roleId?: StringFilter<"AuthzAccess"> | string
+    status?: StringFilter<"AuthzAccess"> | string
+    moreDetails?: JsonFilter<"AuthzAccess">
   }
 
   export type ApplicationServerMapCreateWithoutApplicationInput = {
@@ -36609,6 +35892,7 @@ export namespace Prisma {
     loadBalancer?: string | null
     createdAt: Date | string
     updatedAt: Date | string
+    authzAccesses?: AuthzAccessCreateNestedManyWithoutForServerInput
   }
 
   export type ServerUncheckedCreateWithoutApplicationServerMapsInput = {
@@ -36626,6 +35910,7 @@ export namespace Prisma {
     loadBalancer?: string | null
     createdAt: Date | string
     updatedAt: Date | string
+    authzAccesses?: AuthzAccessUncheckedCreateNestedManyWithoutForServerInput
   }
 
   export type ServerCreateOrConnectWithoutApplicationServerMapsInput = {
@@ -36698,6 +35983,7 @@ export namespace Prisma {
     loadBalancer?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authzAccesses?: AuthzAccessUpdateManyWithoutForServerNestedInput
   }
 
   export type ServerUncheckedUpdateWithoutApplicationServerMapsInput = {
@@ -36715,6 +36001,7 @@ export namespace Prisma {
     loadBalancer?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authzAccesses?: AuthzAccessUncheckedUpdateManyWithoutForServerNestedInput
   }
 
   export type ApplicationUpsertWithoutServerMapsInput = {
@@ -37011,6 +36298,32 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type AuthzAccessCreateWithoutToAccountInput = {
+    id?: string
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
+    forServer: ServerCreateNestedOneWithoutAuthzAccessesInput
+    role: AuthzRoleCreateNestedOneWithoutAuthzAccessesInput
+  }
+
+  export type AuthzAccessUncheckedCreateWithoutToAccountInput = {
+    id?: string
+    forServerId: string
+    roleId: string
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
+  }
+
+  export type AuthzAccessCreateOrConnectWithoutToAccountInput = {
+    where: AuthzAccessWhereUniqueInput
+    create: XOR<AuthzAccessCreateWithoutToAccountInput, AuthzAccessUncheckedCreateWithoutToAccountInput>
+  }
+
+  export type AuthzAccessCreateManyToAccountInputEnvelope = {
+    data: AuthzAccessCreateManyToAccountInput | AuthzAccessCreateManyToAccountInput[]
+    skipDuplicates?: boolean
+  }
+
   export type PermitUpsertWithWhereUniqueWithoutAccountInput = {
     where: PermitWhereUniqueInput
     update: XOR<PermitUpdateWithoutAccountInput, PermitUncheckedUpdateWithoutAccountInput>
@@ -37039,11 +36352,28 @@ export namespace Prisma {
     role?: StringFilter<"Permit"> | string
   }
 
+  export type AuthzAccessUpsertWithWhereUniqueWithoutToAccountInput = {
+    where: AuthzAccessWhereUniqueInput
+    update: XOR<AuthzAccessUpdateWithoutToAccountInput, AuthzAccessUncheckedUpdateWithoutToAccountInput>
+    create: XOR<AuthzAccessCreateWithoutToAccountInput, AuthzAccessUncheckedCreateWithoutToAccountInput>
+  }
+
+  export type AuthzAccessUpdateWithWhereUniqueWithoutToAccountInput = {
+    where: AuthzAccessWhereUniqueInput
+    data: XOR<AuthzAccessUpdateWithoutToAccountInput, AuthzAccessUncheckedUpdateWithoutToAccountInput>
+  }
+
+  export type AuthzAccessUpdateManyWithWhereWithoutToAccountInput = {
+    where: AuthzAccessScalarWhereInput
+    data: XOR<AuthzAccessUpdateManyMutationInput, AuthzAccessUncheckedUpdateManyWithoutToAccountInput>
+  }
+
   export type AccountCreateWithoutPermitsInput = {
     id: string
     displayName?: string | null
     displayImage?: string | null
     neupid?: string | null
+    authzAccesses?: AuthzAccessCreateNestedManyWithoutToAccountInput
   }
 
   export type AccountUncheckedCreateWithoutPermitsInput = {
@@ -37051,6 +36381,7 @@ export namespace Prisma {
     displayName?: string | null
     displayImage?: string | null
     neupid?: string | null
+    authzAccesses?: AuthzAccessUncheckedCreateNestedManyWithoutToAccountInput
   }
 
   export type AccountCreateOrConnectWithoutPermitsInput = {
@@ -37074,6 +36405,7 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     displayImage?: NullableStringFieldUpdateOperationsInput | string | null
     neupid?: NullableStringFieldUpdateOperationsInput | string | null
+    authzAccesses?: AuthzAccessUpdateManyWithoutToAccountNestedInput
   }
 
   export type AccountUncheckedUpdateWithoutPermitsInput = {
@@ -37081,6 +36413,229 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     displayImage?: NullableStringFieldUpdateOperationsInput | string | null
     neupid?: NullableStringFieldUpdateOperationsInput | string | null
+    authzAccesses?: AuthzAccessUncheckedUpdateManyWithoutToAccountNestedInput
+  }
+
+  export type AuthzAccessCreateWithoutRoleInput = {
+    id?: string
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
+    toAccount: AccountCreateNestedOneWithoutAuthzAccessesInput
+    forServer: ServerCreateNestedOneWithoutAuthzAccessesInput
+  }
+
+  export type AuthzAccessUncheckedCreateWithoutRoleInput = {
+    id?: string
+    toAccountId: string
+    forServerId: string
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
+  }
+
+  export type AuthzAccessCreateOrConnectWithoutRoleInput = {
+    where: AuthzAccessWhereUniqueInput
+    create: XOR<AuthzAccessCreateWithoutRoleInput, AuthzAccessUncheckedCreateWithoutRoleInput>
+  }
+
+  export type AuthzAccessCreateManyRoleInputEnvelope = {
+    data: AuthzAccessCreateManyRoleInput | AuthzAccessCreateManyRoleInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AuthzAccessUpsertWithWhereUniqueWithoutRoleInput = {
+    where: AuthzAccessWhereUniqueInput
+    update: XOR<AuthzAccessUpdateWithoutRoleInput, AuthzAccessUncheckedUpdateWithoutRoleInput>
+    create: XOR<AuthzAccessCreateWithoutRoleInput, AuthzAccessUncheckedCreateWithoutRoleInput>
+  }
+
+  export type AuthzAccessUpdateWithWhereUniqueWithoutRoleInput = {
+    where: AuthzAccessWhereUniqueInput
+    data: XOR<AuthzAccessUpdateWithoutRoleInput, AuthzAccessUncheckedUpdateWithoutRoleInput>
+  }
+
+  export type AuthzAccessUpdateManyWithWhereWithoutRoleInput = {
+    where: AuthzAccessScalarWhereInput
+    data: XOR<AuthzAccessUpdateManyMutationInput, AuthzAccessUncheckedUpdateManyWithoutRoleInput>
+  }
+
+  export type AccountCreateWithoutAuthzAccessesInput = {
+    id: string
+    displayName?: string | null
+    displayImage?: string | null
+    neupid?: string | null
+    permits?: PermitCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutAuthzAccessesInput = {
+    id: string
+    displayName?: string | null
+    displayImage?: string | null
+    neupid?: string | null
+    permits?: PermitUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutAuthzAccessesInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutAuthzAccessesInput, AccountUncheckedCreateWithoutAuthzAccessesInput>
+  }
+
+  export type ServerCreateWithoutAuthzAccessesInput = {
+    id: string
+    name: string
+    username: string
+    type: string
+    provider: string
+    moreDetails?: string | null
+    publicIp: string
+    privateIp?: string | null
+    privateKey?: string | null
+    publicKey?: string | null
+    proxyHandler?: string | null
+    loadBalancer?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    applicationServerMaps?: ApplicationServerMapCreateNestedManyWithoutServerInput
+  }
+
+  export type ServerUncheckedCreateWithoutAuthzAccessesInput = {
+    id: string
+    name: string
+    username: string
+    type: string
+    provider: string
+    moreDetails?: string | null
+    publicIp: string
+    privateIp?: string | null
+    privateKey?: string | null
+    publicKey?: string | null
+    proxyHandler?: string | null
+    loadBalancer?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    applicationServerMaps?: ApplicationServerMapUncheckedCreateNestedManyWithoutServerInput
+  }
+
+  export type ServerCreateOrConnectWithoutAuthzAccessesInput = {
+    where: ServerWhereUniqueInput
+    create: XOR<ServerCreateWithoutAuthzAccessesInput, ServerUncheckedCreateWithoutAuthzAccessesInput>
+  }
+
+  export type AuthzRoleCreateWithoutAuthzAccessesInput = {
+    id?: string
+    name: string
+    description?: string | null
+    scope?: string | null
+  }
+
+  export type AuthzRoleUncheckedCreateWithoutAuthzAccessesInput = {
+    id?: string
+    name: string
+    description?: string | null
+    scope?: string | null
+  }
+
+  export type AuthzRoleCreateOrConnectWithoutAuthzAccessesInput = {
+    where: AuthzRoleWhereUniqueInput
+    create: XOR<AuthzRoleCreateWithoutAuthzAccessesInput, AuthzRoleUncheckedCreateWithoutAuthzAccessesInput>
+  }
+
+  export type AccountUpsertWithoutAuthzAccessesInput = {
+    update: XOR<AccountUpdateWithoutAuthzAccessesInput, AccountUncheckedUpdateWithoutAuthzAccessesInput>
+    create: XOR<AccountCreateWithoutAuthzAccessesInput, AccountUncheckedCreateWithoutAuthzAccessesInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutAuthzAccessesInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutAuthzAccessesInput, AccountUncheckedUpdateWithoutAuthzAccessesInput>
+  }
+
+  export type AccountUpdateWithoutAuthzAccessesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    displayImage?: NullableStringFieldUpdateOperationsInput | string | null
+    neupid?: NullableStringFieldUpdateOperationsInput | string | null
+    permits?: PermitUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutAuthzAccessesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    displayImage?: NullableStringFieldUpdateOperationsInput | string | null
+    neupid?: NullableStringFieldUpdateOperationsInput | string | null
+    permits?: PermitUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type ServerUpsertWithoutAuthzAccessesInput = {
+    update: XOR<ServerUpdateWithoutAuthzAccessesInput, ServerUncheckedUpdateWithoutAuthzAccessesInput>
+    create: XOR<ServerCreateWithoutAuthzAccessesInput, ServerUncheckedCreateWithoutAuthzAccessesInput>
+    where?: ServerWhereInput
+  }
+
+  export type ServerUpdateToOneWithWhereWithoutAuthzAccessesInput = {
+    where?: ServerWhereInput
+    data: XOR<ServerUpdateWithoutAuthzAccessesInput, ServerUncheckedUpdateWithoutAuthzAccessesInput>
+  }
+
+  export type ServerUpdateWithoutAuthzAccessesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    moreDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    publicIp?: StringFieldUpdateOperationsInput | string
+    privateIp?: NullableStringFieldUpdateOperationsInput | string | null
+    privateKey?: NullableStringFieldUpdateOperationsInput | string | null
+    publicKey?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyHandler?: NullableStringFieldUpdateOperationsInput | string | null
+    loadBalancer?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    applicationServerMaps?: ApplicationServerMapUpdateManyWithoutServerNestedInput
+  }
+
+  export type ServerUncheckedUpdateWithoutAuthzAccessesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    moreDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    publicIp?: StringFieldUpdateOperationsInput | string
+    privateIp?: NullableStringFieldUpdateOperationsInput | string | null
+    privateKey?: NullableStringFieldUpdateOperationsInput | string | null
+    publicKey?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyHandler?: NullableStringFieldUpdateOperationsInput | string | null
+    loadBalancer?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    applicationServerMaps?: ApplicationServerMapUncheckedUpdateManyWithoutServerNestedInput
+  }
+
+  export type AuthzRoleUpsertWithoutAuthzAccessesInput = {
+    update: XOR<AuthzRoleUpdateWithoutAuthzAccessesInput, AuthzRoleUncheckedUpdateWithoutAuthzAccessesInput>
+    create: XOR<AuthzRoleCreateWithoutAuthzAccessesInput, AuthzRoleUncheckedCreateWithoutAuthzAccessesInput>
+    where?: AuthzRoleWhereInput
+  }
+
+  export type AuthzRoleUpdateToOneWithWhereWithoutAuthzAccessesInput = {
+    where?: AuthzRoleWhereInput
+    data: XOR<AuthzRoleUpdateWithoutAuthzAccessesInput, AuthzRoleUncheckedUpdateWithoutAuthzAccessesInput>
+  }
+
+  export type AuthzRoleUpdateWithoutAuthzAccessesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    scope?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type AuthzRoleUncheckedUpdateWithoutAuthzAccessesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    scope?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ApplicationServerMapCreateManyServerInput = {
@@ -37088,6 +36643,14 @@ export namespace Prisma {
     applicationId: string
     status?: $Enums.ApplicationServerMapStatus
     isPrimary?: boolean
+  }
+
+  export type AuthzAccessCreateManyForServerInput = {
+    id?: string
+    toAccountId: string
+    roleId: string
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
   }
 
   export type ApplicationServerMapUpdateWithoutServerInput = {
@@ -37109,6 +36672,30 @@ export namespace Prisma {
     applicationId?: StringFieldUpdateOperationsInput | string
     status?: EnumApplicationServerMapStatusFieldUpdateOperationsInput | $Enums.ApplicationServerMapStatus
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type AuthzAccessUpdateWithoutForServerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
+    toAccount?: AccountUpdateOneRequiredWithoutAuthzAccessesNestedInput
+    role?: AuthzRoleUpdateOneRequiredWithoutAuthzAccessesNestedInput
+  }
+
+  export type AuthzAccessUncheckedUpdateWithoutForServerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    toAccountId?: StringFieldUpdateOperationsInput | string
+    roleId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type AuthzAccessUncheckedUpdateManyWithoutForServerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    toAccountId?: StringFieldUpdateOperationsInput | string
+    roleId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
   }
 
   export type ApplicationServerMapCreateManyApplicationInput = {
@@ -37215,6 +36802,14 @@ export namespace Prisma {
     role: string
   }
 
+  export type AuthzAccessCreateManyToAccountInput = {
+    id?: string
+    forServerId: string
+    roleId: string
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
+  }
+
   export type PermitUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     portfolioId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -37237,6 +36832,62 @@ export namespace Prisma {
     assetType?: StringFieldUpdateOperationsInput | string
     assetId?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AuthzAccessUpdateWithoutToAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
+    forServer?: ServerUpdateOneRequiredWithoutAuthzAccessesNestedInput
+    role?: AuthzRoleUpdateOneRequiredWithoutAuthzAccessesNestedInput
+  }
+
+  export type AuthzAccessUncheckedUpdateWithoutToAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    forServerId?: StringFieldUpdateOperationsInput | string
+    roleId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type AuthzAccessUncheckedUpdateManyWithoutToAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    forServerId?: StringFieldUpdateOperationsInput | string
+    roleId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type AuthzAccessCreateManyRoleInput = {
+    id?: string
+    toAccountId: string
+    forServerId: string
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
+  }
+
+  export type AuthzAccessUpdateWithoutRoleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
+    toAccount?: AccountUpdateOneRequiredWithoutAuthzAccessesNestedInput
+    forServer?: ServerUpdateOneRequiredWithoutAuthzAccessesNestedInput
+  }
+
+  export type AuthzAccessUncheckedUpdateWithoutRoleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    toAccountId?: StringFieldUpdateOperationsInput | string
+    forServerId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type AuthzAccessUncheckedUpdateManyWithoutRoleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    toAccountId?: StringFieldUpdateOperationsInput | string
+    forServerId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
   }
 
 

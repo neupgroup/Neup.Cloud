@@ -29,6 +29,7 @@ import {
 } from '@/services/server/server-runtime';
 import { runCommandOnServer } from '@/services/server/ssh';
 import { getServerExpiration, parseServerMetadata } from '@/services/server/server-metadata';
+import { getCurrentAccountId } from '@/services/account-profile';
 import type { Server } from '@/services/server/types';
 
 type ServerApplicationMap = {
@@ -111,7 +112,8 @@ export async function updateServer(
   );
 
   if (typeof filteredData.moreDetails === 'string') {
-    const existingServer = await getServerById(id);
+    const accountId = await getCurrentAccountId();
+    const existingServer = accountId ? await getServerById(id, accountId) : null;
     const incomingMetadata = parseServerMetadata(filteredData.moreDetails);
     const existingMetadata = parseServerMetadata(existingServer?.moreDetails);
 
@@ -141,7 +143,8 @@ export async function deleteServer(id: string) {
 }
 
 export async function selectServer(serverId: string, serverName: string) {
-  const server = await getServerById(serverId);
+  const accountId = await getCurrentAccountId();
+  const server = accountId ? await getServerById(serverId, accountId) : null;
   if (!server) {
     throw new Error('Server not found.');
   }
@@ -166,26 +169,34 @@ export async function selectServer(serverId: string, serverName: string) {
 }
 
 export async function getServers(): Promise<Server[]> {
-  const servers = await getServersData();
+  const accountId = await getCurrentAccountId();
+  if (!accountId) return [];
+
+  const servers = await getServersData(accountId);
   return servers.map((server: Parameters<typeof toPublicServer>[0]) => toPublicServer(server) as Server);
 }
 
 export async function getServersWithRunningApplications(): Promise<Array<Server & {
   applicationServerMaps?: ServerApplicationMap[];
 }>> {
-  const servers = await getServersWithRunningApplicationsData();
+  const accountId = await getCurrentAccountId();
+  if (!accountId) return [];
+
+  const servers = await getServersWithRunningApplicationsData(accountId);
   return servers as Array<Server & {
     applicationServerMaps?: ServerApplicationMap[];
   }>;
 }
 
 export async function getServer(id: string): Promise<Server | null> {
-  const server = await getServerByIdentifier(id);
+  const accountId = await getCurrentAccountId();
+  const server = accountId ? await getServerByIdentifier(id, accountId) : null;
   return server ? (toPublicServer(server) as Server) : null;
 }
 
 export async function getServerForRunner(id: string) {
-  return getServerForRunnerLogic(id);
+  const accountId = await getCurrentAccountId();
+  return getServerForRunnerLogic(id, accountId);
 }
 
 export async function checkServerConnection(
@@ -199,7 +210,8 @@ export async function checkServerConnection(
     throw new Error('Server ID is required.');
   }
 
-  const server = await getServerById(serverId);
+  const accountId = await getCurrentAccountId();
+  const server = accountId ? await getServerById(serverId, accountId) : null;
 
   if (!server) {
     throw new Error('Server not found.');

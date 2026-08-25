@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/core/database/prisma';
 import { ensureAccountProfile } from '@/services/account-profile';
 
 /**
  * POST /api/webhooks/account-created
  *
  * Called by the neupgroup.com auth service when a new account is created.
- * Provisions the account in the local DB and grants the
- * `cloud.individual.default` role.
+ * Provisions the account in the local DB. New accounts receive no server
+ * access until an explicit `authz_access` record is created for them.
  *
  * Expected body: { accountId: string }
  * Expected header: Authorization: Bearer <WEBHOOK_SECRET>
  */
-
-const DEFAULT_ROLE_ID = 'cloud.individual.default';
 
 export async function POST(request: NextRequest) {
   // Verify webhook secret
@@ -42,20 +39,7 @@ export async function POST(request: NextRequest) {
     // 1. Ensure the account row exists with profile fields (idempotent)
     await ensureAccountProfile({ accountId });
 
-    // 2. Grant the default role to the account (owner = self for individual accounts)
-    const grantId = `grant::${accountId}::${DEFAULT_ROLE_ID}`;
-    await prisma.authzAccountAccessGrant.upsert({
-      where: { id: grantId },
-      update: {},
-      create: {
-        id: grantId,
-        ownerAccountId: accountId,
-        targetAccountId: accountId,
-        roleId: DEFAULT_ROLE_ID,
-      },
-    });
-
-    return NextResponse.json({ ok: true, accountId, roleId: DEFAULT_ROLE_ID });
+    return NextResponse.json({ ok: true, accountId });
   } catch (error) {
     console.error('[account-created webhook] error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -30,6 +30,7 @@ model Server {
   createdAt             DateTime               @map("createdAt") @db.Timestamp(6)
   updatedAt             DateTime               @map("updatedAt") @db.Timestamp(6)
   applicationServerMaps ApplicationServerMap[]
+  authzAccesses         AuthzAccess[]
 
   @@map("servers")
 }
@@ -284,7 +285,8 @@ model Account {
   displayImage String? @map("displayImage") @db.Text
   neupid       String? @db.Text
 
-  permits Permit[]
+  permits       Permit[]
+  authzAccesses AuthzAccess[] @relation("AuthzAccessToAccount")
 
   @@map("accounts")
 }
@@ -307,6 +309,8 @@ model AuthzRole {
   name        String  @db.Text
   description String? @db.Text
   scope       String? @db.Text
+
+  authzAccesses AuthzAccess[]
 
   @@map("authz_role")
 }
@@ -331,23 +335,20 @@ model AuthzRoleCapability {
   @@map("authz_role_capability")
 }
 
-model AuthzAccountAccessGrant {
-  id              String  @id @default(uuid()) @db.Text
-  ownerAccountId  String  @map("owner_account_id") @db.Text
-  targetAccountId String  @map("target_account_id") @db.Text
-  roleId          String  @map("role_id") @db.Text
-  portfolioId     String? @map("portfolio_id") @db.Text
+model AuthzAccess {
+  id          String @id @default(uuid()) @db.Text
+  toAccountId String @map("to_account_id") @db.Text
+  forServerId String @map("for_server_id") @db.Text
+  roleId      String @map("role_id") @db.Text
+  status      String @db.Text
+  moreDetails Json   @map("more_details") @db.JsonB
 
-  @@map("authz_account_access_grant")
-}
+  toAccount Account   @relation("AuthzAccessToAccount", fields: [toAccountId], references: [id])
+  forServer Server    @relation(fields: [forServerId], references: [id])
+  role      AuthzRole @relation(fields: [roleId], references: [id])
 
-model AuthzAssetsAccessGrant {
-  id          String  @id @default(uuid()) @db.Text
-  assetId     String  @map("asset_id") @db.Text
-  accountId   String  @map("account_id") @db.Text
-  roleId      String  @map("role_id") @db.Text
-  portfolioId String? @map("portfolio_id") @db.Text
-  assetType   String? @map("asset_type") @db.Text
-
-  @@map("authz_assets_access_grant")
+  @@index([toAccountId], map: "authz_access_to_account_id_idx")
+  @@index([forServerId], map: "authz_access_for_server_id_idx")
+  @@index([roleId], map: "authz_access_role_id_idx")
+  @@map("authz_access")
 }

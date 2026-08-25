@@ -1,9 +1,13 @@
 import { runCommandOnServer } from '@/services/server/ssh';
 import { createServerLog } from '@/services/logs/server';
 import { getServerByIdentifier } from '@/services/server/data';
+import { getCurrentAccountId } from '@/services/account-profile';
 
-export async function getServerForRunner(id: string) {
-  return getServerByIdentifier(id);
+export async function getServerForRunner(id: string, accountId?: string | null) {
+  const resolvedAccountId = accountId ?? await getCurrentAccountId();
+  if (!resolvedAccountId) return null;
+
+  return getServerByIdentifier(id, resolvedAccountId);
 }
 
 export async function getRamUsage(serverId: string) {

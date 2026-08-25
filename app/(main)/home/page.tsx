@@ -96,11 +96,6 @@ export default function Home() {
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-4 w-64" />
         </div>
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <Skeleton key={index} className="h-28 rounded-xl" />
-          ))}
-        </div>
       </div>
     );
   }
@@ -113,40 +108,42 @@ export default function Home() {
       </div>
 
       {availableServers.length > 0 && (
-        <div className="relative max-w-md">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search servers..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-          />
-        </div>
-      )}
+        <>
+          <div className="relative max-w-md">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search servers..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+            />
+          </div>
 
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
-        {filteredServers.map((server) => (
-          <div key={server.id} onClick={() => openServer(server.id)}>
-            <Card className="cursor-pointer transition-all hover:border-primary">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-                <CardTitle className="truncate text-sm font-medium">{server.name}</CardTitle>
-                <Server className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="truncate text-lg font-semibold">{server.publicIp}</div>
-                <p className="truncate text-xs text-muted-foreground">{server.provider}</p>
-              </CardContent>
+          <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
+            {filteredServers.map((server) => (
+              <div key={server.id} onClick={() => openServer(server.id)}>
+                <Card className="cursor-pointer transition-all hover:border-primary">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+                    <CardTitle className="truncate text-sm font-medium">{server.name}</CardTitle>
+                    <Server className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent className="p-4 pt-0">
+                    <div className="truncate text-lg font-semibold">{server.publicIp}</div>
+                    <p className="truncate text-xs text-muted-foreground">{server.provider}</p>
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
+            <Card
+              onClick={() => router.push('/servers/add')}
+              className="flex cursor-pointer flex-col items-center justify-center border-dashed p-4 transition-all hover:border-primary"
+            >
+              <Plus className="mb-1 h-6 w-6 text-muted-foreground" />
+              <span className="text-xs font-bold text-muted-foreground">Add New</span>
             </Card>
           </div>
-        ))}
-        <Card
-          onClick={() => router.push('/servers/add')}
-          className="flex cursor-pointer flex-col items-center justify-center border-dashed p-4 transition-all hover:border-primary"
-        >
-          <Plus className="mb-1 h-6 w-6 text-muted-foreground" />
-          <span className="text-xs font-bold text-muted-foreground">Add New</span>
-        </Card>
-      </div>
+        </>
+      )}
 
       {!serversLoading && availableServers.length > 0 && filteredServers.length === 0 && (
         <p className="text-sm text-muted-foreground">No servers match your search.</p>

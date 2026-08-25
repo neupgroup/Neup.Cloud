@@ -53,14 +53,30 @@ export function toPublicServer<
   } as Omit<T, 'privateKey' | 'moreDetails'> & { moreDetails: string | null };
 }
 
-export async function getServers() {
+export async function getServers(accountId: string) {
   return prisma.server.findMany({
+    where: {
+      authzAccesses: {
+        some: {
+          toAccountId: accountId,
+          status: 'active',
+        },
+      },
+    },
     orderBy: { name: 'asc' },
   });
 }
 
-export async function getServersWithRunningApplications() {
+export async function getServersWithRunningApplications(accountId: string) {
   const servers = await prisma.server.findMany({
+    where: {
+      authzAccesses: {
+        some: {
+          toAccountId: accountId,
+          status: 'active',
+        },
+      },
+    },
     include: {
       applicationServerMaps: {
         orderBy: [{ application: { name: 'asc' } }],
@@ -84,13 +100,27 @@ export async function getServersWithRunningApplications() {
   return servers.map(toPublicServer);
 }
 
-export async function getServerById(id: string) {
+export async function getServerById(id: string, accountId?: string) {
+  if (accountId) {
+    return prisma.server.findFirst({
+      where: {
+        id,
+        authzAccesses: {
+          some: {
+            toAccountId: accountId,
+            status: 'active',
+          },
+        },
+      },
+    });
+  }
+
   return prisma.server.findUnique({
     where: { id },
   });
 }
 
-export async function getServerByIdentifier(identifier: string) {
+export async function getServerByIdentifier(identifier: string, accountId?: string) {
   const candidates = getServerSelectionCandidates(identifier);
   if (candidates.length === 0) {
     return null;
@@ -104,6 +134,16 @@ export async function getServerByIdentifier(identifier: string) {
         { privateIp: candidate },
         { name: candidate },
       ])),
+      ...(accountId
+        ? {
+            authzAccesses: {
+              some: {
+                toAccountId: accountId,
+                status: 'active',
+              },
+            },
+          }
+        : {}),
     },
   });
 }

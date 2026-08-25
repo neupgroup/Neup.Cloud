@@ -358,21 +358,13 @@ exports.Prisma.AuthzRoleCapabilityScalarFieldEnum = {
   roleName: 'roleName'
 };
 
-exports.Prisma.AuthzAccountAccessGrantScalarFieldEnum = {
+exports.Prisma.AuthzAccessScalarFieldEnum = {
   id: 'id',
-  ownerAccountId: 'ownerAccountId',
-  targetAccountId: 'targetAccountId',
+  toAccountId: 'toAccountId',
+  forServerId: 'forServerId',
   roleId: 'roleId',
-  portfolioId: 'portfolioId'
-};
-
-exports.Prisma.AuthzAssetsAccessGrantScalarFieldEnum = {
-  id: 'id',
-  assetId: 'assetId',
-  accountId: 'accountId',
-  roleId: 'roleId',
-  portfolioId: 'portfolioId',
-  assetType: 'assetType'
+  status: 'status',
+  moreDetails: 'moreDetails'
 };
 
 exports.Prisma.SortOrder = {
@@ -435,8 +427,7 @@ exports.Prisma.ModelName = {
   AuthzRole: 'AuthzRole',
   AuthzCapability: 'AuthzCapability',
   AuthzRoleCapability: 'AuthzRoleCapability',
-  AuthzAccountAccessGrant: 'AuthzAccountAccessGrant',
-  AuthzAssetsAccessGrant: 'AuthzAssetsAccessGrant'
+  AuthzAccess: 'AuthzAccess'
 };
 
 /**

@@ -11,6 +11,7 @@ import { getApplication } from './crud';
 import { getProcessDetails, getSupervisorProcesses } from './process-management';
 import { getApplicationServerMapData } from './server-map';
 import { getServerById } from '@/services/server/data';
+import { getCurrentAccountId } from '@/services/account-profile';
 
 export async function getApplicationDetailPageData(
   params: Promise<{ id: string }>,
@@ -18,7 +19,10 @@ export async function getApplicationDetailPageData(
 ) {
   const { id } = await params;
   const serverId = selectedServerId;
-  const serverName = serverId ? (await getServerById(serverId))?.name ?? null : null;
+  const accountId = await getCurrentAccountId();
+  const serverName = serverId && accountId
+    ? (await getServerById(serverId, accountId))?.name ?? null
+    : null;
 
   if (id.startsWith('supervisor_')) {
     const processName = id.slice('supervisor_'.length);
