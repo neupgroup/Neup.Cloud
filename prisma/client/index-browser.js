@@ -362,6 +362,7 @@ exports.Prisma.AuthzAccessScalarFieldEnum = {
   id: 'id',
   toAccountId: 'toAccountId',
   forServerId: 'forServerId',
+  databaseId: 'databaseId',
   roleId: 'roleId',
   status: 'status',
   moreDetails: 'moreDetails'

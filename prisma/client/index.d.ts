@@ -3197,6 +3197,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type DatabaseCountOutputType
+   */
+
+  export type DatabaseCountOutputType = {
+    authzAccesses: number
+  }
+
+  export type DatabaseCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    authzAccesses?: boolean | DatabaseCountOutputTypeCountAuthzAccessesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * DatabaseCountOutputType without action
+   */
+  export type DatabaseCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DatabaseCountOutputType
+     */
+    select?: DatabaseCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * DatabaseCountOutputType without action
+   */
+  export type DatabaseCountOutputTypeCountAuthzAccessesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AuthzAccessWhereInput
+  }
+
+
+  /**
    * Count Type AccountCountOutputType
    */
 
@@ -22668,6 +22699,8 @@ export namespace Prisma {
     lastValidatedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    authzAccesses?: boolean | Database$authzAccessesArgs<ExtArgs>
+    _count?: boolean | DatabaseCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["database"]>
 
   export type DatabaseSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -22710,10 +22743,18 @@ export namespace Prisma {
   }
 
   export type DatabaseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "connectionType" | "connectionStatus" | "credentails" | "authConfig" | "lastValidatedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["database"]>
+  export type DatabaseInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    authzAccesses?: boolean | Database$authzAccessesArgs<ExtArgs>
+    _count?: boolean | DatabaseCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type DatabaseIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type DatabaseIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $DatabasePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Database"
-    objects: {}
+    objects: {
+      authzAccesses: Prisma.$AuthzAccessPayload<ExtArgs>[]
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       title: string
@@ -23119,6 +23160,7 @@ export namespace Prisma {
    */
   export interface Prisma__DatabaseClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    authzAccesses<T extends Database$authzAccessesArgs<ExtArgs> = {}>(args?: Subset<T, Database$authzAccessesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -23175,6 +23217,10 @@ export namespace Prisma {
      */
     omit?: DatabaseOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DatabaseInclude<ExtArgs> | null
+    /**
      * Filter, which Database to fetch.
      */
     where: DatabaseWhereUniqueInput
@@ -23193,6 +23239,10 @@ export namespace Prisma {
      */
     omit?: DatabaseOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DatabaseInclude<ExtArgs> | null
+    /**
      * Filter, which Database to fetch.
      */
     where: DatabaseWhereUniqueInput
@@ -23210,6 +23260,10 @@ export namespace Prisma {
      * Omit specific fields from the Database
      */
     omit?: DatabaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DatabaseInclude<ExtArgs> | null
     /**
      * Filter, which Database to fetch.
      */
@@ -23259,6 +23313,10 @@ export namespace Prisma {
      */
     omit?: DatabaseOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DatabaseInclude<ExtArgs> | null
+    /**
      * Filter, which Database to fetch.
      */
     where?: DatabaseWhereInput
@@ -23306,6 +23364,10 @@ export namespace Prisma {
      * Omit specific fields from the Database
      */
     omit?: DatabaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DatabaseInclude<ExtArgs> | null
     /**
      * Filter, which Databases to fetch.
      */
@@ -23355,6 +23417,10 @@ export namespace Prisma {
      */
     omit?: DatabaseOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DatabaseInclude<ExtArgs> | null
+    /**
      * The data needed to create a Database.
      */
     data: XOR<DatabaseCreateInput, DatabaseUncheckedCreateInput>
@@ -23402,6 +23468,10 @@ export namespace Prisma {
      * Omit specific fields from the Database
      */
     omit?: DatabaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DatabaseInclude<ExtArgs> | null
     /**
      * The data needed to update a Database.
      */
@@ -23469,6 +23539,10 @@ export namespace Prisma {
      */
     omit?: DatabaseOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DatabaseInclude<ExtArgs> | null
+    /**
      * The filter to search for the Database to update in case it exists.
      */
     where: DatabaseWhereUniqueInput
@@ -23495,6 +23569,10 @@ export namespace Prisma {
      */
     omit?: DatabaseOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DatabaseInclude<ExtArgs> | null
+    /**
      * Filter which Database to delete.
      */
     where: DatabaseWhereUniqueInput
@@ -23515,6 +23593,30 @@ export namespace Prisma {
   }
 
   /**
+   * Database.authzAccesses
+   */
+  export type Database$authzAccessesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthzAccess
+     */
+    select?: AuthzAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthzAccess
+     */
+    omit?: AuthzAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthzAccessInclude<ExtArgs> | null
+    where?: AuthzAccessWhereInput
+    orderBy?: AuthzAccessOrderByWithRelationInput | AuthzAccessOrderByWithRelationInput[]
+    cursor?: AuthzAccessWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AuthzAccessScalarFieldEnum | AuthzAccessScalarFieldEnum[]
+  }
+
+  /**
    * Database without action
    */
   export type DatabaseDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -23526,6 +23628,10 @@ export namespace Prisma {
      * Omit specific fields from the Database
      */
     omit?: DatabaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DatabaseInclude<ExtArgs> | null
   }
 
 
@@ -28767,6 +28873,7 @@ export namespace Prisma {
     id: string | null
     toAccountId: string | null
     forServerId: string | null
+    databaseId: string | null
     roleId: string | null
     status: string | null
   }
@@ -28775,6 +28882,7 @@ export namespace Prisma {
     id: string | null
     toAccountId: string | null
     forServerId: string | null
+    databaseId: string | null
     roleId: string | null
     status: string | null
   }
@@ -28783,6 +28891,7 @@ export namespace Prisma {
     id: number
     toAccountId: number
     forServerId: number
+    databaseId: number
     roleId: number
     status: number
     moreDetails: number
@@ -28794,6 +28903,7 @@ export namespace Prisma {
     id?: true
     toAccountId?: true
     forServerId?: true
+    databaseId?: true
     roleId?: true
     status?: true
   }
@@ -28802,6 +28912,7 @@ export namespace Prisma {
     id?: true
     toAccountId?: true
     forServerId?: true
+    databaseId?: true
     roleId?: true
     status?: true
   }
@@ -28810,6 +28921,7 @@ export namespace Prisma {
     id?: true
     toAccountId?: true
     forServerId?: true
+    databaseId?: true
     roleId?: true
     status?: true
     moreDetails?: true
@@ -28891,7 +29003,8 @@ export namespace Prisma {
   export type AuthzAccessGroupByOutputType = {
     id: string
     toAccountId: string
-    forServerId: string
+    forServerId: string | null
+    databaseId: string | null
     roleId: string
     status: string
     moreDetails: JsonValue
@@ -28918,11 +29031,13 @@ export namespace Prisma {
     id?: boolean
     toAccountId?: boolean
     forServerId?: boolean
+    databaseId?: boolean
     roleId?: boolean
     status?: boolean
     moreDetails?: boolean
     toAccount?: boolean | AccountDefaultArgs<ExtArgs>
-    forServer?: boolean | ServerDefaultArgs<ExtArgs>
+    forServer?: boolean | AuthzAccess$forServerArgs<ExtArgs>
+    database?: boolean | AuthzAccess$databaseArgs<ExtArgs>
     role?: boolean | AuthzRoleDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["authzAccess"]>
 
@@ -28930,11 +29045,13 @@ export namespace Prisma {
     id?: boolean
     toAccountId?: boolean
     forServerId?: boolean
+    databaseId?: boolean
     roleId?: boolean
     status?: boolean
     moreDetails?: boolean
     toAccount?: boolean | AccountDefaultArgs<ExtArgs>
-    forServer?: boolean | ServerDefaultArgs<ExtArgs>
+    forServer?: boolean | AuthzAccess$forServerArgs<ExtArgs>
+    database?: boolean | AuthzAccess$databaseArgs<ExtArgs>
     role?: boolean | AuthzRoleDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["authzAccess"]>
 
@@ -28942,11 +29059,13 @@ export namespace Prisma {
     id?: boolean
     toAccountId?: boolean
     forServerId?: boolean
+    databaseId?: boolean
     roleId?: boolean
     status?: boolean
     moreDetails?: boolean
     toAccount?: boolean | AccountDefaultArgs<ExtArgs>
-    forServer?: boolean | ServerDefaultArgs<ExtArgs>
+    forServer?: boolean | AuthzAccess$forServerArgs<ExtArgs>
+    database?: boolean | AuthzAccess$databaseArgs<ExtArgs>
     role?: boolean | AuthzRoleDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["authzAccess"]>
 
@@ -28954,25 +29073,29 @@ export namespace Prisma {
     id?: boolean
     toAccountId?: boolean
     forServerId?: boolean
+    databaseId?: boolean
     roleId?: boolean
     status?: boolean
     moreDetails?: boolean
   }
 
-  export type AuthzAccessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "toAccountId" | "forServerId" | "roleId" | "status" | "moreDetails", ExtArgs["result"]["authzAccess"]>
+  export type AuthzAccessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "toAccountId" | "forServerId" | "databaseId" | "roleId" | "status" | "moreDetails", ExtArgs["result"]["authzAccess"]>
   export type AuthzAccessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     toAccount?: boolean | AccountDefaultArgs<ExtArgs>
-    forServer?: boolean | ServerDefaultArgs<ExtArgs>
+    forServer?: boolean | AuthzAccess$forServerArgs<ExtArgs>
+    database?: boolean | AuthzAccess$databaseArgs<ExtArgs>
     role?: boolean | AuthzRoleDefaultArgs<ExtArgs>
   }
   export type AuthzAccessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     toAccount?: boolean | AccountDefaultArgs<ExtArgs>
-    forServer?: boolean | ServerDefaultArgs<ExtArgs>
+    forServer?: boolean | AuthzAccess$forServerArgs<ExtArgs>
+    database?: boolean | AuthzAccess$databaseArgs<ExtArgs>
     role?: boolean | AuthzRoleDefaultArgs<ExtArgs>
   }
   export type AuthzAccessIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     toAccount?: boolean | AccountDefaultArgs<ExtArgs>
-    forServer?: boolean | ServerDefaultArgs<ExtArgs>
+    forServer?: boolean | AuthzAccess$forServerArgs<ExtArgs>
+    database?: boolean | AuthzAccess$databaseArgs<ExtArgs>
     role?: boolean | AuthzRoleDefaultArgs<ExtArgs>
   }
 
@@ -28980,13 +29103,15 @@ export namespace Prisma {
     name: "AuthzAccess"
     objects: {
       toAccount: Prisma.$AccountPayload<ExtArgs>
-      forServer: Prisma.$ServerPayload<ExtArgs>
+      forServer: Prisma.$ServerPayload<ExtArgs> | null
+      database: Prisma.$DatabasePayload<ExtArgs> | null
       role: Prisma.$AuthzRolePayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       toAccountId: string
-      forServerId: string
+      forServerId: string | null
+      databaseId: string | null
       roleId: string
       status: string
       moreDetails: Prisma.JsonValue
@@ -29385,7 +29510,8 @@ export namespace Prisma {
   export interface Prisma__AuthzAccessClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     toAccount<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    forServer<T extends ServerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ServerDefaultArgs<ExtArgs>>): Prisma__ServerClient<$Result.GetResult<Prisma.$ServerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    forServer<T extends AuthzAccess$forServerArgs<ExtArgs> = {}>(args?: Subset<T, AuthzAccess$forServerArgs<ExtArgs>>): Prisma__ServerClient<$Result.GetResult<Prisma.$ServerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    database<T extends AuthzAccess$databaseArgs<ExtArgs> = {}>(args?: Subset<T, AuthzAccess$databaseArgs<ExtArgs>>): Prisma__DatabaseClient<$Result.GetResult<Prisma.$DatabasePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     role<T extends AuthzRoleDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AuthzRoleDefaultArgs<ExtArgs>>): Prisma__AuthzRoleClient<$Result.GetResult<Prisma.$AuthzRolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -29419,6 +29545,7 @@ export namespace Prisma {
     readonly id: FieldRef<"AuthzAccess", 'String'>
     readonly toAccountId: FieldRef<"AuthzAccess", 'String'>
     readonly forServerId: FieldRef<"AuthzAccess", 'String'>
+    readonly databaseId: FieldRef<"AuthzAccess", 'String'>
     readonly roleId: FieldRef<"AuthzAccess", 'String'>
     readonly status: FieldRef<"AuthzAccess", 'String'>
     readonly moreDetails: FieldRef<"AuthzAccess", 'Json'>
@@ -29823,6 +29950,44 @@ export namespace Prisma {
   }
 
   /**
+   * AuthzAccess.forServer
+   */
+  export type AuthzAccess$forServerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Server
+     */
+    select?: ServerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Server
+     */
+    omit?: ServerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServerInclude<ExtArgs> | null
+    where?: ServerWhereInput
+  }
+
+  /**
+   * AuthzAccess.database
+   */
+  export type AuthzAccess$databaseArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Database
+     */
+    select?: DatabaseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Database
+     */
+    omit?: DatabaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DatabaseInclude<ExtArgs> | null
+    where?: DatabaseWhereInput
+  }
+
+  /**
    * AuthzAccess without action
    */
   export type AuthzAccessDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -30169,6 +30334,7 @@ export namespace Prisma {
     id: 'id',
     toAccountId: 'toAccountId',
     forServerId: 'forServerId',
+    databaseId: 'databaseId',
     roleId: 'roleId',
     status: 'status',
     moreDetails: 'moreDetails'
@@ -31537,6 +31703,7 @@ export namespace Prisma {
     lastValidatedAt?: DateTimeNullableFilter<"Database"> | Date | string | null
     createdAt?: DateTimeFilter<"Database"> | Date | string
     updatedAt?: DateTimeFilter<"Database"> | Date | string
+    authzAccesses?: AuthzAccessListRelationFilter
   }
 
   export type DatabaseOrderByWithRelationInput = {
@@ -31550,6 +31717,7 @@ export namespace Prisma {
     lastValidatedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    authzAccesses?: AuthzAccessOrderByRelationAggregateInput
   }
 
   export type DatabaseWhereUniqueInput = Prisma.AtLeast<{
@@ -31566,6 +31734,7 @@ export namespace Prisma {
     lastValidatedAt?: DateTimeNullableFilter<"Database"> | Date | string | null
     createdAt?: DateTimeFilter<"Database"> | Date | string
     updatedAt?: DateTimeFilter<"Database"> | Date | string
+    authzAccesses?: AuthzAccessListRelationFilter
   }, "id">
 
   export type DatabaseOrderByWithAggregationInput = {
@@ -31873,24 +32042,28 @@ export namespace Prisma {
     NOT?: AuthzAccessWhereInput | AuthzAccessWhereInput[]
     id?: StringFilter<"AuthzAccess"> | string
     toAccountId?: StringFilter<"AuthzAccess"> | string
-    forServerId?: StringFilter<"AuthzAccess"> | string
+    forServerId?: StringNullableFilter<"AuthzAccess"> | string | null
+    databaseId?: StringNullableFilter<"AuthzAccess"> | string | null
     roleId?: StringFilter<"AuthzAccess"> | string
     status?: StringFilter<"AuthzAccess"> | string
     moreDetails?: JsonFilter<"AuthzAccess">
     toAccount?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    forServer?: XOR<ServerScalarRelationFilter, ServerWhereInput>
+    forServer?: XOR<ServerNullableScalarRelationFilter, ServerWhereInput> | null
+    database?: XOR<DatabaseNullableScalarRelationFilter, DatabaseWhereInput> | null
     role?: XOR<AuthzRoleScalarRelationFilter, AuthzRoleWhereInput>
   }
 
   export type AuthzAccessOrderByWithRelationInput = {
     id?: SortOrder
     toAccountId?: SortOrder
-    forServerId?: SortOrder
+    forServerId?: SortOrderInput | SortOrder
+    databaseId?: SortOrderInput | SortOrder
     roleId?: SortOrder
     status?: SortOrder
     moreDetails?: SortOrder
     toAccount?: AccountOrderByWithRelationInput
     forServer?: ServerOrderByWithRelationInput
+    database?: DatabaseOrderByWithRelationInput
     role?: AuthzRoleOrderByWithRelationInput
   }
 
@@ -31900,19 +32073,22 @@ export namespace Prisma {
     OR?: AuthzAccessWhereInput[]
     NOT?: AuthzAccessWhereInput | AuthzAccessWhereInput[]
     toAccountId?: StringFilter<"AuthzAccess"> | string
-    forServerId?: StringFilter<"AuthzAccess"> | string
+    forServerId?: StringNullableFilter<"AuthzAccess"> | string | null
+    databaseId?: StringNullableFilter<"AuthzAccess"> | string | null
     roleId?: StringFilter<"AuthzAccess"> | string
     status?: StringFilter<"AuthzAccess"> | string
     moreDetails?: JsonFilter<"AuthzAccess">
     toAccount?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    forServer?: XOR<ServerScalarRelationFilter, ServerWhereInput>
+    forServer?: XOR<ServerNullableScalarRelationFilter, ServerWhereInput> | null
+    database?: XOR<DatabaseNullableScalarRelationFilter, DatabaseWhereInput> | null
     role?: XOR<AuthzRoleScalarRelationFilter, AuthzRoleWhereInput>
   }, "id">
 
   export type AuthzAccessOrderByWithAggregationInput = {
     id?: SortOrder
     toAccountId?: SortOrder
-    forServerId?: SortOrder
+    forServerId?: SortOrderInput | SortOrder
+    databaseId?: SortOrderInput | SortOrder
     roleId?: SortOrder
     status?: SortOrder
     moreDetails?: SortOrder
@@ -31927,7 +32103,8 @@ export namespace Prisma {
     NOT?: AuthzAccessScalarWhereWithAggregatesInput | AuthzAccessScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"AuthzAccess"> | string
     toAccountId?: StringWithAggregatesFilter<"AuthzAccess"> | string
-    forServerId?: StringWithAggregatesFilter<"AuthzAccess"> | string
+    forServerId?: StringNullableWithAggregatesFilter<"AuthzAccess"> | string | null
+    databaseId?: StringNullableWithAggregatesFilter<"AuthzAccess"> | string | null
     roleId?: StringWithAggregatesFilter<"AuthzAccess"> | string
     status?: StringWithAggregatesFilter<"AuthzAccess"> | string
     moreDetails?: JsonWithAggregatesFilter<"AuthzAccess">
@@ -33262,6 +33439,7 @@ export namespace Prisma {
     lastValidatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    authzAccesses?: AuthzAccessCreateNestedManyWithoutDatabaseInput
   }
 
   export type DatabaseUncheckedCreateInput = {
@@ -33275,6 +33453,7 @@ export namespace Prisma {
     lastValidatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    authzAccesses?: AuthzAccessUncheckedCreateNestedManyWithoutDatabaseInput
   }
 
   export type DatabaseUpdateInput = {
@@ -33288,6 +33467,7 @@ export namespace Prisma {
     lastValidatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authzAccesses?: AuthzAccessUpdateManyWithoutDatabaseNestedInput
   }
 
   export type DatabaseUncheckedUpdateInput = {
@@ -33301,6 +33481,7 @@ export namespace Prisma {
     lastValidatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authzAccesses?: AuthzAccessUncheckedUpdateManyWithoutDatabaseNestedInput
   }
 
   export type DatabaseCreateManyInput = {
@@ -33631,14 +33812,16 @@ export namespace Prisma {
     status: string
     moreDetails: JsonNullValueInput | InputJsonValue
     toAccount: AccountCreateNestedOneWithoutAuthzAccessesInput
-    forServer: ServerCreateNestedOneWithoutAuthzAccessesInput
+    forServer?: ServerCreateNestedOneWithoutAuthzAccessesInput
+    database?: DatabaseCreateNestedOneWithoutAuthzAccessesInput
     role: AuthzRoleCreateNestedOneWithoutAuthzAccessesInput
   }
 
   export type AuthzAccessUncheckedCreateInput = {
     id?: string
     toAccountId: string
-    forServerId: string
+    forServerId?: string | null
+    databaseId?: string | null
     roleId: string
     status: string
     moreDetails: JsonNullValueInput | InputJsonValue
@@ -33649,14 +33832,16 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     moreDetails?: JsonNullValueInput | InputJsonValue
     toAccount?: AccountUpdateOneRequiredWithoutAuthzAccessesNestedInput
-    forServer?: ServerUpdateOneRequiredWithoutAuthzAccessesNestedInput
+    forServer?: ServerUpdateOneWithoutAuthzAccessesNestedInput
+    database?: DatabaseUpdateOneWithoutAuthzAccessesNestedInput
     role?: AuthzRoleUpdateOneRequiredWithoutAuthzAccessesNestedInput
   }
 
   export type AuthzAccessUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     toAccountId?: StringFieldUpdateOperationsInput | string
-    forServerId?: StringFieldUpdateOperationsInput | string
+    forServerId?: NullableStringFieldUpdateOperationsInput | string | null
+    databaseId?: NullableStringFieldUpdateOperationsInput | string | null
     roleId?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     moreDetails?: JsonNullValueInput | InputJsonValue
@@ -33665,7 +33850,8 @@ export namespace Prisma {
   export type AuthzAccessCreateManyInput = {
     id?: string
     toAccountId: string
-    forServerId: string
+    forServerId?: string | null
+    databaseId?: string | null
     roleId: string
     status: string
     moreDetails: JsonNullValueInput | InputJsonValue
@@ -33680,7 +33866,8 @@ export namespace Prisma {
   export type AuthzAccessUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     toAccountId?: StringFieldUpdateOperationsInput | string
-    forServerId?: StringFieldUpdateOperationsInput | string
+    forServerId?: NullableStringFieldUpdateOperationsInput | string | null
+    databaseId?: NullableStringFieldUpdateOperationsInput | string | null
     roleId?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     moreDetails?: JsonNullValueInput | InputJsonValue
@@ -34864,6 +35051,16 @@ export namespace Prisma {
     roleName?: SortOrder
   }
 
+  export type ServerNullableScalarRelationFilter = {
+    is?: ServerWhereInput | null
+    isNot?: ServerWhereInput | null
+  }
+
+  export type DatabaseNullableScalarRelationFilter = {
+    is?: DatabaseWhereInput | null
+    isNot?: DatabaseWhereInput | null
+  }
+
   export type AuthzRoleScalarRelationFilter = {
     is?: AuthzRoleWhereInput
     isNot?: AuthzRoleWhereInput
@@ -34873,6 +35070,7 @@ export namespace Prisma {
     id?: SortOrder
     toAccountId?: SortOrder
     forServerId?: SortOrder
+    databaseId?: SortOrder
     roleId?: SortOrder
     status?: SortOrder
     moreDetails?: SortOrder
@@ -34882,6 +35080,7 @@ export namespace Prisma {
     id?: SortOrder
     toAccountId?: SortOrder
     forServerId?: SortOrder
+    databaseId?: SortOrder
     roleId?: SortOrder
     status?: SortOrder
   }
@@ -34890,6 +35089,7 @@ export namespace Prisma {
     id?: SortOrder
     toAccountId?: SortOrder
     forServerId?: SortOrder
+    databaseId?: SortOrder
     roleId?: SortOrder
     status?: SortOrder
   }
@@ -35239,8 +35439,50 @@ export namespace Prisma {
     update?: XOR<XOR<IntelligenceAccessUpdateToOneWithWhereWithoutLogsInput, IntelligenceAccessUpdateWithoutLogsInput>, IntelligenceAccessUncheckedUpdateWithoutLogsInput>
   }
 
+  export type AuthzAccessCreateNestedManyWithoutDatabaseInput = {
+    create?: XOR<AuthzAccessCreateWithoutDatabaseInput, AuthzAccessUncheckedCreateWithoutDatabaseInput> | AuthzAccessCreateWithoutDatabaseInput[] | AuthzAccessUncheckedCreateWithoutDatabaseInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutDatabaseInput | AuthzAccessCreateOrConnectWithoutDatabaseInput[]
+    createMany?: AuthzAccessCreateManyDatabaseInputEnvelope
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+  }
+
+  export type AuthzAccessUncheckedCreateNestedManyWithoutDatabaseInput = {
+    create?: XOR<AuthzAccessCreateWithoutDatabaseInput, AuthzAccessUncheckedCreateWithoutDatabaseInput> | AuthzAccessCreateWithoutDatabaseInput[] | AuthzAccessUncheckedCreateWithoutDatabaseInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutDatabaseInput | AuthzAccessCreateOrConnectWithoutDatabaseInput[]
+    createMany?: AuthzAccessCreateManyDatabaseInputEnvelope
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+  }
+
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
+  }
+
+  export type AuthzAccessUpdateManyWithoutDatabaseNestedInput = {
+    create?: XOR<AuthzAccessCreateWithoutDatabaseInput, AuthzAccessUncheckedCreateWithoutDatabaseInput> | AuthzAccessCreateWithoutDatabaseInput[] | AuthzAccessUncheckedCreateWithoutDatabaseInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutDatabaseInput | AuthzAccessCreateOrConnectWithoutDatabaseInput[]
+    upsert?: AuthzAccessUpsertWithWhereUniqueWithoutDatabaseInput | AuthzAccessUpsertWithWhereUniqueWithoutDatabaseInput[]
+    createMany?: AuthzAccessCreateManyDatabaseInputEnvelope
+    set?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    disconnect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    delete?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    update?: AuthzAccessUpdateWithWhereUniqueWithoutDatabaseInput | AuthzAccessUpdateWithWhereUniqueWithoutDatabaseInput[]
+    updateMany?: AuthzAccessUpdateManyWithWhereWithoutDatabaseInput | AuthzAccessUpdateManyWithWhereWithoutDatabaseInput[]
+    deleteMany?: AuthzAccessScalarWhereInput | AuthzAccessScalarWhereInput[]
+  }
+
+  export type AuthzAccessUncheckedUpdateManyWithoutDatabaseNestedInput = {
+    create?: XOR<AuthzAccessCreateWithoutDatabaseInput, AuthzAccessUncheckedCreateWithoutDatabaseInput> | AuthzAccessCreateWithoutDatabaseInput[] | AuthzAccessUncheckedCreateWithoutDatabaseInput[]
+    connectOrCreate?: AuthzAccessCreateOrConnectWithoutDatabaseInput | AuthzAccessCreateOrConnectWithoutDatabaseInput[]
+    upsert?: AuthzAccessUpsertWithWhereUniqueWithoutDatabaseInput | AuthzAccessUpsertWithWhereUniqueWithoutDatabaseInput[]
+    createMany?: AuthzAccessCreateManyDatabaseInputEnvelope
+    set?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    disconnect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    delete?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    connect?: AuthzAccessWhereUniqueInput | AuthzAccessWhereUniqueInput[]
+    update?: AuthzAccessUpdateWithWhereUniqueWithoutDatabaseInput | AuthzAccessUpdateWithWhereUniqueWithoutDatabaseInput[]
+    updateMany?: AuthzAccessUpdateManyWithWhereWithoutDatabaseInput | AuthzAccessUpdateManyWithWhereWithoutDatabaseInput[]
+    deleteMany?: AuthzAccessScalarWhereInput | AuthzAccessScalarWhereInput[]
   }
 
   export type PermitCreateNestedManyWithoutAccountInput = {
@@ -35395,6 +35637,12 @@ export namespace Prisma {
     connect?: ServerWhereUniqueInput
   }
 
+  export type DatabaseCreateNestedOneWithoutAuthzAccessesInput = {
+    create?: XOR<DatabaseCreateWithoutAuthzAccessesInput, DatabaseUncheckedCreateWithoutAuthzAccessesInput>
+    connectOrCreate?: DatabaseCreateOrConnectWithoutAuthzAccessesInput
+    connect?: DatabaseWhereUniqueInput
+  }
+
   export type AuthzRoleCreateNestedOneWithoutAuthzAccessesInput = {
     create?: XOR<AuthzRoleCreateWithoutAuthzAccessesInput, AuthzRoleUncheckedCreateWithoutAuthzAccessesInput>
     connectOrCreate?: AuthzRoleCreateOrConnectWithoutAuthzAccessesInput
@@ -35409,12 +35657,24 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAuthzAccessesInput, AccountUpdateWithoutAuthzAccessesInput>, AccountUncheckedUpdateWithoutAuthzAccessesInput>
   }
 
-  export type ServerUpdateOneRequiredWithoutAuthzAccessesNestedInput = {
+  export type ServerUpdateOneWithoutAuthzAccessesNestedInput = {
     create?: XOR<ServerCreateWithoutAuthzAccessesInput, ServerUncheckedCreateWithoutAuthzAccessesInput>
     connectOrCreate?: ServerCreateOrConnectWithoutAuthzAccessesInput
     upsert?: ServerUpsertWithoutAuthzAccessesInput
+    disconnect?: ServerWhereInput | boolean
+    delete?: ServerWhereInput | boolean
     connect?: ServerWhereUniqueInput
     update?: XOR<XOR<ServerUpdateToOneWithWhereWithoutAuthzAccessesInput, ServerUpdateWithoutAuthzAccessesInput>, ServerUncheckedUpdateWithoutAuthzAccessesInput>
+  }
+
+  export type DatabaseUpdateOneWithoutAuthzAccessesNestedInput = {
+    create?: XOR<DatabaseCreateWithoutAuthzAccessesInput, DatabaseUncheckedCreateWithoutAuthzAccessesInput>
+    connectOrCreate?: DatabaseCreateOrConnectWithoutAuthzAccessesInput
+    upsert?: DatabaseUpsertWithoutAuthzAccessesInput
+    disconnect?: DatabaseWhereInput | boolean
+    delete?: DatabaseWhereInput | boolean
+    connect?: DatabaseWhereUniqueInput
+    update?: XOR<XOR<DatabaseUpdateToOneWithWhereWithoutAuthzAccessesInput, DatabaseUpdateWithoutAuthzAccessesInput>, DatabaseUncheckedUpdateWithoutAuthzAccessesInput>
   }
 
   export type AuthzRoleUpdateOneRequiredWithoutAuthzAccessesNestedInput = {
@@ -35761,12 +36021,14 @@ export namespace Prisma {
     status: string
     moreDetails: JsonNullValueInput | InputJsonValue
     toAccount: AccountCreateNestedOneWithoutAuthzAccessesInput
+    database?: DatabaseCreateNestedOneWithoutAuthzAccessesInput
     role: AuthzRoleCreateNestedOneWithoutAuthzAccessesInput
   }
 
   export type AuthzAccessUncheckedCreateWithoutForServerInput = {
     id?: string
     toAccountId: string
+    databaseId?: string | null
     roleId: string
     status: string
     moreDetails: JsonNullValueInput | InputJsonValue
@@ -35831,7 +36093,8 @@ export namespace Prisma {
     NOT?: AuthzAccessScalarWhereInput | AuthzAccessScalarWhereInput[]
     id?: StringFilter<"AuthzAccess"> | string
     toAccountId?: StringFilter<"AuthzAccess"> | string
-    forServerId?: StringFilter<"AuthzAccess"> | string
+    forServerId?: StringNullableFilter<"AuthzAccess"> | string | null
+    databaseId?: StringNullableFilter<"AuthzAccess"> | string | null
     roleId?: StringFilter<"AuthzAccess"> | string
     status?: StringFilter<"AuthzAccess"> | string
     moreDetails?: JsonFilter<"AuthzAccess">
@@ -36272,6 +36535,50 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AuthzAccessCreateWithoutDatabaseInput = {
+    id?: string
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
+    toAccount: AccountCreateNestedOneWithoutAuthzAccessesInput
+    forServer?: ServerCreateNestedOneWithoutAuthzAccessesInput
+    role: AuthzRoleCreateNestedOneWithoutAuthzAccessesInput
+  }
+
+  export type AuthzAccessUncheckedCreateWithoutDatabaseInput = {
+    id?: string
+    toAccountId: string
+    forServerId?: string | null
+    roleId: string
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
+  }
+
+  export type AuthzAccessCreateOrConnectWithoutDatabaseInput = {
+    where: AuthzAccessWhereUniqueInput
+    create: XOR<AuthzAccessCreateWithoutDatabaseInput, AuthzAccessUncheckedCreateWithoutDatabaseInput>
+  }
+
+  export type AuthzAccessCreateManyDatabaseInputEnvelope = {
+    data: AuthzAccessCreateManyDatabaseInput | AuthzAccessCreateManyDatabaseInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AuthzAccessUpsertWithWhereUniqueWithoutDatabaseInput = {
+    where: AuthzAccessWhereUniqueInput
+    update: XOR<AuthzAccessUpdateWithoutDatabaseInput, AuthzAccessUncheckedUpdateWithoutDatabaseInput>
+    create: XOR<AuthzAccessCreateWithoutDatabaseInput, AuthzAccessUncheckedCreateWithoutDatabaseInput>
+  }
+
+  export type AuthzAccessUpdateWithWhereUniqueWithoutDatabaseInput = {
+    where: AuthzAccessWhereUniqueInput
+    data: XOR<AuthzAccessUpdateWithoutDatabaseInput, AuthzAccessUncheckedUpdateWithoutDatabaseInput>
+  }
+
+  export type AuthzAccessUpdateManyWithWhereWithoutDatabaseInput = {
+    where: AuthzAccessScalarWhereInput
+    data: XOR<AuthzAccessUpdateManyMutationInput, AuthzAccessUncheckedUpdateManyWithoutDatabaseInput>
+  }
+
   export type PermitCreateWithoutAccountInput = {
     id: string
     portfolioId?: string | null
@@ -36302,13 +36609,15 @@ export namespace Prisma {
     id?: string
     status: string
     moreDetails: JsonNullValueInput | InputJsonValue
-    forServer: ServerCreateNestedOneWithoutAuthzAccessesInput
+    forServer?: ServerCreateNestedOneWithoutAuthzAccessesInput
+    database?: DatabaseCreateNestedOneWithoutAuthzAccessesInput
     role: AuthzRoleCreateNestedOneWithoutAuthzAccessesInput
   }
 
   export type AuthzAccessUncheckedCreateWithoutToAccountInput = {
     id?: string
-    forServerId: string
+    forServerId?: string | null
+    databaseId?: string | null
     roleId: string
     status: string
     moreDetails: JsonNullValueInput | InputJsonValue
@@ -36421,13 +36730,15 @@ export namespace Prisma {
     status: string
     moreDetails: JsonNullValueInput | InputJsonValue
     toAccount: AccountCreateNestedOneWithoutAuthzAccessesInput
-    forServer: ServerCreateNestedOneWithoutAuthzAccessesInput
+    forServer?: ServerCreateNestedOneWithoutAuthzAccessesInput
+    database?: DatabaseCreateNestedOneWithoutAuthzAccessesInput
   }
 
   export type AuthzAccessUncheckedCreateWithoutRoleInput = {
     id?: string
     toAccountId: string
-    forServerId: string
+    forServerId?: string | null
+    databaseId?: string | null
     status: string
     moreDetails: JsonNullValueInput | InputJsonValue
   }
@@ -36518,6 +36829,37 @@ export namespace Prisma {
   export type ServerCreateOrConnectWithoutAuthzAccessesInput = {
     where: ServerWhereUniqueInput
     create: XOR<ServerCreateWithoutAuthzAccessesInput, ServerUncheckedCreateWithoutAuthzAccessesInput>
+  }
+
+  export type DatabaseCreateWithoutAuthzAccessesInput = {
+    id: string
+    title: string
+    description: string
+    connectionType: string
+    connectionStatus?: string
+    credentails: string
+    authConfig: JsonNullValueInput | InputJsonValue
+    lastValidatedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DatabaseUncheckedCreateWithoutAuthzAccessesInput = {
+    id: string
+    title: string
+    description: string
+    connectionType: string
+    connectionStatus?: string
+    credentails: string
+    authConfig: JsonNullValueInput | InputJsonValue
+    lastValidatedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DatabaseCreateOrConnectWithoutAuthzAccessesInput = {
+    where: DatabaseWhereUniqueInput
+    create: XOR<DatabaseCreateWithoutAuthzAccessesInput, DatabaseUncheckedCreateWithoutAuthzAccessesInput>
   }
 
   export type AuthzRoleCreateWithoutAuthzAccessesInput = {
@@ -36613,6 +36955,43 @@ export namespace Prisma {
     applicationServerMaps?: ApplicationServerMapUncheckedUpdateManyWithoutServerNestedInput
   }
 
+  export type DatabaseUpsertWithoutAuthzAccessesInput = {
+    update: XOR<DatabaseUpdateWithoutAuthzAccessesInput, DatabaseUncheckedUpdateWithoutAuthzAccessesInput>
+    create: XOR<DatabaseCreateWithoutAuthzAccessesInput, DatabaseUncheckedCreateWithoutAuthzAccessesInput>
+    where?: DatabaseWhereInput
+  }
+
+  export type DatabaseUpdateToOneWithWhereWithoutAuthzAccessesInput = {
+    where?: DatabaseWhereInput
+    data: XOR<DatabaseUpdateWithoutAuthzAccessesInput, DatabaseUncheckedUpdateWithoutAuthzAccessesInput>
+  }
+
+  export type DatabaseUpdateWithoutAuthzAccessesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    connectionType?: StringFieldUpdateOperationsInput | string
+    connectionStatus?: StringFieldUpdateOperationsInput | string
+    credentails?: StringFieldUpdateOperationsInput | string
+    authConfig?: JsonNullValueInput | InputJsonValue
+    lastValidatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DatabaseUncheckedUpdateWithoutAuthzAccessesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    connectionType?: StringFieldUpdateOperationsInput | string
+    connectionStatus?: StringFieldUpdateOperationsInput | string
+    credentails?: StringFieldUpdateOperationsInput | string
+    authConfig?: JsonNullValueInput | InputJsonValue
+    lastValidatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AuthzRoleUpsertWithoutAuthzAccessesInput = {
     update: XOR<AuthzRoleUpdateWithoutAuthzAccessesInput, AuthzRoleUncheckedUpdateWithoutAuthzAccessesInput>
     create: XOR<AuthzRoleCreateWithoutAuthzAccessesInput, AuthzRoleUncheckedCreateWithoutAuthzAccessesInput>
@@ -36648,6 +37027,7 @@ export namespace Prisma {
   export type AuthzAccessCreateManyForServerInput = {
     id?: string
     toAccountId: string
+    databaseId?: string | null
     roleId: string
     status: string
     moreDetails: JsonNullValueInput | InputJsonValue
@@ -36679,12 +37059,14 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     moreDetails?: JsonNullValueInput | InputJsonValue
     toAccount?: AccountUpdateOneRequiredWithoutAuthzAccessesNestedInput
+    database?: DatabaseUpdateOneWithoutAuthzAccessesNestedInput
     role?: AuthzRoleUpdateOneRequiredWithoutAuthzAccessesNestedInput
   }
 
   export type AuthzAccessUncheckedUpdateWithoutForServerInput = {
     id?: StringFieldUpdateOperationsInput | string
     toAccountId?: StringFieldUpdateOperationsInput | string
+    databaseId?: NullableStringFieldUpdateOperationsInput | string | null
     roleId?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     moreDetails?: JsonNullValueInput | InputJsonValue
@@ -36693,6 +37075,7 @@ export namespace Prisma {
   export type AuthzAccessUncheckedUpdateManyWithoutForServerInput = {
     id?: StringFieldUpdateOperationsInput | string
     toAccountId?: StringFieldUpdateOperationsInput | string
+    databaseId?: NullableStringFieldUpdateOperationsInput | string | null
     roleId?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     moreDetails?: JsonNullValueInput | InputJsonValue
@@ -36794,6 +37177,42 @@ export namespace Prisma {
     loggedOn?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AuthzAccessCreateManyDatabaseInput = {
+    id?: string
+    toAccountId: string
+    forServerId?: string | null
+    roleId: string
+    status: string
+    moreDetails: JsonNullValueInput | InputJsonValue
+  }
+
+  export type AuthzAccessUpdateWithoutDatabaseInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
+    toAccount?: AccountUpdateOneRequiredWithoutAuthzAccessesNestedInput
+    forServer?: ServerUpdateOneWithoutAuthzAccessesNestedInput
+    role?: AuthzRoleUpdateOneRequiredWithoutAuthzAccessesNestedInput
+  }
+
+  export type AuthzAccessUncheckedUpdateWithoutDatabaseInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    toAccountId?: StringFieldUpdateOperationsInput | string
+    forServerId?: NullableStringFieldUpdateOperationsInput | string | null
+    roleId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type AuthzAccessUncheckedUpdateManyWithoutDatabaseInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    toAccountId?: StringFieldUpdateOperationsInput | string
+    forServerId?: NullableStringFieldUpdateOperationsInput | string | null
+    roleId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    moreDetails?: JsonNullValueInput | InputJsonValue
+  }
+
   export type PermitCreateManyAccountInput = {
     id: string
     portfolioId?: string | null
@@ -36804,7 +37223,8 @@ export namespace Prisma {
 
   export type AuthzAccessCreateManyToAccountInput = {
     id?: string
-    forServerId: string
+    forServerId?: string | null
+    databaseId?: string | null
     roleId: string
     status: string
     moreDetails: JsonNullValueInput | InputJsonValue
@@ -36838,13 +37258,15 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     moreDetails?: JsonNullValueInput | InputJsonValue
-    forServer?: ServerUpdateOneRequiredWithoutAuthzAccessesNestedInput
+    forServer?: ServerUpdateOneWithoutAuthzAccessesNestedInput
+    database?: DatabaseUpdateOneWithoutAuthzAccessesNestedInput
     role?: AuthzRoleUpdateOneRequiredWithoutAuthzAccessesNestedInput
   }
 
   export type AuthzAccessUncheckedUpdateWithoutToAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    forServerId?: StringFieldUpdateOperationsInput | string
+    forServerId?: NullableStringFieldUpdateOperationsInput | string | null
+    databaseId?: NullableStringFieldUpdateOperationsInput | string | null
     roleId?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     moreDetails?: JsonNullValueInput | InputJsonValue
@@ -36852,7 +37274,8 @@ export namespace Prisma {
 
   export type AuthzAccessUncheckedUpdateManyWithoutToAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    forServerId?: StringFieldUpdateOperationsInput | string
+    forServerId?: NullableStringFieldUpdateOperationsInput | string | null
+    databaseId?: NullableStringFieldUpdateOperationsInput | string | null
     roleId?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     moreDetails?: JsonNullValueInput | InputJsonValue
@@ -36861,7 +37284,8 @@ export namespace Prisma {
   export type AuthzAccessCreateManyRoleInput = {
     id?: string
     toAccountId: string
-    forServerId: string
+    forServerId?: string | null
+    databaseId?: string | null
     status: string
     moreDetails: JsonNullValueInput | InputJsonValue
   }
@@ -36871,13 +37295,15 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     moreDetails?: JsonNullValueInput | InputJsonValue
     toAccount?: AccountUpdateOneRequiredWithoutAuthzAccessesNestedInput
-    forServer?: ServerUpdateOneRequiredWithoutAuthzAccessesNestedInput
+    forServer?: ServerUpdateOneWithoutAuthzAccessesNestedInput
+    database?: DatabaseUpdateOneWithoutAuthzAccessesNestedInput
   }
 
   export type AuthzAccessUncheckedUpdateWithoutRoleInput = {
     id?: StringFieldUpdateOperationsInput | string
     toAccountId?: StringFieldUpdateOperationsInput | string
-    forServerId?: StringFieldUpdateOperationsInput | string
+    forServerId?: NullableStringFieldUpdateOperationsInput | string | null
+    databaseId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     moreDetails?: JsonNullValueInput | InputJsonValue
   }
@@ -36885,7 +37311,8 @@ export namespace Prisma {
   export type AuthzAccessUncheckedUpdateManyWithoutRoleInput = {
     id?: StringFieldUpdateOperationsInput | string
     toAccountId?: StringFieldUpdateOperationsInput | string
-    forServerId?: StringFieldUpdateOperationsInput | string
+    forServerId?: NullableStringFieldUpdateOperationsInput | string | null
+    databaseId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     moreDetails?: JsonNullValueInput | InputJsonValue
   }

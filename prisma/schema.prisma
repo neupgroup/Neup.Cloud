@@ -276,6 +276,8 @@ model Database {
   createdAt        DateTime  @default(now()) @map("createdAt") @db.Timestamp(6)
   updatedAt        DateTime  @updatedAt @map("updatedAt") @db.Timestamp(6)
 
+  authzAccesses AuthzAccess[]
+
   @@map("databases")
 }
 
@@ -336,19 +338,22 @@ model AuthzRoleCapability {
 }
 
 model AuthzAccess {
-  id          String @id @default(uuid()) @db.Text
-  toAccountId String @map("to_account_id") @db.Text
-  forServerId String @map("for_server_id") @db.Text
-  roleId      String @map("role_id") @db.Text
-  status      String @db.Text
-  moreDetails Json   @map("more_details") @db.JsonB
+  id          String  @id @default(uuid()) @db.Text
+  toAccountId String  @map("to_account_id") @db.Text
+  forServerId String? @map("for_server_id") @db.Text
+  databaseId  String? @map("database_id") @db.Text
+  roleId      String  @map("role_id") @db.Text
+  status      String  @db.Text
+  moreDetails Json    @map("more_details") @db.JsonB
 
   toAccount Account   @relation("AuthzAccessToAccount", fields: [toAccountId], references: [id])
-  forServer Server    @relation(fields: [forServerId], references: [id])
+  forServer Server?   @relation(fields: [forServerId], references: [id])
+  database  Database? @relation(fields: [databaseId], references: [id])
   role      AuthzRole @relation(fields: [roleId], references: [id])
 
   @@index([toAccountId], map: "authz_access_to_account_id_idx")
   @@index([forServerId], map: "authz_access_for_server_id_idx")
+  @@index([databaseId], map: "authz_access_database_id_idx")
   @@index([roleId], map: "authz_access_role_id_idx")
   @@map("authz_access")
 }

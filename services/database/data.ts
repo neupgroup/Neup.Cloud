@@ -1,5 +1,6 @@
 import { prisma } from '@/core/database/prisma';
 import { stringUuid } from '@/core/data/uuid';
+import { getCurrentAccountId } from '@/services/account-profile';
 import type { ExternalDatabase } from '@/services/database/types';
 
 type DatabaseDelegate = {
@@ -52,10 +53,23 @@ function mapDatabase(record: {
 }
 
 export async function getDatabaseById(id: string) {
+  const accountId = await getCurrentAccountId();
+  if (!accountId) return null;
+
   const delegate = getDatabaseDelegate();
 
   if (delegate) {
-    const record = await (delegate as any).findUnique?.({ where: { id } });
+    const record = await (delegate as any).findFirst?.({
+      where: {
+        id,
+        authzAccesses: {
+          some: {
+            toAccountId: accountId,
+            status: 'active',
+          },
+        },
+      },
+    });
     if (!record) {
       return null;
     }
@@ -78,8 +92,16 @@ export async function getDatabaseById(id: string) {
     `SELECT id, title, description, "connectionType", "connectionStatus", credentails, "authConfig", "lastValidatedAt", "createdAt", "updatedAt"
      FROM "databases"
      WHERE id = $1
+       AND EXISTS (
+         SELECT 1
+         FROM "authz_access" AS access
+         WHERE access."database_id" = "databases".id
+           AND access."to_account_id" = $2
+           AND access.status = 'active'
+       )
      LIMIT 1`,
-    id
+    id,
+    accountId
   );
 
   if (!records[0]) {
@@ -90,10 +112,21 @@ export async function getDatabaseById(id: string) {
 }
 
 export async function getDatabases() {
+  const accountId = await getCurrentAccountId();
+  if (!accountId) return [];
+
   const delegate = getDatabaseDelegate();
 
   if (delegate) {
     const records = await delegate.findMany({
+      where: {
+        authzAccesses: {
+          some: {
+            toAccountId: accountId,
+            status: 'active',
+          },
+        },
+      },
       orderBy: { title: 'asc' },
     });
 
@@ -114,7 +147,15 @@ export async function getDatabases() {
   }>>(
     `SELECT id, title, description, "connectionType", "connectionStatus", credentails, "authConfig", "lastValidatedAt", "createdAt", "updatedAt"
      FROM "databases"
-     ORDER BY title ASC`
+     AND EXISTS (
+       SELECT 1
+       FROM "authz_access" AS access
+       WHERE access."database_id" = "databases".id
+         AND access."to_account_id" = $1
+         AND access.status = 'active'
+     )
+     ORDER BY title ASC`,
+    accountId
   );
 
   return records.map(mapDatabase);
