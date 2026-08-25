@@ -52,6 +52,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ProgressBar } from '@/components/progress-bar';
 import NProgress from 'nprogress';
+import application from '@/base/application.json';
 
 import { findLongestMatch } from '@/services/core/findLongestMatch';
 import {
@@ -392,6 +393,7 @@ export default function RootLayout({
       <head>
         <title>Neup.Cloud | Modern Infrastructure Control</title>
         <meta name="description" content="The future of cloud infrastructure." />
+        <link rel="icon" href={application.appLogo.favicon} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />

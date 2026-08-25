@@ -5,6 +5,7 @@ import { cn } from "@/core/utils";
 import Link from "next/link";
 import NProgress from 'nprogress';
 import { usePathname } from 'next/navigation';
+import application from '@/base/application.json';
 
 export function Logo({ className }: { className?: string }) {
   const pathname = usePathname();
@@ -17,14 +18,14 @@ export function Logo({ className }: { className?: string }) {
   return (
     <Link href="/home" onClick={handleClick} className={cn("flex items-center gap-2 text-foreground", className)}>
       <Image
-        src="https://neupgroup.com/cloud/logo.svg"
-        alt="Neup.Cloud"
+        src={application.appLogo.favicon}
+        alt={`${application.appName} logo`}
         width={32}
         height={25}
         priority
         className="h-7 w-8 object-contain"
       />
-      <span className="font-headline text-lg font-bold">Neup.Cloud</span>
+      <span className="font-headline text-lg font-bold">{application.appName}</span>
     </Link>
   );
 }
