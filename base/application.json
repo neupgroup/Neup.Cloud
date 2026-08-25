@@ -3,6 +3,7 @@
     "appId": "neup.cloud",
     "appDescription": "Neup.Cloud is a cloud, server, and intelligence management service that allows users to manage cloud resources for their services.",
     "appLogo" : {
+        "mainlogo": "/cloud/logo.svg",
         "favicon": "/cloud/favicon.ico",
         "apple-touch-icon": "/cloud/apple-touch-icon.png",
         "android-chrome-192x192": "/cloud/android-chrome-192x192.png",

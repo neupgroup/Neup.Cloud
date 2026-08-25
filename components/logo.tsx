@@ -18,7 +18,7 @@ export function Logo({ className }: { className?: string }) {
   return (
     <Link href="/home" onClick={handleClick} className={cn("flex items-center gap-2 text-foreground", className)}>
       <Image
-        src={application.appLogo.favicon}
+        src={application.appLogo.mainlogo}
         alt={`${application.appName} logo`}
         width={32}
         height={25}
