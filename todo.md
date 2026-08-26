@@ -1,4 +1,5 @@
 # TODO
+- [ ] Authenticate logger bridge requests using the supplied `NEUP_APP_ID` and `NEUP_APP_SECRET`; the logger routes currently accept and persist unauthenticated requests.
 - [ ] Configure `NEUP_ACCOUNT_CREATED_NOTIFY_URL`/`NEUP_ACCOUNT_CREATED_NOTIFY_SECRET` once the Neup Account account-created notification endpoint is confirmed.
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/webservices/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/webservices/page.tsx).
 - [ ] Add `::neup.documentation::...::end` documentation to [app/(main)/server/page.tsx](/Users/neupkishor/Code/neup.cloud/app/(main)/server/page.tsx).

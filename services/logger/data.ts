@@ -82,6 +82,32 @@ export async function getLoggerActivities() {
   });
 }
 
+export async function getPaginatedLoggerActivities(page = 1, pageSize = 25) {
+  const safePage = Math.max(1, Math.floor(page));
+  const safePageSize = Math.max(1, Math.floor(pageSize));
+
+  const total = await prisma.loggerActivity.count();
+  const totalPages = Math.max(1, Math.ceil(total / safePageSize));
+  const currentPage = Math.min(safePage, totalPages);
+  const activities = await prisma.loggerActivity.findMany({
+    include: {
+      project: true,
+    },
+    orderBy: {
+      loggedOn: 'desc',
+    },
+    skip: (currentPage - 1) * safePageSize,
+    take: safePageSize,
+  });
+
+  return {
+    activities,
+    currentPage,
+    totalPages,
+    total,
+  };
+}
+
 export async function getLoggerActivitiesByType(type: string) {
   return prisma.loggerActivity.findMany({
     where: {

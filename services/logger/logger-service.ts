@@ -4,6 +4,7 @@ import {
   createLoggerActivity,
   ensureLoggerProject,
   getLoggerActivities,
+  getPaginatedLoggerActivities,
   getLoggerActivitiesByType,
 } from '@/services/logger/data';
 
@@ -87,6 +88,15 @@ export async function getAllLoggerActivities(): Promise<LoggerActivityRecord[]> 
       createdOn: record.project.createdOn.toISOString(),
     },
   }));
+}
+
+export async function getPaginatedLoggerActivityRecords(page = 1, pageSize = 25) {
+  const result = await getPaginatedLoggerActivities(page, pageSize);
+
+  return {
+    ...result,
+    activities: result.activities.map(mapLoggerActivity),
+  };
 }
 
 export async function getErrorLoggerActivities(): Promise<LoggerActivityRecord[]> {
