@@ -50,6 +50,9 @@ core
 neup.core
 logica
 neup.logica
+component
+neup.component
+neup.react.component
 
 # certificates and signing keys.
 /keys
