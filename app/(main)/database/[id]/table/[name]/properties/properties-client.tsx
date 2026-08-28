@@ -10,14 +10,14 @@ import { addTablePrimaryKeyAction,
   dropTableColumnAction,
   dropTableIndexAction,
 } from '@/services/database/management';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription, AlertTitle } from '@/component/ui/alert';
+import { Badge } from '@/component/ui/badge';
+import { Button } from '@/component/ui/button';
+import { Card } from '@/component/ui/card';
+import { Checkbox } from '@/component/ui/checkbox';
+import { Input } from '@/component/ui/input';
+import { Label } from '@/component/ui/label';
+import { Switch } from '@/component/ui/switch';
 import {
   Table,
   TableBody,
@@ -25,7 +25,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/component/ui/table';
 import { useToast } from '@/core/hooks/useToast';
 
 type Props = {

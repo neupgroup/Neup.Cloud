@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { KeyRound } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/component/ui/alert';
 import { getApplication } from '@/services/server/applications/service';
 import { PageTitleBack } from '@/components/page-header';
 import { EnvironmentsForm } from '../environments-form';

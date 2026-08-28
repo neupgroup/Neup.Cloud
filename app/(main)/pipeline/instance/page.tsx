@@ -3,15 +3,15 @@ import Link from 'next/link';
 import { ArrowRight, Database, ScrollText, Workflow } from 'lucide-react';
 
 import { PageTitle } from '@/components/page-header';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/component/ui/badge';
+import { Button } from '@/component/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '@/component/ui/card';
 import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
 import { getPipelinesByAccountId } from '@/services/pipelines/data';
 

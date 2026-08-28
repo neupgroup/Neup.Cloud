@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { FolderOpen, Network, ScrollText, AlertCircle } from "lucide-react";
 
-import { Card } from "@/components/ui/card";
+import { Card } from "@/component/ui/card";
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 import { cn } from "@/core/utils";
 import { useSystemSection, SystemSectionProps } from '@/components/applications/system-section';

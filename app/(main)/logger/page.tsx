@@ -17,9 +17,9 @@ import { Activity, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react
 import { formatDistanceToNow } from 'date-fns';
 
 import { PageTitle } from '@/components/page-header';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/component/ui/badge';
+import { Button } from '@/component/ui/button';
+import { ScrollArea } from '@/component/ui/scroll-area';
 import { getPaginatedLoggerActivityRecords } from '@/services/logger/logger-service';
 
 export const metadata: Metadata = {

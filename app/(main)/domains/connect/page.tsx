@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/component/ui/card';
+import { Button } from '@/component/ui/button';
+import { Input } from '@/component/ui/input';
 import { useToast } from '@/core/hooks/useToast';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { addDomain } from '@/services/domains/domains-service';

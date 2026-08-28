@@ -7,9 +7,9 @@ import { getDatabaseById } from '@/services/database/data';
 import { getConnectionTableDataPage } from '@/services/database/explorer';
 import type { DatabaseTableDataPage } from '@/services/database/types';
 import { TableDataClient } from './table-data-client';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/component/ui/badge';
+import { Card } from '@/component/ui/card';
+import { Button } from '@/component/ui/button';
 
 export const metadata: Metadata = {
   title: 'Table Data, Neup.Cloud',

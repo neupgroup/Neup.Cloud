@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "setup": "rm -rf core && rm -rf logica && rm -rf neup.core && rm -rf neup.logica && git clone https://github.com/neupgroup/neup.core && git clone https://github.com/neupgroup/neup.logica && mv neup.core core && mv neup.logica logica",
+    "setup": "rm -rf core && rm -rf logica && rm -rf neup.core && rm -rf neup.logica && git clone https://github.com/neupgroup/neup.core && git clone https://github.com/neupgroup/neup.logica && mv neup.core core && mv neup.logica logica && rm -rf component && rm -rf neup.react.component && git clone https://github.com/neupgroup/neup.react.components && mv neup.react.components component",
     "prebuild": "npm run setup",
     "predev": "npm run setup",
 

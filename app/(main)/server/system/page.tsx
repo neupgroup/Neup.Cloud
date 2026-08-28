@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { PageTitle } from '@/components/page-header';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/component/ui/card';
+import { Button } from '@/component/ui/button';
 import { HardDrive, ArrowUpCircle, Package, Repeat2, ShieldCheck } from 'lucide-react';
 import { useServerName } from '@/inapp/hooks/use-server-name';
 import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';

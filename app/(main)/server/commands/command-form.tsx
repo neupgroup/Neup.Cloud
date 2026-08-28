@@ -1,9 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/component/ui/label';
+import { Input } from '@/component/ui/input';
+import { Textarea } from '@/component/ui/textarea';
 import { Variable } from 'lucide-react';
 import { CommandFormData, VARIABLE_REGEX } from '@/services/saved-commands/types';
 

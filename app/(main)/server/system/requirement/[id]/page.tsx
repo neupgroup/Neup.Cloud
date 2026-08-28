@@ -18,7 +18,7 @@ import { checkRequirementStep, installRequirementStep, uninstallRequirementStep,
 import * as Icons from 'lucide-react';
 import { cn } from '@/core/utils';
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/component/ui/skeleton";
 import { useServerName } from '@/inapp/hooks/use-server-name';
 import { useSelectedServerHref, useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 

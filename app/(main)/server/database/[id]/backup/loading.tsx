@@ -1,5 +1,5 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/component/ui/skeleton";
+import { Card, CardContent } from "@/component/ui/card";
 import { PageTitleBack } from "@/components/page-header";
 
 export default function Loading() {

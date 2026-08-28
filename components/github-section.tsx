@@ -2,8 +2,8 @@
 'use client';
 
 import { performGitOperation } from "@/services/server/applications/service";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/component/ui/button";
+import { Card } from "@/component/ui/card";
 import { useToast } from '@/core/hooks/useToast';
 import { cn } from "@/core/utils";
 import { Download, ExternalLink, GitBranch, GitPullRequest, Loader2, RefreshCw, RotateCcw } from "lucide-react";

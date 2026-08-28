@@ -1,9 +1,9 @@
 'use client';
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card } from "@/components/ui/card";
+import { Badge } from "@/component/ui/badge";
+import { Button } from "@/component/ui/button";
+import { Skeleton } from "@/component/ui/skeleton";
+import { Card } from "@/component/ui/card";
 import { Trash2, Copy, Check } from "lucide-react";
 import { useParams } from 'next/navigation';
 import { cn } from "@/core/utils";
@@ -23,7 +23,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from "@/component/ui/alert-dialog";
 
 function CopyButton({ text }: { text: string }) {
     const [copied, setCopied] = useState(false);

@@ -33,7 +33,7 @@ import {
   Workflow,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/component/ui/button';
 import {
   createPipelineLogAction,
   savePipelineFlowAction,

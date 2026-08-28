@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Card } from '@/component/ui/card';
+import { Button } from '@/component/ui/button';
+import { Input } from '@/component/ui/input';
+import { Badge } from '@/component/ui/badge';
 import { Play, RotateCcw, AlertCircle, CheckCircle2, XCircle, Clock, ShieldAlert, Plus } from 'lucide-react';
 import { checkOutboundPortConnectivity, checkPortConnectivity } from '@/services/server/firewall/firewall-service';
 import { useToast } from '@/core/hooks/useToast';

@@ -9,9 +9,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+} from "@/component/ui/alert-dialog";
+import { Button } from "@/component/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/component/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -19,11 +19,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/component/ui/dialog";
+import { Input } from "@/component/ui/input";
+import { Label } from "@/component/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/component/ui/table";
+import { Textarea } from "@/component/ui/textarea";
 import { FileText, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
 import type { Application } from "@/services/server/applications/_types";

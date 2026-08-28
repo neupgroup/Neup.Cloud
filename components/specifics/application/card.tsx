@@ -1,7 +1,7 @@
 import type { ApplicationCardStatus } from '@/services/server/applications/status-card';
 import { getLanguageDisplay, getStatusDotClass } from '@/services/server/applications/status-card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/component/ui/badge';
+import { Skeleton } from '@/component/ui/skeleton';
 import { cn } from '@/core/utils';
 import { AppWindow, Code, ChevronRight } from 'lucide-react';
 import Link from 'next/link';

@@ -2,7 +2,7 @@
 'use client';
 
 import { executeApplicationCommand } from "@/services/server/applications/service";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/component/ui/card";
 import { useToast } from '@/core/hooks/useToast';
 import { cn } from "@/core/utils";
 import { Check, Hammer, Loader2, Play, PlayCircle, RefreshCw, StopCircle, Terminal, Download } from "lucide-react";

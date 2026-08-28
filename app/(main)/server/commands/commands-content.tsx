@@ -3,29 +3,29 @@
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { Card } from '@/component/ui/card';
+import { Skeleton } from '@/component/ui/skeleton';
+import { Button } from '@/component/ui/button';
 import { Server, Loader2, Play, Search, ChevronRight, CheckCircle2, XCircle, Clock, SquareTerminal } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
+} from '@/component/ui/accordion';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/component/ui/select';
 import { getServers } from '@/services/server/server-service';
 import { getSavedCommands, executeSavedCommand } from '@/services/server/commands/server-command-service';
 import { getServerLogs } from '@/services/server/server-file-service';
 import { runCustomCommandOnServer } from '@/services/server/server-file-service';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/component/ui/label';
+import { Textarea } from '@/component/ui/textarea';
 import { useToast } from '@/core/hooks/useToast';
 import {
   Dialog,
@@ -35,8 +35,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogClose,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+} from '@/component/ui/dialog';
+import { Input } from '@/component/ui/input';
 import { type SavedCommand } from '@/services/saved-commands/types';
 import { cn } from '@/core/utils';
 import { CommandLogList, CommandLogListSkeleton } from './command-log-card';

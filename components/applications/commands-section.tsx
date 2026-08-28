@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card";
+import { Card } from "@/component/ui/card";
 import { cn } from "@/core/utils";
 import { Terminal } from "lucide-react";
 

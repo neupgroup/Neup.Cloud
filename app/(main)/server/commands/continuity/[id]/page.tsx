@@ -26,9 +26,9 @@ import { useEffect, useMemo, useRef, useState, useTransition, type KeyboardEvent
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Loader2, Server, SquareTerminal, XCircle } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/component/ui/button';
+import { Card } from '@/component/ui/card';
+import { Skeleton } from '@/component/ui/skeleton';
 import { useToast } from '@/core/hooks/useToast';
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';

@@ -1,7 +1,7 @@
 // Merged into page.tsx and can be deleted.
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/component/ui/button';
 import { useToast } from '@/core/hooks/useToast';
 import { checkDatabaseConnection } from '@/services/database/management';
 

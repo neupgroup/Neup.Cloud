@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageTitleBack } from '@/components/page-header';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/component/ui/card';
+import { Button } from '@/component/ui/button';
+import { Badge } from '@/component/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from "@/component/ui/alert";
+import { Skeleton } from '@/component/ui/skeleton';
 import { useToast } from '@/core/hooks/useToast';
 import { AlertCircle, Package, ArrowUpCircle, CheckCircle2, Loader2, Play } from 'lucide-react';
 import { getPackageDetails, updatePackage } from '@/services/server/system-updates';

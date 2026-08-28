@@ -2,7 +2,7 @@
 
 import { Github, Link as LinkIcon } from "lucide-react";
 
-import { Card } from "@/components/ui/card";
+import { Card } from "@/component/ui/card";
 
 import { RepoControls } from "../repo-controls";
 

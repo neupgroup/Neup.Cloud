@@ -44,12 +44,12 @@ import {
 } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/core/utils';
-import { Button } from '@/components/ui/button';
-import { useState, useEffect, Suspense } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/component/ui/button';
+import { useState, useEffect, useRef, Suspense } from 'react';
+import { ScrollArea } from '@/component/ui/scroll-area';
 import { Logo } from '@/components/logo';
-import { Toaster } from "@/component/ui/toaster"
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useToast } from '@/core/hooks/useToast';
+import { Avatar, AvatarFallback, AvatarImage } from '@/component/ui/avatar';
 import { ProgressBar } from '@/components/progress-bar';
 import NProgress from 'nprogress';
 import application from '@/base/application.json';
@@ -351,22 +351,44 @@ export default function RootLayout({
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { toast } = useToast();
+  const previousSelectedServerId = useRef<string | null>(null);
+  const hasMountedServerSelection = useRef(false);
   const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isServerSelected, setIsServerSelected] = useState(false);
   const isPlainRoute = pathname === '/pipeline/editor' || pathname.startsWith('/pipeline/editor/');
 
   useEffect(() => {
+    const nextSelectedServerId = shouldPreserveSelectedServer(pathname)
+      ? getSelectedServer(searchParams)
+      : null;
+
+    if (
+      hasMountedServerSelection.current &&
+      previousSelectedServerId.current !== nextSelectedServerId
+    ) {
+      toast({
+        title: nextSelectedServerId ? 'Server selected' : 'Server unselected',
+        description: nextSelectedServerId
+          ? 'The selected server is now active.'
+          : 'No server is currently selected.',
+        state: 'info',
+      });
+    }
+
+    previousSelectedServerId.current = nextSelectedServerId;
+    hasMountedServerSelection.current = true;
+
     if (!shouldPreserveSelectedServer(pathname)) {
       setSelectedServerId(null);
       setIsServerSelected(false);
       return;
     }
 
-    const nextSelectedServerId = getSelectedServer(searchParams);
     setSelectedServerId(nextSelectedServerId);
     setIsServerSelected(Boolean(nextSelectedServerId));
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, toast]);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -436,7 +458,6 @@ export default function RootLayout({
             </div>
           </div>
         )}
-        <Toaster />
         <Suspense fallback={null}>
           <ProgressBar />
         </Suspense>

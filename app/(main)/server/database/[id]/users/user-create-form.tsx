@@ -3,14 +3,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/component/ui/button';
+import { Input } from '@/component/ui/input';
+import { Label } from '@/component/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/component/ui/card';
 import { useToast } from '@/core/hooks/useToast';
 import { Loader2, UserPlus, ShieldCheck, Key, User, Database } from 'lucide-react';
 import { createDatabaseUser } from '@/services/database/database-runtime';
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@/component/ui/checkbox";
 import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 
 interface UserCreateFormProps {

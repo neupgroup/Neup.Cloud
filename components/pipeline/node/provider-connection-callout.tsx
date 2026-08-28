@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { ExternalLink, PlugZap } from 'lucide-react';
 
 import { useProviderConnection, type PipelineProviderKey } from '@/components/pipeline/provider-connections';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/component/ui/badge';
+import { Button } from '@/component/ui/button';
 
 type PipelineProviderConnectionCalloutProps = {
   provider: PipelineProviderKey;

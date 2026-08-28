@@ -5,7 +5,7 @@ import { ChevronRight, ServerIcon, Check, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/component/ui/button";
 import { useToast } from '@/core/hooks/useToast';
 import { shouldPreserveSelectedServer, withSelectedServerQuery } from "@/inapp/helpers/navigation";
 import { deleteServer } from '@/services/server/server-service';

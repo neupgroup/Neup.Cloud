@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getNginxConfigurations, type WebServiceConfig } from '@/services/webservices/service';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/component/ui/card';
+import { Badge } from '@/component/ui/badge';
+import { Skeleton } from '@/component/ui/skeleton';
 import { Plus, FileCode, Calendar, User, Server, Hash, RefreshCw, Shield, CheckCircle } from 'lucide-react';
 import { PageTitleBack } from '@/components/page-header';
 import { cn } from '@/core/utils';

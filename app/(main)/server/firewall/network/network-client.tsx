@@ -13,13 +13,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Card,
-} from "@/components/ui/card";
+} from "@/component/ui/card";
 import { ShieldCheck, Network, Trash2, Plus, Info, Activity, ChevronRight } from "lucide-react";
 import { getFirewallStatus, allowPort, deleteRule, toggleFirewall, type FirewallRule } from '@/services/server/firewall/firewall-service';
 import { isSshAllowRule } from '@/services/server/firewall/firewall-rules';
 import { useToast } from '@/core/hooks/useToast';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from "@/components/ui/button";
+import { Skeleton } from '@/component/ui/skeleton';
+import { Button } from "@/component/ui/button";
 import { cn } from '@/core/utils';
 import {
     Dialog,
@@ -29,17 +29,17 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/component/ui/dialog";
+import { Input } from "@/component/ui/input";
+import { Label } from "@/component/ui/label";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { Badge } from '@/components/ui/badge';
+} from "@/component/ui/select";
+import { Badge } from '@/component/ui/badge';
 import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 
 function RulesList({ rules, firewallActive, onDelete }: { rules: FirewallRule[], firewallActive: boolean, onDelete: (id: number) => void }) {

@@ -12,7 +12,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/component/ui/form";
 import {
   Card,
   CardContent,
@@ -20,17 +20,17 @@ import {
   CardHeader,
   CardTitle,
   CardFooter,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/component/ui/card";
+import { Button } from "@/component/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/component/ui/select";
+import { Input } from "@/component/ui/input";
+import { Textarea } from "@/component/ui/textarea";
 import { getInfrastructureRecommendations } from "@/core/intelligence/flows/infrastructure-recommendations";
 import { Loader2, Zap } from "lucide-react";
 import type { InfrastructureRecommendationsOutput } from "@/core/intelligence/flows/infrastructure-recommendations";

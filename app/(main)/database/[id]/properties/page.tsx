@@ -3,9 +3,9 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Database, ShieldCheck } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Card } from '@/component/ui/card';
 import { PageTitleBack } from '@/components/page-header';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/component/ui/button';
 import { useToast } from '@/core/hooks/useToast';
 import {
   checkDatabaseConnection,

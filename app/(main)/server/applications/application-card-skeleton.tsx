@@ -6,8 +6,8 @@ import {
   Card,
   CardContent,
   CardHeader,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/component/ui/card";
+import { Skeleton } from "@/component/ui/skeleton";
 
 export function ApplicationCardSkeleton() {
   return (

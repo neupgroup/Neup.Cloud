@@ -18,10 +18,10 @@ home URL.
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Search, Server } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/component/ui/card';
+import { Button } from '@/component/ui/button';
+import { Input } from '@/component/ui/input';
+import { Skeleton } from '@/component/ui/skeleton';
 import { getServers } from '@/services/server/server-service';
 import { getServerExpiration, isServerDisabled } from '@/services/server/server-metadata';
 import { selectServer } from '@/inapp/helpers/selection';

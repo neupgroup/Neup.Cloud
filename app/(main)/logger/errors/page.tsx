@@ -17,11 +17,11 @@ import { AlertTriangle, List } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 import { PageTitle } from '@/components/page-header';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/component/ui/badge';
+import { Button } from '@/component/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/component/ui/card';
+import { ScrollArea } from '@/component/ui/scroll-area';
+import { Separator } from '@/component/ui/separator';
 import { getErrorLoggerActivities } from '@/services/logger/logger-service';
 
 export const metadata: Metadata = {

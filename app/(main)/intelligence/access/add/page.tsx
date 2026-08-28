@@ -7,7 +7,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '@/component/ui/card';
 import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
 import { getAccessTokens, getIntelligenceModels } from '@/services/intelligence/store';
 import AccessCreateForm from '@/app/(main)/intelligence/access/add/access-create-form';

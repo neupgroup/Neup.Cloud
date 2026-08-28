@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2, RefreshCcw, Download, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/component/ui/button';
 import { PageTitleBackWithComponent } from '@/components/page-header';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/component/ui/card';
+import { Badge } from '@/component/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from "@/component/ui/alert";
+import { Skeleton } from '@/component/ui/skeleton';
 import { useToast } from '@/core/hooks/useToast';
 import { getPackageVersions, installPackage, uninstallPackage, reinstallPackage, type PackageVersionInfo } from '@/services/server/system-packages';
 import { cn } from '@/core/utils';

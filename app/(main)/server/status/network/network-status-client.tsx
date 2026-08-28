@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Activity, ArrowLeftRight, Globe, Hash, Loader2, Network, RefreshCw, Search, ServerCog } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/component/ui/badge';
+import { Button } from '@/component/ui/button';
+import { Card } from '@/component/ui/card';
+import { Input } from '@/component/ui/input';
+import { Skeleton } from '@/component/ui/skeleton';
 import { cn } from '@/core/utils';
 import { useToast } from '@/core/hooks/useToast';
 import { getNetworkConnections, type NetworkConnection } from '@/services/server/network';

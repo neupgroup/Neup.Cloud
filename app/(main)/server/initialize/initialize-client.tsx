@@ -28,9 +28,9 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { AlertCircle, CheckCircle2, Loader2, RefreshCcw, Rocket, ShieldCheck, Signal, XCircle } from 'lucide-react';
 
 import { PageTitle } from '@/components/page-header';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@/component/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/component/ui/card';
+import { Progress } from '@/component/ui/progress';
 import { cn } from '@/core/utils';
 import {
   checkInitializeApplicationLauncher,

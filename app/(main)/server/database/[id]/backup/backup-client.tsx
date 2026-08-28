@@ -2,10 +2,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/component/ui/card";
 import { Database, Download, FileCode, ShieldCheck, CheckCircle2, Loader2, ChevronLeft, AlertCircle, HardDrive } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/component/ui/button";
+import { Badge } from "@/component/ui/badge";
 import { useToast } from '@/core/hooks/useToast';
 import Link from 'next/link';
 import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';

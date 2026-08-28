@@ -4,8 +4,8 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import {
     Card,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+} from '@/component/ui/card';
+import { Button } from '@/component/ui/button';
 import { Server } from 'lucide-react';
 import { PackagesClient } from './packages-client';
 import { getServer } from '@/services/server/server-service';

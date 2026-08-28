@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { PageTitleBack } from '@/components/page-header';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/component/ui/card';
+import { Input } from '@/component/ui/input';
+import { Textarea } from '@/component/ui/textarea';
+import { Button } from '@/component/ui/button';
 import { useToast } from '@/core/hooks/useToast';
 import { createDatabaseConnection } from '@/services/database/management';
 import type { DatabaseConnectionType } from '@/services/database/types';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/component/ui/select';
 
 const INITIAL_AUTH_STATE: Record<DatabaseConnectionType, Record<string, string>> = {
   postgres: { host: '', port: '5432', database: '', username: '', password: '', ssl: '' },

@@ -3,9 +3,9 @@
 import { useTransition } from 'react';
 import { CheckCircle2, Server, Loader2 } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/component/ui/badge';
+import { Button } from '@/component/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/component/ui/card';
 import { useToast } from '@/core/hooks/useToast';
 import { choosePrimaryApplicationServer } from '@/services/server/applications/service';
 import type { ApplicationRunningSection, ApplicationServerMapRow } from '@/services/server/applications/server-map';

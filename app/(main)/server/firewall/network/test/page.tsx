@@ -11,8 +11,8 @@ import { PageTitleBack } from "@/components/page-header";
 import { Server, ShieldCheck } from "lucide-react";
 import { Metadata } from "next";
 import Link from 'next/link';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card } from '@/component/ui/card';
+import { Button } from '@/component/ui/button';
 import NetworkTestClient from "./test-client";
 import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
 

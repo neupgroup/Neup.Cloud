@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BarChart3, ChevronRight, Database, Settings, Table, Terminal } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Card } from '@/component/ui/card';
 import { PageTitleBack } from '@/components/page-header';
 import { getDatabaseConnectionMeta } from '@/services/database/management';
 

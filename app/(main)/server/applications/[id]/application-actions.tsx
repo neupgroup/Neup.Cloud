@@ -2,7 +2,7 @@
 
 import { Edit } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/component/ui/button';
 import { DeleteApplicationButton } from '@/components/delete-application-button';
 
 export function ApplicationActions({ applicationId }: { applicationId: string }) {

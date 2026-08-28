@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { CheckCircle2, XCircle, Clock, ChevronRight, ArrowUpRight } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Card } from '@/component/ui/card';
+import { Skeleton } from '@/component/ui/skeleton';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/component/ui/accordion';
 import { cn } from '@/core/utils';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';

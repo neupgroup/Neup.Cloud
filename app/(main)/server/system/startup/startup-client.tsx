@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Card,
-} from "@/components/ui/card";
+} from "@/component/ui/card";
 import { Search, Package, Trash2, Plus } from "lucide-react";
 import { getStartupServices, toggleService, createService, type StartupService } from '@/services/server/system-startup';
 import { useToast } from '@/core/hooks/useToast';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Skeleton } from '@/component/ui/skeleton';
+import { Input } from "@/component/ui/input";
+import { Button } from "@/component/ui/button";
 import { cn } from '@/core/utils';
 import {
     Dialog,
@@ -19,15 +19,15 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Badge } from '@/components/ui/badge';
+} from "@/component/ui/dialog";
+import { Label } from "@/component/ui/label";
+import { Badge } from '@/component/ui/badge';
 import {
     Tabs,
     TabsContent,
     TabsList,
     TabsTrigger,
-} from "@/components/ui/tabs";
+} from "@/component/ui/tabs";
 
 function StartupList({ services, onDisable, onAddClick }: { services: StartupService[], onDisable: (name: string) => void, onAddClick: () => void }) {
     return (

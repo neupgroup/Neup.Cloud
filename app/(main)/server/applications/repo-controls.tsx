@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/component/ui/button";
 import { Download, GitPullRequest, RefreshCw, RotateCcw } from "lucide-react";
 
 import { useRepoControls } from '@/components/applications/repo-controls';

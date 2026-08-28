@@ -20,7 +20,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '@/component/ui/card';
 
 export const metadata: Metadata = {
   title: 'Intelligence, Neup.Cloud',
