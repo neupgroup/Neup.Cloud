@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from "#/components/ui/button";
+import Icon from "#/components/ui/icon";
 import { Download, GitPullRequest, RefreshCw, RotateCcw } from "lucide-react";
 
 import { useRepoControls } from '@/components/applications/repo-controls';
@@ -10,7 +11,23 @@ interface RepoControlsProps {
 }
 
 export function RepoControls({ applicationId }: RepoControlsProps) {
-  const { loading, handleAction } = useRepoControls(applicationId);
+  const { loading, operationStatus, handleAction } = useRepoControls(applicationId);
+
+  const getRepositoryIcon = (operation: 'clone' | 'pull') => {
+    if (loading === operation) {
+      return <Icon type="animated" from="Download" size={18} />;
+    }
+
+    if (operationStatus?.operation === operation) {
+      return operationStatus.result === 'success'
+        ? <Icon type="animated" from="Download" to="TickMark" size={18} />
+        : <Icon type="animated" from="Download" to="CrossMark" size={18} />;
+    }
+
+    return operation === 'clone'
+      ? <Download className="mr-2 h-4 w-4" />
+      : <GitPullRequest className="mr-2 h-4 w-4" />;
+  };
 
   return (
     <div className="flex flex-wrap gap-2 pt-2">
@@ -20,7 +37,7 @@ export function RepoControls({ applicationId }: RepoControlsProps) {
         onClick={() => handleAction('clone')}
         disabled={!!loading}
       >
-        <Download className="mr-2 h-4 w-4" />
+        {getRepositoryIcon('clone')}
         {loading === 'clone' ? 'Cloning...' : 'Clone Repository'}
       </Button>
       <Button
@@ -29,8 +46,12 @@ export function RepoControls({ applicationId }: RepoControlsProps) {
         onClick={() => handleAction('pull')}
         disabled={!!loading}
       >
-        <GitPullRequest className="mr-2 h-4 w-4" />
-        {loading === 'pull' ? 'Pulling...' : 'Pull'}
+        {getRepositoryIcon('pull')}
+        {loading === 'pull'
+          ? 'Pulling...'
+          : operationStatus?.operation === 'pull' && operationStatus.result === 'success'
+            ? 'Pull Completed.'
+            : 'Pull'}
       </Button>
       <Button
         type="outlined"

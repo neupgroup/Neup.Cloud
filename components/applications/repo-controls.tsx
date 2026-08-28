@@ -2,6 +2,7 @@ import { useToast } from '#/core/hooks/useToast';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 import { useState } from "react";
+import Icon from '#/components/ui/icon';
 
 import { performGitOperation } from '@/services/server/applications/service';
 
@@ -13,6 +14,10 @@ export function useRepoControls(applicationId: string) {
     const { toast } = useToast();
     const selectedServerId = useSelectedServerId();
     const [loading, setLoading] = useState<string | null>(null);
+    const [operationStatus, setOperationStatus] = useState<{
+        operation: 'clone' | 'pull' | 'pull-force' | 'reset-main';
+        result: 'success' | 'error';
+    } | null>(null);
 
     const getOperationMessages = (operation: 'clone' | 'pull' | 'pull-force' | 'reset-main') => {
         if (operation === 'clone') {
@@ -40,15 +45,19 @@ export function useRepoControls(applicationId: string) {
 
     const handleAction = async (operation: 'clone' | 'pull' | 'pull-force' | 'reset-main') => {
         setLoading(operation);
+        setOperationStatus(null);
         const messages = getOperationMessages(operation);
         const actions = [
             ['Open app', 'success', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
             ['Dismiss', 'none', 'dismiss'],
         ] as [['Open app', 'success', string], ['Dismiss', 'none', 'dismiss']];
 
-        toast({
+        const operationToast = toast({
             name: `application-git-${applicationId}`,
             convey: 'info',
+            icon: operation === 'clone' || operation === 'pull'
+                ? <Icon type="animated" from="Download" size={24} />
+                : undefined,
             actions,
             title: messages.started,
             description: `Git operation '${operation}' has started.`,
@@ -56,9 +65,12 @@ export function useRepoControls(applicationId: string) {
 
         try {
             await performGitOperation(applicationId, selectedServerId, operation);
-            toast({
-                name: `application-git-${applicationId}`,
+            setOperationStatus({ operation, result: 'success' });
+            operationToast.update({
                 convey: 'success',
+                icon: operation === 'clone' || operation === 'pull'
+                    ? <Icon type="animated" from="Download" to="TickMark" size={24} />
+                    : undefined,
                 actions: [
                     ['Open app', 'success', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
                     ['Dismiss', 'none', 'dismiss'],
@@ -68,9 +80,12 @@ export function useRepoControls(applicationId: string) {
             });
         } catch (error: any) {
             console.error(error);
-            toast({
-                name: `application-git-${applicationId}`,
+            setOperationStatus({ operation, result: 'error' });
+            operationToast.update({
                 convey: 'dangerous',
+                icon: operation === 'clone' || operation === 'pull'
+                    ? <Icon type="animated" from="Download" to="CrossMark" size={24} />
+                    : undefined,
                 actions: [
                     ['Open app', 'danger', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
                     ['Dismiss', 'none', 'dismiss'],
@@ -84,5 +99,5 @@ export function useRepoControls(applicationId: string) {
         }
     };
 
-    return { loading, handleAction };
+    return { loading, operationStatus, handleAction };
 }

@@ -9,6 +9,7 @@ import { useToast } from '#/core/hooks/useToast';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 import { cn } from "#/core/utils";
+import CodeRevolve from "#/components/animation/CodeRevolve";
 import { executeApplicationCommand } from "@/services/server/applications/service";
 
 interface LifecycleSectionProps {
@@ -77,6 +78,7 @@ export function LifecycleSection({ application, runningCommandName = null }: Lif
       await executeApplicationCommand(application.id, command, selectedServerId, name, displayCommand);
       toast({
         convey: 'info',
+        icon: name.toLowerCase().includes('build') ? <CodeRevolve size={20} /> : undefined,
         actions: [
           ['Open app', 'success', withSelectedServerQuery(`/server/applications/${application.id}`, selectedServerId)],
           ['Dismiss', 'none', 'dismiss'],

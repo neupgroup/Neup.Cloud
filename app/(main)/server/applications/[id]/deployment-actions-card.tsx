@@ -6,9 +6,10 @@ import { useToast } from '#/core/hooks/useToast';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 import { cn } from "#/core/utils";
-import { FileText, UploadCloud, Key, Loader2 } from "lucide-react";
+import Icon from "#/components/ui/icon";
+import { FileText, UploadCloud, Key } from "lucide-react";
 import { useRouter } from 'next/navigation';
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { deployConfiguration } from "@/services/server/applications/service";
 
 interface DeploymentActionsCardProps {
@@ -22,6 +23,7 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
     const selectedServerId = useSelectedServerId();
     const router = useRouter();
     const [isDeploying, setIsDeploying] = useState(false);
+    const [deploymentState, setDeploymentState] = useState<'idle' | 'uploading' | 'complete'>('idle');
 
     const openInline = (view: 'environments' | 'files') => {
         const route = view === 'environments' ? 'environment' : 'files';
@@ -30,10 +32,22 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
 
     const handleDeploy = async () => {
         setIsDeploying(true);
+        setDeploymentState('uploading');
+        const deploymentToast = toast({
+            name: `application-deployment-${applicationId}`,
+            convey: 'info',
+            icon: <Icon type="animated" from="Upload" size={24} />,
+            dismissesOn: null,
+            title: "Deploying Configuration",
+            description: "Environment variables and config files are being updated on the server.",
+        });
+
         try {
             await deployConfiguration(applicationId, selectedServerId);
-            toast({
+            setDeploymentState('complete');
+            deploymentToast.update({
                 convey: 'success',
+                icon: <Icon type="animated" from="Upload" to="TickMark" size={24} />,
                 actions: [
                     ['Open app', 'success', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
                     ['Dismiss', 'none', 'dismiss'],
@@ -44,8 +58,10 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
             });
         } catch (error: any) {
             console.error(error);
-            toast({
+            setDeploymentState('idle');
+            deploymentToast.update({
                 convey: 'dangerous',
+                icon: undefined,
                 actions: [
                     ['Open app', 'danger', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
                     ['Dismiss', 'none', 'dismiss'],
@@ -61,14 +77,14 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
     };
 
     const ActionRow = ({
-        icon: Icon,
+        icon,
         title,
         description,
         onClick,
         isLoading = false,
         isLast = false
     }: {
-        icon: any,
+        icon: ReactNode,
         title: string,
         description: string,
         onClick?: () => void,
@@ -83,8 +99,10 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
                     </h3>
 
                     <div className="flex items-center gap-1">
-                        <div className="h-8 w-8 flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors">
-                            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
+                        <div
+                            className="flex h-10 w-10 items-center justify-center rounded-[8px] p-1.5 text-muted-foreground transition-colors group-hover:text-foreground"
+                        >
+                            {isLoading ? <Icon type="animated" from="Upload" size={24} /> : icon}
                         </div>
                     </div>
                 </div>
@@ -116,7 +134,17 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
 
             <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
                 <ActionRow
-                    icon={UploadCloud}
+                    icon={deploymentState === 'complete' ? (
+                        <Icon
+                            key="deployment-complete"
+                            type="animated"
+                            from="Upload"
+                            to="TickMark"
+                            size={24}
+                        />
+                    ) : (
+                        <UploadCloud className="h-4 w-4" />
+                    )}
                     title="Deploy Configuration"
                     description="Deploy environment variables and config files to the server"
                     onClick={handleDeploy}
@@ -124,14 +152,14 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
                 />
 
                 <ActionRow
-                    icon={Key}
+                    icon={<Key className="h-4 w-4" />}
                     title="Environment Variables"
                     description="Manage environment variables and secrets for this application"
                     onClick={onOpenEnvironments ?? (() => openInline('environments'))}
                 />
 
                 <ActionRow
-                    icon={FileText}
+                    icon={<FileText className="h-4 w-4" />}
                     title="Custom Files"
                     description="Manage file overrides that deploy with your configuration"
                     onClick={onOpenFiles ?? (() => openInline('files'))}
