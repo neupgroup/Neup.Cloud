@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '#/core/utils';
 import { ServerNameLink } from '@/components/server-name-link';
-import { BackButton } from '#/components/elements/backButton';
+import { BackButton } from '#/components/element/backButton';
 
 interface PageTitleProps {
     title: React.ReactNode;
