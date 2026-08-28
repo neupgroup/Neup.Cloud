@@ -18,12 +18,14 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, Loader2, ServerIcon } from 'lucide-react';
 import { Button } from '@/component/ui/button';
 import { Card, CardContent } from '@/component/ui/card';
+import { useToast } from '@/core/hooks/useToast';
 import { getServers } from '@/services/server/server-service';
 import type { Server } from '@/services/server/types';
 import { selectServer } from '@/inapp/helpers/selection';
 
 export default function ServersPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [servers, setServers] = useState<Server[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [switchingId, setSwitchingId] = useState<string | null>(null);
@@ -55,6 +57,14 @@ export default function ServersPage() {
   const handleSwitch = async (id: string) => {
     setSwitchingId(id);
     try {
+      const server = servers.find((item) => item.id === id);
+      toast({
+        name: 'cloud.server.selected',
+        title: 'Server selected',
+        description: server ? `You are now managing ${server.name}.` : 'The selected server is now active.',
+        state: 'info',
+        autoDismiss: 10,
+      });
       router.push(selectServer('/server/home', id));
     } finally {
       setSwitchingId(null);

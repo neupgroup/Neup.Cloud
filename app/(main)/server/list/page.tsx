@@ -144,8 +144,11 @@ function ServerListContent() {
     setSwitchingId(server.id);
     try {
       toast({
+        name: "cloud.server.selected",
         title: "Server switched",
         description: `You are now managing ${server.name}.`,
+        state: "info",
+        autoDismiss: 10,
       });
       router.push(selectServer(redirectTo ?? "/server/home", server.id), { scroll: false });
     } catch (error) {

@@ -1,0 +1,15 @@
+# Ignore everything
+*
+
+# Allow these folders
+!element/
+!layout/
+!ui/
+
+# Allow everything inside them
+!element/**
+!layout/**
+!ui/**
+
+# Keep .gitignore
+!.gitignore

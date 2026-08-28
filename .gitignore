@@ -10,6 +10,10 @@
 !.yarn/releases
 !.yarn/versions
 
+# dont ignore .gitignore and .gitkeep files
+!.gitignore
+!.gitkeep
+
 # testing
 /coverage
 
@@ -53,6 +57,8 @@ neup.logica
 component
 neup.component
 neup.react.component
+
+# neup.design components
 
 # certificates and signing keys.
 /keys

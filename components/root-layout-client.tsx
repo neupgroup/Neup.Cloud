@@ -44,15 +44,13 @@ import {
 } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/core/utils';
-import { Button } from '@/component/ui/button';
-import { useState, useEffect, useRef, Suspense } from 'react';
-import { ScrollArea } from '@/component/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { useState, useEffect, Suspense } from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Logo } from '@/components/logo';
-import { useToast } from '@/core/hooks/useToast';
-import { Avatar, AvatarFallback, AvatarImage } from '@/component/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ProgressBar } from '@/components/progress-bar';
 import NProgress from 'nprogress';
-import application from '@/base/application.json';
 
 import { findLongestMatch } from '@/services/core/findLongestMatch';
 import {
@@ -351,9 +349,6 @@ export default function RootLayout({
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { toast } = useToast();
-  const previousSelectedServerId = useRef<string | null>(null);
-  const hasMountedServerSelection = useRef(false);
   const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isServerSelected, setIsServerSelected] = useState(false);
@@ -364,22 +359,6 @@ export default function RootLayout({
       ? getSelectedServer(searchParams)
       : null;
 
-    if (
-      hasMountedServerSelection.current &&
-      previousSelectedServerId.current !== nextSelectedServerId
-    ) {
-      toast({
-        title: nextSelectedServerId ? 'Server selected' : 'Server unselected',
-        description: nextSelectedServerId
-          ? 'The selected server is now active.'
-          : 'No server is currently selected.',
-        state: 'info',
-      });
-    }
-
-    previousSelectedServerId.current = nextSelectedServerId;
-    hasMountedServerSelection.current = true;
-
     if (!shouldPreserveSelectedServer(pathname)) {
       setSelectedServerId(null);
       setIsServerSelected(false);
@@ -388,7 +367,7 @@ export default function RootLayout({
 
     setSelectedServerId(nextSelectedServerId);
     setIsServerSelected(Boolean(nextSelectedServerId));
-  }, [pathname, searchParams, toast]);
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -411,17 +390,7 @@ export default function RootLayout({
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <title>Neup.Cloud | Modern Infrastructure Control</title>
-        <meta name="description" content="The future of cloud infrastructure." />
-        <link rel="icon" href={application.appLogo.favicon} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-body antialiased bg-white">
+    <>
         {isPlainRoute ? (
           <div className="min-h-screen w-full bg-white text-foreground">{children}</div>
         ) : (
@@ -461,7 +430,6 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <ProgressBar />
         </Suspense>
-      </body>
-    </html>
+    </>
   );
 }

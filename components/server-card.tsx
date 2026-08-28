@@ -53,8 +53,11 @@ export function ServerCard({ server, onServerDeleted, onServerSelected, isSelect
     setIsSwitching(true);
     try {
       toast({
+        name: 'cloud.server.selected',
         title: "Server Selected",
         description: `You are now managing \"${server.name}\".`,
+        state: 'info',
+        autoDismiss: 10,
       });
       onServerSelected(server.id);
       const currentUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
