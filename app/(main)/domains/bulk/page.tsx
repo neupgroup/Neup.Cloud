@@ -63,9 +63,9 @@ export default function DomainsBulkPage() {
   const [csvInput, setCsvInput] = useState('');
   const [results, setResults] = useState<AvailabilityResult[]>([]);
   const [isChecking, startTransition] = useTransition();
-  const [animateResults, setAnimateResults] = useState(false);
   const [lastCheckedDomains, setLastCheckedDomains] = useState<string[]>([]);
   const [checkingDomains, setCheckingDomains] = useState<Set<string>>(new Set());
+  const [animatingDomains, setAnimatingDomains] = useState<Set<string>>(new Set());
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
   const [openCards, setOpenCards] = useState<Record<string, boolean>>({});
 
@@ -83,9 +83,9 @@ export default function DomainsBulkPage() {
     const domains = requestedDomains ?? allDomains;
     if (allDomains.length === 0) {
       setResults([]);
-      setAnimateResults(false);
       setLastCheckedDomains([]);
       setCheckingDomains(new Set());
+      setAnimatingDomains(new Set());
       setProgress({ completed: 0, total: 0 });
       return;
     }
@@ -94,8 +94,8 @@ export default function DomainsBulkPage() {
     if (domainsToCheck.length === 0) {
       setResults((previous) => previous.filter((result) => allDomains.includes(result.domain)));
       setLastCheckedDomains((previous) => previous.filter((domain) => allDomains.includes(domain)));
-      setAnimateResults(false);
       setCheckingDomains(new Set());
+      setAnimatingDomains(new Set());
       setProgress({ completed: 0, total: 0 });
       return;
     }
@@ -103,7 +103,7 @@ export default function DomainsBulkPage() {
     setCheckingDomains(new Set(domainsToCheck));
     startTransition(async () => {
       setResults((previous) => previous.filter((result) => allDomains.includes(result.domain)));
-      setAnimateResults(false);
+      setAnimatingDomains(new Set());
       setProgress({ completed: 0, total: domainsToCheck.length });
       if (!requestedDomains) setOpenCards({});
 
@@ -147,6 +147,8 @@ export default function DomainsBulkPage() {
 
         if (!result.whoisExists) notFoundCount += 1;
 
+        setAnimatingDomains((previous) => new Set(previous).add(domain));
+
         whoisToast.update({
           title: `Searching ${domainsToCheck.length} Domains`,
           description: `${notFoundCount} Available for Purchase of ${domainsToCheck.length} domains`,
@@ -173,7 +175,6 @@ export default function DomainsBulkPage() {
         description: `${notFoundCount} Available for Purchase of ${domainsToCheck.length} domains`,
         dismissesOn: 5,
       });
-      setAnimateResults(true);
       setCheckingDomains(new Set());
       setLastCheckedDomains((previous) => requestedDomains
         ? Array.from(new Set([...previous, ...domainsToCheck])).filter((domain) => allDomains.includes(domain))
@@ -198,7 +199,7 @@ export default function DomainsBulkPage() {
             value={csvInput}
             onChange={(event) => {
               setCsvInput(event.target.value);
-              setAnimateResults(false);
+              setAnimatingDomains(new Set());
             }}
             placeholder="google.com, mysite.net\nbrandname.io"
             className="min-h-[180px]"
@@ -265,9 +266,14 @@ export default function DomainsBulkPage() {
                           type="animated"
                           from="Search"
                           to={result.whoisExists ? 'CrossMark' : 'TickMark'}
-                          position={checkingDomains.has(domain) || animateResults ? 0 : 2}
+                          position={animatingDomains.has(domain) ? 0 : 2}
                           size={24}
                           label={result.whoisExists ? 'Unavailable' : 'Available'}
+                          onComplete={() => setAnimatingDomains((previous) => {
+                            const next = new Set(previous);
+                            next.delete(domain);
+                            return next;
+                          })}
                         />
                       ) : null}
                     </CardTitle>

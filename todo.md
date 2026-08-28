@@ -1,4 +1,5 @@
 # TODO
+- [x] Stop the CrossMark outline rotation when the shared icon reaches position 2.
 - [ ] Fix the logo image sizing warning by preserving its aspect ratio when CSS changes its dimensions.
 - [x] Disable repeated bulk WHOIS searches until domains are added, removed, or changed; check only newly added domains.
 - [x] Use one updating aggregate toast for bulk WHOIS progress instead of one toast per domain.
