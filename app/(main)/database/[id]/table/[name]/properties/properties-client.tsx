@@ -287,7 +287,7 @@ export function TablePropertiesClient({ connectionId, tableName, properties }: P
                   <TableCell className="text-right">
                     {schemaChangesEnabled ? (
                       <Button
-                        variant="destructive"
+                        type="solid"
                         size="sm"
                         disabled={isPending}
                         onClick={() => handleDropColumn(column.name)}
@@ -344,7 +344,7 @@ export function TablePropertiesClient({ connectionId, tableName, properties }: P
                     <TableCell className="text-right">
                       {!index.isPrimary && schemaChangesEnabled ? (
                         <Button
-                          variant="outline"
+                          type="outlined"
                           size="sm"
                           disabled={isPending}
                           onClick={() => handleDropIndex(index.name)}
@@ -517,7 +517,7 @@ export function TablePropertiesClient({ connectionId, tableName, properties }: P
             </p>
           </div>
 
-          <Button variant="destructive" className="gap-2 w-fit" disabled={isPending} onClick={handleDeleteTable}>
+          <Button type="solid" className="gap-2 w-fit" disabled={isPending} onClick={handleDeleteTable}>
             <Trash2 className="h-4 w-4" />
             Delete table
           </Button>

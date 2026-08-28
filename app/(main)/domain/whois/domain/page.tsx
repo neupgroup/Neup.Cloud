@@ -38,7 +38,7 @@ export default function WhoisDomainLookupPage() {
               onChange={(event) => setDomain(event.target.value)}
               placeholder="example.com"
             />
-            <Button type="submit">Open detailed WHOIS</Button>
+            <Button htmlType="submit">Open detailed WHOIS</Button>
           </form>
         </CardContent>
       </Card>

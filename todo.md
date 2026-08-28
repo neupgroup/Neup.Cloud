@@ -1,4 +1,6 @@
 # TODO
+- [x] Include `.neup` UI components in Tailwind content scanning so shared Button hover and active classes are generated.
+- [ ] Fix proxy redirect URLs: `buildPublicAppUrl()` defaults redirects to `/analytics` instead of this app's `/cloud` base path.
 - [ ] Fix pre-existing JSX/syntax errors reported by `npx tsc --noEmit` in [component/ui/carousel.tsx](/Users/neupkishor/Code/Neup.Cloud/component/ui/carousel.tsx), [component/ui/chart.tsx](/Users/neupkishor/Code/Neup.Cloud/component/ui/chart.tsx), [component/ui/menubar.tsx](/Users/neupkishor/Code/Neup.Cloud/component/ui/menubar.tsx), and [component/ui/sidebar.tsx](/Users/neupkishor/Code/Neup.Cloud/component/ui/sidebar.tsx).
 - [ ] Authenticate logger bridge requests using the supplied `NEUP_APP_ID` and `NEUP_APP_SECRET`; the logger routes currently accept and persist unauthenticated requests.
 - [ ] Configure `NEUP_ACCOUNT_CREATED_NOTIFY_URL`/`NEUP_ACCOUNT_CREATED_NOTIFY_SECRET` once the Neup Account account-created notification endpoint is confirmed.

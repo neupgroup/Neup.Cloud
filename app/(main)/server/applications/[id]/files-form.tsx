@@ -83,11 +83,11 @@ export function FilesForm({ application }: { application: Application }) {
                   <TableCell className="text-muted-foreground">{content.length} bytes</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => openEditDialog(path, content)}>
+                      <Button type="plain" size="icon" onClick={() => openEditDialog(path, content)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
-                        variant="ghost"
+                        type="plain"
                         size="icon"
                         className="text-destructive hover:text-destructive"
                         onClick={() => openDeleteAlert(path)}
@@ -137,7 +137,7 @@ export function FilesForm({ application }: { application: Application }) {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+            <Button type="outlined" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleSaveFile} disabled={isSaving || !currentFile?.path}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save File

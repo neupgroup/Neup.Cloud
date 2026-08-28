@@ -135,8 +135,8 @@ export function PipelineSidebar({
 
                   return (
                     <div key={category.id} className="rounded-[1.5rem] border border-white/80 bg-white/90 shadow-sm">
-                      <button
-                        type="button"
+                      <Button
+                        htmlType="button"
                         onClick={() => onActiveCategoryChange(category.id)}
                         className={cn(
                           'flex w-full items-start gap-3 rounded-[1.5rem] px-4 py-3 text-left transition-all',
@@ -159,7 +159,7 @@ export function PipelineSidebar({
                             {category.description}
                           </p>
                         </div>
-                      </button>
+                      </Button>
 
                       {isActive ? (
                         <div className="space-y-2 border-t border-slate-100 px-3 py-3">
@@ -169,9 +169,9 @@ export function PipelineSidebar({
                               const tone = getNodeTone(template.kind);
 
                               return (
-                                <button
+                                <Button
                                   key={template.kind}
-                                  type="button"
+                                  htmlType="button"
                                   onClick={() => onAddNode(template.kind)}
                                   className="w-full rounded-[1.15rem] border border-slate-200 bg-slate-50 px-3 py-3 text-left transition-all hover:border-slate-300 hover:bg-white"
                                 >
@@ -186,7 +186,7 @@ export function PipelineSidebar({
                                       </p>
                                     </div>
                                   </div>
-                                </button>
+                                </Button>
                               );
                             })
                           ) : (
@@ -272,19 +272,19 @@ export function PipelineSidebar({
               <section className="space-y-3 px-1">
                 <h3 className="text-lg font-semibold text-slate-950">Quick actions</h3>
                 <div className="grid gap-2">
-                  <Button variant="outline" className="justify-start rounded-2xl border-slate-200 bg-slate-50" onClick={onDuplicate}>
+                  <Button type="outlined" className="justify-start rounded-2xl border-slate-200 bg-slate-50" onClick={onDuplicate}>
                     <Copy className="mr-2 h-4 w-4" />
                     Duplicate node
                   </Button>
                   <Button
-                    variant="outline"
+                    type="outlined"
                     className="justify-start rounded-2xl border-slate-200 bg-slate-50"
                     onClick={onAddChild}
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Add child node
                   </Button>
-                  <Button variant="destructive" className="justify-start rounded-2xl" onClick={onDelete}>
+                  <Button type="solid" className="justify-start rounded-2xl" onClick={onDelete}>
                     <Trash2 className="mr-2 h-4 w-4" />
                     Remove node
                   </Button>

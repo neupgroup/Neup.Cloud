@@ -222,8 +222,8 @@ export function TableDataClient({
                       {isEditing ? (
                         <>
                           <Button
-                            type="button"
-                            variant="ghost"
+                            htmlType="button"
+                            type="plain"
                             size="icon"
                             className="h-8 w-8"
                             disabled={isPending}
@@ -233,8 +233,8 @@ export function TableDataClient({
                             <Check className="h-4 w-4" />
                           </Button>
                           <Button
-                            type="button"
-                            variant="ghost"
+                            htmlType="button"
+                            type="plain"
                             size="icon"
                             className="h-8 w-8 text-destructive hover:text-destructive"
                             disabled={isPending}
@@ -244,8 +244,8 @@ export function TableDataClient({
                             <Trash2 className="h-4 w-4" />
                           </Button>
                           <Button
-                            type="button"
-                            variant="ghost"
+                            htmlType="button"
+                            type="plain"
                             size="icon"
                             className="h-8 w-8"
                             disabled={isPending}
@@ -258,8 +258,8 @@ export function TableDataClient({
                       ) : (
                         <>
                           <Button
-                            type="button"
-                            variant="ghost"
+                            htmlType="button"
+                            type="plain"
                             size="icon"
                             className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                             disabled={isPending}
@@ -269,8 +269,8 @@ export function TableDataClient({
                             <Edit2 className="h-4 w-4" />
                           </Button>
                           <Button
-                            type="button"
-                            variant="ghost"
+                            htmlType="button"
+                            type="plain"
                             size="icon"
                             className="h-8 w-8 text-destructive opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100 focus-visible:opacity-100"
                             disabled={isPending}

@@ -148,7 +148,7 @@ export default function KeysList({ serverId, isLoadingOverride }: { serverId?: s
         return (
             <Card className="p-8 text-center text-destructive">
                 <p>Error loading keys: {error}</p>
-                <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>Retry</Button>
+                <Button type="outlined" className="mt-4" onClick={() => window.location.reload()}>Retry</Button>
             </Card>
         );
     }

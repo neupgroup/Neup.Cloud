@@ -28,7 +28,7 @@ export function DeleteConnectionButton({ connectionId }: { connectionId: string 
   };
 
   return (
-    <Button onClick={handleDelete} variant="destructive">
+    <Button onClick={handleDelete} type="solid">
       Delete connection
     </Button>
   );

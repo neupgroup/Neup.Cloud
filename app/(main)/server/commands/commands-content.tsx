@@ -557,7 +557,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
                   </>
                 )}
               </Button>
-              <Button variant="outline" onClick={handleOpenContinuityTerminal}>
+              <Button type="outlined" onClick={handleOpenContinuityTerminal}>
                 <SquareTerminal className="mr-2 h-4 w-4" />
                 Run in Continuous Mode
               </Button>
@@ -669,7 +669,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
                             </h3>
                             <Button
                               size="icon"
-                              variant="ghost"
+                              type="plain"
                               className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-background/80"
                               onClick={(e) => openRunDialog(e, sourceCommand || savedCommands[0])}
                               disabled={isRunning}
@@ -695,12 +695,12 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
                 {!showDashboard && (
                   <div className="flex justify-start gap-2 p-4 pt-2">
                     {currentCommandPage > 1 && (
-                      <Button variant="outline" onClick={() => updateUrlParams({ page: currentCommandPage - 1 }, 'push')}>
+                      <Button type="outlined" onClick={() => updateUrlParams({ page: currentCommandPage - 1 }, 'push')}>
                         Previous
                       </Button>
                     )}
                     {commandTotalPages > currentCommandPage && (
-                      <Button variant="outline" onClick={() => updateUrlParams({ page: currentCommandPage + 1 }, 'push')}>
+                      <Button type="outlined" onClick={() => updateUrlParams({ page: currentCommandPage + 1 }, 'push')}>
                         Next
                       </Button>
                     )}
@@ -710,7 +710,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
 
               {showDashboard && savedCommands.length >= 5 && (
                 <div className="flex justify-start">
-                    <Button variant="outline" asChild>
+                    <Button type="outlined" asChild>
                       <Link href={withSelectedServerQuery(savedCommandsHref, effectiveSelectedServer)}>View more</Link>
                     </Button>
                   </div>
@@ -759,19 +759,19 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
 
               {showDashboard ? (
                 <div className="flex justify-start p-0">
-                  <Button variant="outline" asChild>
+                  <Button type="outlined" asChild>
                     <Link href={withSelectedServerQuery(historyHref, effectiveSelectedServer)}>View more</Link>
                   </Button>
                 </div>
               ) : (
                 <div className="flex justify-start gap-2">
                   {currentHistoryPage > 1 && (
-                    <Button variant="outline" onClick={() => updateUrlParams({ page: currentHistoryPage - 1 }, 'push')}>
+                    <Button type="outlined" onClick={() => updateUrlParams({ page: currentHistoryPage - 1 }, 'push')}>
                       Previous
                     </Button>
                   )}
                   {historyTotalPages > currentHistoryPage && (
-                    <Button variant="outline" onClick={() => updateUrlParams({ page: currentHistoryPage + 1 }, 'push')}>
+                    <Button type="outlined" onClick={() => updateUrlParams({ page: currentHistoryPage + 1 }, 'push')}>
                       Next
                     </Button>
                   )}
@@ -840,7 +840,7 @@ export function CommandsContent({ mode = 'dashboard' }: { mode?: CommandsPageMod
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="secondary">
+              <Button htmlType="button" type="tinted">
                 Cancel
               </Button>
             </DialogClose>

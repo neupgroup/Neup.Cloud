@@ -55,7 +55,7 @@ export default async function LoggerPage({
         )}
         description="Incoming activity from external applications."
       >
-        <Button variant="outline" asChild>
+        <Button type="outlined" asChild>
           <Link href="/logger/errors">
             <AlertTriangle className="mr-2 h-4 w-4" />
             View Errors
@@ -103,27 +103,27 @@ export default async function LoggerPage({
           </p>
           <div className="flex items-center gap-2">
             {currentPage > 1 ? (
-              <Button variant="outline" asChild>
+              <Button type="outlined" asChild>
                 <Link href={`/logger?page=${currentPage - 1}`}>
                   <ChevronLeft className="mr-2 h-4 w-4" />
                   Previous
                 </Link>
               </Button>
             ) : (
-              <Button variant="outline" disabled>
+              <Button type="outlined" disabled>
                 <ChevronLeft className="mr-2 h-4 w-4" />
                 Previous
               </Button>
             )}
             {currentPage < totalPages ? (
-              <Button variant="outline" asChild>
+              <Button type="outlined" asChild>
                 <Link href={`/logger?page=${currentPage + 1}`}>
                   Next
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             ) : (
-              <Button variant="outline" disabled>
+              <Button type="outlined" disabled>
                 Next
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>

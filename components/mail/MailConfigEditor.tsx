@@ -244,8 +244,8 @@ export default function MailConfigEditor({
 
                       <div className="pl-6">
                         <Button
-                          type="button"
-                          variant="outline"
+                          htmlType="button"
+                          type="outlined"
                           size="sm"
                           onClick={() => handleCheckRecord(check.key)}
                           disabled={checkingRecordKeys.includes(check.key)}
@@ -284,8 +284,8 @@ export default function MailConfigEditor({
                           ) : null}
 
                           <Button
-                            type="button"
-                            variant="outline"
+                            htmlType="button"
+                            type="outlined"
                             size="sm"
                             onClick={() => {
                               setGeneratedGuideKeys((keys) => (
@@ -331,8 +331,8 @@ export default function MailConfigEditor({
                 ) : (
                   <div>
                     <Button
-                      type="button"
-                      variant="outline"
+                      htmlType="button"
+                      type="outlined"
                       onClick={() => setMailDnsRefreshKey((key) => key + 1)}
                       className="inline-flex items-center gap-2"
                     >

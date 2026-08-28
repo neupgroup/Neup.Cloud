@@ -46,7 +46,7 @@ export default async function IntelligenceModelsPage() {
           <Button asChild>
             <Link href="/intelligence/models/add">Add Model</Link>
           </Button>
-          <Button variant="outline" asChild>
+          <Button type="outlined" asChild>
             <Link href="/intelligence/access/add">Create Access</Link>
           </Button>
         </CardContent>
@@ -105,7 +105,7 @@ export default async function IntelligenceModelsPage() {
                       </div>
                     </div>
                     <div>
-                      <Button variant="outline" asChild>
+                      <Button type="outlined" asChild>
                         <Link href={`/intelligence/models/${model.id}`}>
                           View And Edit
                           <ArrowRight className="ml-2 h-4 w-4" />
@@ -120,7 +120,7 @@ export default async function IntelligenceModelsPage() {
         </CardContent>
       </Card>
 
-      <Button variant="ghost" asChild className="w-fit">
+      <Button type="plain" asChild className="w-fit">
         <Link href="/intelligence/models/add">
           Add another model
           <ArrowRight className="ml-2 h-4 w-4" />

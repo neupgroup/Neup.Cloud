@@ -309,12 +309,12 @@ export function DeployApplicationPage() {
                   )}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button type="button" variant="outline" onClick={() => appIconInputRef.current?.click()}>
+                  <Button htmlType="button" type="outlined" onClick={() => appIconInputRef.current?.click()}>
                     <Upload className="mr-2 h-4 w-4" />
                     Upload Icon
                   </Button>
                   {appIcon ? (
-                    <Button type="button" variant="ghost" onClick={() => setAppIcon('')}>
+                    <Button htmlType="button" type="plain" onClick={() => setAppIcon('')}>
                       <X className="mr-2 h-4 w-4" />
                       Remove
                     </Button>
@@ -467,7 +467,7 @@ export function DeployApplicationPage() {
                           {cmd.value}
                         </div>
                       </div>
-                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeCommand(index)}>
+                      <Button htmlType="button" type="plain" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeCommand(index)}>
                         <Trash className="h-4 w-4" />
                       </Button>
                     </div>
@@ -494,7 +494,7 @@ export function DeployApplicationPage() {
                 <Label className="text-xs">Command Script</Label>
                 <Textarea value={newCmdValue} onChange={(e) => setNewCmdValue(e.target.value)} placeholder="npm run migrate" className="font-mono text-sm min-h-[80px]" />
               </div>
-              <Button type="button" onClick={addCustomCommand} variant="secondary" size="sm" className="w-full md:w-auto self-end">
+              <Button htmlType="button" onClick={addCustomCommand} type="tinted" size="sm" className="w-full md:w-auto self-end">
                 <Plus className="h-4 w-4 mr-2" /> Add Command
               </Button>
             </div>
@@ -502,7 +502,7 @@ export function DeployApplicationPage() {
         </Card>
 
         <div className="flex justify-end pt-4">
-          <Button type="submit" size="lg" disabled={isLoading} className="w-full md:w-auto min-w-[200px]">
+          <Button htmlType="submit" size="lg" disabled={isLoading} className="w-full md:w-auto min-w-[200px]">
             {isLoading ? 'Deploying...' : 'Deploy Application'}
           </Button>
         </div>

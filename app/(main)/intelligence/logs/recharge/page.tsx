@@ -82,8 +82,8 @@ export default async function IntelligenceLogsRechargePage({
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button type="submit">Recharge Access</Button>
-              <Button variant="outline" asChild>
+              <Button htmlType="submit">Recharge Access</Button>
+              <Button type="outlined" asChild>
                 <Link href="/intelligence/access">View Access</Link>
               </Button>
             </div>

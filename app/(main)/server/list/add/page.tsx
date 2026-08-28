@@ -167,10 +167,10 @@ export default function AddServerPage() {
           </CardContent>
 
           <CardFooter className="flex flex-col-reverse gap-2 border-t px-6 py-4 sm:flex-row sm:justify-end">
-            <Button variant="ghost" type="button" onClick={() => router.back()}>
+            <Button type="plain" htmlType="button" onClick={() => router.back()}>
               Cancel
             </Button>
-            <Button type="button" variant="outline" disabled={isLoading || isCheckingConnection} onClick={handleCheckConnection}>
+            <Button htmlType="button" type="outlined" disabled={isLoading || isCheckingConnection} onClick={handleCheckConnection}>
               {isCheckingConnection ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -180,7 +180,7 @@ export default function AddServerPage() {
                 "Check connection"
               )}
             </Button>
-            <Button type="submit" disabled={isLoading || isCheckingConnection}>
+            <Button htmlType="submit" disabled={isLoading || isCheckingConnection}>
               {isLoading ? "Creating..." : "Create server"}
             </Button>
           </CardFooter>

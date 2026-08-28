@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getNginxConfigurations, type WebServiceConfig } from '@/services/webservices/service';
 import { Card } from '#/components/ui/card';
+import { Button } from '#/components/ui/button';
 import { Badge } from '#/components/ui/badge';
 import { Skeleton } from '#/components/ui/skeleton';
 import { Plus, FileCode, Calendar, User, Server, Hash, RefreshCw, Shield, CheckCircle } from 'lucide-react';
@@ -224,7 +225,7 @@ export default function NginxConfigurationsPage() {
                     </Link>
 
                     {/* Test Configuration Row */}
-                    <button
+                    <Button
                         onClick={handleTest}
                         disabled={testing}
                         className="w-full text-left block hover:bg-blue-500/5 transition-colors"
@@ -238,10 +239,10 @@ export default function NginxConfigurationsPage() {
                                 <p className="text-sm text-muted-foreground">Verify configuration correctness before restarting</p>
                             </div>
                         </div>
-                    </button>
+                    </Button>
 
                     {/* Restart Server Row */}
-                    <button
+                    <Button
                         onClick={handleRestart}
                         disabled={restarting}
                         className="w-full text-left block hover:bg-red-500/5 transition-colors"
@@ -255,7 +256,7 @@ export default function NginxConfigurationsPage() {
                                 <p className="text-sm text-muted-foreground">Apply changes by restarting the service</p>
                             </div>
                         </div>
-                    </button>
+                    </Button>
                 </Card>
             </div>
 

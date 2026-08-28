@@ -8,6 +8,7 @@ import { getServer } from '@/services/server/server-service';
 import { endLiveSession, executeLiveCommand, initLiveSession } from '@/services/server/live-command';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { useServerName } from '@/hooks/use-server-name';
+import { Button } from '#/components/ui/button';
 import { getWildcardCertificateSession, verifyWildcardCertificateSession } from '@/services/webservices/nginx/service';
 
 interface HistoryItem {
@@ -216,14 +217,14 @@ export default function LiveConsolePage() {
 
           <div className="flex items-center space-x-6">
             {acmeMode && acmeSession && !isEnded ? (
-              <button
+              <Button
                 onClick={handleVerifyAcme}
                 disabled={isVerifyingAcme || acmeSession.status === 'completed'}
                 className="flex items-center bg-blue-900/20 hover:bg-blue-900/40 disabled:opacity-50 disabled:cursor-not-allowed text-blue-400 border border-blue-900/50 px-3 py-1 rounded transition-colors"
               >
                 <Play className="w-4 h-4 mr-2" />
                 {isVerifyingAcme ? 'Verifying ACME...' : 'Verify ACME Challenge'}
-              </button>
+              </Button>
             ) : null}
 
             <div
@@ -234,21 +235,21 @@ export default function LiveConsolePage() {
             </div>
 
             {!isEnded ? (
-              <button
+              <Button
                 onClick={handleEndSession}
                 className="flex items-center bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900/50 px-3 py-1 rounded transition-colors"
               >
                 <XCircle className="w-4 h-4 mr-2" />
                 End Session
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 onClick={() => window.location.reload()}
                 className="flex items-center bg-green-900/20 hover:bg-green-900/40 text-green-500 border border-green-900/50 px-3 py-1 rounded transition-colors"
               >
                 <Play className="w-4 h-4 mr-2" />
                 New Session
-              </button>
+              </Button>
             )}
           </div>
         </div>

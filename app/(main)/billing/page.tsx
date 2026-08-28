@@ -65,7 +65,7 @@ export default function Page() {
                         </div>
                     </CardContent>
                     <CardFooter>
-                        <Button variant="outline" className="w-full">Update Payment Method</Button>
+                        <Button type="outlined" className="w-full">Update Payment Method</Button>
                     </CardFooter>
                 </Card>
             </div>
@@ -89,7 +89,7 @@ export default function Page() {
                                     <TableCell>{invoice.date}</TableCell>
                                     <TableCell>{invoice.amount}</TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon">
+                                        <Button type="plain" size="icon">
                                             <Download className="h-4 w-4" />
                                         </Button>
                                     </TableCell>

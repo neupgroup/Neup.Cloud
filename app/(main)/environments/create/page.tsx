@@ -236,7 +236,7 @@ export default function CreateEnvironmentPage() {
 
                     </CardContent>
                     <CardFooter className="border-t px-6 py-4 flex justify-end">
-                        <Button type="submit" disabled={isLoading}>
+                        <Button htmlType="submit" disabled={isLoading}>
                             {isLoading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

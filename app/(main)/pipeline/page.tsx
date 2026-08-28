@@ -115,7 +115,7 @@ export default function PipelinePage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button asChild variant="outline" className="rounded-full border-slate-200 bg-white/90">
+            <Button asChild type="outlined" className="rounded-full border-slate-200 bg-white/90">
               <Link href="/home">Dashboard</Link>
             </Button>
             <Button asChild className="rounded-full px-5">
@@ -150,7 +150,7 @@ export default function PipelinePage() {
                     <Play className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="rounded-full border-slate-200 bg-white">
+                <Button asChild size="lg" type="outlined" className="rounded-full border-slate-200 bg-white">
                   <Link href="/home">Return home</Link>
                 </Button>
               </div>
@@ -258,7 +258,7 @@ export default function PipelinePage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <Button asChild variant="outline" className="w-full rounded-full border-slate-200 bg-white">
+                  <Button asChild type="outlined" className="w-full rounded-full border-slate-200 bg-white">
                     <Link href="/pipeline/editor">Use inside editor</Link>
                   </Button>
                 </CardContent>
@@ -293,7 +293,7 @@ export default function PipelinePage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <Button asChild variant="outline" className="w-full rounded-full border-slate-200 bg-white">
+                    <Button asChild type="outlined" className="w-full rounded-full border-slate-200 bg-white">
                       <Link href={connection.href}>Open setup page</Link>
                     </Button>
                   </CardContent>

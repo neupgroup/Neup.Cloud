@@ -64,7 +64,7 @@ export default async function DatabasePage({
                     <p className="mt-2 text-muted-foreground max-w-sm mx-auto">
                         You need to select a server before you can manage its databases.
                     </p>
-                    <Button asChild className="mt-6" variant="outline">
+                    <Button asChild className="mt-6" type="outlined">
                         <Link href="/servers">Go to Servers</Link>
                     </Button>
                 </Card>

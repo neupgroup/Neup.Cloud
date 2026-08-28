@@ -27,7 +27,7 @@ export default async function CreateUserPage({ params, searchParams }: { params:
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div className="space-y-1">
-                <Button variant="ghost" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
+                <Button type="plain" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
                     <Link href={withSelectedServerQuery(`/server/database/${id}/users`, serverId)}>
                         <ChevronLeft className="h-4 w-4 mr-1" /> Back to Users
                     </Link>

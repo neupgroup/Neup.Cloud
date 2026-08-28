@@ -187,7 +187,7 @@ export function DdosTestCards({
             <Button
               onClick={onStop}
               disabled={!isRunning}
-              variant="destructive"
+              type="solid"
               size="lg"
             >
               Stop Test
@@ -299,7 +299,7 @@ export function DdosTestCards({
             )}
 
             <div className="pt-2">
-              <Button variant="outline" size="sm" onClick={onClearResults}>
+              <Button type="outlined" size="sm" onClick={onClearResults}>
                 Clear Results
               </Button>
             </div>

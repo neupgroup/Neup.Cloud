@@ -200,7 +200,7 @@ export default function ServerHomePage() {
                                 <p className="text-sm text-muted-foreground">Recent commands and server events.</p>
                             </div>
                             {dashboardLoading || logsLoading ? <CommandLogListSkeleton rows={5} /> : <CommandLogList logs={activityLogs} />}
-                            <Button variant="outline" asChild>
+                            <Button type="outlined" asChild>
                                 <Link href={`/server/commands/history?selectedServer=${encodeURIComponent(selectedServerId)}`}>See all activities</Link>
                             </Button>
                         </div>

@@ -97,7 +97,7 @@ export function ServerCard({ server, onServerDeleted, onServerSelected, isSelect
         ) : isSwitching ? (
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         ) : null}
-        <Button variant="ghost" size="icon" onClick={handleDelete}>
+        <Button type="plain" size="icon" onClick={handleDelete}>
           <span className="sr-only">Delete</span>
           <ChevronRight className="h-5 w-5" />
         </Button>

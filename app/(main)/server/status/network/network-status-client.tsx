@@ -240,8 +240,8 @@ export default function NetworkStatusClient({
           />
         </div>}
         {showRefresh && <Button
-          type="button"
-          variant="outline"
+          htmlType="button"
+          type="outlined"
           onClick={() => fetchConnections({ quiet: true })}
           disabled={isLoading || isRefreshing}
           className="sm:w-auto"

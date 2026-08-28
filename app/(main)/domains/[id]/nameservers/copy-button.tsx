@@ -23,7 +23,7 @@ export function CopyButton({ textToCopy }: CopyButtonProps) {
 
     return (
         <Button
-            variant="ghost"
+            type="plain"
             size="sm"
             onClick={handleCopy}
             className="h-8 w-8 p-0"

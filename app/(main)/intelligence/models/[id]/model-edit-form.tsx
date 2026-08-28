@@ -121,8 +121,8 @@ export default function ModelEditForm({
                     {providerSuggestions.map((option) => (
                       <Button
                         key={option.value}
-                        type="button"
-                        variant="outline"
+                        htmlType="button"
+                        type="outlined"
                         size="sm"
                         className="rounded-full"
                         onClick={() => setProvider(option.value)}
@@ -181,8 +181,8 @@ export default function ModelEditForm({
                     {currencySuggestions.map((option) => (
                       <Button
                         key={option.code}
-                        type="button"
-                        variant="outline"
+                        htmlType="button"
+                        type="outlined"
                         size="sm"
                         className="rounded-full"
                         onClick={() => setCurrency(option.code)}
@@ -247,11 +247,11 @@ export default function ModelEditForm({
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button type="submit" disabled={isPending || !canSubmit}>
+              <Button htmlType="submit" disabled={isPending || !canSubmit}>
                 <Save className="mr-2 h-4 w-4" />
                 {isPending ? 'Saving...' : 'Save Changes'}
               </Button>
-              <Button variant="outline" asChild>
+              <Button type="outlined" asChild>
                 <Link href="/intelligence/models">Back to Models</Link>
               </Button>
             </div>
@@ -269,11 +269,11 @@ export default function ModelEditForm({
         <CardContent>
           <form action={deleteIntelligenceModelAction} className="flex flex-col gap-3 sm:flex-row">
             <input type="hidden" name="model_id" value={String(modelId)} />
-            <Button type="submit" variant="destructive">
+            <Button htmlType="submit" type="solid">
               <Trash2 className="mr-2 h-4 w-4" />
               Delete Model
             </Button>
-            <Button variant="outline" asChild>
+            <Button type="outlined" asChild>
               <Link href="/intelligence/models">Cancel</Link>
             </Button>
           </form>

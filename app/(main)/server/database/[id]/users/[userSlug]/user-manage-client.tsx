@@ -200,7 +200,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div className="space-y-1">
-                <Button variant="ghost" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
+                <Button type="plain" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
                     <Link href={withSelectedServer(`/server/database/${engine}-${dbName}/users`)}>
                         <ChevronLeft className="h-4 w-4 mr-1" /> Back to Users
                     </Link>
@@ -271,7 +271,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                                     required
                                 />
                             </div>
-                            <Button type="submit" className="gap-2" disabled={isLoading}>
+                            <Button htmlType="submit" className="gap-2" disabled={isLoading}>
                                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                                 Update Password
                             </Button>
@@ -294,8 +294,8 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                                 <Label>Permission Presets</Label>
                                 <div className="flex gap-2">
                                     <Button
-                                        type="button"
-                                        variant="outline"
+                                        htmlType="button"
+                                        type="outlined"
                                         size="sm"
                                         onClick={() => handlePresetClick('read')}
                                         className="h-7 text-xs"
@@ -303,8 +303,8 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                                         Read Only
                                     </Button>
                                     <Button
-                                        type="button"
-                                        variant="outline"
+                                        htmlType="button"
+                                        type="outlined"
                                         size="sm"
                                         onClick={() => handlePresetClick('readWrite')}
                                         className="h-7 text-xs"
@@ -312,8 +312,8 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                                         Read/Write
                                     </Button>
                                     <Button
-                                        type="button"
-                                        variant="outline"
+                                        htmlType="button"
+                                        type="outlined"
                                         size="sm"
                                         onClick={() => handlePresetClick('developer')}
                                         className="h-7 text-xs"
@@ -321,8 +321,8 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                                         Developer
                                     </Button>
                                     <Button
-                                        type="button"
-                                        variant="outline"
+                                        htmlType="button"
+                                        type="outlined"
                                         size="sm"
                                         onClick={() => handlePresetClick('full')}
                                         className="h-7 text-xs"
@@ -377,7 +377,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                         <p className="text-sm text-muted-foreground leading-relaxed">
                             This removes database-level privileges for <span className="font-mono text-foreground">{username}</span> on <span className="font-mono text-foreground">{dbName}</span>. The user can still exist for other databases.
                         </p>
-                        <Button variant="outline" onClick={handleRevokeAccess} disabled={isLoading}>
+                        <Button type="outlined" onClick={handleRevokeAccess} disabled={isLoading}>
                             {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShieldX className="h-4 w-4 mr-2" />}
                             Revoke Access
                         </Button>
@@ -439,7 +439,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                         <p className="text-sm text-muted-foreground leading-relaxed">
                             Deleting this user removes the account from the database engine. Any applications using these credentials will fail to connect.
                         </p>
-                        <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
+                        <Button type="solid" onClick={handleDelete} disabled={isLoading}>
                             {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
                             Delete User Account
                         </Button>

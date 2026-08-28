@@ -30,7 +30,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" disabled={disabled || pending}>
+    <Button htmlType="submit" disabled={disabled || pending}>
       {pending ? 'Saving...' : 'Save Model'}
     </Button>
   );
@@ -96,8 +96,8 @@ export default function ModelCreateForm() {
                   {providerSuggestions.map((option) => (
                     <Button
                       key={option.value}
-                      type="button"
-                      variant="outline"
+                      htmlType="button"
+                      type="outlined"
                       size="sm"
                       className="rounded-full"
                       onClick={() => setProvider(option.value)}
@@ -157,8 +157,8 @@ export default function ModelCreateForm() {
                   {currencySuggestions.map((option) => (
                     <Button
                       key={option.code}
-                      type="button"
-                      variant="outline"
+                      htmlType="button"
+                      type="outlined"
                       size="sm"
                       className="rounded-full"
                       onClick={() => setCurrency(option.code)}
@@ -230,7 +230,7 @@ export default function ModelCreateForm() {
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <SubmitButton disabled={!canSubmit} />
-            <Button variant="outline" asChild>
+            <Button type="outlined" asChild>
               <Link href="/intelligence/models">Back to Models</Link>
             </Button>
           </div>

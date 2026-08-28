@@ -115,7 +115,7 @@ function ProcessesList({ processes, onKill }: { processes: Process[], onKill: (p
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-memory-stick"><path d="M6 3v18" /><path d="M18 3v18" /><path d="M6 9h12" /><path d="M6 15h12" /><path d="M9 3v18" /><path d="M15 3v18" /></svg>
                                 <span className="font-medium">{process.memory}% RAM</span>
                             </div>
-                            <button
+                            <Button
                                 onClick={() => handleKillClick(process.pid)}
                                 disabled={killingPid === process.pid}
                                 className="flex items-center gap-1.5 shrink-0 text-red-500 hover:text-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -126,7 +126,7 @@ function ProcessesList({ processes, onKill }: { processes: Process[], onKill: (p
                                     <XCircle className="h-3.5 w-3.5" />
                                 )}
                                 <span className="font-medium">Kill</span>
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -478,13 +478,13 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
                     {/* Date Navigator */}
                     <div className="flex items-center gap-1 bg-card p-1 rounded-md border shadow-sm w-full sm:w-auto justify-between sm:justify-start">
-                        <Button variant="ghost" size="icon" onClick={handlePreviousTime} className="h-8 w-8">
+                        <Button type="plain" size="icon" onClick={handlePreviousTime} className="h-8 w-8">
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
                         <div className="px-2 text-xs sm:text-sm font-medium text-center truncate">
                             {format(startTime, "MMM d, h:mm a")} - {format(new Date(endTime), "MMM d, h:mm a")}
                         </div>
-                        <Button variant="ghost" size="icon" onClick={handleNextTime} disabled={isCurrentTime} className="h-8 w-8">
+                        <Button type="plain" size="icon" onClick={handleNextTime} disabled={isCurrentTime} className="h-8 w-8">
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
@@ -492,7 +492,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                     {/* Timeframe Tabs */}
                     <div className="flex items-center p-1 bg-muted/50 rounded-lg border w-full sm:w-auto">
                         {Object.entries(TIME_FRAMES).map(([key, { label }]) => (
-                            <button
+                            <Button
                                 key={key}
                                 onClick={() => setTimeFrame(key as any)}
                                 className={cn(
@@ -503,7 +503,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                 )}
                             >
                                 {key.toUpperCase()}
-                            </button>
+                            </Button>
                         ))}
                     </div>
                 </div>
@@ -1071,7 +1071,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                             </div>
                                         )}
                                         <div className="p-4 border-t border-border">
-                                            <Button asChild variant="outline" className="w-full">
+                                            <Button asChild type="outlined" className="w-full">
                                                 <Link href={withSelectedServerQuery('/server/processes', serverId)}>View more</Link>
                                             </Button>
                                         </div>
@@ -1148,7 +1148,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                             </div>
                                         )}
                                         <div className="p-4 border-t border-border">
-                                            <Button asChild variant="outline" size="sm" className="w-auto">
+                                            <Button asChild type="outlined" size="sm" className="w-auto">
                                                 <Link href={withSelectedServerQuery('/server/processes', serverId)}>View more</Link>
                                             </Button>
                                         </div>

@@ -219,7 +219,7 @@ export default function RecommendationClient() {
                   )}
                 />
               </div>
-              <Button type="submit" disabled={isLoading}>
+              <Button htmlType="submit" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

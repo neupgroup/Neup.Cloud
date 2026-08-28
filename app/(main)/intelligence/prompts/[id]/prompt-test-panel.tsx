@@ -132,7 +132,7 @@ export function PromptTestPanel({
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Button type="button" onClick={handleRunTest} disabled={isPending}>
+        <Button htmlType="button" onClick={handleRunTest} disabled={isPending}>
           {isPending ? 'Running...' : 'Run test'}
         </Button>
       </div>

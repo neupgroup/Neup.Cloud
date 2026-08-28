@@ -136,7 +136,7 @@ export function UpdateDetailsClient({ serverId, serverName, id }: { serverId: st
                             </CardDescription>
                         </div>
                         {details?.homepage && (
-                            <Button variant="ghost" asChild>
+                            <Button type="plain" asChild>
                                 <a href={details.homepage} target="_blank" rel="noopener noreferrer">Visit Homepage</a>
                             </Button>
                         )}
@@ -164,7 +164,7 @@ export function UpdateDetailsClient({ serverId, serverName, id }: { serverId: st
                             Update Package
                         </Button>
                     ) : (
-                        <Button onClick={handleUpdate} variant="outline" disabled={isUpdating} title="Reinstall or ensure latest version">
+                        <Button onClick={handleUpdate} type="outlined" disabled={isUpdating} title="Reinstall or ensure latest version">
                             {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
                             Reinstall / Update
                         </Button>

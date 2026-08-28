@@ -274,15 +274,15 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <button
-              type="button"
+            <Button
+              htmlType="button"
               onClick={() => handleCopy(publishState.generatedAccessKey!)}
               className="rounded-xl border border-emerald-300 bg-white p-4 text-left font-mono text-sm break-all text-emerald-950 transition hover:border-emerald-500 hover:bg-emerald-100"
             >
               {publishState.generatedAccessKey}
-            </button>
+            </Button>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button type="button" onClick={() => handleCopy(publishState.generatedAccessKey!)}>
+              <Button htmlType="button" onClick={() => handleCopy(publishState.generatedAccessKey!)}>
                 <Copy className="mr-2 h-4 w-4" />
                 {copied ? 'Copied' : 'Copy Access Key'}
               </Button>
@@ -334,8 +334,8 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Status</p>
-              <button
-                type="button"
+              <Button
+                htmlType="button"
                 onClick={handleStatusClick}
                 disabled={access.status === 'unpublished' || !access.published || isUpdatingStatus}
                 className={`text-sm font-semibold ${getStatusColor(access.status)} ${
@@ -345,7 +345,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                 } disabled:opacity-50`}
               >
                 {getStatusLabel(access.status)}
-              </button>
+              </Button>
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Token Balance</p>
@@ -435,16 +435,16 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                     </p>
                   </div>
                 </div>
-                <button
-                  type="button"
+                <Button
+                  htmlType="button"
                   onClick={() => handleCopy(resetKeyState.generatedAccessKey!)}
                   className="w-full rounded-xl border-2 border-emerald-400 bg-white p-4 text-left font-mono text-sm break-all text-emerald-950 transition hover:border-emerald-600 hover:bg-emerald-50 mb-3"
                 >
                   {resetKeyState.generatedAccessKey}
-                </button>
+                </Button>
                 <div className="flex gap-3">
                   <Button 
-                    type="button" 
+                    htmlType="button"
                     onClick={() => handleCopy(resetKeyState.generatedAccessKey!)}
                     className="flex-1"
                   >
@@ -452,8 +452,8 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                     {copied ? 'Copied!' : 'Copy Key'}
                   </Button>
                   <Button 
-                    type="button" 
-                    variant="outline"
+                    htmlType="button"
+                    type="outlined"
                     onClick={() => handleDownload(resetKeyState.generatedAccessKey!, access.id)}
                     className="flex-1"
                   >
@@ -513,8 +513,8 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                         <p className="text-sm text-muted-foreground">Configure models for this access</p>
                       </div>
                       <Button
-                        type="button"
-                        variant="outline"
+                        htmlType="button"
+                        type="outlined"
                         size="sm"
                         onClick={() => setEditModelBlocks([...editModelBlocks, { modelId: '', tokenId: '' }])}
                       >
@@ -533,8 +533,8 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                           </div>
                           {index > 0 && (
                             <Button
-                              type="button"
-                              variant="ghost"
+                              htmlType="button"
+                              type="plain"
                               size="sm"
                               onClick={() => setEditModelBlocks(editModelBlocks.filter((_, i) => i !== index))}
                             >
@@ -550,7 +550,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                             <input type="hidden" name={`model_${index}_id`} value={block.modelId} />
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button type="button" variant="outline" className="justify-between">
+                                <Button htmlType="button" type="outlined" className="justify-between">
                                   <span className="truncate">
                                     {block.modelId
                                       ? models.find((m) => m.id === Number(block.modelId))?.title || 'Select a model'
@@ -581,7 +581,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                               <input type="hidden" name={`token_${index}_id`} value={block.tokenId} />
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button type="button" variant="outline" className="justify-between" disabled={!block.modelId}>
+                                  <Button htmlType="button" type="outlined" className="justify-between" disabled={!block.modelId}>
                                     <span className="truncate">
                                       {block.tokenId
                                         ? tokens.find((t) => t.id === Number(block.tokenId))?.name || 'Select a token'
@@ -642,13 +642,13 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                 </div>
 
                 <div className="flex gap-3">
-                  <Button type="submit" disabled={isUpdatingConfig || !accessKeyForEdit}>
+                  <Button htmlType="submit" disabled={isUpdatingConfig || !accessKeyForEdit}>
                     <Save className="mr-2 h-4 w-4" />
                     {isUpdatingConfig ? 'Saving...' : 'Save Changes'}
                   </Button>
                   <Button
-                    type="button"
-                    variant="outline"
+                    htmlType="button"
+                    type="outlined"
                     onClick={() => {
                       setIsEditing(false);
                       setAccessKeyForEdit('');
@@ -670,8 +670,8 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                 <form action={resetKeyAction}>
                   <input type="hidden" name="access_id" value={String(access.id)} />
                   <Button 
-                    type="submit" 
-                    variant="destructive" 
+                    htmlType="submit"
+                    type="solid"
                     disabled={isResettingKey}
                   >
                     <KeyRound className="mr-2 h-4 w-4" />
@@ -704,7 +704,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
               <input type="hidden" name="access_id" value={String(access.id)} />
               <input type="hidden" name="reset_key" value="true" />
               <input type="hidden" name="new_access_key" value="" />
-              <Button type="submit" disabled={isPublishing}>
+              <Button htmlType="submit" disabled={isPublishing}>
                 <KeyRound className="mr-2 h-4 w-4" />
                 {isPublishing ? 'Publishing...' : 'Generate Key & Publish'}
               </Button>
@@ -735,8 +735,8 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                 </pre>
               </div>
               <Button
-                type="button"
-                variant="outline"
+                htmlType="button"
+                type="outlined"
                 size="sm"
                 onClick={() => handleCopy(generateCurlCommand())}
                 className="mt-2"
@@ -785,15 +785,15 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
 
               <div className="flex gap-3">
                 <Button
-                  type="button"
+                  htmlType="button"
                   onClick={handleTest}
                   disabled={testLoading || !testAccessKey || !testContext || (access.type === 'hybrid' && !testPrompt)}
                 >
                   {testLoading ? 'Testing...' : 'Run Test'}
                 </Button>
                 <Button
-                  type="button"
-                  variant="outline"
+                  htmlType="button"
+                  type="outlined"
                   onClick={() => {
                     setIsTesting(false);
                     setTestAccessKey('');
@@ -834,14 +834,14 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
       {!isEditing && (
         <div className="flex gap-3">
           {access.published && access.status !== 'unpublished' && access.type !== 'open' && (
-            <Button onClick={() => setIsTesting(true)} variant="outline" disabled={isTesting}>
+            <Button onClick={() => setIsTesting(true)} type="outlined" disabled={isTesting}>
               <AlertCircle className="mr-2 h-4 w-4" />
               Test
             </Button>
           )}
           
           {access.published && access.status !== 'unpublished' && (
-            <Button onClick={() => setIsEditing(true)} variant="outline">
+            <Button onClick={() => setIsEditing(true)} type="outlined">
               <Edit className="mr-2 h-4 w-4" />
               Edit
             </Button>
@@ -849,7 +849,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
           
           <form action={deleteIntelligenceAccessAction} className="inline">
             <input type="hidden" name="access_id" value={String(access.id)} />
-            <Button type="submit" variant="destructive">
+            <Button htmlType="submit" type="solid">
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </Button>

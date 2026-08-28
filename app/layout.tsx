@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import RootLayoutClient from '@/components/root-layout-client';
+import { ensureAccountProfile, getCurrentAccountId } from '@/services/account-profile';
 import BaseLayout from '#/components/layout/RootLayout';
 import application from '@/base/application.json';
 import './globals.css';
@@ -17,11 +18,27 @@ function formatNeupId(value: string | null) {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
-  const initialProfile: CurrentAccountProfile = {
+  let initialProfile: CurrentAccountProfile = {
     displayName: cookieStore.get('neup_profile_display_name')?.value ?? null,
     displayImage: cookieStore.get('neup_profile_display_image')?.value ?? null,
     neupid: formatNeupId(cookieStore.get('neup_profile_neupid')?.value ?? null),
   };
+
+  if (!initialProfile.displayName || !initialProfile.displayImage || !initialProfile.neupid) {
+    const accountId = await getCurrentAccountId();
+    if (accountId) {
+      try {
+        const profile = await ensureAccountProfile({ accountId, forceRefresh: true });
+        initialProfile = {
+          displayName: profile.displayName,
+          displayImage: profile.displayImage,
+          neupid: formatNeupId(profile.neupid),
+        };
+      } catch (error) {
+        console.error('[root layout] failed to load account profile:', error);
+      }
+    }
+  }
 
   return (
     <html lang="en" suppressHydrationWarning>

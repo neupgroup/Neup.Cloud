@@ -143,14 +143,14 @@ export default async function IntelligenceDevlogPage({
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           {currentPage > 1 ? (
-            <Button variant="outline" asChild>
+            <Button type="outlined" asChild>
               <Link href={`/intelligence/devlog?page=${currentPage - 1}`}>
                 <ChevronLeft className="mr-2 h-4 w-4" />
                 Previous
               </Link>
             </Button>
           ) : (
-            <Button variant="outline" disabled>
+            <Button type="outlined" disabled>
               <ChevronLeft className="mr-2 h-4 w-4" />
               Previous
             </Button>
@@ -159,14 +159,14 @@ export default async function IntelligenceDevlogPage({
             Page {currentPage} of {totalPages}
           </p>
           {currentPage < totalPages ? (
-            <Button variant="outline" asChild>
+            <Button type="outlined" asChild>
               <Link href={`/intelligence/devlog?page=${currentPage + 1}`}>
                 Next
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           ) : (
-            <Button variant="outline" disabled>
+            <Button type="outlined" disabled>
               Next
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>

@@ -59,7 +59,7 @@ export function DropDatabaseButton({ serverId, engine, dbName }: DropDatabaseBut
     return (
         <ConfirmDialog
             trigger={
-                <Button variant="destructive" disabled={isDropping}>
+                <Button type="solid" disabled={isDropping}>
                     {isDropping ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                     <span className="ml-2">Drop Database</span>
                 </Button>

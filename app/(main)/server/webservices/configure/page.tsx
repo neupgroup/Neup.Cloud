@@ -210,7 +210,7 @@ export default function ServerSettingsPage() {
 
                         </CardContent>
                         <CardFooter className="border-t px-6 py-4 flex justify-end">
-                            <Button type="submit" disabled={saving}>
+                            <Button htmlType="submit" disabled={saving}>
                                 {saving ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

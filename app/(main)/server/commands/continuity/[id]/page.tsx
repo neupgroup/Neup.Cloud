@@ -284,7 +284,7 @@ export default function ContinuitySessionPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
-          <Button asChild variant="ghost" size="sm" className="px-0 text-muted-foreground hover:text-foreground">
+          <Button asChild type="plain" size="sm" className="px-0 text-muted-foreground hover:text-foreground">
             <Link href={withSelectedServerQuery('/server/commands/continuity', selectedServerId)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
@@ -376,7 +376,7 @@ export default function ContinuitySessionPage() {
 
       {selectedServerId && requestedSessionId ? (
         <div className="flex justify-start">
-          <Button type="button" variant="destructive" onClick={handleEndSession} disabled={isEndingSession}>
+          <Button htmlType="button" type="solid" onClick={handleEndSession} disabled={isEndingSession}>
             {isEndingSession ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
             End Session
           </Button>

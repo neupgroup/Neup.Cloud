@@ -40,7 +40,7 @@ export function PageTitleBack({ title, description, serverName, backHref, classN
 
     return (
         <div className={cn("space-y-2", className)}>
-            <Button variant="ghost" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground hover:underline" asChild>
+            <Button type="plain" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground hover:underline" asChild>
                 <Link href={backHref}>
                     &lt; Go back
                 </Link>
@@ -88,7 +88,7 @@ export function PageTitleBackWithComponent({ title, description, serverName, bac
 
     return (
         <div className={cn("space-y-2", className)}>
-            <Button variant="ghost" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground hover:underline" asChild>
+            <Button type="plain" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground hover:underline" asChild>
                 <Link href={backHref}>
                     &lt; Go back
                 </Link>

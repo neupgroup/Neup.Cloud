@@ -387,7 +387,7 @@ export default function StorageClient({
                         <h4 className="text-base font-medium mb-1">Failed to load storage info</h4>
                         <p className="text-sm text-muted-foreground">{error}</p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+                    <Button type="outlined" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
                         <RotateCcw className={cn('mr-1.5 h-3.5 w-3.5', isRefreshing && 'animate-spin')} />
                         Retry
                     </Button>
@@ -401,7 +401,7 @@ export default function StorageClient({
     return (
         <div className="space-y-8">
             <div className="flex justify-end">
-                <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={isRefreshing} className="text-muted-foreground hover:text-foreground">
+                <Button type="plain" size="sm" onClick={handleRefresh} disabled={isRefreshing} className="text-muted-foreground hover:text-foreground">
                     <RotateCcw className={cn('mr-1.5 h-3.5 w-3.5', isRefreshing && 'animate-spin')} />
                     Refresh
                 </Button>

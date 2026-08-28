@@ -35,6 +35,7 @@ export type AccountProfile = {
 type EnsureAccountProfileInput = {
   accountId: string;
   neupid?: string | null;
+  forceRefresh?: boolean;
 };
 
 type AccountProfileRow = {
@@ -193,7 +194,7 @@ export async function ensureAccountProfile(input: EnsureAccountProfileInput): Pr
   }
 
   const existing = await getStoredAccountProfile(accountId);
-  if (existing?.displayName && existing.neupid) {
+  if (existing?.displayName && existing.neupid && !input.forceRefresh) {
     return existing;
   }
 

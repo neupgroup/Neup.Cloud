@@ -49,7 +49,7 @@ export default function RequirementsPage() {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
-            <Button asChild variant="ghost" size="sm" className="w-fit -ml-2 text-muted-foreground hover:text-foreground">
+            <Button asChild type="plain" size="sm" className="w-fit -ml-2 text-muted-foreground hover:text-foreground">
                 <Link href={withSelectedServer("/server/system")}>
                     <ArrowLeft className="mr-1 h-4 w-4" /> Back to System
                 </Link>

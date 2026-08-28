@@ -172,7 +172,7 @@ function ServerSearchContent() {
                   <FileSearch className="h-5 w-5 text-muted-foreground" />
                   Search
                 </span>
-                <Button variant="outline" onClick={handleRootModeToggle}>
+                <Button type="outlined" onClick={handleRootModeToggle}>
                   {rootMode ? (
                     <>
                       <ShieldOff className="mr-2 h-4 w-4" /> Turn Root Off
@@ -234,13 +234,13 @@ function ServerSearchContent() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Button type="submit" disabled={isSearching} className="w-full sm:w-auto">
+                  <Button htmlType="submit" disabled={isSearching} className="w-full sm:w-auto">
                     {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileSearch className="mr-2 h-4 w-4" />}
                     Search
                   </Button>
                   <Button
-                    type="button"
-                    variant="outline"
+                    htmlType="button"
+                    type="outlined"
                     className="w-full sm:w-auto"
                     onClick={() => {
                       setQuery('');
@@ -322,13 +322,13 @@ function ServerSearchContent() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
-                              <Button asChild variant="outline" size="sm">
+                              <Button asChild type="outlined" size="sm">
                                 <Link href={viewerHref} onClick={(e) => e.stopPropagation()}>
                                   <ExternalLink className="mr-2 h-4 w-4" />
                                   Open
                                 </Link>
                               </Button>
-                              <Button asChild variant="secondary" size="sm">
+                              <Button asChild type="tinted" size="sm">
                                 <Link
                                   href={openFilesHref}
                                   target="_blank"

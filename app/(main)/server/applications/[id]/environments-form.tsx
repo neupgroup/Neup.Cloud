@@ -144,8 +144,8 @@ export function EnvironmentsForm({ application }: { application: Application }) 
                                         />
                                     </div>
                                     <Button
-                                        type="button"
-                                        variant="ghost"
+                                        htmlType="button"
+                                        type="plain"
                                         size="icon"
                                         onClick={() => remove(index)}
                                         className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
@@ -157,8 +157,8 @@ export function EnvironmentsForm({ application }: { application: Application }) 
                         </div>
 
                         <Button
-                            type="button"
-                            variant="outline"
+                            htmlType="button"
+                            type="outlined"
                             onClick={() => append({ key: "", value: "" })}
                             className="w-full border-dashed"
                         >
@@ -166,7 +166,7 @@ export function EnvironmentsForm({ application }: { application: Application }) 
                         </Button>
 
                         <div className="flex justify-end pt-4">
-                            <Button type="submit" disabled={isLoading}>
+                            <Button htmlType="submit" disabled={isLoading}>
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Save Variables
                             </Button>

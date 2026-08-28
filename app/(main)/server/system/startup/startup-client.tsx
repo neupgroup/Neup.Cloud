@@ -77,7 +77,7 @@ function StartupList({ services, onDisable, onAddClick }: { services: StartupSer
                             </div>
                         </div>
                         <Button
-                            variant="ghost"
+                            type="plain"
                             size="icon"
                             className="text-muted-foreground hover:text-destructive"
                             onClick={(e) => {
@@ -243,7 +243,7 @@ function AddServiceDialog({ onAdd, isOpen, setIsOpen }: {
                         </TabsContent>
 
                         <DialogFooter>
-                            <Button type="submit" disabled={isSubmitting}>
+                            <Button htmlType="submit" disabled={isSubmitting}>
                                 {isSubmitting ? 'Processing...' : (mode === 'existing' ? 'Enable Service' : 'Create & Enable')}
                             </Button>
                         </DialogFooter>

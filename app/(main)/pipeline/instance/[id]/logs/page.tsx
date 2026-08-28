@@ -85,7 +85,7 @@ export default async function PipelineInstanceLogsPage({
             await clearPipelineLogsAction({ pipelineId: pipeline.id });
           }}
         >
-          <Button variant="outline" type="submit">
+          <Button type="outlined" htmlType="submit">
             Clear logs
           </Button>
         </form>

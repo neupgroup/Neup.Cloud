@@ -8,7 +8,6 @@ import {
   Server,
   Lightbulb,
   CreditCard,
-  CircleUser,
   HeartPulse,
   HardDrive,
   FileCode,
@@ -48,7 +47,7 @@ import { Button } from '#/components/ui/button';
 import { useState, useEffect, Suspense } from 'react';
 import { ScrollArea } from '#/components/ui/scroll-area';
 import { Logo } from '@/components/logo';
-import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar';
+import { Userbar } from '#/components/element/userbar';
 import { ProgressBar } from '@/components/progress-bar';
 import NProgress from 'nprogress';
 
@@ -301,13 +300,13 @@ function Header({
   accountProfile: CurrentAccountProfile;
 }) {
   const displayName = accountProfile.displayName ?? 'My Account';
-  const neupId = accountProfile.neupid;
+  const neupId = accountProfile.neupid?.replace(/^@/, '') ?? '';
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center border-b bg-background shadow-[0_16px_40px_rgba(15,23,42,0.10)]">
       <div className="mx-auto flex w-full max-w-[1440px] items-center px-4 sm:px-6 md:px-8">
         <div className="flex items-center gap-4 lg:hidden">
-          <Button variant="ghost" size="icon" onClick={toggleMobileMenu}>
+          <Button type="plain" size="icon" onClick={toggleMobileMenu}>
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
         </div>
@@ -320,19 +319,12 @@ function Header({
           </div>
         </div>
         <div className="ml-auto">
-          <Link href="/profile" className="flex h-11 max-w-[280px] items-center gap-3 rounded-md px-2.5 hover:bg-muted">
-            <span className="hidden min-w-0 text-right sm:block">
-              <span className="block truncate text-sm font-semibold leading-tight text-foreground">{displayName}</span>
-              {neupId && (
-                <span className="block truncate text-xs font-medium leading-tight text-muted-foreground">{neupId}</span>
-              )}
-            </span>
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={accountProfile.displayImage ?? undefined} alt={displayName} />
-              <AvatarFallback>
-                <CircleUser className="h-5 w-5" />
-              </AvatarFallback>
-            </Avatar>
+          <Link href="/profile" className="block rounded-md px-2.5 hover:bg-muted">
+            <Userbar
+              displayName={displayName}
+              displayImage={accountProfile.displayImage}
+              neupid={neupId}
+            />
           </Link>
         </div>
       </div>
@@ -349,10 +341,33 @@ export default function RootLayout({
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [accountProfile, setAccountProfile] = useState(initialProfile);
   const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isServerSelected, setIsServerSelected] = useState(false);
   const isPlainRoute = pathname === '/pipeline/editor' || pathname.startsWith('/pipeline/editor/');
+
+  useEffect(() => {
+    const refreshAccountProfile = async () => {
+      try {
+        const response = await fetch('/cloud/api/account/profile', {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store',
+        });
+
+        if (!response.ok) return;
+
+        const nextProfile = (await response.json()) as CurrentAccountProfile;
+        setAccountProfile(nextProfile);
+      } catch {
+        // Keep the last known profile when a background refresh fails.
+      }
+    };
+
+    const refreshInterval = window.setInterval(refreshAccountProfile, 5 * 60 * 1000);
+    return () => window.clearInterval(refreshInterval);
+  }, []);
 
   useEffect(() => {
     const nextSelectedServerId = shouldPreserveSelectedServer(pathname)
@@ -398,7 +413,7 @@ export default function RootLayout({
             <Header
               isMobileMenuOpen={isMobileMenuOpen}
               toggleMobileMenu={toggleMobileMenu}
-              accountProfile={initialProfile}
+              accountProfile={accountProfile}
             />
 
             <div className={cn(

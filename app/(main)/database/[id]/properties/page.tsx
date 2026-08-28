@@ -153,7 +153,7 @@ export default function DatabaseConnectionPropertiesPage({ params }: Props) {
                 <div className="text-xs uppercase text-muted-foreground mb-1">Connection Test</div>
                 <p className="text-sm text-muted-foreground">Check whether the saved connection can still be maintained.</p>
               </div>
-              <Button onClick={handleCheckConnection} variant="outline" disabled={isChecking || isDeleting}>
+              <Button onClick={handleCheckConnection} type="outlined" disabled={isChecking || isDeleting}>
                 {isChecking ? 'Checking...' : 'Check for connection'}
               </Button>
             </div>
@@ -171,7 +171,7 @@ export default function DatabaseConnectionPropertiesPage({ params }: Props) {
                 <div className="text-xs uppercase text-muted-foreground mb-1">Danger Zone</div>
                 <p className="text-sm text-muted-foreground">Remove this saved connection from Neup.Cloud.</p>
               </div>
-              <Button onClick={handleDeleteConnection} variant="destructive" disabled={isDeleting || isChecking}>
+              <Button onClick={handleDeleteConnection} type="solid" disabled={isDeleting || isChecking}>
                 {isDeleting ? 'Deleting...' : 'Delete connection'}
               </Button>
             </div>

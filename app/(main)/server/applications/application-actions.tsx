@@ -84,7 +84,7 @@ export function ApplicationActions({ applicationId }: ApplicationActionsProps) {
     return (
         <div className="flex items-center gap-2">
             <Button
-                variant="outline"
+                type="outlined"
                 size="sm"
                 className="h-8 gap-1.5"
                 onClick={handleDeploy}
@@ -97,14 +97,14 @@ export function ApplicationActions({ applicationId }: ApplicationActionsProps) {
             </Button>
 
 
-            <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => openInline('environments')}>
+            <Button type="outlined" size="sm" className="h-8 gap-1.5" onClick={() => openInline('environments')}>
                 <Key className="h-4 w-4" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                     Env
                 </span>
             </Button>
 
-            <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => openInline('files')}>
+            <Button type="outlined" size="sm" className="h-8 gap-1.5" onClick={() => openInline('files')}>
                 <FileText className="h-4 w-4" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                     Files
@@ -112,7 +112,7 @@ export function ApplicationActions({ applicationId }: ApplicationActionsProps) {
             </Button>
 
             <Button
-                variant="outline"
+                type="outlined"
                 size="sm"
                 className="h-8 gap-1.5"
                 onClick={() => {
@@ -127,7 +127,7 @@ export function ApplicationActions({ applicationId }: ApplicationActionsProps) {
 
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm" className="h-8 gap-1.5">
+                    <Button type="solid" size="sm" className="h-8 gap-1.5">
                         <Trash className="h-4 w-4" />
                         <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                             Delete

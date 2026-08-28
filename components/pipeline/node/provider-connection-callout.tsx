@@ -66,7 +66,7 @@ export function PipelineProviderConnectionCallout({
           </div>
         </div>
 
-        <Button asChild variant="outline" className="rounded-2xl border-slate-200 bg-white">
+        <Button asChild type="outlined" className="rounded-2xl border-slate-200 bg-white">
           <Link href={href}>
             Open setup
             <ExternalLink className="ml-2 h-4 w-4" />

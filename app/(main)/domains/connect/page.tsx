@@ -61,7 +61,7 @@ export default function AddDomainPage() {
                                     disabled={isAdding}
                                 />
                             </div>
-                            <Button type="submit" disabled={isAdding} className="w-full">
+                            <Button htmlType="submit" disabled={isAdding} className="w-full">
                                 {isAdding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                                 {isAdding ? "Connecting..." : "Connect Domain"}
                             </Button>

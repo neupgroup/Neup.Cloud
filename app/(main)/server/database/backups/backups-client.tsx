@@ -40,7 +40,7 @@ export function DatabaseBackupsClient({ engine, dbName, backups, hasSelectedServ
     return (
         <div className="grid gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div className="space-y-1">
-                <Button variant="ghost" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
+                <Button type="plain" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
                     <Link href={withSelectedServer('/server/database')}>
                         <ChevronLeft className="h-4 w-4 mr-1" /> Back to Databases
                     </Link>
@@ -72,8 +72,8 @@ export function DatabaseBackupsClient({ engine, dbName, backups, hasSelectedServ
                                 className={`border-x border-t bg-card text-card-foreground ${isFirst ? 'rounded-t-md' : ''} ${isLast ? 'rounded-b-md border-b' : ''}`}
                             >
                                 <div className="px-4 py-3">
-                                    <button
-                                        type="button"
+                                    <Button
+                                        htmlType="button"
                                         className="flex w-full items-center justify-between gap-4 text-left"
                                         onClick={() => setExpandedBackup(isExpanded ? null : backupKey)}
                                         aria-expanded={isExpanded}
@@ -91,7 +91,7 @@ export function DatabaseBackupsClient({ engine, dbName, backups, hasSelectedServ
                                             </div>
                                         </div>
                                         <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out ${isExpanded ? 'rotate-180' : ''}`} />
-                                    </button>
+                                    </Button>
 
                                     <div
                                         className={`grid transition-all duration-200 ease-out ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
@@ -99,11 +99,11 @@ export function DatabaseBackupsClient({ engine, dbName, backups, hasSelectedServ
                                     >
                                         <div className="overflow-hidden">
                                             <div className={`flex flex-col gap-2 border-t sm:flex-row sm:justify-end transition-all duration-200 ease-out ${isExpanded ? 'mt-3 pt-3' : 'mt-0 pt-0'}`}>
-                                                <Button variant="outline" size="sm" className="justify-start gap-2" tabIndex={isExpanded ? 0 : -1}>
+                                                <Button type="outlined" size="sm" className="justify-start gap-2" tabIndex={isExpanded ? 0 : -1}>
                                                     <RotateCcw className="h-4 w-4" />
                                                     Restore Backup
                                                 </Button>
-                                                <Button variant="destructive" size="sm" className="justify-start gap-2" tabIndex={isExpanded ? 0 : -1}>
+                                                <Button type="solid" size="sm" className="justify-start gap-2" tabIndex={isExpanded ? 0 : -1}>
                                                     <Trash2 className="h-4 w-4" />
                                                     Delete Backup
                                                 </Button>

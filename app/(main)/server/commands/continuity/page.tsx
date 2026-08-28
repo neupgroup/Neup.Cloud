@@ -26,6 +26,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Plus, Server, SquareTerminal } from 'lucide-react';
 
 import { Card } from '#/components/ui/card';
+import { Button } from '#/components/ui/button';
 import { PageTitle } from '@/components/page-header';
 import { Skeleton } from '#/components/ui/skeleton';
 import { useToast } from '#/core/hooks/useToast';
@@ -143,8 +144,8 @@ export default function ContinuityPage() {
         description="Manage persistent terminal sessions on the selected server."
       />
 
-      <button
-        type="button"
+      <Button
+        htmlType="button"
         onClick={handleCreateSession}
         disabled={!selectedServerId || isCreatingSession}
         className="flex w-full items-center justify-between gap-4 rounded-lg border bg-card p-5 text-left transition hover:bg-muted/40 disabled:cursor-not-allowed disabled:opacity-60"
@@ -160,7 +161,7 @@ export default function ContinuityPage() {
           {isCreatingSession ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           <span>Open</span>
         </div>
-      </button>
+      </Button>
 
       {pageError ? (
         <Card className="border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -192,9 +193,9 @@ export default function ContinuityPage() {
             </div>
           ) : (
             sessions.map((session) => (
-              <button
+              <Button
                 key={session.id}
-                type="button"
+                htmlType="button"
                 onClick={() => handleOpenSession(session.id)}
                 className="w-full rounded-lg border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40"
               >
@@ -213,7 +214,7 @@ export default function ContinuityPage() {
                   <span>{session.windows} window{session.windows === 1 ? '' : 's'}</span>
                   <span>{session.attachedClients} attached</span>
                 </div>
-              </button>
+              </Button>
             ))
           )}
         </div>

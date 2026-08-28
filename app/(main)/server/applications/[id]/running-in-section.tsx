@@ -96,7 +96,7 @@ export function RunningInSection({ applicationId, maps, runningSection }: Runnin
                   </Badge>
                 ) : (
                   <Button
-                    variant="outline"
+                    type="outlined"
                     size="sm"
                     onClick={() => handleSetPrimary(server.serverId)}
                     disabled={isPending}

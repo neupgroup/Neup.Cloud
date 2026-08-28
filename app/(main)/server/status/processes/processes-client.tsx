@@ -47,7 +47,7 @@ function ProcessesList({ processes, onKill, killingPid }: { processes: Process[]
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-memory-stick"><path d="M6 3v18" /><path d="M18 3v18" /><path d="M6 9h12" /><path d="M6 15h12" /><path d="M9 3v18" /><path d="M15 3v18" /></svg>
                                 <span className="font-medium">{process.memory}% RAM</span>
                             </div>
-                            <button
+                            <Button
                                 onClick={() => onKill(process.pid)}
                                 disabled={killingPid === process.pid}
                                 className="flex items-center gap-1.5 shrink-0 text-red-500 hover:text-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -58,7 +58,7 @@ function ProcessesList({ processes, onKill, killingPid }: { processes: Process[]
                                     <XCircle className="h-3.5 w-3.5" />
                                 )}
                                 <span className="font-medium">Kill</span>
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -206,7 +206,7 @@ export default function ProcessesClient({
                             {showLoadMore && visibleProcesses.length < filteredProcesses.length && (
                                 <div className="text-center">
                                     <Button
-                                        variant="outline"
+                                        type="outlined"
                                         onClick={() => setVisibleCount(prev => prev + 10)}
                                     >
                                         Load More ({filteredProcesses.length - visibleCount} remaining)

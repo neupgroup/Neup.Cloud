@@ -780,29 +780,29 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
           <div className="flex flex-col text-sm">
             {contextMenu.type === 'item' ? (
               <>
-                <button onClick={handleCopy} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
+                <Button onClick={handleCopy} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
                   <Copy className="mr-2 h-4 w-4" /> Copy
-                </button>
-                <button onClick={handleCut} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
+                </Button>
+                <Button onClick={handleCut} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
                   <Move className="mr-2 h-4 w-4" /> Move (Cut)
-                </button>
+                </Button>
                 {selectedFiles.size === 1 && (
-                  <button onClick={handleRename} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
+                  <Button onClick={handleRename} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
                     <Edit className="mr-2 h-4 w-4" /> Rename
-                  </button>
+                  </Button>
                 )}
-                <button onClick={handleDownload} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
+                <Button onClick={handleDownload} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
                   <Download className="mr-2 h-4 w-4" /> Download
-                </button>
-                <button onClick={handleDelete} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground text-red-600">
+                </Button>
+                <Button onClick={handleDelete} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground text-red-600">
                   <Trash className="mr-2 h-4 w-4" /> Delete
-                </button>
+                </Button>
                 {selectedFiles.size === 1 && (
                   <>
                     <div className="h-px bg-border my-1" />
-                    <button onClick={handleDetails} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
+                    <Button onClick={handleDetails} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
                       <Info className="mr-2 h-4 w-4" /> Details
-                    </button>
+                    </Button>
                   </>
                 )}
               </>
@@ -811,26 +811,26 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
             {clipboard && (
               <>
                 {contextMenu.type === 'item' && <div className="h-px bg-border my-1" />}
-                <button onClick={handlePaste} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
+                <Button onClick={handlePaste} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
                   <ClipboardPaste className="mr-2 h-4 w-4" /> Paste ({clipboard.op})
-                </button>
-                <button onClick={() => { setClipboard(null); setContextMenu(null); }} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground text-xs text-muted-foreground">
+                </Button>
+                <Button onClick={() => { setClipboard(null); setContextMenu(null); }} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground text-xs text-muted-foreground">
                   <X className="mr-2 h-3 w-3" /> Clear Clipboard
-                </button>
+                </Button>
               </>
             )}
 
             {(contextMenu.type === 'item' || clipboard) && <div className="h-px bg-border my-1" />}
 
-            <button onClick={() => { setUploadDialogOpen(true); setContextMenu(null); }} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
+            <Button onClick={() => { setUploadDialogOpen(true); setContextMenu(null); }} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
               <UploadCloud className="mr-2 h-4 w-4" /> Upload
-            </button>
-            <button onClick={() => { handleCreateNew('folder'); setContextMenu(null); }} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
+            </Button>
+            <Button onClick={() => { handleCreateNew('folder'); setContextMenu(null); }} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
               <FolderPlus className="mr-2 h-4 w-4" /> New Folder
-            </button>
-            <button onClick={() => { handleCreateNew('file'); setContextMenu(null); }} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
+            </Button>
+            <Button onClick={() => { handleCreateNew('file'); setContextMenu(null); }} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
               <FilePlus className="mr-2 h-4 w-4" /> New File
-            </button>
+            </Button>
 
             <div className="h-px bg-border my-1" />
 
@@ -838,21 +838,21 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
               <Terminal className="mr-2 h-4 w-4" /> Open Terminal Here
             </Link>
 
-            <button onClick={handleViewModeChange} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
+            <Button onClick={handleViewModeChange} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
               {viewMode === 'grid' ? (
                 <><List className="mr-2 h-4 w-4" /> View as List</>
               ) : (
                 <><LayoutGrid className="mr-2 h-4 w-4" /> View as Grid</>
               )}
-            </button>
+            </Button>
 
-            <button onClick={handleRootModeToggle} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
+            <Button onClick={handleRootModeToggle} className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 outline-none hover:bg-accent hover:text-accent-foreground">
               {rootMode ? (
                 <><ShieldOff className="mr-2 h-4 w-4" /> Turn Root Off</>
               ) : (
                 <><Shield className="mr-2 h-4 w-4" /> Turn Root On</>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -878,7 +878,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRenameState(null)}>Cancel</Button>
+            <Button type="outlined" onClick={() => setRenameState(null)}>Cancel</Button>
             <Button onClick={confirmRename}>Save</Button>
           </DialogFooter>
         </DialogContent>
@@ -893,7 +893,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteState(null)}>Cancel</Button>
+            <Button type="outlined" onClick={() => setDeleteState(null)}>Cancel</Button>
             <Button onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">Delete</Button>
           </DialogFooter>
         </DialogContent>
@@ -925,21 +925,21 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
 
       <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground p-1">
         <span className="font-semibold text-foreground">Path:</span>
-        <button
+        <Button
           onClick={() => router.push(pathname + '?' + createQueryString('path', '/'))}
           className="hover:underline hover:text-primary transition-colors"
         >
           root
-        </button>
+        </Button>
         {breadcrumbSegments.map((segment, index) => (
           <React.Fragment key={segment}>
             <span className="text-muted-foreground/40">&gt;</span>
-            <button
+            <Button
               onClick={() => handleBreadcrumbClick(index)}
               className="hover:underline hover:text-primary transition-colors"
             >
               {segment}
-            </button>
+            </Button>
           </React.Fragment>
         ))}
       </div>
@@ -1152,7 +1152,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
             {!uploadType ? (
               <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl justify-center items-center h-full">
                 <Button
-                  variant="outline"
+                  type="outlined"
                   className="h-40 w-40 flex flex-col gap-4 border-2 hover:border-primary/50 hover:bg-accent transition-all rounded-xl"
                   onClick={() => setUploadType('file')}
                 >
@@ -1161,7 +1161,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
                 </Button>
                 <div className="text-muted-foreground font-medium">- OR -</div>
                 <Button
-                  variant="outline"
+                  type="outlined"
                   className="h-40 w-40 flex flex-col gap-4 border-2 hover:border-primary/50 hover:bg-accent transition-all rounded-xl"
                   onClick={() => setUploadType('folder')}
                 >
@@ -1193,7 +1193,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
                   <h3 className="text-2xl font-semibold">Drop {uploadType === 'file' ? 'files' : 'folder'} here</h3>
                   <p className="text-muted-foreground text-base">or click to open explorer</p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setUploadType(null); }}>Back to selection</Button>
+                <Button type="plain" size="sm" onClick={(e) => { e.stopPropagation(); setUploadType(null); }}>Back to selection</Button>
               </div>
             )}
           </div>

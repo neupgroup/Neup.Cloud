@@ -26,7 +26,7 @@ export function CheckConnectionButton({ connectionId }: { connectionId: string }
   };
 
   return (
-    <Button onClick={handleCheck} variant="outline">
+    <Button onClick={handleCheck} type="outlined">
       Check for connection
     </Button>
   );

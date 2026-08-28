@@ -644,8 +644,8 @@ export function PipelineProviderConnectionPage({ provider }: { provider: Pipelin
                         </Button>
                         {connection ? (
                           <Button
-                            type="button"
-                            variant="outline"
+                            htmlType="button"
+                            type="outlined"
                             className="rounded-2xl border-slate-200 bg-white"
                             onClick={handleUseSavedDraft}
                           >
@@ -654,16 +654,16 @@ export function PipelineProviderConnectionPage({ provider }: { provider: Pipelin
                           </Button>
                         ) : null}
                         <Button
-                          type="button"
-                          variant="outline"
+                          htmlType="button"
+                          type="outlined"
                           className="rounded-2xl border-slate-200 bg-white"
                           onClick={handleLoadExample}
                         >
                           Load example
                         </Button>
                         <Button
-                          type="button"
-                          variant="outline"
+                          htmlType="button"
+                          type="outlined"
                           className="rounded-2xl border-rose-200 bg-white text-rose-700 hover:bg-rose-50 hover:text-rose-700"
                           onClick={handleClear}
                         >
@@ -749,7 +749,7 @@ export function PipelineProviderConnectionPage({ provider }: { provider: Pipelin
                         <Button asChild className="rounded-2xl">
                           <Link href="/pipeline/editor">Open pipeline editor</Link>
                         </Button>
-                        <Button asChild variant="outline" className="rounded-2xl border-slate-200 bg-white">
+                        <Button asChild type="outlined" className="rounded-2xl border-slate-200 bg-white">
                           <Link href="/pipeline">Back to pipeline</Link>
                         </Button>
                       </div>

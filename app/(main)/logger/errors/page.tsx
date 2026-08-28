@@ -50,7 +50,7 @@ export default async function LoggerErrorsPage() {
         )}
         description="Error events received from external applications."
       >
-        <Button variant="outline" asChild>
+        <Button type="outlined" asChild>
           <Link href="/logger">
             <List className="mr-2 h-4 w-4" />
             View All Logs

@@ -194,7 +194,7 @@ export default function WhoisDomainDetailsPage() {
             )}
 
             <div className="flex items-center gap-2 flex-wrap">
-              <Button variant={data?.whoisExists ? 'outline' : 'default'} asChild>
+              <Button type={data?.whoisExists ? 'outlined' : 'tinted'} asChild>
                 <a href={data?.nameComUrl || `https://www.name.com/domain/search/${encodeURIComponent(domain)}`} target="_blank" rel="noopener noreferrer">
                   Search via name.com
                   <ExternalLink className="ml-2 h-3 w-3" />

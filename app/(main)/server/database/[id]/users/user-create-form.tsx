@@ -146,8 +146,8 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
                             <Label>Permissions</Label>
                             <div className="flex gap-2">
                                 <Button
-                                    type="button"
-                                    variant="outline"
+                                    htmlType="button"
+                                    type="outlined"
                                     size="sm"
                                     onClick={() => handlePresetClick('read')}
                                     className="h-7 text-xs"
@@ -155,8 +155,8 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
                                     Read Only
                                 </Button>
                                 <Button
-                                    type="button"
-                                    variant="outline"
+                                    htmlType="button"
+                                    type="outlined"
                                     size="sm"
                                     onClick={() => handlePresetClick('readWrite')}
                                     className="h-7 text-xs"
@@ -164,8 +164,8 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
                                     Read/Write
                                 </Button>
                                 <Button
-                                    type="button"
-                                    variant="outline"
+                                    htmlType="button"
+                                    type="outlined"
                                     size="sm"
                                     onClick={() => handlePresetClick('developer')}
                                     className="h-7 text-xs"
@@ -173,8 +173,8 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
                                     Developer
                                 </Button>
                                 <Button
-                                    type="button"
-                                    variant="outline"
+                                    htmlType="button"
+                                    type="outlined"
                                     size="sm"
                                     onClick={() => handlePresetClick('full')}
                                     className="h-7 text-xs"
@@ -217,7 +217,7 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
                         </div>
                     </div>
 
-                    <Button type="submit" className="w-full h-11 shadow-lg shadow-primary/10" disabled={isLoading || selectedPermissions.length === 0}>
+                    <Button htmlType="submit" className="w-full h-11 shadow-lg shadow-primary/10" disabled={isLoading || selectedPermissions.length === 0}>
                         {isLoading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

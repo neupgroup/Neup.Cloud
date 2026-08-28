@@ -1669,7 +1669,7 @@ function PipelineEditorCanvas({
 
             <div className="flex flex-wrap items-center gap-2">
               {currentPipelineId ? (
-                <Button variant="outline" className="rounded-full border-slate-200 bg-white" asChild>
+                <Button type="outlined" className="rounded-full border-slate-200 bg-white" asChild>
                   <Link
                     href={`/pipeline/instance/${currentPipelineId}/logs`}
                     target="_blank"
@@ -1680,12 +1680,12 @@ function PipelineEditorCanvas({
                   </Link>
                 </Button>
               ) : (
-                <Button variant="outline" className="rounded-full border-slate-200 bg-white" disabled>
+                <Button type="outlined" className="rounded-full border-slate-200 bg-white" disabled>
                   <TerminalSquare className="mr-2 h-4 w-4" />
                   Logs
                 </Button>
               )}
-              <Button variant="outline" className="rounded-full border-slate-200 bg-white" onClick={handleSave}>
+              <Button type="outlined" className="rounded-full border-slate-200 bg-white" onClick={handleSave}>
                 <Save className="mr-2 h-4 w-4" />
                 {saveState === 'saving' ? 'Saving...' : saveState === 'saved' ? 'Saved' : 'Save'}
               </Button>
@@ -1698,8 +1698,8 @@ function PipelineEditorCanvas({
 
             {shouldShowEmptyCanvasCta ? (
               <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center p-6">
-                <button
-                  type="button"
+                <Button
+                  htmlType="button"
                   className="pointer-events-auto flex flex-col items-center gap-5 text-slate-500 transition-all hover:text-slate-800"
                   onClick={openTriggerLibraryFromCanvas}
                 >
@@ -1709,7 +1709,7 @@ function PipelineEditorCanvas({
                   <span className="text-3xl font-medium tracking-tight text-slate-600">
                     Add first step...
                   </span>
-                </button>
+                </Button>
               </div>
             ) : null}
 

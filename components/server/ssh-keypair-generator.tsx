@@ -149,7 +149,7 @@ export function SshKeypairGenerator({ onUsePrivateKey }: SshKeypairGeneratorProp
       </div>
 
       <div className="flex justify-end">
-        <Button type="button" variant="outline" onClick={handleGenerate} disabled={isGenerating || !canGenerate}>
+        <Button htmlType="button" type="outlined" onClick={handleGenerate} disabled={isGenerating || !canGenerate}>
           {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <WandSparkles className="mr-2 h-4 w-4" />}
           Generate
         </Button>
@@ -159,7 +159,7 @@ export function SshKeypairGenerator({ onUsePrivateKey }: SshKeypairGeneratorProp
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
             <Label htmlFor="generatedPublicKey" className="text-xs">Public key (copy this where needed)</Label>
-            <Button type="button" size="sm" variant="ghost" onClick={() => copyToClipboard(publicKey, 'Public key')}>
+            <Button htmlType="button" size="sm" type="plain" onClick={() => copyToClipboard(publicKey, 'Public key')}>
               <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy public key
             </Button>
           </div>
@@ -174,7 +174,7 @@ export function SshKeypairGenerator({ onUsePrivateKey }: SshKeypairGeneratorProp
 
       {privateKey ? (
         <div className="flex justify-end">
-          <Button type="button" size="sm" variant="ghost" onClick={() => copyToClipboard(privateKey, 'Private key')}>
+          <Button htmlType="button" size="sm" type="plain" onClick={() => copyToClipboard(privateKey, 'Private key')}>
             <KeyRound className="mr-1.5 h-3.5 w-3.5" /> Copy private key
           </Button>
         </div>

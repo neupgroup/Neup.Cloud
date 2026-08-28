@@ -109,7 +109,7 @@ export function UpdatesClient({ serverId, serverName, showTitle = true }: { serv
                 </div>
                 <h3 className="text-lg font-medium text-foreground">System is Up to Date</h3>
                 <p className="max-w-sm mt-2 mb-6">No package updates are currently available.</p>
-                <Button variant="secondary" onClick={() => window.location.reload()}>
+                <Button type="tinted" onClick={() => window.location.reload()}>
                     Reload Page
                 </Button>
             </Card>

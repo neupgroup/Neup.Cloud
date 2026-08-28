@@ -188,7 +188,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                                 </p>
                                 <div className="flex flex-wrap justify-center md:justify-start gap-4">
                                     <Button
-                                        type="button"
+                                        htmlType="button"
                                         onClick={handleInstall}
                                         disabled={isInstalling}
                                         className="bg-primary hover:bg-primary/90 text-primary-foreground h-11 px-6 shadow-xl shadow-primary/20"
@@ -205,7 +205,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                                             </>
                                         )}
                                     </Button>
-                                    <Button variant="outline" type="button" className="h-11 px-6 border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors">
+                                    <Button type="outlined" htmlType="button" className="h-11 px-6 border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors">
                                         View Documentation
                                     </Button>
                                 </div>
@@ -302,13 +302,13 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
             </div>
 
             <div className="flex gap-4 pt-4">
-                <Button type="submit" className="px-8 shadow-lg shadow-primary/20" disabled={isLoading || !serverId || !isEngineInstalled}>
+                <Button htmlType="submit" className="px-8 shadow-lg shadow-primary/20" disabled={isLoading || !serverId || !isEngineInstalled}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Create Database
                 </Button>
                 <Button
-                    type="button"
-                    variant="ghost"
+                    htmlType="button"
+                    type="plain"
                     onClick={() => router.push(withSelectedServerQuery('/server/database', serverId))}
                     disabled={isLoading}
                 >

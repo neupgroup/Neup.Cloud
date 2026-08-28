@@ -213,7 +213,7 @@ export default function ConnectDatabasePage() {
               </>
             )}
 
-            <Button type="submit" disabled={isSaving} className="w-full">
+            <Button htmlType="submit" disabled={isSaving} className="w-full">
               {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               {isSaving ? 'Connecting...' : 'Connect Database'}
             </Button>

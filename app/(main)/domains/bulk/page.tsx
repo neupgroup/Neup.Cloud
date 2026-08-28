@@ -182,7 +182,7 @@ export default function DomainsBulkPage() {
                       ) : (
                         <Badge variant="secondary">WHOIS Not Found</Badge>
                       )}
-                      <Button variant="ghost" size="sm">
+                      <Button type="plain" size="sm">
                         Details
                         <ChevronDown
                           className={`ml-2 h-4 w-4 transition-transform duration-200 ${openCards[result.domain] ? 'rotate-180' : ''}`}
@@ -218,7 +218,7 @@ export default function DomainsBulkPage() {
 
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Button variant="outline" asChild>
+                        <Button type="outlined" asChild>
                           <Link
                             href={`/domain/whois/${encodeURIComponent(result.domain)}`}
                             onClick={(event) => event.stopPropagation()}

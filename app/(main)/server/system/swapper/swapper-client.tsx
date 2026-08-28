@@ -139,7 +139,7 @@ function DynamicSwapCard({
                                 placeholder="2048"
                                 className="w-32"
                             />
-                            <Button type="submit" size="sm" disabled={isSaving}>
+                            <Button htmlType="submit" size="sm" disabled={isSaving}>
                                 {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
                             </Button>
                         </div>
@@ -271,7 +271,7 @@ function PersistentSwapCard({
                                 className="w-32"
                                 disabled={isBusy}
                             />
-                            <Button type="submit" size="sm" disabled={isBusy}>
+                            <Button htmlType="submit" size="sm" disabled={isBusy}>
                                 {isApplying
                                     ? <Loader2 className="h-4 w-4 animate-spin" />
                                     : isActive ? 'Update' : 'Apply'
@@ -380,7 +380,7 @@ function SwapFilesCard({
             <div className="flex items-center justify-between px-1">
                 <h3 className="text-xl font-semibold">Swap Files</h3>
                 <Button
-                    variant="ghost"
+                    type="plain"
                     size="sm"
                     disabled={isRefreshing}
                     onClick={handleRefresh}
@@ -460,7 +460,7 @@ function SwapFilesCard({
 	                                    )}
 	                                </div>
 
-	                                <button
+	                                <Button
 	                                    disabled={isDeleting}
 	                                    onClick={() => handleDelete(file.path)}
 	                                    className="shrink-0 h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
@@ -470,7 +470,7 @@ function SwapFilesCard({
 	                                        ? <Loader2 className="h-4 w-4 animate-spin" />
 	                                        : <Trash2 className="h-4 w-4" />
 	                                    }
-	                                </button>
+	                                </Button>
 	                            </div>
 	                        );
 	                    })

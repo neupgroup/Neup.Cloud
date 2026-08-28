@@ -239,13 +239,13 @@ export function OpenFlowClient({ tokens, models, accountId }: OpenFlowClientProp
             </div>
 
             {!showFallback ? (
-              <Button type="button" variant="outline" className="w-full" onClick={() => setShowFallback(true)}>
+              <Button htmlType="button" type="outlined" className="w-full" onClick={() => setShowFallback(true)}>
                 Add fallback model
               </Button>
             ) : (
               <Collapsible open={showFallback} onOpenChange={setShowFallback}>
                 <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
+                  <Button type="outlined" className="w-full justify-between">
                     <span>Fallback Configuration</span>
                     <ChevronDown className={`h-4 w-4 transition-transform ${showFallback ? 'rotate-180' : ''}`} />
                   </Button>
@@ -337,7 +337,7 @@ export function OpenFlowClient({ tokens, models, accountId }: OpenFlowClientProp
               />
             </div>
 
-            <Button type="submit" disabled={!apiKey || !prompt || loading} className="w-full">
+            <Button htmlType="submit" disabled={!apiKey || !prompt || loading} className="w-full">
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

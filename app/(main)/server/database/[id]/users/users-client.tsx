@@ -53,7 +53,7 @@ export function UsersClientPage({ serverId, engine, dbName, initialUsers }: User
         <div className="grid gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
-                    <Button variant="ghost" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
+                    <Button type="plain" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
                         <Link href={withSelectedServer(`/server/database/${engine}-${dbName}`)}>
                             <ChevronLeft className="h-4 w-4 mr-1" /> Back to Database
                         </Link>
@@ -99,13 +99,13 @@ export function UsersClientPage({ serverId, engine, dbName, initialUsers }: User
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" asChild>
+                                                <Button type="plain" size="icon" className="text-muted-foreground hover:text-primary" asChild>
                                                     <Link href={withSelectedServer(`/server/database/${engine}-${dbName}/users/${user.username}-${user.host || 'local'}`)}>
                                                         <Key className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
                                                 <Button
-                                                    variant="ghost"
+                                                    type="plain"
                                                     size="icon"
                                                     className="text-muted-foreground hover:text-destructive"
                                                     onClick={() => handleDelete(user.username, user.host || '%')}

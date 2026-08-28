@@ -257,7 +257,7 @@ export default function UserDetailsPage({ params }: { params: { id: string } }) 
                         <CardContent>
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button variant="destructive" className="w-full" disabled={user.type === 'root' || isDeleting}>
+                                    <Button type="solid" className="w-full" disabled={user.type === 'root' || isDeleting}>
                                         {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
                                         Delete User Account
                                     </Button>

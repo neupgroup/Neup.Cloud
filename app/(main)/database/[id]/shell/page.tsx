@@ -203,7 +203,7 @@ export default function DatabaseShellPage({ params }: Props) {
               ? QUICK_QUERIES[connectionType].map((item) => (
                   <Button
                     key={item.label}
-                    variant="outline"
+                    type="outlined"
                     size="sm"
                     onClick={() => setQuery(item.query)}
                     disabled={isExecuting || isLoadingMeta}
@@ -220,7 +220,7 @@ export default function DatabaseShellPage({ params }: Props) {
               {isExecuting ? 'Executing...' : 'Run Query'}
             </Button>
             <Button
-              variant="outline"
+              type="outlined"
               onClick={() => {
                 setQuery('');
                 setResult(null);

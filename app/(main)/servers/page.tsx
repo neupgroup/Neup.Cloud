@@ -84,10 +84,10 @@ export default function ServersPage() {
         <CardContent className="space-y-4 p-6">
           <h2 className="text-xl font-semibold">Quick Actions</h2>
           <div className="flex flex-col gap-4">
-            <Button variant="outline" onClick={() => router.push('/servers/add')}>
+            <Button type="outlined" onClick={() => router.push('/servers/add')}>
               Add New Server
             </Button>
-            <Button variant="outline" onClick={() => router.push('/servers/purchase')}>
+            <Button type="outlined" onClick={() => router.push('/servers/purchase')}>
               Purchase Managed Server
             </Button>
           </div>
@@ -106,7 +106,7 @@ export default function ServersPage() {
               {servers.map((server) => (
                 <Button
                   key={server.id}
-                  variant="ghost"
+                  type="plain"
                   className="flex items-center justify-between"
                   disabled={Boolean(switchingId)}
                   onClick={() => handleSwitch(server.id)}

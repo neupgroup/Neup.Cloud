@@ -72,7 +72,7 @@ export default function ServerDetailsPage({ params }: { params: Promise<{ id: st
   if (isLoading) {
     return (
       <div className="mx-auto max-w-4xl space-y-6 py-10">
-        <Button variant="ghost" className="w-fit px-0 text-muted-foreground hover:text-foreground" onClick={() => router.push("/server/list")}>
+        <Button type="plain" className="w-fit px-0 text-muted-foreground hover:text-foreground" onClick={() => router.push("/server/list")}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to servers
         </Button>
         <Card>
@@ -93,7 +93,7 @@ export default function ServerDetailsPage({ params }: { params: Promise<{ id: st
   if (!server) {
     return (
       <div className="mx-auto max-w-4xl space-y-6 py-10">
-        <Button variant="ghost" className="w-fit px-0 text-muted-foreground hover:text-foreground" onClick={() => router.push("/server/list")}>
+        <Button type="plain" className="w-fit px-0 text-muted-foreground hover:text-foreground" onClick={() => router.push("/server/list")}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to servers
         </Button>
         <Card>
@@ -251,7 +251,7 @@ function ServerDetailsForm({ server }: { server: Server }) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 py-10">
-      <Button variant="ghost" className="w-fit px-0 text-muted-foreground hover:text-foreground" onClick={() => router.push("/server/list")}>
+      <Button type="plain" className="w-fit px-0 text-muted-foreground hover:text-foreground" onClick={() => router.push("/server/list")}>
         <ArrowLeft className="mr-2 h-4 w-4" /> Back to servers
       </Button>
 
@@ -301,16 +301,16 @@ function ServerDetailsForm({ server }: { server: Server }) {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="outline" onClick={() => updateExpiration(addExpirationMonths(currentExpiration, 1))} disabled={isExpiring}>Add 1 month</Button>
-            <Button type="button" variant="outline" onClick={() => updateExpiration(addExpirationMonths(currentExpiration, 3))} disabled={isExpiring}>Add 3 months</Button>
-            <Button type="button" variant="outline" onClick={() => updateExpiration(addExpirationMonths(currentExpiration, 6))} disabled={isExpiring}>Add 6 months</Button>
-            <Button type="button" variant="outline" onClick={() => updateExpiration(addExpirationMonths(currentExpiration, 12))} disabled={isExpiring}>Add 1 year</Button>
+            <Button htmlType="button" type="outlined" onClick={() => updateExpiration(addExpirationMonths(currentExpiration, 1))} disabled={isExpiring}>Add 1 month</Button>
+            <Button htmlType="button" type="outlined" onClick={() => updateExpiration(addExpirationMonths(currentExpiration, 3))} disabled={isExpiring}>Add 3 months</Button>
+            <Button htmlType="button" type="outlined" onClick={() => updateExpiration(addExpirationMonths(currentExpiration, 6))} disabled={isExpiring}>Add 6 months</Button>
+            <Button htmlType="button" type="outlined" onClick={() => updateExpiration(addExpirationMonths(currentExpiration, 12))} disabled={isExpiring}>Add 1 year</Button>
           </div>
           <p className="text-sm text-muted-foreground">Current expiration: <span className="font-medium text-foreground">{formatDate(currentExpiration)}</span></p>
         </CardContent>
         <CardFooter className="justify-end border-t px-6 py-4">
           <ConfirmDialog
-            trigger={<Button type="button" variant="destructive" disabled={isExpiring}><ShieldAlert className="mr-2 h-4 w-4" />Expire</Button>}
+            trigger={<Button htmlType="button" type="solid" disabled={isExpiring}><ShieldAlert className="mr-2 h-4 w-4" />Expire</Button>}
             title="Expire this server?"
             description="This will set the server expiration to now."
             confirmLabel={isExpiring ? "Updating..." : "Expire"}
@@ -337,7 +337,7 @@ function ServerDetailsForm({ server }: { server: Server }) {
           </CardContent>
           <CardFooter className="flex flex-col gap-2 border-t px-6 py-4 sm:flex-row sm:justify-between">
             <ConfirmDialog
-              trigger={<Button type="button" variant="destructive" className="w-full sm:w-auto"><ShieldAlert className="mr-2 h-4 w-4" />Expire now</Button>}
+              trigger={<Button htmlType="button" type="solid" className="w-full sm:w-auto"><ShieldAlert className="mr-2 h-4 w-4" />Expire now</Button>}
               title="Expire this server?"
               description="This will mark the server as expired in its metadata. You can move the expiration date later by editing the server."
               confirmLabel={isExpiring ? "Expiring..." : "Expire now"}
@@ -345,8 +345,8 @@ function ServerDetailsForm({ server }: { server: Server }) {
               loading={isExpiring}
             />
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Button type="button" variant="ghost" onClick={() => router.push("/server/list")}>Cancel</Button>
-              <Button type="submit" disabled={isSaving}>{isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}Save changes</Button>
+              <Button htmlType="button" type="plain" onClick={() => router.push("/server/list")}>Cancel</Button>
+              <Button htmlType="submit" disabled={isSaving}>{isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}Save changes</Button>
             </div>
           </CardFooter>
         </form>

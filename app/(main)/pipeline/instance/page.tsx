@@ -118,7 +118,7 @@ export default async function PipelineInstancePage({
                     </div>
 
                     <div className="flex items-center gap-2 border-t border-border/60 pt-4 lg:w-auto lg:flex-none lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-                      <Button variant="outline" size="sm" asChild>
+                      <Button type="outlined" size="sm" asChild>
                         <Link
                           href={`/pipeline/instance/${encodeURIComponent(pipeline.id)}/logs`}
                           target="_blank"
@@ -142,7 +142,7 @@ export default async function PipelineInstancePage({
 
           {totalPages > 1 ? (
             <div className="flex items-center justify-between pt-2">
-              <Button variant="outline" asChild disabled={currentPage <= 1}>
+              <Button type="outlined" asChild disabled={currentPage <= 1}>
                 <Link
                   href={currentPage <= 1 ? '/pipeline/instance' : `/pipeline/instance?page=${currentPage - 1}`}
                   aria-disabled={currentPage <= 1}
@@ -155,7 +155,7 @@ export default async function PipelineInstancePage({
                 Page {currentPage} of {totalPages}
               </div>
 
-              <Button variant="outline" asChild disabled={currentPage >= totalPages}>
+              <Button type="outlined" asChild disabled={currentPage >= totalPages}>
                 <Link
                   href={currentPage >= totalPages ? `/pipeline/instance?page=${totalPages}` : `/pipeline/instance?page=${currentPage + 1}`}
                   aria-disabled={currentPage >= totalPages}

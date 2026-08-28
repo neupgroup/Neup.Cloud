@@ -165,7 +165,7 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
             <div className="flex flex-col items-center justify-center p-12 text-center">
                 <h2 className="text-xl font-semibold mb-2">Command Not Found</h2>
                 <p className="text-muted-foreground mb-4">The command you are looking for does not exist or has been deleted.</p>
-                <Button asChild variant="outline">
+                <Button asChild type="outlined">
                     <Link href={withSelectedServerQuery('/server/commands', selectedServerFromUrl)}>Back to Commands</Link>
                 </Button>
             </div>
@@ -209,7 +209,7 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
                     {isRunning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
                     Run Command
                 </Button>
-                <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleDelete} disabled={isDeleting}>
+                <Button type="plain" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleDelete} disabled={isDeleting}>
                     {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
                     Delete
                 </Button>
@@ -260,7 +260,7 @@ export default function CommandDetailPage({ params }: { params: { id: string } }
                         </div>
                     </div>
                     <DialogFooter>
-                        <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+                        <DialogClose asChild><Button htmlType="button" type="tinted">Cancel</Button></DialogClose>
                         <Button onClick={handleRunFromDialog} disabled={!effectiveSelectedServer || isRunning}>
                             {isRunning ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Executing...</> : 'Run on Server'}
                         </Button>

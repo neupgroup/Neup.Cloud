@@ -116,7 +116,7 @@ export default async function DatabaseTableDataPage({ params, searchParams }: Pr
         title={tableName}
         description={`${connection.connectionType === 'firestore' ? 'Viewing documents from' : 'Viewing data from'} ${connection.title}`}
       >
-        <Button variant="outline" asChild>
+        <Button type="outlined" asChild>
           <Link href={`/database/${id}/table/${encodeURIComponent(tableName)}/properties`}>
             Properties
           </Link>
@@ -126,7 +126,7 @@ export default async function DatabaseTableDataPage({ params, searchParams }: Pr
       <div className="flex items-center gap-2">
         <span className="text-sm text-muted-foreground">Rows per page:</span>
         {[10, 25, 50].map((option) => (
-          <Button key={option} variant={option === perPage ? 'default' : 'outline'} size="sm" asChild>
+          <Button key={option} type={option === perPage ? 'tinted' : 'outlined'} size="sm" asChild>
             <Link href={`/database/${id}/table/${encodeURIComponent(tableName)}?page=1&perPage=${option}`}>{option}</Link>
           </Button>
         ))}
@@ -147,7 +147,7 @@ export default async function DatabaseTableDataPage({ params, searchParams }: Pr
       </Card>
 
       <div className="flex items-center justify-between">
-        <Button variant="outline" size="sm" disabled={currentPage <= 1} asChild={currentPage > 1}>
+        <Button type="outlined" size="sm" disabled={currentPage <= 1} asChild={currentPage > 1}>
           {currentPage > 1 ? (
             <Link href={prevHref}>
               <ChevronLeft className="h-4 w-4 mr-1" /> Previous
@@ -163,7 +163,7 @@ export default async function DatabaseTableDataPage({ params, searchParams }: Pr
           Page {currentPage}{typeof totalRows === 'number' ? ` of ${Math.max(1, Math.ceil(totalRows / perPage))}` : ''}
         </div>
 
-        <Button variant="outline" size="sm" disabled={!hasNextPage} asChild={hasNextPage}>
+        <Button type="outlined" size="sm" disabled={!hasNextPage} asChild={hasNextPage}>
           {hasNextPage ? (
             <Link href={nextHref}>
               Next <ChevronRight className="h-4 w-4 ml-1" />

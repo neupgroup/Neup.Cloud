@@ -19,7 +19,7 @@ export default async function ViewKeyPage({ params }: { params: Promise<{ id: st
         return (
             <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
                 <p className="text-muted-foreground">No server selected.</p>
-                <Button asChild variant="outline">
+                <Button asChild type="outlined">
                     <Link href="/servers">Select a Server</Link>
                 </Button>
             </div>
@@ -33,7 +33,7 @@ export default async function ViewKeyPage({ params }: { params: Promise<{ id: st
             <div className="p-8 text-center text-destructive space-y-2">
                 <h3 className="font-semibold">Error Loading Keys</h3>
                 <p className="text-sm">{error || "Unknown error occurred."}</p>
-                <Button asChild variant="outline" className="mt-4">
+                <Button asChild type="outlined" className="mt-4">
                     <Link href="/server/firewall/keys">Back to Keys</Link>
                 </Button>
             </div>
@@ -51,7 +51,7 @@ export default async function ViewKeyPage({ params }: { params: Promise<{ id: st
             {/* Responsive Header */}
             <div className="flex flex-col gap-4">
                 <Button
-                    variant="ghost"
+                    type="plain"
                     size="sm"
                     className="w-fit -ml-2 text-muted-foreground hover:text-foreground"
                     asChild
@@ -68,7 +68,7 @@ export default async function ViewKeyPage({ params }: { params: Promise<{ id: st
                         </h1>
                         <p className="text-muted-foreground">View details of this authorized key.</p>
                     </div>
-                    <Button variant="destructive" size="sm" className="w-full sm:w-auto shrink-0">
+                    <Button type="solid" size="sm" className="w-full sm:w-auto shrink-0">
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete Key
                     </Button>

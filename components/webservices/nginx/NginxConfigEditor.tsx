@@ -1540,7 +1540,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                 <Plus className="h-10 w-10 text-muted-foreground mb-4 opacity-50" />
                                 <h4 className="text-base font-semibold mb-2">No Blocks Added</h4>
                                 <p className="text-sm text-muted-foreground mb-6">Start by adding your first {domainMode === 'domain' ? 'subdomain' : 'server'} block.</p>
-                                <Button onClick={() => addDomainBlock()} variant="secondary">
+                                <Button onClick={() => addDomainBlock()} type="tinted">
                                     <Plus className="h-4 w-4 mr-2" /> Create First Block
                                 </Button>
                             </div>
@@ -1584,7 +1584,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
 
                                     <div className="flex items-center gap-2">
                                         <Button
-                                            variant="ghost"
+                                            type="plain"
                                             size="sm"
                                             className="h-8 w-8 rounded-full hover:bg-red-500/10 hover:text-red-500"
                                             onClick={() => removeDomainBlock(block.id)}
@@ -1594,7 +1594,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                             <Trash2 className="h-3.5 w-3.5" />
                                         </Button>
                                         <Button
-                                            variant="outline"
+                                            type="outlined"
                                             size="sm"
                                             className="h-8 rounded-full bg-background/50 hover:bg-background"
                                             onClick={() => setExpandedBlockId(expandedBlockId === block.id ? null : block.id)}
@@ -1947,7 +1947,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                                                                         className="h-9 bg-background flex-1"
                                                                                     />
                                                                                     <Button
-                                                                                        variant="ghost"
+                                                                                        type="plain"
                                                                                         size="sm"
                                                                                         className="h-9 w-9 p-0 text-destructive hover:bg-destructive/10"
                                                                                         onClick={() => removeCustomHeader(block.id, rule.id, header.id)}
@@ -1960,7 +1960,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                                                     )}
 
                                                                     <Button
-                                                                        variant="outline"
+                                                                        type="outlined"
                                                                         size="sm"
                                                                         onClick={() => addCustomHeader(block.id, rule.id)}
                                                                     >
@@ -2000,7 +2000,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                                     {rIdx !== 0 && (
                                                         <div className="mt-6 flex justify-end">
                                                             <Button
-                                                                variant="ghost"
+                                                                type="plain"
                                                                 size="sm"
                                                                 className="text-destructive hover:bg-destructive/10 h-8"
                                                                 onClick={() => removePathRule(block.id, rule.id)}
@@ -2136,7 +2136,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
 
                                 {configName && (
                                     <Button
-                                        variant="destructive"
+                                        type="solid"
                                         onClick={handleDelete}
                                         disabled={deleting || deploying}
                                         className="min-w-[240px]"

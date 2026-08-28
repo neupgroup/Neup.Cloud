@@ -15,7 +15,7 @@ export function RepoControls({ applicationId }: RepoControlsProps) {
   return (
     <div className="flex flex-wrap gap-2 pt-2">
       <Button
-        variant="outline"
+        type="outlined"
         size="sm"
         onClick={() => handleAction('clone')}
         disabled={!!loading}
@@ -24,7 +24,7 @@ export function RepoControls({ applicationId }: RepoControlsProps) {
         {loading === 'clone' ? 'Cloning...' : 'Clone Repository'}
       </Button>
       <Button
-        variant="outline"
+        type="outlined"
         size="sm"
         onClick={() => handleAction('reset-main')}
         disabled={!!loading}
@@ -33,7 +33,7 @@ export function RepoControls({ applicationId }: RepoControlsProps) {
         {loading === 'reset-main' ? 'Resetting...' : 'Reset to Main'}
       </Button>
       <Button
-        variant="outline"
+        type="outlined"
         size="sm"
         onClick={() => handleAction('pull')}
         disabled={!!loading}
@@ -42,7 +42,7 @@ export function RepoControls({ applicationId }: RepoControlsProps) {
         {loading === 'pull' ? 'Pulling...' : 'Pull'}
       </Button>
       <Button
-        variant="destructive"
+        type="solid"
         size="sm"
         onClick={() => handleAction('pull-force')}
         disabled={!!loading}

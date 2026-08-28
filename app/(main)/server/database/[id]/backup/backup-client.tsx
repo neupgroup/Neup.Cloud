@@ -104,7 +104,7 @@ export function BackupClientPage({ serverId, engine, dbName, databaseSize }: Bac
         <div className="grid gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
-                    <Button variant="ghost" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
+                    <Button type="plain" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
                         <Link href={withSelectedServer(`/server/database/${engine}-${dbName}`)}>
                             <ChevronLeft className="h-4 w-4 mr-1" /> Back to Database
                         </Link>
@@ -189,7 +189,7 @@ export function BackupClientPage({ serverId, engine, dbName, databaseSize }: Bac
                             </li>
                         </ul>
                         <Button
-                            variant="secondary"
+                            type="tinted"
                             className="w-full h-11"
                             onClick={() => handleBackup('schema')}
                             disabled={isGenerating !== null}

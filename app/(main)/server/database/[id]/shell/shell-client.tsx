@@ -164,7 +164,7 @@ export function ShellClient({ id, dbName, engine, serverId }: ShellClientProps) 
                         </div>
                         <div className="flex items-center gap-2">
                             <Button
-                                variant="outline"
+                                type="outlined"
                                 size="sm"
                                 onClick={handleClear}
                                 disabled={isExecuting}
@@ -210,7 +210,7 @@ export function ShellClient({ id, dbName, engine, serverId }: ShellClientProps) 
                             {quickQueries.map((q, idx) => (
                                 <Button
                                     key={idx}
-                                    variant="outline"
+                                    type="outlined"
                                     size="sm"
                                     onClick={() => setQuery(q.query)}
                                     disabled={isExecuting}

@@ -49,7 +49,7 @@ export function DeleteButton({
             trigger={
                 <Button
                     size={iconOnly ? "icon" : undefined}
-                    variant={iconOnly ? "ghost" : "destructive"}
+                    type={iconOnly ? "plain" : "solid"}
                     className={className}
                 >
                     <Trash className="h-4 w-4" />

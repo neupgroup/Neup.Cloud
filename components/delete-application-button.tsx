@@ -40,7 +40,7 @@ export function DeleteApplicationButton({ applicationId }: DeleteApplicationButt
     return (
         <ConfirmDialog
             trigger={
-                <Button variant="destructive" className="gap-2">
+                <Button type="solid" className="gap-2">
                     <Trash className="h-4 w-4" />
                     Delete Application
                 </Button>

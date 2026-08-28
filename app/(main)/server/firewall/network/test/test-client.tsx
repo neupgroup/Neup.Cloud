@@ -178,7 +178,7 @@ export default function NetworkTestClient({ serverId }: { serverId: string }) {
                                 min={1}
                                 max={65535}
                             />
-                            <Button type="submit" className="shrink-0 h-10 px-6">
+                            <Button htmlType="submit" className="shrink-0 h-10 px-6">
                                 Run Test
                             </Button>
                         </form>

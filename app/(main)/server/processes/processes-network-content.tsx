@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Activity, ArrowLeftRight, Cpu, Globe, Hash, Network, Search, ServerCog, User, XCircle } from 'lucide-react';
 import { Card } from '#/components/ui/card';
+import { Button } from '#/components/ui/button';
 import { Input } from '#/components/ui/input';
 import { Skeleton } from '#/components/ui/skeleton';
 import { Badge } from '#/components/ui/badge';
@@ -163,7 +164,7 @@ export default function ProcessesNetworkContent({ serverId }: { serverId: string
                   <span className={cn('flex items-center gap-1.5', getNetworkStateClass(connection.state))}><Activity className="h-3.5 w-3.5" />{connection.state}</span>
                   <span className="flex items-center gap-1.5 font-mono"><ServerCog className="h-3.5 w-3.5" />{connection.localAddress}:{connection.port}</span>
                   {connection.peerAddress && connection.peerAddress !== '*:*' && <span className="flex items-center gap-1.5 font-mono"><Globe className="h-3.5 w-3.5" />{connection.peerAddress}</span>}
-                  {pidUnavailable && <button type="button" onClick={() => handleFindPid(connection)} disabled={findingPid === key} className="flex items-center gap-1.5 text-blue-500 hover:text-blue-600 disabled:opacity-50"><Cpu className="h-3.5 w-3.5" />{findingPid === key ? 'Finding PID...' : 'Find PID'}</button>}
+                  {pidUnavailable && <Button htmlType="button" onClick={() => handleFindPid(connection)} disabled={findingPid === key} className="flex items-center gap-1.5 text-blue-500 hover:text-blue-600 disabled:opacity-50"><Cpu className="h-3.5 w-3.5" />{findingPid === key ? 'Finding PID...' : 'Find PID'}</Button>}
                 </div>
               </div>
             );
@@ -176,7 +177,7 @@ export default function ProcessesNetworkContent({ serverId }: { serverId: string
                 <span className="flex items-center gap-1.5"><User className="h-3.5 w-3.5" />{process.user}</span>
                 <span className="flex items-center gap-1.5"><Cpu className="h-3.5 w-3.5" />{process.cpu} CPU</span>
                 <span>{process.memory}% RAM</span>
-                <button onClick={() => handleKillProcess(process.pid)} disabled={killingPid === process.pid} className="flex items-center gap-1.5 text-red-500 disabled:opacity-50"><XCircle className="h-3.5 w-3.5" />Kill</button>
+                <Button onClick={() => handleKillProcess(process.pid)} disabled={killingPid === process.pid} className="flex items-center gap-1.5 text-red-500 disabled:opacity-50"><XCircle className="h-3.5 w-3.5" />Kill</Button>
               </div>
             </div>
           ))}

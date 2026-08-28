@@ -94,7 +94,7 @@ function DomainListResult({ results, isLoading, query }: { results: DomainStatus
                                         Add to Cart
                                     </Button>
                                 ) : (
-                                    <Button size="sm" variant="outline" className="ml-2 h-8" asChild>
+                                    <Button size="sm" type="outlined" className="ml-2 h-8" asChild>
                                         <a href={`https://www.whois.com/whois/${domain.name}`} target="_blank" rel="noopener noreferrer">
                                             WHOIS
                                             <ExternalLink className="ml-2 h-3 w-3" />
@@ -176,7 +176,7 @@ function FindDomainContent() {
                         className="pl-9 pr-24 h-10 w-full"
                     />
                     <div className="absolute right-1">
-                        <Button type="submit" disabled={isSearching} size="sm" className="h-8 px-3">
+                        <Button htmlType="submit" disabled={isSearching} size="sm" className="h-8 px-3">
                             {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
                         </Button>
                     </div>

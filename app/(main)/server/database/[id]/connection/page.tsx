@@ -111,7 +111,7 @@ export default async function DatabaseConnectionPage({ params, searchParams }: P
                                 <label className="text-sm font-medium text-muted-foreground">Host</label>
                                 <div className="flex items-center gap-2">
                                     <code className="flex-1 p-3 bg-muted rounded-lg font-mono text-sm">{host}</code>
-                                    <Button variant="outline" size="icon" className="shrink-0">
+                                    <Button type="outlined" size="icon" className="shrink-0">
                                         <Copy className="h-4 w-4" />
                                     </Button>
                                 </div>
@@ -120,7 +120,7 @@ export default async function DatabaseConnectionPage({ params, searchParams }: P
                                 <label className="text-sm font-medium text-muted-foreground">Port</label>
                                 <div className="flex items-center gap-2">
                                     <code className="flex-1 p-3 bg-muted rounded-lg font-mono text-sm">{port}</code>
-                                    <Button variant="outline" size="icon" className="shrink-0">
+                                    <Button type="outlined" size="icon" className="shrink-0">
                                         <Copy className="h-4 w-4" />
                                     </Button>
                                 </div>
@@ -131,7 +131,7 @@ export default async function DatabaseConnectionPage({ params, searchParams }: P
                                 <label className="text-sm font-medium text-muted-foreground">Database Name</label>
                                 <div className="flex items-center gap-2">
                                     <code className="flex-1 p-3 bg-muted rounded-lg font-mono text-sm">{details.name}</code>
-                                    <Button variant="outline" size="icon" className="shrink-0">
+                                    <Button type="outlined" size="icon" className="shrink-0">
                                         <Copy className="h-4 w-4" />
                                     </Button>
                                 </div>
@@ -140,7 +140,7 @@ export default async function DatabaseConnectionPage({ params, searchParams }: P
                                 <label className="text-sm font-medium text-muted-foreground">Username</label>
                                 <div className="flex items-center gap-2">
                                     <code className="flex-1 p-3 bg-muted rounded-lg font-mono text-sm">owner</code>
-                                    <Button variant="outline" size="icon" className="shrink-0">
+                                    <Button type="outlined" size="icon" className="shrink-0">
                                         <Copy className="h-4 w-4" />
                                     </Button>
                                 </div>
@@ -166,7 +166,7 @@ export default async function DatabaseConnectionPage({ params, searchParams }: P
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <label className="text-sm font-medium">Command Line</label>
-                            <Button variant="ghost" size="sm" className="gap-2">
+                            <Button type="plain" size="sm" className="gap-2">
                                 <Copy className="h-3 w-3" />
                                 Copy
                             </Button>
@@ -184,7 +184,7 @@ export default async function DatabaseConnectionPage({ params, searchParams }: P
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <label className="text-sm font-medium">Node.js ({isMariaDB ? 'mysql2' : 'pg'})</label>
-                            <Button variant="ghost" size="sm" className="gap-2">
+                            <Button type="plain" size="sm" className="gap-2">
                                 <Copy className="h-3 w-3" />
                                 Copy
                             </Button>
@@ -222,7 +222,7 @@ await client.connect();`}</pre>
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <label className="text-sm font-medium">Python ({isMariaDB ? 'mysql-connector' : 'psycopg2'})</label>
-                            <Button variant="ghost" size="sm" className="gap-2">
+                            <Button type="plain" size="sm" className="gap-2">
                                 <Copy className="h-3 w-3" />
                                 Copy
                             </Button>
@@ -258,7 +258,7 @@ connection = psycopg2.connect(
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <label className="text-sm font-medium">PHP (PDO)</label>
-                            <Button variant="ghost" size="sm" className="gap-2">
+                            <Button type="plain" size="sm" className="gap-2">
                                 <Copy className="h-3 w-3" />
                                 Copy
                             </Button>

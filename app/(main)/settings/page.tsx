@@ -107,7 +107,7 @@ export default function SettingsPage() {
                                     Add an extra layer of security to your account.
                                 </p>
                             </div>
-                            <Button variant="outline" size="sm">Enable</Button>
+                            <Button type="outlined" size="sm">Enable</Button>
                         </div>
 
                     </CardContent>

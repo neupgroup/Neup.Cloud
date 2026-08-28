@@ -96,7 +96,7 @@ function RulesList({ rules, firewallActive, onDelete }: { rules: FirewallRule[],
                             </div>
                         </div>
                         <Button
-                            variant="ghost"
+                            type="plain"
                             size="icon"
                             className="text-muted-foreground hover:text-destructive"
                             onClick={() => onDelete(rule.id)}
@@ -203,7 +203,7 @@ function AddRuleDialog({ onAdd, isOpen, setIsOpen }: { onAdd: (port: string, pro
                         </Select>
                     </div>
                     <DialogFooter>
-                        <Button type="submit" disabled={isSubmitting}>
+                        <Button htmlType="submit" disabled={isSubmitting}>
                             {isSubmitting ? 'Adding...' : 'Add Rule'}
                         </Button>
                     </DialogFooter>

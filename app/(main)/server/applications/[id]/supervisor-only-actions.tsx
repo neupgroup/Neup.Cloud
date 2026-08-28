@@ -76,7 +76,7 @@ export function SupervisorOnlyActions({ processName }: SupervisorOnlyActionsProp
         <div className="flex items-center gap-3">
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="gap-2" disabled={isStopping || isDeleting}>
+                    <Button type="outlined" className="gap-2" disabled={isStopping || isDeleting}>
                         <Square className="h-4 w-4" />
                         {isStopping ? 'Stopping...' : 'Stop'}
                     </Button>
@@ -99,7 +99,7 @@ export function SupervisorOnlyActions({ processName }: SupervisorOnlyActionsProp
 
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button variant="destructive" className="gap-2" disabled={isStopping || isDeleting}>
+                    <Button type="solid" className="gap-2" disabled={isStopping || isDeleting}>
                         <Trash2 className="h-4 w-4" />
                         {isDeleting ? 'Deleting...' : 'Delete from Supervisor'}
                     </Button>

@@ -51,7 +51,7 @@ export default async function IntelligenceAccessPage() {
           <Button asChild>
             <Link href="/intelligence/access/add">Add Access</Link>
           </Button>
-          <Button variant="outline" asChild>
+          <Button type="outlined" asChild>
             <Link href="/intelligence/tokens">View Tokens</Link>
           </Button>
         </CardContent>
@@ -150,13 +150,13 @@ export default async function IntelligenceAccessPage() {
                     </div>
                     <div className="md:col-span-2">
                       <div className="flex flex-col gap-3 sm:flex-row">
-                        <Button variant="outline" asChild>
+                        <Button type="outlined" asChild>
                           <Link href={`/intelligence/access/${access.id}`}>
                             Edit Access
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </Link>
                         </Button>
-                        <Button variant="outline" asChild>
+                        <Button type="outlined" asChild>
                           <Link href={`/intelligence/logs/recharge?accessId=${access.id}`}>
                             Recharge This Balance
                             <ArrowRight className="ml-2 h-4 w-4" />

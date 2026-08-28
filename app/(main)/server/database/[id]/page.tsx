@@ -68,7 +68,7 @@ export default async function DatabaseDetailsPage({ params, searchParams }: Prop
                     }
                 />
                 <div className="flex items-center gap-2 px-1">
-                    <Button variant="outline" size="sm" className="gap-2">
+                    <Button type="outlined" size="sm" className="gap-2">
                         <RefreshCw className="h-3.5 w-3.5" /> Refresh
                     </Button>
 

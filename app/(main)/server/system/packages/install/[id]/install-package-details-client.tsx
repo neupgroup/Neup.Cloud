@@ -192,10 +192,10 @@ export function InstallPackageDetailsClient({ serverId, serverName, packageName 
                                     </div>
                                     <div>
                                         {ver.version === currentVersion ? (
-                                            <Button variant="ghost" disabled size="sm" className="w-full sm:w-auto">Installed</Button>
+                                            <Button type="plain" disabled size="sm" className="w-full sm:w-auto">Installed</Button>
                                         ) : (
                                             <Button
-                                                variant="outline"
+                                                type="outlined"
                                                 size="sm"
                                                 disabled={isActionLoading}
                                                 onClick={() => handleInstall(ver.version)}
@@ -217,7 +217,7 @@ export function InstallPackageDetailsClient({ serverId, serverName, packageName 
             <div className="flex flex-col sm:flex-row gap-3">
                 {isInstalled ? (
                     <Button
-                        variant="ghost"
+                        type="plain"
                         className="w-full sm:w-auto text-muted-foreground"
                         onClick={() => router.push(`/server/system/packages/${packageName}`)}
                     >

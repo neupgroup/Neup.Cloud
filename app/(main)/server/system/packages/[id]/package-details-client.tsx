@@ -217,10 +217,10 @@ export function PackageDetailsClient({ serverId, serverName, packageName }: { se
                                     </div>
                                     <div>
                                         {ver.version === currentVersion ? (
-                                            <Button variant="ghost" disabled size="sm" className="w-full sm:w-auto">Installed</Button>
+                                            <Button type="plain" disabled size="sm" className="w-full sm:w-auto">Installed</Button>
                                         ) : (
                                             <Button
-                                                variant="outline"
+                                                type="outlined"
                                                 size="sm"
                                                 disabled={isActionLoading}
                                                 onClick={() => handleInstall(ver.version)}
@@ -243,7 +243,7 @@ export function PackageDetailsClient({ serverId, serverName, packageName }: { se
                 {isInstalled ? (
                     <>
                         <Button
-                            variant="outline"
+                            type="outlined"
                             onClick={handleReinstall}
                             disabled={isActionLoading}
                             className="w-full sm:w-auto"
@@ -252,7 +252,7 @@ export function PackageDetailsClient({ serverId, serverName, packageName }: { se
                             Reinstall Package
                         </Button>
                         <Button
-                            variant="destructive"
+                            type="solid"
                             onClick={handleUninstall}
                             disabled={isActionLoading}
                             className="w-full sm:w-auto"

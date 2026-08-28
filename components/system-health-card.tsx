@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
+import { Button } from "#/components/ui/button";
 import { Clock, Loader2 } from "lucide-react";
 import { cn } from "#/core/utils";
 
@@ -29,14 +30,14 @@ export function SystemHealthCard({ uptime, className, onReboot, isRebooting }: S
                 </p>
 
                 {onReboot && (
-                    <button
+                    <Button
                         className="text-xs text-destructive hover:underline mt-2 disabled:opacity-50 flex items-center gap-1"
                         onClick={onReboot}
                         disabled={isRebooting}
                     >
                         {isRebooting && <Loader2 className="h-3 w-3 animate-spin" />}
                         {isRebooting ? "Rebooting..." : "Reboot Server"}
-                    </button>
+                    </Button>
                 )}
             </CardContent>
         </Card>

@@ -395,12 +395,12 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
                                     )}
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <Button type="button" variant="outline" onClick={() => appIconInputRef.current?.click()}>
+                                    <Button htmlType="button" type="outlined" onClick={() => appIconInputRef.current?.click()}>
                                         <Upload className="mr-2 h-4 w-4" />
                                         Upload Icon
                                     </Button>
                                     {appIcon && (
-                                        <Button type="button" variant="ghost" onClick={() => setAppIcon('')}>
+                                        <Button htmlType="button" type="plain" onClick={() => setAppIcon('')}>
                                             <X className="mr-2 h-4 w-4" />
                                             Remove
                                         </Button>
@@ -563,7 +563,7 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
                                                     {cmd.value}
                                                 </div>
                                             </div>
-                                            <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeCommand(idx)}>
+                                            <Button htmlType="button" type="plain" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeCommand(idx)}>
                                                 <Trash className="h-4 w-4" />
                                             </Button>
                                         </div>
@@ -591,7 +591,7 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
                                 <Label className="text-xs">Command Script</Label>
                                 <Textarea value={newCmdValue} onChange={e => setNewCmdValue(e.target.value)} placeholder="npm run migrate" className="font-mono text-sm min-h-[80px]" />
                             </div>
-                            <Button type="button" onClick={addCustomCommand} variant="secondary" size="sm" className="w-full md:w-auto self-end">
+                            <Button htmlType="button" onClick={addCustomCommand} type="tinted" size="sm" className="w-full md:w-auto self-end">
                                 <Plus className="h-4 w-4 mr-2" /> Add Command
                             </Button>
                         </div>
@@ -600,8 +600,8 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
 
                 <div className="flex justify-end pt-4">
                     <Button
-                        type="button"
-                        variant="outline"
+                        htmlType="button"
+                        type="outlined"
                         className="mr-4"
                         onClick={() => {
                             if (onCancel) return onCancel();
@@ -610,7 +610,7 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
                     >
                         Cancel
                     </Button>
-                    <Button type="submit" size="lg" disabled={isLoading} className="w-full md:w-auto min-w-[200px]">
+                    <Button htmlType="submit" size="lg" disabled={isLoading} className="w-full md:w-auto min-w-[200px]">
                         {isLoading ? 'Saving...' : 'Save Changes'}
                     </Button>
                 </div>
