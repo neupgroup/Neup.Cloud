@@ -9,6 +9,7 @@ export function ApplicationsPage({ selectedServerId }: { selectedServerId?: stri
       title="Applications"
       description="Manage and monitor your deployed applications."
       selectedServerId={selectedServerId}
+      deferStatusLoad
     />
   );
 }

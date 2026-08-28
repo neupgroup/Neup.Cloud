@@ -26,6 +26,24 @@ const toneMap: Record<Exclude<ApplicationStatusFilter, 'all'>, string> = {
   notRunning: 'gray',
 };
 
+function toRegisteredItem(application: Application): ApplicationItem {
+  return {
+    id: application.id,
+    application,
+    status: getProcessCardStatus(null),
+    href: `/server/applications/${application.id}`,
+  };
+}
+
+/**
+ * Loads the persisted application list without contacting the selected server.
+ * Live process state is intentionally fetched separately by getApplicationItems.
+ */
+export async function getAllApplicationItems(): Promise<ApplicationItem[]> {
+  const applications = await getApplicationsData();
+  return applications.map(toRegisteredItem);
+}
+
 async function buildAllItems(serverId?: string | null): Promise<ApplicationItem[]> {
   const selectedServerId = serverId ?? await getSelectedServerId();
   if (!selectedServerId) return [];
@@ -33,10 +51,8 @@ async function buildAllItems(serverId?: string | null): Promise<ApplicationItem[
   const syncResult = await syncWithServer(selectedServerId);
 
   const registered: ApplicationItem[] = syncResult.applications.map((application) => ({
-    id: application.id,
-    application,
+    ...toRegisteredItem(application),
     status: getStoredStatus(application),
-    href: `/server/applications/${application.id}`,
   }));
 
   const unregistered: ApplicationItem[] = syncResult.serverOnlyApplications.map((process: ServerProcess) => ({

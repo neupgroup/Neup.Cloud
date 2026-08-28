@@ -1,9 +1,8 @@
 
 import React from 'react';
-import Link from 'next/link';
-import { Button } from '#/components/ui/button';
 import { cn } from '#/core/utils';
 import { ServerNameLink } from '@/components/server-name-link';
+import { BackButton } from '#/components/elements/backButton';
 
 interface PageTitleProps {
     title: React.ReactNode;
@@ -40,11 +39,7 @@ export function PageTitleBack({ title, description, serverName, backHref, classN
 
     return (
         <div className={cn("space-y-2", className)}>
-            <Button type="plain" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground hover:underline" asChild>
-                <Link href={backHref}>
-                    &lt; Go back
-                </Link>
-            </Button>
+            <BackButton backsTo={backHref} />
             <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                     <h1 className="text-3xl font-bold font-headline tracking-tight">{title}</h1>
@@ -88,11 +83,7 @@ export function PageTitleBackWithComponent({ title, description, serverName, bac
 
     return (
         <div className={cn("space-y-2", className)}>
-            <Button type="plain" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground hover:underline" asChild>
-                <Link href={backHref}>
-                    &lt; Go back
-                </Link>
-            </Button>
+            <BackButton backsTo={backHref} />
             <div className="space-y-1.5">
                 <div className="flex items-center gap-3">
                     <h1 className="text-3xl font-bold font-headline tracking-tight">{title}</h1>

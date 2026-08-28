@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Loader2, PlusCircle } from 'lucide-react';
 import { Card } from '#/components/ui/card';
 import { ApplicationCard, ApplicationCardSkeleton } from './card';
 import { useSelectedServerHref } from '@/hooks/use-selected-server';
-import { getApplicationItems } from '@/services/server/applications/queries';
+import { getAllApplicationItems, getApplicationItems } from '@/services/server/applications/queries';
 import type { ApplicationItem, ApplicationSource, ApplicationStatusFilter } from '@/services/server/applications/queries';
 
 export type ApplicationSectionProps = {
@@ -19,6 +19,8 @@ export type ApplicationSectionProps = {
   selectedServerId?: string | null;
   /** If true, returns null when there are no items (useful for dashboard widgets) */
   hideWhenEmpty?: boolean;
+  /** Render persisted applications before fetching live server process state. */
+  deferStatusLoad?: boolean;
 };
 
 export function ApplicationSection({
@@ -30,11 +32,12 @@ export function ApplicationSection({
   emptyMessage,
   selectedServerId,
   hideWhenEmpty = false,
+  deferStatusLoad = false,
 }: ApplicationSectionProps) {
   const [items, setItems] = useState<ApplicationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-  const isFirstLoadRef = useRef(true);
   const statusFilterKey = Array.isArray(statusFilter) ? statusFilter.join('|') : statusFilter;
   const withSelectedServerHref = useSelectedServerHref();
 
@@ -46,29 +49,55 @@ export function ApplicationSection({
 
     const fetch = async () => {
       setIsLoading(true);
+      setIsRefreshing(false);
       try {
-        const result = await getApplicationItems(source, resolvedStatusFilter, selectedServerId ?? undefined);
+        const result = deferStatusLoad
+          ? await getAllApplicationItems()
+          : await getApplicationItems(source, resolvedStatusFilter, selectedServerId ?? undefined);
         if (!cancelled) {
           setItems(result);
           setHasLoadedOnce(true);
-          isFirstLoadRef.current = false;
+          setIsLoading(false);
+        }
+
+        if (deferStatusLoad) {
+          if (cancelled) return;
+          setIsRefreshing(true);
+
+          const liveItems = await getApplicationItems(
+            source,
+            resolvedStatusFilter,
+            selectedServerId ?? undefined
+          );
+
+          if (!cancelled) {
+            const liveItemsById = new Map(liveItems.map((item) => [item.id, item]));
+            const mergedItems = result.map((item) => liveItemsById.get(item.id) ?? item);
+            const initialIds = new Set(result.map((item) => item.id));
+
+            setItems([
+              ...mergedItems,
+              ...liveItems.filter((item) => !initialIds.has(item.id)),
+            ]);
+          }
         }
       } catch {
         // silently fail
       } finally {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+          setIsRefreshing(false);
+        }
       }
     };
 
     void fetch();
     return () => { cancelled = true; };
-  }, [source, statusFilterKey, selectedServerId]);
+  }, [source, statusFilterKey, selectedServerId, deferStatusLoad]);
 
   if (!isLoading && items.length === 0 && hideWhenEmpty) return null;
 
   const showInitialSkeleton = isLoading && !hasLoadedOnce;
-  const isRefreshing = isLoading && hasLoadedOnce;
-
   const resolvedTitle = title ?? (statusFilter === 'running' ? 'Running Applications' : 'Applications');
   const resolvedDescription = description ?? (statusFilter === 'running' ? 'Currently running applications.' : 'All deployed applications.');
   const resolvedEmpty = emptyMessage ?? (statusFilter === 'running' ? 'No applications are currently running.' : 'No applications found.');
