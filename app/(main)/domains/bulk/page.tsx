@@ -7,7 +7,9 @@ import { Button } from '#/components/ui/button';
 import { Textarea } from '#/components/ui/textarea';
 import { Badge } from '#/components/ui/badge';
 import { Collapsible, CollapsibleContent } from '#/components/ui/collapsible';
-import { ChevronDown, ExternalLink, Loader2 } from 'lucide-react';
+import { Icon } from '#/components/ui/icon';
+import { useToast } from '#/core/hooks/useToast';
+import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 
 type WhoisInfo = {
@@ -57,29 +59,67 @@ function formatDate(value: string | null) {
 }
 
 export default function DomainsBulkPage() {
+  const { toast } = useToast();
   const [csvInput, setCsvInput] = useState('');
   const [results, setResults] = useState<AvailabilityResult[]>([]);
   const [isChecking, startTransition] = useTransition();
+  const [animateResults, setAnimateResults] = useState(false);
+  const [lastCheckedDomains, setLastCheckedDomains] = useState<string[]>([]);
+  const [checkingDomains, setCheckingDomains] = useState<Set<string>>(new Set());
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
   const [openCards, setOpenCards] = useState<Record<string, boolean>>({});
 
   const parsedDomains = useMemo(() => extractDomainsFromCsv(csvInput), [csvInput]);
+  const resultByDomain = useMemo(
+    () => new Map(results.map((result) => [result.domain, result])),
+    [results],
+  );
+  const domainsHaveChanged =
+    parsedDomains.length !== lastCheckedDomains.length ||
+    parsedDomains.some((domain) => !lastCheckedDomains.includes(domain));
 
-  const runCheck = () => {
-    const domains = extractDomainsFromCsv(csvInput);
-    if (domains.length === 0) {
+  const runCheck = (requestedDomains?: string[]) => {
+    const allDomains = extractDomainsFromCsv(csvInput);
+    const domains = requestedDomains ?? allDomains;
+    if (allDomains.length === 0) {
       setResults([]);
+      setAnimateResults(false);
+      setLastCheckedDomains([]);
+      setCheckingDomains(new Set());
       setProgress({ completed: 0, total: 0 });
       return;
     }
 
-    startTransition(async () => {
-      setResults([]);
-      setProgress({ completed: 0, total: domains.length });
-      setOpenCards({});
+    const domainsToCheck = domains.filter((domain) => !resultByDomain.has(domain));
+    if (domainsToCheck.length === 0) {
+      setResults((previous) => previous.filter((result) => allDomains.includes(result.domain)));
+      setLastCheckedDomains((previous) => previous.filter((domain) => allDomains.includes(domain)));
+      setAnimateResults(false);
+      setCheckingDomains(new Set());
+      setProgress({ completed: 0, total: 0 });
+      return;
+    }
 
-      for (let index = 0; index < domains.length; index += 1) {
-        const domain = domains[index];
+    setCheckingDomains(new Set(domainsToCheck));
+    startTransition(async () => {
+      setResults((previous) => previous.filter((result) => allDomains.includes(result.domain)));
+      setAnimateResults(false);
+      setProgress({ completed: 0, total: domainsToCheck.length });
+      if (!requestedDomains) setOpenCards({});
+
+      const whoisToast = toast({
+        name: 'domains-bulk-whois',
+        convey: 'info',
+        icon: <Icon type="animated" from="Search" size={24} />,
+        title: `Searching ${domainsToCheck.length} Domains`,
+        description: `0 Available for Purchase of ${domainsToCheck.length} domains`,
+        dismissesOn: null,
+      });
+
+      let notFoundCount = 0;
+
+      for (let index = 0; index < domainsToCheck.length; index += 1) {
+        const domain = domainsToCheck[index];
         const defaultNameComUrl = `https://www.name.com/domain/search/${encodeURIComponent(domain)}`;
 
         let result: AvailabilityResult;
@@ -105,9 +145,39 @@ export default function DomainsBulkPage() {
           };
         }
 
+        if (!result.whoisExists) notFoundCount += 1;
+
+        whoisToast.update({
+          title: `Searching ${domainsToCheck.length} Domains`,
+          description: `${notFoundCount} Available for Purchase of ${domainsToCheck.length} domains`,
+        });
+
         setResults((previous) => [...previous, result]);
-        setProgress({ completed: index + 1, total: domains.length });
+        setProgress({ completed: index + 1, total: domainsToCheck.length });
       }
+
+      whoisToast.update({
+        icon: (
+          <Icon
+            type="animated"
+            from="Search"
+            to="Searched"
+            position={0}
+            size={24}
+            onComplete={() => whoisToast.update({
+              icon: <Icon type="animated" from="Search" to="Searched" position={2} size={24} />,
+            })}
+          />
+        ),
+        title: `Searched ${domainsToCheck.length} Domains`,
+        description: `${notFoundCount} Available for Purchase of ${domainsToCheck.length} domains`,
+        dismissesOn: 5,
+      });
+      setAnimateResults(true);
+      setCheckingDomains(new Set());
+      setLastCheckedDomains((previous) => requestedDomains
+        ? Array.from(new Set([...previous, ...domainsToCheck])).filter((domain) => allDomains.includes(domain))
+        : allDomains);
     });
   };
 
@@ -126,7 +196,10 @@ export default function DomainsBulkPage() {
           </p>
           <Textarea
             value={csvInput}
-            onChange={(event) => setCsvInput(event.target.value)}
+            onChange={(event) => {
+              setCsvInput(event.target.value);
+              setAnimateResults(false);
+            }}
             placeholder="google.com, mysite.net\nbrandname.io"
             className="min-h-[180px]"
           />
@@ -136,8 +209,11 @@ export default function DomainsBulkPage() {
           <p className="text-sm text-muted-foreground">
             Detected domains: <span className="font-medium text-foreground">{parsedDomains.length}</span>
           </p>
-          <Button onClick={runCheck} disabled={isChecking || parsedDomains.length === 0}>
-            {isChecking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+          <Button onClick={() => runCheck()} disabled={isChecking || parsedDomains.length === 0 || !domainsHaveChanged}>
+            {isChecking ? <Icon type="animated" from="Search" size={20} label={null} /> : null}
+            {!isChecking && !domainsHaveChanged && lastCheckedDomains.length > 0 ? (
+              <Icon type="animated" from="Search" to="Searched" position={2} size={20} label={null} />
+            ) : null}
             Check WHOIS
           </Button>
         </div>
@@ -149,104 +225,144 @@ export default function DomainsBulkPage() {
         )}
       </Card>
 
-      {results.length > 0 && (
-        <div className="grid gap-4">
-          {results.map((result) => (
+      {parsedDomains.length > 0 && (
+        <div className="grid gap-0">
+          {parsedDomains.map((domain, index) => {
+            const result = resultByDomain.get(domain);
+            const isSearching = checkingDomains.has(domain) && !result;
+            const isFirstCard = index === 0;
+            const isLastCard = index === parsedDomains.length - 1;
+
+            return (
             <Card
-              key={result.domain}
-              className="cursor-pointer"
-              onClick={() =>
+              key={domain}
+              className={`cursor-pointer rounded-none ${isFirstCard ? 'rounded-t-lg' : ''} ${isLastCard ? 'rounded-b-lg' : ''}`}
+              onClick={() => {
+                if (!result) return;
                 setOpenCards((previous) => ({
                   ...previous,
-                  [result.domain]: !previous[result.domain],
-                }))
-              }
+                  [domain]: !previous[domain],
+                }));
+              }}
             >
               <Collapsible
-                open={Boolean(openCards[result.domain])}
+                open={Boolean(result && openCards[domain])}
                 onOpenChange={(open) =>
-                  setOpenCards((previous) => ({
+                  result && setOpenCards((previous) => ({
                     ...previous,
-                    [result.domain]: open,
+                    [domain]: open,
                   }))
                 }
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <CardTitle className="text-xl">{result.domain}</CardTitle>
+                    <CardTitle className="flex items-center gap-2 text-xl">
+                      {domain}
+                      {isSearching ? (
+                        <Icon type="animated" from="Search" size={24} label="Searching" />
+                      ) : result ? (
+                        <Icon
+                          type="animated"
+                          from="Search"
+                          to={result.whoisExists ? 'CrossMark' : 'TickMark'}
+                          position={checkingDomains.has(domain) || animateResults ? 0 : 2}
+                          size={24}
+                          label={result.whoisExists ? 'Unavailable' : 'Available'}
+                        />
+                      ) : null}
+                    </CardTitle>
                     <div className="flex items-center gap-2">
-                      {result.whoisExists ? (
+                      {result?.whoisExists ? (
                         <Badge className="bg-green-500/10 text-green-700 border-green-200 hover:bg-green-500/20 border">
                           WHOIS Found
                         </Badge>
-                      ) : (
+                      ) : result ? (
                         <Badge variant="secondary">WHOIS Not Found</Badge>
+                      ) : null}
+                      {!result && (
+                        <Button
+                          type="outlined"
+                          size="sm"
+                          disabled={isChecking}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            runCheck([domain]);
+                          }}
+                        >
+                          {isSearching ? <Icon type="animated" from="Search" size={16} label={null} /> : null}
+                          {isSearching ? 'Searching...' : 'Search'}
+                        </Button>
                       )}
-                      <Button type="plain" size="sm">
-                        Details
-                        <ChevronDown
-                          className={`ml-2 h-4 w-4 transition-transform duration-200 ${openCards[result.domain] ? 'rotate-180' : ''}`}
-                        />
-                      </Button>
                     </div>
                   </div>
                 </CardHeader>
 
                 <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
                   <CardContent className="space-y-4">
-                    <p className="text-sm text-muted-foreground">{result.reason}</p>
+                    {result ? (
+                      <>
+                        <p className="text-sm text-muted-foreground">{result.reason}</p>
 
-                    {result.whoisExists && result.whois ? (
-                      <div className="grid gap-2 text-sm">
-                        <p><span className="text-muted-foreground">Registrar:</span> {result.whois.registrar ?? 'N/A'}</p>
-                        <p><span className="text-muted-foreground">Handle:</span> {result.whois.whoisHandle ?? 'N/A'}</p>
-                        <p><span className="text-muted-foreground">Created:</span> {formatDate(result.whois.createdAt)}</p>
-                        <p><span className="text-muted-foreground">Updated:</span> {formatDate(result.whois.updatedAt)}</p>
-                        <p><span className="text-muted-foreground">Expires:</span> {formatDate(result.whois.expiresAt)}</p>
-                        <p>
-                          <span className="text-muted-foreground">Statuses:</span>{' '}
-                          {result.whois.statuses.length > 0 ? result.whois.statuses.join(', ') : 'N/A'}
-                        </p>
-                        <p>
-                          <span className="text-muted-foreground">Nameservers:</span>{' '}
-                          {result.whois.nameservers.length > 0 ? result.whois.nameservers.join(', ') : 'N/A'}
-                        </p>
-                      </div>
+                        {result.whoisExists && result.whois ? (
+                          <div className="grid gap-2 text-sm">
+                            <p><span className="text-muted-foreground">Registrar:</span> {result.whois.registrar ?? 'N/A'}</p>
+                            <p><span className="text-muted-foreground">Handle:</span> {result.whois.whoisHandle ?? 'N/A'}</p>
+                            <p><span className="text-muted-foreground">Created:</span> {formatDate(result.whois.createdAt)}</p>
+                            <p><span className="text-muted-foreground">Updated:</span> {formatDate(result.whois.updatedAt)}</p>
+                            <p><span className="text-muted-foreground">Expires:</span> {formatDate(result.whois.expiresAt)}</p>
+                            <p>
+                              <span className="text-muted-foreground">Statuses:</span>{' '}
+                              {result.whois.statuses.length > 0 ? result.whois.statuses.join(', ') : 'N/A'}
+                            </p>
+                            <p>
+                              <span className="text-muted-foreground">Nameservers:</span>{' '}
+                              {result.whois.nameservers.length > 0 ? result.whois.nameservers.join(', ') : 'N/A'}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-sm">Whois information does not exist.</p>
+                        )}
+                      </>
                     ) : (
-                      <p className="text-sm">Whois information does not exists.</p>
+                      <p className="text-sm text-muted-foreground">
+                        {isSearching ? 'Searching WHOIS information...' : 'Start a WHOIS check to view details.'}
+                      </p>
                     )}
 
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Button type="outlined" asChild>
-                          <Link
-                            href={`/domain/whois/${encodeURIComponent(result.domain)}`}
-                            onClick={(event) => event.stopPropagation()}
+                    {result && (
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Button type="outlined" asChild>
+                            <Link
+                              href={`/domain/whois/${encodeURIComponent(result.domain)}`}
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              Detailed WHOIS
+                            </Link>
+                          </Button>
+                          <Button
+                            variant={result.whoisExists ? 'outline' : 'default'}
+                            asChild
                           >
-                            Detailed WHOIS
-                          </Link>
-                        </Button>
-                        <Button
-                          variant={result.whoisExists ? 'outline' : 'default'}
-                          asChild
-                        >
-                          <a
-                            href={result.nameComUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(event) => event.stopPropagation()}
-                          >
-                            Search via name.com
-                            <ExternalLink className="ml-2 h-3 w-3" />
-                          </a>
-                        </Button>
+                            <a
+                              href={result.nameComUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              Search via name.com
+                              <ExternalLink className="ml-2 h-3 w-3" />
+                            </a>
+                          </Button>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </CardContent>
                 </CollapsibleContent>
               </Collapsible>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

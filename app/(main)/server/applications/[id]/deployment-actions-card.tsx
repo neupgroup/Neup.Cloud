@@ -36,7 +36,7 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
         const deploymentToast = toast({
             name: `application-deployment-${applicationId}`,
             convey: 'info',
-            icon: <Icon type="animated" from="Upload" size={24} />,
+            icon: <Icon type="animated" from="Deploy" size={24} />,
             dismissesOn: null,
             title: "Deploying Configuration",
             description: "Environment variables and config files are being updated on the server.",
@@ -47,7 +47,7 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
             setDeploymentState('complete');
             deploymentToast.update({
                 convey: 'success',
-                icon: <Icon type="animated" from="Upload" to="TickMark" size={24} />,
+                icon: <Icon type="animated" from="Deploy" to="TickMark" position={2} size={24} />,
                 actions: [
                     ['Open app', 'success', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
                     ['Dismiss', 'none', 'dismiss'],
@@ -102,7 +102,7 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
                         <div
                             className="flex h-10 w-10 items-center justify-center rounded-[8px] p-1.5 text-muted-foreground transition-colors group-hover:text-foreground"
                         >
-                            {isLoading ? <Icon type="animated" from="Upload" size={24} /> : icon}
+                            {isLoading ? <Icon type="animated" from="Deploy" size={24} /> : icon}
                         </div>
                     </div>
                 </div>
@@ -138,8 +138,9 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
                         <Icon
                             key="deployment-complete"
                             type="animated"
-                            from="Upload"
+                            from="Deploy"
                             to="TickMark"
+                            position={2}
                             size={24}
                         />
                     ) : (

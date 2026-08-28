@@ -71,6 +71,7 @@ import { Input } from '#/components/ui/input';
 import { Label } from '#/components/ui/label';
 import { Progress } from '#/components/ui/progress';
 import { Skeleton } from '#/components/ui/skeleton';
+import { Icon } from '#/components/ui/icon';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { useServerName } from '@/hooks/use-server-name';
 import { withSelectedServerQuery } from '@/helpers/navigation';
@@ -344,22 +345,48 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
     const { op, files: sourcePaths } = clipboard;
     const destPath = currentPath;
 
-    let result;
-    if (op === 'copy') {
-      result = await copyFiles(serverId, sourcePaths, destPath, rootMode);
-    } else {
-      result = await moveFiles(serverId, sourcePaths, destPath, rootMode);
-    }
+    const operation = op === 'copy' ? 'Copy' : 'Move';
+    const operationToast = toast({
+      name: `server-files-${serverId}`,
+      convey: 'info',
+      title: `${operation} in progress`,
+      description: `${operation}ing ${sourcePaths.length} item${sourcePaths.length === 1 ? '' : 's'}...`,
+      dismissesOn: null,
+    });
 
-    if (result.error) {
-      toast({ variant: 'destructive', title: 'Action Failed', description: result.error });
-    } else {
-      toast({ title: 'Success', description: `Items ${op === 'copy' ? 'copied' : 'moved'} successfully.` });
-      if (op === 'move') setClipboard(null);
-      await fetchFiles(currentPath);
+    try {
+      const result = op === 'copy'
+        ? await copyFiles(serverId, sourcePaths, destPath, rootMode)
+        : await moveFiles(serverId, sourcePaths, destPath, rootMode);
+
+      if (result.error) {
+        operationToast.update({
+          convey: 'dangerous',
+          title: `${operation} failed`,
+          description: result.error,
+          dismissesOn: 6,
+        });
+      } else {
+        operationToast.update({
+          convey: 'success',
+          title: `${operation} complete`,
+          description: `${sourcePaths.length} item${sourcePaths.length === 1 ? '' : 's'} ${op === 'copy' ? 'copied' : 'moved'} successfully.`,
+          dismissesOn: 4,
+        });
+        if (op === 'move') setClipboard(null);
+        await fetchFiles(currentPath);
+      }
+    } catch (error: any) {
+      operationToast.update({
+        convey: 'dangerous',
+        title: `${operation} failed`,
+        description: error.message || `Unable to ${op} the selected items.`,
+        dismissesOn: 6,
+      });
+    } finally {
+      setIsProcessing(false);
+      setContextMenu(null);
     }
-    setIsProcessing(false);
-    setContextMenu(null);
   };
 
   const handleRename = () => {
@@ -420,19 +447,60 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
       currentPath.endsWith('/') ? currentPath + name : currentPath + '/' + name
     );
 
-    const result = await deleteFiles(serverId, pathsToDelete, rootMode);
+    const deleteToast = toast({
+      name: `server-files-${serverId}`,
+      convey: 'dangerous',
+      icon: <Icon type="animated" from="Trash" size={24} />,
+      title: 'Deleting items',
+      description: `Deleting ${filesToDelete.length} item${filesToDelete.length === 1 ? '' : 's'}...`,
+      dismissesOn: null,
+    });
 
-    if (result.error) {
-      toast({ variant: 'destructive', title: 'Delete Failed', description: result.error });
-      setFiles(oldFiles);
-    } else {
-      try {
-        const audio = new Audio('/sounds/recycle.mp3');
-        audio.play().catch(e => console.error("Audio play failed", e));
-      } catch (e) {
-        console.error("Audio init failed", e);
+    try {
+      const result = await deleteFiles(serverId, pathsToDelete, rootMode);
+
+      if (result.error) {
+        deleteToast.update({
+          convey: 'dangerous',
+          title: 'Delete failed',
+          description: result.error,
+          dismissesOn: 6,
+        });
+        setFiles(oldFiles);
+      } else {
+        try {
+          const audio = new Audio('/sounds/recycle.mp3');
+          audio.play().catch(e => console.error("Audio play failed", e));
+        } catch (e) {
+          console.error("Audio init failed", e);
+        }
+        deleteToast.update({
+          convey: 'dangerous',
+          icon: (
+            <Icon
+              type="animated"
+              from="Trash"
+              to="Deleted"
+              position={0}
+              size={24}
+              onComplete={() => deleteToast.update({
+                icon: <Icon type="animated" from="Trash" to="Deleted" position={2} size={24} />,
+              })}
+            />
+          ),
+          title: 'Deleted',
+          description: `Successfully deleted ${filesToDelete.length} item${filesToDelete.length === 1 ? '' : 's'}.`,
+          dismissesOn: 4,
+        });
       }
-      toast({ title: 'Deleted', description: `Successfully deleted ${filesToDelete.length} items.` });
+    } catch (error: any) {
+      setFiles(oldFiles);
+      deleteToast.update({
+        convey: 'dangerous',
+        title: 'Delete failed',
+        description: error.message || 'Unable to delete the selected items.',
+        dismissesOn: 6,
+      });
     }
   }
 
@@ -640,17 +708,59 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
     const newPath = currentPath.endsWith('/') ? currentPath + val : currentPath + '/' + val;
     let res;
 
-    if (type === 'folder') {
-      res = await createDirectory(serverId, newPath, rootMode);
-    } else {
-      res = await createEmptyFile(serverId, newPath, rootMode);
-    }
+    const itemLabel = type === 'folder' ? 'Folder' : 'File';
+    const creationToast = toast({
+      name: `server-files-${serverId}`,
+      convey: 'info',
+      icon: <Icon type="animated" from="CreateFile" size={24} />,
+      title: `Creating ${itemLabel.toLowerCase()}`,
+      description: `Creating ${val}...`,
+      dismissesOn: null,
+    });
 
-    if (res.error) {
-      toast({ variant: 'destructive', title: 'Action Failed', description: res.error });
+    try {
+      if (type === 'folder') {
+        res = await createDirectory(serverId, newPath, rootMode);
+      } else {
+        res = await createEmptyFile(serverId, newPath, rootMode);
+      }
+
+      if (res.error) {
+        creationToast.update({
+          convey: 'dangerous',
+          title: `${itemLabel} creation failed`,
+          description: res.error,
+          dismissesOn: 6,
+        });
+        setFiles(oldFiles);
+      } else {
+        creationToast.update({
+          convey: 'success',
+          icon: (
+            <Icon
+              type="animated"
+              from="CreateFile"
+              to="TickMark"
+              position={0}
+              size={24}
+              onComplete={() => creationToast.update({
+                icon: <Icon type="animated" from="CreateFile" to="TickMark" position={2} size={24} />,
+              })}
+            />
+          ),
+          title: `${itemLabel} created`,
+          description: `${val} was created successfully.`,
+          dismissesOn: 4,
+        });
+      }
+    } catch (error: any) {
       setFiles(oldFiles);
-    } else {
-      toast({ title: 'Success', description: `${type === 'folder' ? 'Folder' : 'File'} created.` });
+      creationToast.update({
+        convey: 'dangerous',
+        title: `${itemLabel} creation failed`,
+        description: error.message || `Unable to create ${itemLabel.toLowerCase()}.`,
+        dismissesOn: 6,
+      });
     }
   }
 

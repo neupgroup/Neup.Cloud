@@ -20,8 +20,8 @@ export function RepoControls({ applicationId }: RepoControlsProps) {
 
     if (operationStatus?.operation === operation) {
       return operationStatus.result === 'success'
-        ? <Icon type="animated" from="Download" to="TickMark" size={18} />
-        : <Icon type="animated" from="Download" to="CrossMark" size={18} />;
+        ? <Icon type="animated" from="Download" to="TickMark" position={2} size={18} />
+        : <Icon type="animated" from="Download" to="CrossMark" position={2} size={18} />;
     }
 
     return operation === 'clone'

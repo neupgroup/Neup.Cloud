@@ -1,4 +1,13 @@
 # TODO
+- [ ] Fix the logo image sizing warning by preserving its aspect ratio when CSS changes its dimensions.
+- [x] Disable repeated bulk WHOIS searches until domains are added, removed, or changed; check only newly added domains.
+- [x] Use one updating aggregate toast for bulk WHOIS progress instead of one toast per domain.
+- [x] Make bulk WHOIS page toasts stack together under one shared toast group.
+- [x] Add search, searched, tick, and cross toast animations to the bulk WHOIS checker.
+- [x] Show the dangerous Trash-to-Deleted animation when deleting files and folders.
+- [x] Show the CreateFile-to-TickMark animation when creating files and folders.
+- [x] Show the shared toast UI for file and folder copy, move, and delete operations.
+- [x] Restore the missing shared `.neup` Progress UI component imported by the server files and initialization pages.
 - [x] Include `.neup` UI components in Tailwind content scanning so shared Button hover and active classes are generated.
 - [ ] Fix proxy redirect URLs: `buildPublicAppUrl()` defaults redirects to `/analytics` instead of this app's `/cloud` base path.
 - [ ] Fix pre-existing JSX/syntax errors reported by `npx tsc --noEmit` in [component/ui/carousel.tsx](/Users/neupkishor/Code/Neup.Cloud/component/ui/carousel.tsx), [component/ui/chart.tsx](/Users/neupkishor/Code/Neup.Cloud/component/ui/chart.tsx), [component/ui/menubar.tsx](/Users/neupkishor/Code/Neup.Cloud/component/ui/menubar.tsx), and [component/ui/sidebar.tsx](/Users/neupkishor/Code/Neup.Cloud/component/ui/sidebar.tsx).

@@ -69,7 +69,7 @@ export function useRepoControls(applicationId: string) {
             operationToast.update({
                 convey: 'success',
                 icon: operation === 'clone' || operation === 'pull'
-                    ? <Icon type="animated" from="Download" to="TickMark" size={24} />
+                    ? <Icon type="animated" from="Download" to="TickMark" position={2} size={24} />
                     : undefined,
                 actions: [
                     ['Open app', 'success', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
@@ -84,7 +84,7 @@ export function useRepoControls(applicationId: string) {
             operationToast.update({
                 convey: 'dangerous',
                 icon: operation === 'clone' || operation === 'pull'
-                    ? <Icon type="animated" from="Download" to="CrossMark" size={24} />
+                    ? <Icon type="animated" from="Download" to="CrossMark" position={2} size={24} />
                     : undefined,
                 actions: [
                     ['Open app', 'danger', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
