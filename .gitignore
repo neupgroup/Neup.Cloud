@@ -49,6 +49,7 @@ certificates
 
 # neup system and standard files.
 .neup
+.neup/*
 core
 neup.core
 logica

@@ -5,7 +5,7 @@ set -Eeuo pipefail
 : <<'NEUP_DOCUMENTATION'
 ::neup.documentation::setup-script
 
-Synchronizes the shared Neup repositories into the expected `neup` folders.
+Synchronizes the shared Neup repositories into the expected `.neup` folders.
 
 Run `npm run setup` to update only repositories whose local HEAD is not the
 latest commit on GitHub's `main` branch. Run `npm run setup -- force` (or
@@ -15,7 +15,7 @@ latest commit on GitHub's `main` branch. Run `npm run setup -- force` (or
 NEUP_DOCUMENTATION
 
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-readonly NEUP_DIR="$SCRIPT_DIR/neup"
+readonly NEUP_DIR="$SCRIPT_DIR/.neup"
 
 clone_repository() {
   local repository_url="$1"
