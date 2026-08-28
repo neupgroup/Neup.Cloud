@@ -48,6 +48,7 @@ firestore-debug.log
 certificates
 
 # neup system and standard files.
+.neup
 core
 neup.core
 logica
