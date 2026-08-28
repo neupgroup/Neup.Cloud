@@ -58,7 +58,7 @@ export function useRepoControls(applicationId: string) {
             icon: operation === 'clone' || operation === 'pull' || operation === 'pull-force'
                 ? <Icon
                     type="animated"
-                    from={operation === 'pull-force' ? 'download_white' : 'Download'}
+                    from="Download"
                     size={24}
                   />
                 : undefined,
@@ -78,8 +78,8 @@ export function useRepoControls(applicationId: string) {
                 icon: operation === 'clone' || operation === 'pull' || operation === 'pull-force'
                     ? <Icon
                         type="animated"
-                        from={operation === 'pull-force' ? 'download_white' : 'Download'}
-                        to={operation === 'pull-force' ? 'tickmark_white' : 'TickMark'}
+                        from="Download"
+                        to="TickMark"
                         position={2}
                         size={24}
                       />
@@ -99,7 +99,7 @@ export function useRepoControls(applicationId: string) {
                 icon: operation === 'clone' || operation === 'pull' || operation === 'pull-force'
                     ? <Icon
                         type="animated"
-                        from={operation === 'pull-force' ? 'download_white' : 'Download'}
+                        from="Download"
                         to="CrossMark"
                         position={2}
                         size={24}
