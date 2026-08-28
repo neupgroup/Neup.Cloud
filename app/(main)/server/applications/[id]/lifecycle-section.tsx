@@ -76,6 +76,7 @@ export function LifecycleSection({ application, runningCommandName = null }: Lif
     try {
       await executeApplicationCommand(application.id, command, selectedServerId, name, displayCommand);
       toast({
+        convey: 'info',
         actions: [
           ['Open app', 'success', withSelectedServerQuery(`/server/applications/${application.id}`, selectedServerId)],
           ['Dismiss', 'none', 'dismiss'],
@@ -86,6 +87,7 @@ export function LifecycleSection({ application, runningCommandName = null }: Lif
     } catch (error: any) {
       console.error(error);
       toast({
+        convey: 'dangerous',
         actions: [
           ['Open app', 'danger', withSelectedServerQuery(`/server/applications/${application.id}`, selectedServerId)],
           ['Dismiss', 'none', 'dismiss'],

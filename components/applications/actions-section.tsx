@@ -29,6 +29,7 @@ export function useActionsSection(application: any) {
             await executeApplicationCommand(application.id, command, selectedServerId, name);
             toast({
                 name: `application-action-${application.id}`,
+                convey: 'success',
                 actions: [
                     ['Open app', 'success', withSelectedServerQuery(`/server/applications/${application.id}`, selectedServerId)],
                     ['Dismiss', 'none', 'dismiss'],
@@ -40,6 +41,7 @@ export function useActionsSection(application: any) {
             console.error(error);
             toast({
                 name: `application-action-${application.id}`,
+                convey: 'dangerous',
                 actions: [
                     ['Open app', 'danger', withSelectedServerQuery(`/server/applications/${application.id}`, selectedServerId)],
                     ['Dismiss', 'none', 'dismiss'],

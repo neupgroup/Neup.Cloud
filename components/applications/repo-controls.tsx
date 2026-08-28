@@ -48,6 +48,7 @@ export function useRepoControls(applicationId: string) {
 
         toast({
             name: `application-git-${applicationId}`,
+            convey: 'info',
             actions,
             title: messages.started,
             description: `Git operation '${operation}' has started.`,
@@ -57,6 +58,7 @@ export function useRepoControls(applicationId: string) {
             await performGitOperation(applicationId, selectedServerId, operation);
             toast({
                 name: `application-git-${applicationId}`,
+                convey: 'success',
                 actions: [
                     ['Open app', 'success', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
                     ['Dismiss', 'none', 'dismiss'],
@@ -68,6 +70,7 @@ export function useRepoControls(applicationId: string) {
             console.error(error);
             toast({
                 name: `application-git-${applicationId}`,
+                convey: 'dangerous',
                 actions: [
                     ['Open app', 'danger', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
                     ['Dismiss', 'none', 'dismiss'],

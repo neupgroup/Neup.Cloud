@@ -244,7 +244,7 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
 
     const addCustomCommand = () => {
         if (!newCmdName.trim() || !newCmdValue.trim()) {
-            toast({ title: "Validation Error", description: "Name and Command content are required.", variant: "destructive" });
+            toast({ convey: 'dangerous', title: "Validation Error", description: "Name and Command content are required.", variant: "destructive" });
             return;
         }
         setCommands([...commands, { name: newCmdName, description: newCmdDesc, value: newCmdValue }]);
@@ -276,7 +276,7 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
         setIsLoading(true);
 
         if (!appName || !appLocation || !selectedFramework) {
-            toast({ variant: "destructive", title: "Missing fields", description: "Name, Location and Framework are required." });
+            toast({ convey: 'dangerous', variant: "destructive", title: "Missing fields", description: "Name, Location and Framework are required." });
             setIsLoading(false);
             return;
         }
@@ -288,6 +288,7 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
 
         if (!locationDetails) {
             toast({
+                convey: 'dangerous',
                 variant: "destructive",
                 title: "Invalid executable path",
                 description: "Provide the full path to the executable file.",
@@ -355,12 +356,12 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
 
         try {
             await updateApplication(application.id, updatedData);
-            toast({ title: "Application Updated", description: "Changes saved successfully." });
+            toast({ convey: 'success', title: "Application Updated", description: "Changes saved successfully." });
             router.refresh();
             onSaved?.();
         } catch (err) {
             console.error(err);
-            toast({ variant: "destructive", title: "Error", description: "Could not update application." });
+            toast({ convey: 'dangerous', variant: "destructive", title: "Error", description: "Could not update application." });
         } finally {
             setIsLoading(false);
         }

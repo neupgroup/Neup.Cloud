@@ -32,10 +32,11 @@ export function RunningInSection({ applicationId, maps, runningSection }: Runnin
     startTransition(async () => {
       try {
         await choosePrimaryApplicationServer(applicationId, serverId);
-        toast({ title: 'Primary server updated' });
+        toast({ convey: 'success', title: 'Primary server updated' });
       } catch (error) {
         console.error(error);
         toast({
+          convey: 'dangerous',
           title: 'Could not update primary server',
           description: error instanceof Error ? error.message : 'Please try again.',
           variant: 'destructive',

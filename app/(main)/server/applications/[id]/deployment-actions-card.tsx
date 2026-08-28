@@ -33,6 +33,7 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
         try {
             await deployConfiguration(applicationId, selectedServerId);
             toast({
+                convey: 'success',
                 actions: [
                     ['Open app', 'success', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
                     ['Dismiss', 'none', 'dismiss'],
@@ -44,6 +45,7 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
         } catch (error: any) {
             console.error(error);
             toast({
+                convey: 'dangerous',
                 actions: [
                     ['Open app', 'danger', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
                     ['Dismiss', 'none', 'dismiss'],

@@ -38,12 +38,14 @@ export function SupervisorOnlyActions({ processName }: SupervisorOnlyActionsProp
         try {
             await stopSupervisorOnlyProcess(processName, selectedServerId);
             toast({
+                convey: 'success',
                 title: 'Process stopped',
                 description: `${processName} has been stopped.`,
             });
             router.refresh();
         } catch (error: any) {
             toast({
+                convey: 'dangerous',
                 variant: 'destructive',
                 title: 'Stop failed',
                 description: error.message || 'Could not stop the Supervisor process.',
@@ -58,6 +60,7 @@ export function SupervisorOnlyActions({ processName }: SupervisorOnlyActionsProp
         try {
             await deleteSupervisorOnlyProcess(processName, selectedServerId);
             toast({
+                convey: 'success',
                 title: 'Removed from Supervisor',
                 description: `${processName} has been removed from Supervisor.`,
             });
@@ -65,6 +68,7 @@ export function SupervisorOnlyActions({ processName }: SupervisorOnlyActionsProp
             router.refresh();
         } catch (error: any) {
             toast({
+                convey: 'dangerous',
                 variant: 'destructive',
                 title: 'Delete failed',
                 description: error.message || 'Could not remove the Supervisor process.',

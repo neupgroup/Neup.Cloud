@@ -25,6 +25,7 @@ export function DeleteApplicationButton({ applicationId }: DeleteApplicationButt
         try {
             await deleteApplication(applicationId);
             toast({
+                convey: 'success',
                 title: "Application deleted",
                 description: "The application has been stopped and removed.",
             });
@@ -32,6 +33,7 @@ export function DeleteApplicationButton({ applicationId }: DeleteApplicationButt
         } catch (error) {
             console.error(error);
             toast({
+                convey: 'dangerous',
                 variant: "destructive",
                 title: "Error",
                 description: "Failed to delete application.",
