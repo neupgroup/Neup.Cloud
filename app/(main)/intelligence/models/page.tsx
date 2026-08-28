@@ -3,15 +3,15 @@ import Link from 'next/link';
 import { ArrowRight, Bot, CircleDollarSign, Plus } from 'lucide-react';
 
 import { PageTitle } from '@/components/page-header';
-import { Badge } from '@/component/ui/badge';
-import { Button } from '@/component/ui/button';
+import { Badge } from '#/components/ui/badge';
+import { Button } from '#/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/component/ui/card';
+} from '#/components/ui/card';
 import { getIntelligenceModels } from '@/services/intelligence/store';
 
 export const metadata: Metadata = {

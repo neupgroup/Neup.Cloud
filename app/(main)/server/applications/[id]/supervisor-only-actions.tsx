@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2, Square } from 'lucide-react';
 
-import { Button } from '@/component/ui/button';
+import { Button } from '#/components/ui/button';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -16,7 +16,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from '@/component/ui/alert-dialog';
+} from '#/components/ui/alert-dialog';
 import { deleteSupervisorOnlyProcess, stopSupervisorOnlyProcess } from '@/services/server/applications/service';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { useToast } from '@/core/hooks/useToast';

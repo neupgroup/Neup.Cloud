@@ -1,4 +1,4 @@
-import { Button } from "@/component/ui/button";
+import { Button } from "#/components/ui/button";
 import {
     Card,
     CardContent,
@@ -6,8 +6,8 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/component/ui/card";
-import { Separator } from "@/component/ui/separator";
+} from "#/components/ui/card";
+import { Separator } from "#/components/ui/separator";
 import {
     Table,
     TableBody,
@@ -15,7 +15,7 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/component/ui/table";
+} from "#/components/ui/table";
 import { Download } from "lucide-react";
 import type { Metadata } from 'next';
 import { getBillingPageData } from '@/services/billing';

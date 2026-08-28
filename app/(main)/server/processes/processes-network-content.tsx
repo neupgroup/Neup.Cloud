@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Activity, ArrowLeftRight, Cpu, Globe, Hash, Network, Search, ServerCog, User, XCircle } from 'lucide-react';
-import { Card } from '@/component/ui/card';
-import { Input } from '@/component/ui/input';
-import { Skeleton } from '@/component/ui/skeleton';
-import { Badge } from '@/component/ui/badge';
+import { Card } from '#/components/ui/card';
+import { Input } from '#/components/ui/input';
+import { Skeleton } from '#/components/ui/skeleton';
+import { Badge } from '#/components/ui/badge';
 import { cn } from '@/core/utils';
 import { useToast } from '@/core/hooks/useToast';
 import { getProcesses, killProcess } from '@/services/processes/processes-service';

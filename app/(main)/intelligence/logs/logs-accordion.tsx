@@ -5,8 +5,8 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/component/ui/accordion';
-import { Card, CardContent } from '@/component/ui/card';
+} from '#/components/ui/accordion';
+import { Card, CardContent } from '#/components/ui/card';
 import { cn } from '@/core/utils';
 
 interface LogViewModel {

@@ -4,7 +4,7 @@ import * as LucideIcons from "lucide-react";
 import { Download, Hammer, Loader2, Play, PlayCircle, RefreshCw, StopCircle, Terminal } from "lucide-react";
 import { useState } from "react";
 
-import { Card } from "@/component/ui/card";
+import { Card } from "#/components/ui/card";
 import { useToast } from '@/core/hooks/useToast';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { cn } from "@/core/utils";

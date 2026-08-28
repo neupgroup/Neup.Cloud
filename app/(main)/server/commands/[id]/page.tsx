@@ -7,9 +7,9 @@ import { useRouter } from 'next/navigation';
 import {
     Card,
     CardContent,
-} from '@/component/ui/card';
-import { Skeleton } from '@/component/ui/skeleton';
-import { Button } from '@/component/ui/button';
+} from '#/components/ui/card';
+import { Skeleton } from '#/components/ui/skeleton';
+import { Button } from '#/components/ui/button';
 import {
     Loader2,
     Trash2,
@@ -23,16 +23,16 @@ import {
     DialogHeader,
     DialogTitle,
     DialogClose,
-} from '@/component/ui/dialog';
+} from '#/components/ui/dialog';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from '@/component/ui/select';
-import { Input } from '@/component/ui/input';
-import { Label } from '@/component/ui/label';
+} from '#/components/ui/select';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
 
 import { getServers } from '@/services/server/server-service';
 import { getSavedCommands, deleteSavedCommand, executeSavedCommand } from '@/services/server/commands/server-command-service';

@@ -5,12 +5,12 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/component/ui/card";
+} from "#/components/ui/card";
 import { Database, Globe, Copy, CheckCircle, Shield, Code, Server } from "lucide-react";
-import { Button } from "@/component/ui/button";
+import { Button } from "#/components/ui/button";
 import { PageTitleBack } from "@/components/page-header";
 import type { Metadata } from 'next';
-import { Badge } from "@/component/ui/badge";
+import { Badge } from "#/components/ui/badge";
 import { getDatabaseDetails } from '@/services/database/database-runtime';
 import { notFound } from "next/navigation";
 import { withSelectedServerQuery } from "@/inapp/helpers/navigation";

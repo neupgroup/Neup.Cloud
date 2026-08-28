@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/component/ui/card";
+} from "#/components/ui/card";
 import {
   Table,
   TableBody,
@@ -15,8 +15,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/component/ui/table";
-import { Badge } from "@/component/ui/badge";
+} from "#/components/ui/table";
+import { Badge } from "#/components/ui/badge";
 import { ShieldAlert, AlertTriangle, Info } from "lucide-react";
 import { getErrors } from '@/services/errors/errors-service';
 import { useToast } from '@/core/hooks/useToast';

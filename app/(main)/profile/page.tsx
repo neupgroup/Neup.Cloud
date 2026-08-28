@@ -22,7 +22,7 @@ import {
   Pencil,
   UserRound,
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/component/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar';
 
 type ProfileState = {
   displayName: string;

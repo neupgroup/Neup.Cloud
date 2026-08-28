@@ -3,8 +3,8 @@
 import { AlertCircle, Clock, Loader2, PlayCircle, StopCircle, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { Button } from "@/component/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/component/ui/card";
+import { Button } from "#/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { cn } from "@/core/utils";
 import { AppStatusResult, checkApplicationStatus } from "@/services/server/applications/status-actions";

@@ -3,14 +3,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/component/ui/button';
+import { Button } from '#/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/component/ui/card';
+} from '#/components/ui/card';
 import { PageTitle } from '@/components/page-header';
 import { useToast } from '@/core/hooks/useToast';
 import {
@@ -56,7 +56,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/component/ui/dialog';
+} from '#/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,11 +66,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/component/ui/alert-dialog';
-import { Input } from '@/component/ui/input';
-import { Label } from '@/component/ui/label';
-import { Progress } from '@/component/ui/progress';
-import { Skeleton } from '@/component/ui/skeleton';
+} from '#/components/ui/alert-dialog';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
+import { Progress } from '#/components/ui/progress';
+import { Skeleton } from '#/components/ui/skeleton';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { useServerName } from '@/inapp/hooks/use-server-name';
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';

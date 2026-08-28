@@ -2,11 +2,11 @@
 
 import React, { useMemo, useState, useTransition } from 'react';
 import { PageTitleBack } from '@/components/page-header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/component/ui/card';
-import { Button } from '@/component/ui/button';
-import { Textarea } from '@/component/ui/textarea';
-import { Badge } from '@/component/ui/badge';
-import { Collapsible, CollapsibleContent } from '@/component/ui/collapsible';
+import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card';
+import { Button } from '#/components/ui/button';
+import { Textarea } from '#/components/ui/textarea';
+import { Badge } from '#/components/ui/badge';
+import { Collapsible, CollapsibleContent } from '#/components/ui/collapsible';
 import { ChevronDown, ExternalLink, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 

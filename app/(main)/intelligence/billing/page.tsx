@@ -3,14 +3,14 @@ import Link from 'next/link';
 import { CreditCard, ReceiptText, Sparkles } from 'lucide-react';
 
 import { PageTitle } from '@/components/page-header';
-import { Button } from '@/component/ui/button';
+import { Button } from '#/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/component/ui/card';
+} from '#/components/ui/card';
 import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
 import { getIntelligenceLogs } from '@/services/intelligence/store';
 

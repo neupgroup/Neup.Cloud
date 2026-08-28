@@ -3,14 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageTitle } from '@/components/page-header';
-import { Card } from '@/component/ui/card';
+import { Card } from '#/components/ui/card';
 import { DeleteButton } from '@/components/delete-button';
-import { Input } from '@/component/ui/input';
+import { Input } from '#/components/ui/input';
 import { Trash, Search, Globe, Server, Lock, ChevronRight, PlusCircle, ShieldAlert, EyeOff } from 'lucide-react';
 import { useToast } from '@/core/hooks/useToast';
 import { cn } from '@/core/utils';
 import { getEnvironmentVariables, deleteEnvironmentVariable, type EnvironmentVariable } from '@/services/environment-variables/environment-variables-service';
-import { Badge } from '@/component/ui/badge';
+import { Badge } from '#/components/ui/badge';
 
 export default function EnvironmentsPage() {
     const router = useRouter();

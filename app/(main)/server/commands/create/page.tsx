@@ -5,12 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, PlusCircle, Trash2, Variable } from 'lucide-react';
 
-import { Button } from '@/component/ui/button';
-import { Input } from '@/component/ui/input';
-import { Label } from '@/component/ui/label';
-import { Textarea } from '@/component/ui/textarea';
-import { Card } from '@/component/ui/card';
-import { Checkbox } from '@/component/ui/checkbox';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
+import { Textarea } from '#/components/ui/textarea';
+import { Card } from '#/components/ui/card';
+import { Checkbox } from '#/components/ui/checkbox';
 import { PageTitleBack } from '@/components/page-header';
 
 import { useToast } from '@/core/hooks/useToast';

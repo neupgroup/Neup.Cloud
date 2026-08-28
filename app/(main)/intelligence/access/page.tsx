@@ -3,15 +3,15 @@ import Link from 'next/link';
 import { ArrowRight, Coins, KeyRound, Plus, ShieldCheck } from 'lucide-react';
 
 import { PageTitle } from '@/components/page-header';
-import { Button } from '@/component/ui/button';
+import { Button } from '#/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/component/ui/card';
-import { Badge } from '@/component/ui/badge';
+} from '#/components/ui/card';
+import { Badge } from '#/components/ui/badge';
 import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
 import { maskSecret } from '@/services/intelligence/helpers';
 import { getIntelligenceAccesses } from '@/services/intelligence/store';

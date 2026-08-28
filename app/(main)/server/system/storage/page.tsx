@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { Button } from '@/component/ui/button';
-import { Card } from '@/component/ui/card';
+import { Button } from '#/components/ui/button';
+import { Card } from '#/components/ui/card';
 import { PageTitleBack } from '@/components/page-header';
 import { Server } from 'lucide-react';
 import StorageClient from './storage-client';

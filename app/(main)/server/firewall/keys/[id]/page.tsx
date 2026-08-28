@@ -1,7 +1,7 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/component/ui/card";
-import { Label } from "@/component/ui/label";
-import { Textarea } from "@/component/ui/textarea";
-import { Button } from "@/component/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card";
+import { Label } from "#/components/ui/label";
+import { Textarea } from "#/components/ui/textarea";
+import { Button } from "#/components/ui/button";
 import { Trash2, ChevronLeft } from "lucide-react";
 import Link from 'next/link';
 import { getAuthorizedKeys } from "@/services/server/firewall-keys-service";

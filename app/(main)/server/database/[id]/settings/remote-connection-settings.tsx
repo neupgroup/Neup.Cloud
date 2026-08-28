@@ -7,12 +7,12 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/component/ui/card";
+} from "#/components/ui/card";
 import { Globe } from "lucide-react";
-import { Switch } from "@/component/ui/switch";
-import { Label } from "@/component/ui/label";
-import { Input } from "@/component/ui/input";
-import { Button } from "@/component/ui/button";
+import { Switch } from "#/components/ui/switch";
+import { Label } from "#/components/ui/label";
+import { Input } from "#/components/ui/input";
+import { Button } from "#/components/ui/button";
 import { saveDatabaseSettings, type DatabaseSettings } from '@/services/database/database-runtime';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/core/hooks/useToast';

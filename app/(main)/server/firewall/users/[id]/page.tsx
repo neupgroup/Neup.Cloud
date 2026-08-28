@@ -1,11 +1,11 @@
 'use client';
 
 import { PageTitleBack } from "@/components/page-header";
-import { Button } from "@/component/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/component/ui/card";
-import { Input } from "@/component/ui/input";
-import { Label } from "@/component/ui/label";
-import { Switch } from "@/component/ui/switch";
+import { Button } from "#/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "#/components/ui/card";
+import { Input } from "#/components/ui/input";
+import { Label } from "#/components/ui/label";
+import { Switch } from "#/components/ui/switch";
 import { Loader2, Save, Trash2, Key } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getUserDetails, updateUserPassword, toggleSudo, deleteUser, SystemUser } from "@/services/server/firewall-users-service";
@@ -21,8 +21,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/component/ui/alert-dialog";
-import { Separator } from "@/component/ui/separator";
+} from "#/components/ui/alert-dialog";
+import { Separator } from "#/components/ui/separator";
 
 export default function UserDetailsPage({ params }: { params: { id: string } }) { // id is username
     const username = params.id;

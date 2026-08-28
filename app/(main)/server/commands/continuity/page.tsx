@@ -25,9 +25,9 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Plus, Server, SquareTerminal } from 'lucide-react';
 
-import { Card } from '@/component/ui/card';
+import { Card } from '#/components/ui/card';
 import { PageTitle } from '@/components/page-header';
-import { Skeleton } from '@/component/ui/skeleton';
+import { Skeleton } from '#/components/ui/skeleton';
 import { useToast } from '@/core/hooks/useToast';
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';

@@ -9,14 +9,14 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/component/ui/card";
-import { Button } from "@/component/ui/button";
-import { Skeleton } from "@/component/ui/skeleton";
+} from "#/components/ui/card";
+import { Button } from "#/components/ui/button";
+import { Skeleton } from "#/components/ui/skeleton";
 import { Loader2, Hash, User, Cpu, XCircle, Search } from "lucide-react";
 import { getProcesses, killProcess } from '@/services/processes/processes-service';
 import type { Process } from '@/services/processes/types';
 import { useToast } from '@/core/hooks/useToast';
-import { Input } from '@/component/ui/input';
+import { Input } from '#/components/ui/input';
 
 function ProcessesList({ processes, onKill, killingPid }: { processes: Process[], onKill: (pid: string) => void, killingPid: string | null }) {
     return (

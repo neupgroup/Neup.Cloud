@@ -4,9 +4,9 @@ import { Metadata } from "next";
 import { cookies } from 'next/headers';
 import { getSystemUsers } from "@/services/server/firewall-users-service";
 import UsersList from "./users-list";
-import { Card, CardHeader, CardTitle } from "@/component/ui/card";
+import { Card, CardHeader, CardTitle } from "#/components/ui/card";
 import Link from "next/link";
-import { Button } from "@/component/ui/button";
+import { Button } from "#/components/ui/button";
 
 export const metadata: Metadata = {
     title: 'Users | Firewall | Neup.Cloud',

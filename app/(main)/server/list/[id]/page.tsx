@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Clock3, Loader2, ServerIcon, ShieldAlert, ShieldCheck } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { Button } from "@/component/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/component/ui/card";
+import { Button } from "#/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "#/components/ui/card";
 import { useToast } from "@/core/hooks/useToast";
 import { getServer, updateServer, checkServerConnection } from "@/services/server/server-service";
 import type { Server } from "@/services/server/types";

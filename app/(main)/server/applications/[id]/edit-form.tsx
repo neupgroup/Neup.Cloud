@@ -1,21 +1,21 @@
 'use client';
 
-import { Badge } from '@/component/ui/badge';
-import { Button } from '@/component/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/component/ui/card';
-import { Checkbox } from '@/component/ui/checkbox';
-import { Input } from '@/component/ui/input';
-import { Label } from '@/component/ui/label';
+import { Badge } from '#/components/ui/badge';
+import { Button } from '#/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
+import { Checkbox } from '#/components/ui/checkbox';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/component/ui/select";
-import { Separator } from '@/component/ui/separator';
-import { Switch } from '@/component/ui/switch';
-import { Textarea } from '@/component/ui/textarea';
+} from "#/components/ui/select";
+import { Separator } from '#/components/ui/separator';
+import { Switch } from '#/components/ui/switch';
+import { Textarea } from '#/components/ui/textarea';
 import { useToast } from '@/core/hooks/useToast';
 import { Plus, Trash, X, Upload, AppWindow, Github } from 'lucide-react';
 import { useRouter } from 'next/navigation';

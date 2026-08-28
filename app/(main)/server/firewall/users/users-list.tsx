@@ -2,13 +2,13 @@
 
 import {
     Card,
-} from "@/component/ui/card";
+} from "#/components/ui/card";
 import { User, Shield, Terminal, Plus, ChevronRight, UserCog } from "lucide-react";
 import { SystemUser } from '@/services/server/firewall-users-service';
-import { Skeleton } from '@/component/ui/skeleton';
+import { Skeleton } from '#/components/ui/skeleton';
 import { cn } from '@/core/utils';
 import Link from "next/link";
-import { Badge } from "@/component/ui/badge";
+import { Badge } from "#/components/ui/badge";
 
 export default function UsersList({ users, isLoading }: { users: SystemUser[], isLoading: boolean }) {
     if (isLoading) {

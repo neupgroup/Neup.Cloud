@@ -3,16 +3,16 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageTitleBack } from '@/components/page-header';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/component/ui/card';
-import { Button } from '@/component/ui/button';
-import { Input } from '@/component/ui/input';
-import { Label } from '@/component/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/component/ui/select';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '#/components/ui/card';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '#/components/ui/select';
 import { useToast } from '@/core/hooks/useToast';
 import { Loader2, Save, Check } from 'lucide-react';
 import { cn } from '@/core/utils';
-import { Badge } from '@/component/ui/badge';
-import { Switch } from '@/component/ui/switch';
+import { Badge } from '#/components/ui/badge';
+import { Switch } from '#/components/ui/switch';
 import { createEnvironmentVariable } from '@/services/environment-variables/environment-variables-service';
 
 const AVAILABLE_SERVERS = [

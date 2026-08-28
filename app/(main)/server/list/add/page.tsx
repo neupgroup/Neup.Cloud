@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
-import { Button } from "@/component/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/component/ui/card";
+import { Button } from "#/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "#/components/ui/card";
 import { useToast } from "@/core/hooks/useToast";
 import { createServer, checkServerConnection } from "@/services/server/server-service";
 import { serializeServerMetadata } from "@/services/server/server-metadata";

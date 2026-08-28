@@ -5,8 +5,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Check, ChevronRight, CirclePlus, Loader2, ServerIcon } from "lucide-react";
 
 import { PageTitle } from "@/components/page-header";
-import { Button } from "@/component/ui/button";
-import { Card, CardContent } from "@/component/ui/card";
+import { Button } from "#/components/ui/button";
+import { Card, CardContent } from "#/components/ui/card";
 import { useToast } from "@/core/hooks/useToast";
 import { useSelectedServerId } from "@/inapp/hooks/use-selected-server";
 import { selectServer } from "@/inapp/helpers/selection";

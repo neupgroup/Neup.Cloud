@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { Card } from '@/component/ui/card';
-import { Button } from '@/component/ui/button';
+import { Card } from '#/components/ui/card';
+import { Button } from '#/components/ui/button';
 import { PageTitle } from '@/components/page-header';
 
 export const metadata: Metadata = {

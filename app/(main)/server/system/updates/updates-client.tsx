@@ -2,17 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, ArrowUpCircle, CheckCircle2, AlertCircle, HardDrive } from 'lucide-react';
-import { Button } from '@/component/ui/button';
+import { Button } from '#/components/ui/button';
 import { PageTitleWithComponent } from '@/components/page-header';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/component/ui/card';
-import { Badge } from '@/component/ui/badge';
-import { Skeleton } from '@/component/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from "@/component/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card';
+import { Badge } from '#/components/ui/badge';
+import { Skeleton } from '#/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
 import { useToast } from '@/core/hooks/useToast';
 import { useRouter } from 'next/navigation';
 import { getSystemUpdates, refreshPackageList, getInstalledPackages, type PackageUpdate } from '@/services/server/system-updates';
 import { cn } from '@/core/utils';
-import { Input } from '@/component/ui/input';
+import { Input } from '#/components/ui/input';
 import { Search } from 'lucide-react';
 
 const COLORS = [

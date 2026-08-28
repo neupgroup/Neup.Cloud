@@ -3,14 +3,14 @@ import Link from 'next/link';
 import { ChevronLeft, ChevronRight, BugPlay } from 'lucide-react';
 
 import { PageTitle } from '@/components/page-header';
-import { Button } from '@/component/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/component/ui/card';
+import { Button } from '#/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/component/ui/accordion';
+} from '#/components/ui/accordion';
 import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
 import { getPaginatedIntelligenceDevLogs } from '@/services/intelligence/store';
 

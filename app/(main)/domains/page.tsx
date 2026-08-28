@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
     Card,
-} from '@/component/ui/card';
-import { Button } from '@/component/ui/button';
+} from '#/components/ui/card';
+import { Button } from '#/components/ui/button';
 import {
     Globe,
     Search,
@@ -19,9 +19,9 @@ import { getDomains } from '@/services/domains/domains-service';
 import type { ManagedDomain } from '@/services/domains/types';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/core/utils';
-import { Input } from '@/component/ui/input';
-import { Skeleton } from '@/component/ui/skeleton';
-import { Badge } from '@/component/ui/badge';
+import { Input } from '#/components/ui/input';
+import { Skeleton } from '#/components/ui/skeleton';
+import { Badge } from '#/components/ui/badge';
 
 function ManagedDomainList({ domains, isLoading, searchQuery }: { domains: ManagedDomain[], isLoading: boolean, searchQuery: string }) {
     const router = useRouter();

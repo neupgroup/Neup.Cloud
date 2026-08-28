@@ -4,16 +4,16 @@ import { Coins, KeySquare, ShieldEllipsis } from 'lucide-react';
 
 import { createAccessTokenAction } from '@/services/intelligence/intelligence-service';
 import { PageTitle } from '@/components/page-header';
-import { Button } from '@/component/ui/button';
-import { Input } from '@/component/ui/input';
-import { Label } from '@/component/ui/label';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/component/ui/card';
+} from '#/components/ui/card';
 import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
 import { maskSecret } from '@/services/intelligence/helpers';
 import { getAccessTokens } from '@/services/intelligence/store';

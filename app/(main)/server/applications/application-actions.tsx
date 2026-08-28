@@ -11,8 +11,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/component/ui/alert-dialog";
-import { Button } from "@/component/ui/button";
+} from "#/components/ui/alert-dialog";
+import { Button } from "#/components/ui/button";
 import { useToast } from '@/core/hooks/useToast';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';

@@ -11,7 +11,7 @@ import { PageTitle } from "@/components/page-header";
 import { ShieldAlert } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
-import { Button } from "@/component/ui/button";
+import { Button } from "#/components/ui/button";
 import { getServer } from "@/services/server/server-service";
 import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
 

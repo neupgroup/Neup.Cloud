@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect, useTransition, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/component/ui/card';
-import { Button } from '@/component/ui/button';
-import { Input } from '@/component/ui/input';
-import { Skeleton } from '@/component/ui/skeleton';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Skeleton } from '#/components/ui/skeleton';
 import { useToast } from '@/core/hooks/useToast';
 import { Search, CheckCircle, XCircle, ShoppingCart, Loader2, ArrowLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import { checkDomain } from '@/services/domains/domains-service';
@@ -13,7 +13,7 @@ import type { DomainStatus } from '@/services/domains/types';
 import Link from 'next/link';
 import { PageTitleBack } from '@/components/page-header';
 import { cn } from '@/core/utils';
-import { Badge } from '@/component/ui/badge';
+import { Badge } from '#/components/ui/badge';
 
 function DomainListResult({ results, isLoading, query }: { results: DomainStatus[], isLoading: boolean, query: string }) {
     const { toast } = useToast();

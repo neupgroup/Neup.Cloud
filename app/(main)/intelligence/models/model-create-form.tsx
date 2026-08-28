@@ -6,17 +6,17 @@ import Link from 'next/link';
 import { Bot, Calculator, Flag } from 'lucide-react';
 
 import { createIntelligenceModelAction } from '@/services/intelligence/intelligence-service';
-import { Button } from '@/component/ui/button';
+import { Button } from '#/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/component/ui/card';
-import { Input } from '@/component/ui/input';
-import { Label } from '@/component/ui/label';
-import { Textarea } from '@/component/ui/textarea';
+} from '#/components/ui/card';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
+import { Textarea } from '#/components/ui/textarea';
 import { getCurrencySuggestions,
   getProviderSuggestions,
   normalizeCurrencyInput,

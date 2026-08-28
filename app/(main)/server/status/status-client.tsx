@@ -20,9 +20,9 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/component/ui/card";
-import { Button } from "@/component/ui/button";
-import { Skeleton } from "@/component/ui/skeleton";
+} from "#/components/ui/card";
+import { Button } from "#/components/ui/button";
+import { Skeleton } from "#/components/ui/skeleton";
 import { Activity, HeartPulse, Server, Loader2, ChevronLeft, ChevronRight, Cpu, User, Hash, Search, XCircle, Globe, ArrowLeftRight } from "lucide-react";
 import { startStatusTracking, stopStatusTracking, getStatus, type StatusData } from '@/services/server/status';
 import { getProcesses, killProcess } from '@/services/processes/processes-service';
@@ -30,7 +30,7 @@ import type { Process } from '@/services/processes/types';
 import { getNetworkConnections, type NetworkConnection } from '@/services/server/network';
 import { useToast } from '@/core/hooks/useToast';
 import { PageTitleWithComponent } from '@/components/page-header';
-import { Input } from '@/component/ui/input';
+import { Input } from '#/components/ui/input';
 import {
     AreaChart,
     Area,
@@ -47,7 +47,7 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/component/ui/select";
+} from "#/components/ui/select";
 import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
 
 const CustomTooltip = ({ active, payload, label, unit }: any) => {

@@ -3,10 +3,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/component/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "#/components/ui/card";
 import { ArrowRightLeft, ShieldCheck, ShieldX, Trash2, Key, ChevronLeft, Loader2, Save, Lock } from "lucide-react";
-import { Button } from "@/component/ui/button";
-import { Badge } from "@/component/ui/badge";
+import { Button } from "#/components/ui/button";
+import { Badge } from "#/components/ui/badge";
 import { useToast } from '@/core/hooks/useToast';
 import {
     deleteDatabaseUser,
@@ -16,9 +16,9 @@ import {
     updateDatabaseUserPermissions
 } from '@/services/database/database-runtime';
 import Link from 'next/link';
-import { Input } from "@/component/ui/input";
-import { Label } from "@/component/ui/label";
-import { Checkbox } from "@/component/ui/checkbox";
+import { Input } from "#/components/ui/input";
+import { Label } from "#/components/ui/label";
+import { Checkbox } from "#/components/ui/checkbox";
 import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 
 interface UserManageClientProps {

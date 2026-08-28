@@ -7,8 +7,8 @@ import { useRouter } from 'next/navigation';
 import { updateServer } from '@/services/server/server-service';
 import { createRecurringSwap, deleteRecurringSwap, deleteSwapFile, listSwapFiles } from '@/services/server/system-swap';
 import type { SwapFileEntry } from '@/services/server/system-swap';
-import { Button } from '@/component/ui/button';
-import { Input } from '@/component/ui/input';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
 import { useToast } from '@/core/hooks/useToast';
 import {
     Zap,

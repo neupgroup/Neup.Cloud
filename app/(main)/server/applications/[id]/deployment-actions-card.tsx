@@ -1,7 +1,7 @@
 // This file has been removed as it is not UI-only or action logic.
 'use client';
 
-import { Card } from "@/component/ui/card";
+import { Card } from "#/components/ui/card";
 import { useToast } from '@/core/hooks/useToast';
 import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
 import { cn } from "@/core/utils";

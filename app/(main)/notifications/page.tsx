@@ -13,7 +13,7 @@ Renders the account notifications center at `/notifications`.
 
 import { AlertCircle, CheckCheck } from 'lucide-react';
 import type { Metadata } from 'next';
-import { Card, CardContent } from '@/component/ui/card';
+import { Card, CardContent } from '#/components/ui/card';
 import { PageTitle } from '@/components/page-header';
 import logica from '@/logica';
 import { getCookie } from '@/core/helpers/cookie';

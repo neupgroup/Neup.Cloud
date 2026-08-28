@@ -1,4 +1,4 @@
-import { Button } from '@/component/ui/button';
+import { Button } from '#/components/ui/button';
 import { Trash } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/core/hooks/useToast';

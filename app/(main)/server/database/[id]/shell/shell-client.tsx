@@ -7,12 +7,12 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/component/ui/card";
+} from "#/components/ui/card";
 import { Terminal, Play, Trash2, Clock, Database, AlertCircle, CheckCircle2 } from "lucide-react";
-import { Button } from "@/component/ui/button";
+import { Button } from "#/components/ui/button";
 import { PageTitleBack } from "@/components/page-header";
-import { Badge } from "@/component/ui/badge";
-import { Textarea } from "@/component/ui/textarea";
+import { Badge } from "#/components/ui/badge";
+import { Textarea } from "#/components/ui/textarea";
 import { useToast } from '@/core/hooks/useToast';
 import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
 

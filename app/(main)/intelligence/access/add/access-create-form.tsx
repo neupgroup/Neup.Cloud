@@ -8,23 +8,23 @@ import {
   createIntelligenceAccessAction,
   type CreateIntelligenceAccessActionState,
 } from '@/services/intelligence/intelligence-service';
-import { Button } from '@/component/ui/button';
-import { Label } from '@/component/ui/label';
+import { Button } from '#/components/ui/button';
+import { Label } from '#/components/ui/label';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/component/ui/card';
-import { Input } from '@/component/ui/input';
-import { Textarea } from '@/component/ui/textarea';
+} from '#/components/ui/card';
+import { Input } from '#/components/ui/input';
+import { Textarea } from '#/components/ui/textarea';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/component/ui/dropdown-menu';
+} from '#/components/ui/dropdown-menu';
 
 interface TokenOption {
   id: number;

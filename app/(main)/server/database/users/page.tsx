@@ -3,9 +3,9 @@ import {
     CardContent,
     CardHeader,
     CardTitle,
-} from "@/component/ui/card";
-import { Badge } from "@/component/ui/badge";
-import { Button } from "@/component/ui/button";
+} from "#/components/ui/card";
+import { Badge } from "#/components/ui/badge";
+import { Button } from "#/components/ui/button";
 import { PageTitle } from "@/components/page-header";
 import {
     Database,
