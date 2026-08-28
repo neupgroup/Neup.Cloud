@@ -55,8 +55,12 @@ export function useRepoControls(applicationId: string) {
         const operationToast = toast({
             name: `application-git-${applicationId}`,
             convey: 'info',
-            icon: operation === 'clone' || operation === 'pull'
-                ? <Icon type="animated" from="Download" size={24} />
+            icon: operation === 'clone' || operation === 'pull' || operation === 'pull-force'
+                ? <Icon
+                    type="animated"
+                    from={operation === 'pull-force' ? 'download_white' : 'Download'}
+                    size={24}
+                  />
                 : undefined,
             actions,
             title: messages.started,
@@ -64,12 +68,21 @@ export function useRepoControls(applicationId: string) {
         });
 
         try {
-            await performGitOperation(applicationId, selectedServerId, operation);
+            const result = await performGitOperation(applicationId, selectedServerId, operation);
+            if (result?.error) {
+                throw new Error(result.error);
+            }
             setOperationStatus({ operation, result: 'success' });
             operationToast.update({
                 convey: 'success',
-                icon: operation === 'clone' || operation === 'pull'
-                    ? <Icon type="animated" from="Download" to="TickMark" position={2} size={24} />
+                icon: operation === 'clone' || operation === 'pull' || operation === 'pull-force'
+                    ? <Icon
+                        type="animated"
+                        from={operation === 'pull-force' ? 'download_white' : 'Download'}
+                        to={operation === 'pull-force' ? 'tickmark_white' : 'TickMark'}
+                        position={2}
+                        size={24}
+                      />
                     : undefined,
                 actions: [
                     ['Open app', 'success', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
@@ -83,8 +96,14 @@ export function useRepoControls(applicationId: string) {
             setOperationStatus({ operation, result: 'error' });
             operationToast.update({
                 convey: 'dangerous',
-                icon: operation === 'clone' || operation === 'pull'
-                    ? <Icon type="animated" from="Download" to="CrossMark" position={2} size={24} />
+                icon: operation === 'clone' || operation === 'pull' || operation === 'pull-force'
+                    ? <Icon
+                        type="animated"
+                        from={operation === 'pull-force' ? 'download_white' : 'Download'}
+                        to="CrossMark"
+                        position={2}
+                        size={24}
+                      />
                     : undefined,
                 actions: [
                     ['Open app', 'danger', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],

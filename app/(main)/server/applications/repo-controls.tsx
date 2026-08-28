@@ -2,7 +2,7 @@
 
 import { Button } from "#/components/ui/button";
 import Icon from "#/components/ui/icon";
-import { Download, GitPullRequest, RefreshCw, RotateCcw } from "lucide-react";
+import { Download, GitPullRequest, RotateCcw } from "lucide-react";
 
 import { useRepoControls } from '@/components/applications/repo-controls';
 
@@ -13,15 +13,31 @@ interface RepoControlsProps {
 export function RepoControls({ applicationId }: RepoControlsProps) {
   const { loading, operationStatus, handleAction } = useRepoControls(applicationId);
 
-  const getRepositoryIcon = (operation: 'clone' | 'pull') => {
+  const getRepositoryIcon = (operation: 'clone' | 'pull' | 'pull-force') => {
     if (loading === operation) {
-      return <Icon type="animated" from="Download" size={18} />;
+      return <Icon
+        type="animated"
+        from={operation === 'pull-force' ? 'download_white' : 'Download'}
+        size={18}
+      />;
     }
 
     if (operationStatus?.operation === operation) {
       return operationStatus.result === 'success'
-        ? <Icon type="animated" from="Download" to="TickMark" position={2} size={18} />
-        : <Icon type="animated" from="Download" to="CrossMark" position={2} size={18} />;
+        ? <Icon
+            type="animated"
+            from={operation === 'pull-force' ? 'download_white' : 'Download'}
+            to={operation === 'pull-force' ? 'tickmark_white' : 'TickMark'}
+            position={2}
+            size={18}
+          />
+        : <Icon
+            type="animated"
+            from={operation === 'pull-force' ? 'download_white' : 'Download'}
+            to="CrossMark"
+            position={2}
+            size={18}
+          />;
     }
 
     return operation === 'clone'
@@ -70,7 +86,7 @@ export function RepoControls({ applicationId }: RepoControlsProps) {
         onClick={() => handleAction('pull-force')}
         disabled={!!loading}
       >
-        <RefreshCw className="mr-2 h-4 w-4" />
+        {getRepositoryIcon('pull-force')}
         {loading === 'pull-force' ? 'Forcing...' : 'Force Pull'}
       </Button>
     </div>
