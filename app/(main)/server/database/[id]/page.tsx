@@ -14,7 +14,7 @@ import { Badge } from "#/components/ui/badge";
 import { getDatabaseDetails } from '@/services/database/database-runtime';
 import { notFound } from "next/navigation";
 import Link from 'next/link';
-import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
+import { withSelectedServerQuery } from "@/helpers/navigation";
 import { parseDatabaseRouteId, resolveSelectedServerId } from "../route-helpers";
 import { DropDatabaseButton } from "./drop-database-button";
 

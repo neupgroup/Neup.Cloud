@@ -1,6 +1,6 @@
-import { Prisma, prisma } from '@/core/database/prisma';
+import { Prisma, prisma } from '#/core/database/prisma';
 import type { CommandVariable, SavedCommand } from '@/services/saved-commands/types';
-import { stringUuid } from '@/core/data/uuid';
+import { stringUuid } from '#/core/data/uuid';
 
 function toJsonField(value: Prisma.InputJsonValue | null | undefined) {
   return value === undefined ? undefined : value === null ? Prisma.DbNull : value;

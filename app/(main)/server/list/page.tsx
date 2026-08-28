@@ -7,9 +7,9 @@ import { ArrowRight, Check, ChevronRight, CirclePlus, Loader2, ServerIcon } from
 import { PageTitle } from "@/components/page-header";
 import { Button } from "#/components/ui/button";
 import { Card, CardContent } from "#/components/ui/card";
-import { useToast } from "@/core/hooks/useToast";
-import { useSelectedServerId } from "@/inapp/hooks/use-selected-server";
-import { selectServer } from "@/inapp/helpers/selection";
+import { useToast } from "#/core/hooks/useToast";
+import { useSelectedServerId } from "@/hooks/use-selected-server";
+import { selectServer } from "@/helpers/selection";
 import { getServersWithRunningApplications } from "@/services/server/server-service";
 import { getServerExpiration } from "@/services/server/server-metadata";
 import type { Server } from "@/services/server/types";

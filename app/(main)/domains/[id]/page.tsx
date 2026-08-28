@@ -6,12 +6,12 @@ import { Skeleton } from "#/components/ui/skeleton";
 import { Card } from "#/components/ui/card";
 import { Trash2, Copy, Check } from "lucide-react";
 import { useParams } from 'next/navigation';
-import { cn } from "@/core/utils";
+import { cn } from "#/core/utils";
 import { getDomain, getDomainDNSRecords, getDomainNameservers, verifyDomain, deleteDomain } from '@/services/domains/domains-service';
 import type { ManagedDomain, DNSRecord } from '@/services/domains/types';
 import { useEffect, useState } from "react";
 import { PageTitleBack } from "@/components/page-header";
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { useRouter } from "next/navigation";
 import {
     AlertDialog,

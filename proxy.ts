@@ -22,8 +22,8 @@ on a browser or server round trip to the account auth endpoint.
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { buildPublicAppUrl } from '@/core/helpers/link/url';
-import logica from '@/logica';
+import { buildPublicAppUrl } from '#/core/helpers/link/url';
+import logica from '#/logica';
 import { ensureAccountProfile, type AccountProfile } from '@/services/account-profile';
 
 type JwtPayload = {

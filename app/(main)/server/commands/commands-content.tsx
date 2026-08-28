@@ -26,7 +26,7 @@ import { getServerLogs } from '@/services/server/server-file-service';
 import { runCustomCommandOnServer } from '@/services/server/server-file-service';
 import { Label } from '#/components/ui/label';
 import { Textarea } from '#/components/ui/textarea';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import {
   Dialog,
   DialogContent,
@@ -38,11 +38,11 @@ import {
 } from '#/components/ui/dialog';
 import { Input } from '#/components/ui/input';
 import { type SavedCommand } from '@/services/saved-commands/types';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import { CommandLogList, CommandLogListSkeleton } from './command-log-card';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { resolveSelectedServerValue, withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { resolveSelectedServerValue, withSelectedServerQuery } from '@/helpers/navigation';
 import { PageTitle } from '@/components/page-header';
 
 /*

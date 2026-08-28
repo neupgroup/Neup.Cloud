@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "#/com
 import { ArrowRightLeft, ShieldCheck, ShieldX, Trash2, Key, ChevronLeft, Loader2, Save, Lock } from "lucide-react";
 import { Button } from "#/components/ui/button";
 import { Badge } from "#/components/ui/badge";
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import {
     deleteDatabaseUser,
     reassignDatabaseUserOwnedObjects,
@@ -19,7 +19,7 @@ import Link from 'next/link';
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { Checkbox } from "#/components/ui/checkbox";
-import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/hooks/use-selected-server';
 
 interface UserManageClientProps {
     serverId: string;

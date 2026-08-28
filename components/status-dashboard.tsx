@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { AppStatusResult, checkApplicationStatus } from "@/services/server/applications/status-actions";
 import { AlertCircle, Clock, Loader2, PlayCircle, StopCircle, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { cn } from "@/core/utils";
+import { cn } from "#/core/utils";
 import { Button } from "#/components/ui/button";
 
 interface StatusDashboardProps {

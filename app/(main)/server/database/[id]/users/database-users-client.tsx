@@ -3,10 +3,10 @@
 import { Card } from "#/components/ui/card";
 import { User, Plus, Shield, ShieldCheck, ChevronRight } from "lucide-react";
 import Link from 'next/link';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import { Badge } from "#/components/ui/badge";
 import type { DatabaseUser } from '@/services/database/database-runtime';
-import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/hooks/use-selected-server';
 import { buildDatabaseUserRouteSlug } from "../../route-paths";
 
 export default function DatabaseUsersClient({ users, dbId }: { users: DatabaseUser[], dbId: string }) {

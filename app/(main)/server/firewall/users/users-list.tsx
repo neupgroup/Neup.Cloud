@@ -6,7 +6,7 @@ import {
 import { User, Shield, Terminal, Plus, ChevronRight, UserCog } from "lucide-react";
 import { SystemUser } from '@/services/server/firewall-users-service';
 import { Skeleton } from '#/components/ui/skeleton';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import Link from "next/link";
 import { Badge } from "#/components/ui/badge";
 

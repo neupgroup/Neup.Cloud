@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { Clock, Loader2 } from "lucide-react";
-import { cn } from "@/core/utils";
+import { cn } from "#/core/utils";
 
 interface SystemHealthCardProps {
     uptime: string | null;

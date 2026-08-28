@@ -24,9 +24,9 @@ These hooks live in `inapp` because selected-server navigation is application co
 */
 
 import { usePathname, useSearchParams } from 'next/navigation';
-import { getSelectedServer, selectServer } from '@/inapp/helpers/selection';
+import { getSelectedServer, selectServer } from '@/helpers/selection';
 
-export { selectServer as withSelectedServerQuery } from '@/inapp/helpers/selection';
+export { selectServer as withSelectedServerQuery } from '@/helpers/selection';
 
 function getCurrentSearch() {
   return typeof window === 'undefined' ? '' : window.location.search;

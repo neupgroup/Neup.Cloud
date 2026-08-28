@@ -29,10 +29,10 @@ import { ArrowLeft, Loader2, Server, SquareTerminal, XCircle } from 'lucide-reac
 import { Button } from '#/components/ui/button';
 import { Card } from '#/components/ui/card';
 import { Skeleton } from '#/components/ui/skeleton';
-import { useToast } from '@/core/hooks/useToast';
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { useServerName } from '@/inapp/hooks/use-server-name';
+import { useToast } from '#/core/hooks/useToast';
+import { withSelectedServerQuery } from '@/helpers/navigation';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { useServerName } from '@/hooks/use-server-name';
 import { getContinuitySessionSnapshot, sendContinuityCommand, sendContinuityEnter, terminateContinuitySession, type ContinuitySessionSnapshot } from '@/services/server/continuity-service';
 import { getServer } from '@/services/server/server-service';
 

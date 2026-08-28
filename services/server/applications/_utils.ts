@@ -1,4 +1,4 @@
-import { Prisma } from '@/core/database/prisma';
+import { Prisma } from '#/core/database/prisma';
 
 import type { Application } from './_types';
 

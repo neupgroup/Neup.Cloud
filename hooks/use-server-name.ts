@@ -24,7 +24,7 @@ The hook caches server names in session storage to avoid repeated client-side lo
 import { useEffect, useState } from 'react';
 
 import { getServer } from '@/services/server/server-service';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
 
 export function useServerName() {
   const [serverName, setServerName] = useState<string | null>(null);

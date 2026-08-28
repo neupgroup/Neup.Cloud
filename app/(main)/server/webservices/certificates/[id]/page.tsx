@@ -2,17 +2,17 @@
 'use client';
 
 import { PageTitleBack } from '@/components/page-header';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/core/hooks/useToast';
+import { Badge } from '#/components/ui/badge';
+import { Button } from '#/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
+import { Skeleton } from '#/components/ui/skeleton';
+import { useToast } from '#/core/hooks/useToast';
 import { AlertCircle, Calendar, CheckCircle2, Copy, FileText, Globe, Key, RefreshCw, Shield, ShieldCheck, Trash2, XCircle } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { deleteCertificate, getCertificate, reissueCertificate } from '@/services/webservices/certificates-service';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 interface CertificateDetails {
     fileName: string;

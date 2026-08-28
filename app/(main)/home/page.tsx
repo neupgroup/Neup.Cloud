@@ -24,7 +24,7 @@ import { Input } from '#/components/ui/input';
 import { Skeleton } from '#/components/ui/skeleton';
 import { getServers } from '@/services/server/server-service';
 import { getServerExpiration, isServerDisabled } from '@/services/server/server-metadata';
-import { selectServer } from '@/inapp/helpers/selection';
+import { selectServer } from '@/helpers/selection';
 
 function isExpired(value?: string | null) {
   if (!value) return false;

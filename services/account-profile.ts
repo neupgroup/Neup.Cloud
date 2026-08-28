@@ -21,9 +21,9 @@ environment hooks, and returns the database-backed row.
 ::end
 */
 
-import { prisma } from '@/core/database/prisma';
-import logica from '@/logica';
-import { getCookie } from '@/core/helpers/cookie';
+import { prisma } from '#/core/database/prisma';
+import logica from '#/logica';
+import { getCookie } from '#/core/helpers/cookie';
 
 export type AccountProfile = {
   id: string;

@@ -5,9 +5,9 @@ import { Download, Hammer, Loader2, Play, PlayCircle, RefreshCw, StopCircle, Ter
 import { useState } from "react";
 
 import { Card } from "#/components/ui/card";
-import { useToast } from '@/core/hooks/useToast';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { cn } from "@/core/utils";
+import { useToast } from '#/core/hooks/useToast';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { cn } from "#/core/utils";
 import { executeApplicationCommand } from "@/services/server/applications/service";
 
 interface LifecycleSectionProps {

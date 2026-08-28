@@ -1,5 +1,5 @@
-import { stringUuid } from '@/core/data/uuid';
-import { prisma } from '@/core/database/prisma';
+import { stringUuid } from '#/core/data/uuid';
+import { prisma } from '#/core/database/prisma';
 import { getCurrentAccountId } from '@/services/account-profile';
 
 export async function createServerLog(data: {

@@ -14,7 +14,7 @@ import Link from 'next/link';
 import { Card } from '#/components/ui/card';
 import { Button } from '#/components/ui/button';
 import NetworkTestClient from "./test-client";
-import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
+import { withSelectedServerQuery } from "@/helpers/navigation";
 
 export const metadata: Metadata = {
     title: 'Test Network Firewall | Neup.Cloud',

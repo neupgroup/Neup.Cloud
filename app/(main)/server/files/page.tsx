@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from '#/components/ui/card';
 import { PageTitle } from '@/components/page-header';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import {
   Folder as FolderIcon,
   File as FileIcon,
@@ -71,9 +71,9 @@ import { Input } from '#/components/ui/input';
 import { Label } from '#/components/ui/label';
 import { Progress } from '#/components/ui/progress';
 import { Skeleton } from '#/components/ui/skeleton';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { useServerName } from '@/inapp/hooks/use-server-name';
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { useServerName } from '@/hooks/use-server-name';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 /*
 ::neup.documentation::server-files-page

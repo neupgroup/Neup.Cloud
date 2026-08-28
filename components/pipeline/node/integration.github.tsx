@@ -8,8 +8,8 @@ import {
   type PipelineNodeInspectorArgs,
   type PipelineNodeRecord,
 } from '@/components/pipeline/node/interface';
-import { Input } from '@/component/ui/input';
-import { Textarea } from '@/component/ui/textarea';
+import { Input } from '#/components/ui/input';
+import { Textarea } from '#/components/ui/textarea';
 
 type GithubNodeData = PipelineNodeRecord & {
   githubConnectionLabel?: string;

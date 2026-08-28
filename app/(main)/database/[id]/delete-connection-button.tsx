@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '#/components/ui/button';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { deleteDatabaseConnection } from '@/services/database/management';
 import { useRouter } from 'next/navigation';
 

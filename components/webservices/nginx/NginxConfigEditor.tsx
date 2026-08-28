@@ -14,8 +14,8 @@ import {
 } from '@/services/webservices/nginx/service';
 import { getCertificates } from '@/services/webservices/certificates-service';
 import { getWebOrServerNginxConfig } from '@/services/webservices/service';
-import { Button } from '@/component/ui/button';
-import { useToast } from '@/core/hooks/useToast';
+import { Button } from '#/components/ui/button';
+import { useToast } from '#/core/hooks/useToast';
 import {
     Loader2,
     Plus,
@@ -39,18 +39,18 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from '@/component/ui/select';
-import { Input } from '@/component/ui/input';
-import { Label } from '@/component/ui/label';
-import { Badge } from '@/component/ui/badge';
-import { Textarea } from '@/component/ui/textarea';
+} from '#/components/ui/select';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
+import { Badge } from '#/components/ui/badge';
+import { Textarea } from '#/components/ui/textarea';
 import { PageTitleBack } from '@/components/page-header';
-import { RadioGroup, RadioGroupItem } from '@/component/ui/radio-group';
-import { Skeleton } from '@/component/ui/skeleton';
-import { Switch } from '@/component/ui/switch';
-import { Card } from '@/component/ui/card';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/inapp/hooks/use-selected-server';
+import { RadioGroup, RadioGroupItem } from '#/components/ui/radio-group';
+import { Skeleton } from '#/components/ui/skeleton';
+import { Switch } from '#/components/ui/switch';
+import { Card } from '#/components/ui/card';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/hooks/use-selected-server';
 
 interface ProxySettings {
     setHost?: boolean;

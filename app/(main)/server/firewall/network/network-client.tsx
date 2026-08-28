@@ -17,10 +17,10 @@ import {
 import { ShieldCheck, Network, Trash2, Plus, Info, Activity, ChevronRight } from "lucide-react";
 import { getFirewallStatus, allowPort, deleteRule, toggleFirewall, type FirewallRule } from '@/services/server/firewall/firewall-service';
 import { isSshAllowRule } from '@/services/server/firewall/firewall-rules';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { Skeleton } from '#/components/ui/skeleton';
 import { Button } from "#/components/ui/button";
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import {
     Dialog,
     DialogContent,
@@ -40,7 +40,7 @@ import {
     SelectValue,
 } from "#/components/ui/select";
 import { Badge } from '#/components/ui/badge';
-import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/hooks/use-selected-server';
 
 function RulesList({ rules, firewallActive, onDelete }: { rules: FirewallRule[], firewallActive: boolean, onDelete: (id: number) => void }) {
     if (rules.length === 0) {

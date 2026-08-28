@@ -1,4 +1,4 @@
-import { prisma } from '@/core/database/prisma';
+import { prisma } from '#/core/database/prisma';
 
 import type { Application } from './_types';
 import { mapApplication } from './_utils';

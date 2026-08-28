@@ -8,10 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/com
 import { Badge } from '#/components/ui/badge';
 import { Skeleton } from '#/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { useRouter } from 'next/navigation';
 import { getSystemUpdates, refreshPackageList, getInstalledPackages, type PackageUpdate } from '@/services/server/system-updates';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import { Input } from '#/components/ui/input';
 import { Search } from 'lucide-react';
 

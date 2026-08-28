@@ -33,7 +33,7 @@ import {
   Workflow,
 } from 'lucide-react';
 
-import { Button } from '@/component/ui/button';
+import { Button } from '#/components/ui/button';
 import {
   createPipelineLogAction,
   savePipelineFlowAction,
@@ -71,7 +71,7 @@ import {
   type PipelineIntelligencePrompt,
   type PipelineIntelligenceToken,
 } from '@/components/pipeline/node/intelligence.shared';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import { PipelineContextMenu } from '@/components/pipeline/pipeline-context-menu';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';

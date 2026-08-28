@@ -1,6 +1,6 @@
 'use server';
 
-import { getResponse } from '@/core/intelligence';
+import { getResponse } from '#/core/intelligence';
 
 export interface InvokeModelInput {
   provider: string | null;

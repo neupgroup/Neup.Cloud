@@ -15,7 +15,7 @@ import { Input } from "#/components/ui/input";
 import { Button } from "#/components/ui/button";
 import { saveDatabaseSettings, type DatabaseSettings } from '@/services/database/database-runtime';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 
 type RemoteConnectionSettingsProps = {
     serverId: string;

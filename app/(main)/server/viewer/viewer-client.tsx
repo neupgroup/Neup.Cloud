@@ -6,8 +6,8 @@ import { Button } from '#/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
 import { Loader2, Save, AlertTriangle, ArrowLeft, Shield, ShieldOff } from 'lucide-react';
 import { getFileContent, saveFileContent } from '@/services/server/viewer-service';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { useToast } from '@/core/hooks/useToast';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { useToast } from '#/core/hooks/useToast';
 
 export default function ViewerClient() {
   const router = useRouter();

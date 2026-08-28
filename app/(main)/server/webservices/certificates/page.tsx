@@ -1,16 +1,16 @@
 "use client";
 
 import { PageTitleBack } from '@/components/page-header';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/core/hooks/useToast';
+import { Button } from '#/components/ui/button';
+import { Card } from '#/components/ui/card';
+import { Skeleton } from '#/components/ui/skeleton';
+import { useToast } from '#/core/hooks/useToast';
 import { AlertCircle, Calendar, CheckCircle2, FileKey, RefreshCw, Shield, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getCertificates } from '@/services/webservices/certificates-service';
 import Link from 'next/link';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 interface Certificate {
     fileName: string;

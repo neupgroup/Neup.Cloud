@@ -43,7 +43,7 @@ import {
   Bell
 } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import { Button } from '#/components/ui/button';
 import { useState, useEffect, Suspense } from 'react';
 import { ScrollArea } from '#/components/ui/scroll-area';
@@ -56,8 +56,8 @@ import { findLongestMatch } from '@/services/core/findLongestMatch';
 import {
   shouldPreserveSelectedServer,
   withSelectedServerQuery,
-} from '@/inapp/helpers/navigation';
-import { getSelectedServer } from '@/inapp/helpers/selection';
+} from '@/helpers/navigation';
+import { getSelectedServer } from '@/helpers/selection';
 
 type CurrentAccountProfile = {
   displayName: string | null;

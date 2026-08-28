@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from '@/core/database/prisma';
+import { prisma } from '#/core/database/prisma';
 import { stripToMainOutput, hasMainMarkers } from '@/services/saved-commands/saved-commands-service';
 import { getAccountDisplayName, getCurrentAccountDisplayName } from '@/services/account-profile';
 

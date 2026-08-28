@@ -24,7 +24,7 @@ import {
     type DatabaseUserAssignment
 } from "@/services/database/database-runtime";
 import { getServer } from "@/services/server/server-service";
-import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
+import { withSelectedServerQuery } from "@/helpers/navigation";
 import {
     buildDatabaseRouteId,
     buildDatabaseUserRouteSlug
@@ -32,7 +32,7 @@ import {
 import {
     resolveSelectedServerId
 } from "../route-helpers";
-import { cn } from "@/core/utils";
+import { cn } from "#/core/utils";
 
 export const metadata: Metadata = {
     title: "Database Users | Neup.Cloud",

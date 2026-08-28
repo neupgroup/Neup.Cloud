@@ -5,24 +5,24 @@ import { useRouter } from 'next/navigation';
 import { Plus, Trash, X, Upload, AppWindow, Github } from 'lucide-react';
 
 import { PageTitleBack } from '@/components/page-header';
-import { Button } from '@/component/ui/button';
-import { Input } from '@/component/ui/input';
-import { Label } from '@/component/ui/label';
-import { Textarea } from '@/component/ui/textarea';
-import { Switch } from '@/component/ui/switch';
-import { Checkbox } from '@/component/ui/checkbox';
-import { Badge } from '@/component/ui/badge';
-import { Separator } from '@/component/ui/separator';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
+import { Textarea } from '#/components/ui/textarea';
+import { Switch } from '#/components/ui/switch';
+import { Checkbox } from '#/components/ui/checkbox';
+import { Badge } from '#/components/ui/badge';
+import { Separator } from '#/components/ui/separator';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/component/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/component/ui/card';
-import { useServerName } from '@/inapp/hooks/use-server-name';
-import { useToast } from '@/core/hooks/useToast';
+} from "#/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
+import { useServerName } from '@/hooks/use-server-name';
+import { useToast } from '#/core/hooks/useToast';
 
 import { createApplication } from '@/services/server/applications/service';
 import { normalizeApplicationNameInput } from '@/services/server/applications/name';

@@ -16,7 +16,7 @@ import {
 import { Separator } from '#/components/ui/separator';
 import { Switch } from '#/components/ui/switch';
 import { Textarea } from '#/components/ui/textarea';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { Plus, Trash, X, Upload, AppWindow, Github } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useRef, useState } from 'react';

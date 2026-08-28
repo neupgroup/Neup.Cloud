@@ -14,17 +14,17 @@ Supports a configurable page header so different routes can reuse the same domai
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Card } from '@/component/ui/card';
-import { Button } from '@/component/ui/button';
-import { Label } from '@/component/ui/label';
+import { Card } from '#/components/ui/card';
+import { Button } from '#/components/ui/button';
+import { Label } from '#/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/component/ui/select';
-import { Skeleton } from '@/component/ui/skeleton';
+} from '#/components/ui/select';
+import { Skeleton } from '#/components/ui/skeleton';
 import { PageTitleBack } from '@/components/page-header';
 import { getDomains } from '@/services/domains/domains-service';
 import type { ManagedDomain } from '@/services/domains/types';

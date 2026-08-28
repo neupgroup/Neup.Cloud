@@ -24,7 +24,7 @@ This module owns selected-server route matching and compatibility wrappers for a
 import {
   getSelectedServer,
   selectServer,
-} from '@/inapp/helpers/selection';
+} from '@/helpers/selection';
 
 const SELECTED_SERVER_ROUTE_PREFIXES = [
   '/home',

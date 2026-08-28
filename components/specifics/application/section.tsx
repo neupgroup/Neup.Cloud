@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Loader2, PlusCircle } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Card } from '#/components/ui/card';
 import { ApplicationCard, ApplicationCardSkeleton } from './card';
-import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/hooks/use-selected-server';
 import { getApplicationItems } from '@/services/server/applications/queries';
 import type { ApplicationItem, ApplicationSource, ApplicationStatusFilter } from '@/services/server/applications/queries';
 

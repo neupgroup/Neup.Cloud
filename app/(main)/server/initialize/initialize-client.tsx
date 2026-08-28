@@ -31,7 +31,7 @@ import { PageTitle } from '@/components/page-header';
 import { Button } from '#/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '#/components/ui/card';
 import { Progress } from '#/components/ui/progress';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import {
   checkInitializeApplicationLauncher,
   checkInitializePorts,

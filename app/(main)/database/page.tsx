@@ -7,7 +7,7 @@ import { PageTitle } from '@/components/page-header';
 import { Card } from '#/components/ui/card';
 import { Input } from '#/components/ui/input';
 import { Badge } from '#/components/ui/badge';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import { getDatabases } from '@/services/database/database-service';
 import type { ExternalDatabase } from '@/services/database/types';
 

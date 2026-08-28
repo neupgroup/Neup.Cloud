@@ -3,7 +3,7 @@ import { PageTitleBack } from '@/components/page-header';
 import { Database } from 'lucide-react';
 import { checkDatabaseInstallation } from '@/services/database/database-runtime';
 import { getServer } from '@/services/server/server-service';
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export default async function CreateDatabasePage({
     searchParams,

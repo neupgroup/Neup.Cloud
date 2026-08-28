@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { cn } from "@/core/utils";
+import { cn } from "#/core/utils";
 import Link from "next/link";
 import NProgress from 'nprogress';
 import { usePathname } from 'next/navigation';

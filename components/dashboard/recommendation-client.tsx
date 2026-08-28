@@ -12,7 +12,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/component/ui/form";
+} from "#/components/ui/form";
 import {
   Card,
   CardContent,
@@ -20,22 +20,22 @@ import {
   CardHeader,
   CardTitle,
   CardFooter,
-} from "@/component/ui/card";
-import { Button } from "@/component/ui/button";
+} from "#/components/ui/card";
+import { Button } from "#/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/component/ui/select";
-import { Input } from "@/component/ui/input";
-import { Textarea } from "@/component/ui/textarea";
-import { getInfrastructureRecommendations } from "@/core/intelligence/flows/infrastructure-recommendations";
+} from "#/components/ui/select";
+import { Input } from "#/components/ui/input";
+import { Textarea } from "#/components/ui/textarea";
+import { getInfrastructureRecommendations } from "#/core/intelligence/flows/infrastructure-recommendations";
 import { Loader2, Zap } from "lucide-react";
-import type { InfrastructureRecommendationsOutput } from "@/core/intelligence/flows/infrastructure-recommendations";
+import type { InfrastructureRecommendationsOutput } from "#/core/intelligence/flows/infrastructure-recommendations";
 import Link from "next/link";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "#/components/ui/skeleton";
 
 const formSchema = z.object({
   appType: z.string().min(1, "Application type is required."),

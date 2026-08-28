@@ -5,11 +5,11 @@ import {
   buildPipelineIntelligenceModelLabel,
   type PipelineIntelligenceContext,
 } from '@/components/pipeline/node/intelligence.shared';
-import { Alert, AlertDescription, AlertTitle } from '@/component/ui/alert';
-import { Badge } from '@/component/ui/badge';
-import { Button } from '@/component/ui/button';
-import { Input } from '@/component/ui/input';
-import { Textarea } from '@/component/ui/textarea';
+import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert';
+import { Badge } from '#/components/ui/badge';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Textarea } from '#/components/ui/textarea';
 import {
   definePipelineNodeModule,
   type PipelineNodeInspectorArgs,

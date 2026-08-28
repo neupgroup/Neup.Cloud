@@ -6,7 +6,7 @@ import { CheckCircle2, Server, Loader2 } from 'lucide-react';
 import { Badge } from '#/components/ui/badge';
 import { Button } from '#/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { choosePrimaryApplicationServer } from '@/services/server/applications/service';
 import type { ApplicationRunningSection, ApplicationServerMapRow } from '@/services/server/applications/server-map';
 

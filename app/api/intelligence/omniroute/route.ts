@@ -17,9 +17,9 @@ Send `{ model, messages }` using OpenAI chat-completion message roles. The optio
 
 import { NextRequest, NextResponse } from 'next/server';
 
-import { requestOmniRouteCompletion } from '@/core/intelligence/omniroute';
-import type { DirectAiMessage } from '@/core/intelligence/_types';
-import { getEnvVariable } from '@/core/helpers/env';
+import { requestOmniRouteCompletion } from '#/core/intelligence/omniroute';
+import type { DirectAiMessage } from '#/core/intelligence/_types';
+import { getEnvVariable } from '#/core/helpers/env';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

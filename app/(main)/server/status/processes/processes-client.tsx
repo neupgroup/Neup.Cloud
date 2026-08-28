@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { cn } from "@/core/utils";
+import { cn } from "#/core/utils";
 
 import {
     Card,
@@ -15,7 +15,7 @@ import { Skeleton } from "#/components/ui/skeleton";
 import { Loader2, Hash, User, Cpu, XCircle, Search } from "lucide-react";
 import { getProcesses, killProcess } from '@/services/processes/processes-service';
 import type { Process } from '@/services/processes/types';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { Input } from '#/components/ui/input';
 
 function ProcessesList({ processes, onKill, killingPid }: { processes: Process[], onKill: (pid: string) => void, killingPid: string | null }) {

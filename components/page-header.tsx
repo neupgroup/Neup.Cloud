@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Button } from '#/components/ui/button';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import { ServerNameLink } from '@/components/server-name-link';
 
 interface PageTitleProps {

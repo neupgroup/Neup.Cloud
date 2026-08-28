@@ -2,12 +2,12 @@
 
 import { Copy, Plus, Search, Trash2, TriangleAlert, type LucideIcon } from 'lucide-react';
 
-import { Alert, AlertDescription, AlertTitle } from '@/component/ui/alert';
-import { Button } from '@/component/ui/button';
-import { Card, CardContent } from '@/component/ui/card';
-import { Input } from '@/component/ui/input';
-import { ScrollArea } from '@/component/ui/scroll-area';
-import { Textarea } from '@/component/ui/textarea';
+import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert';
+import { Button } from '#/components/ui/button';
+import { Card, CardContent } from '#/components/ui/card';
+import { Input } from '#/components/ui/input';
+import { ScrollArea } from '#/components/ui/scroll-area';
+import { Textarea } from '#/components/ui/textarea';
 import {
   PIPELINE_SHARED_NODE_INFO,
   type PipelineNodeInspectorArgs,
@@ -16,7 +16,7 @@ import {
   type PipelineNodeRecord,
   type PipelineNodeType,
 } from '@/components/pipeline/node/interface';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 
 type SidebarTemplate = {
   kind: PipelineNodeKind;

@@ -11,8 +11,8 @@ import { Input } from '#/components/ui/input';
 import { Skeleton } from '#/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
 import { getInstalledPackages, type PackageUpdate } from '@/services/server/system-updates';
-import { cn } from '@/core/utils';
-import { useToast } from '@/core/hooks/useToast';
+import { cn } from '#/core/utils';
+import { useToast } from '#/core/hooks/useToast';
 
 const COLORS = [
     'bg-red-500', 'bg-orange-500', 'bg-amber-500', 'bg-yellow-500', 'bg-lime-500',

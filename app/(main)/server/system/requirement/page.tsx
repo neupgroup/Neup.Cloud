@@ -13,11 +13,11 @@ import { PageTitle } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import Link from 'next/link';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import { requirements } from '@/services/server/requirement-list';
 import * as Icons from 'lucide-react';
-import { useServerName } from '@/inapp/hooks/use-server-name';
-import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
+import { useServerName } from '@/hooks/use-server-name';
+import { useSelectedServerHref } from '@/hooks/use-selected-server';
 import { Button } from '#/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 

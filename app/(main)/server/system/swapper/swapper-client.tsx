@@ -9,7 +9,7 @@ import { createRecurringSwap, deleteRecurringSwap, deleteSwapFile, listSwapFiles
 import type { SwapFileEntry } from '@/services/server/system-swap';
 import { Button } from '#/components/ui/button';
 import { Input } from '#/components/ui/input';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import {
     Zap,
     RefreshCw,
@@ -20,7 +20,7 @@ import {
     Loader2,
     AlertTriangle,
 } from 'lucide-react';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 
 type Props = {
     serverId: string;

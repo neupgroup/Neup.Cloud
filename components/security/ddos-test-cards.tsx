@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Card } from '@/component/ui/card';
-import { Button } from '@/component/ui/button';
-import { Input } from '@/component/ui/input';
-import { Alert, AlertDescription } from '@/component/ui/alert';
-import { Badge } from '@/component/ui/badge';
+import { Card } from '#/components/ui/card';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Alert, AlertDescription } from '#/components/ui/alert';
+import { Badge } from '#/components/ui/badge';
 import { AlertCircle, CheckCircle, Zap } from 'lucide-react';
 import type { DDoSTestProgress, DDoSTestResult } from '@/services/security/ddos-test';
 

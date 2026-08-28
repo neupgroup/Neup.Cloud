@@ -9,9 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/com
 import { Badge } from '#/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
 import { Skeleton } from '#/components/ui/skeleton';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { getPackageVersions, installPackage, uninstallPackage, reinstallPackage, type PackageVersionInfo } from '@/services/server/system-packages';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 
 export function PackageDetailsClient({ serverId, serverName, packageName }: { serverId: string, serverName: string, packageName: string }) {
     const { toast } = useToast();

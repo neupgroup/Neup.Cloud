@@ -28,9 +28,9 @@ import { Loader2, Plus, Server, SquareTerminal } from 'lucide-react';
 import { Card } from '#/components/ui/card';
 import { PageTitle } from '@/components/page-header';
 import { Skeleton } from '#/components/ui/skeleton';
-import { useToast } from '@/core/hooks/useToast';
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
+import { useToast } from '#/core/hooks/useToast';
+import { withSelectedServerQuery } from '@/helpers/navigation';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { createContinuitySession, listContinuitySessions, type ContinuitySession } from '@/services/server/continuity-service';
 
 /*

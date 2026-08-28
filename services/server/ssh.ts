@@ -3,7 +3,7 @@
 
 import { NodeSSH } from 'node-ssh';
 import { UniversalLinux } from '@/services/core/universal';
-import { prisma } from '@/core/database/prisma';
+import { prisma } from '#/core/database/prisma';
 import { connectServerWithPassword } from '@/services/server/auth/password';
 import { connectServerWithPrivateKey } from '@/services/server/auth/privatekey';
 import { getServerSshPassphrase, getServerSshPassword } from '@/services/server/server-metadata';

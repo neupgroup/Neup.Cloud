@@ -27,7 +27,7 @@ The service captures terminal output from tmux panes instead of holding a separa
 
 'use server';
 
-import { stringUuid } from '@/core/data/uuid';
+import { stringUuid } from '#/core/data/uuid';
 import { createServerLog } from '@/services/logs/server';
 import { getServerForRunner } from '@/services/server/server-runtime';
 import { runCommandOnServer } from '@/services/server/ssh';

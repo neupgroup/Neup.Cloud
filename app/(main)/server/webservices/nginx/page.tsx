@@ -8,12 +8,12 @@ import { Badge } from '#/components/ui/badge';
 import { Skeleton } from '#/components/ui/skeleton';
 import { Plus, FileCode, Calendar, User, Server, Hash, RefreshCw, Shield, CheckCircle } from 'lucide-react';
 import { PageTitleBack } from '@/components/page-header';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import { restartNginxService } from './restart-action';
 import { testNginxConfiguration } from './test-action';
-import { useToast } from '@/core/hooks/useToast';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { useToast } from '#/core/hooks/useToast';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export default function NginxConfigurationsPage() {
     const [configurations, setConfigurations] = useState<WebServiceConfig[]>([]);

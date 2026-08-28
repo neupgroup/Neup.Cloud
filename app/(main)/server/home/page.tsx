@@ -23,11 +23,11 @@ import { Skeleton } from '#/components/ui/skeleton';
 import { getServer, getSystemStats } from '@/services/server/server-service';
 import { getServerUptime } from '@/services/server/status';
 import { getCommandLog, type CommandLog } from '@/services/logs/command-log';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { ApplicationSection } from '@/components/specifics/application/section';
 import { CommandLogList, CommandLogListSkeleton } from '@/app/(main)/server/commands/command-log-card';
 import { SystemHealthCard } from '@/components/system-health-card';
-import { useServerName } from '@/inapp/hooks/use-server-name';
+import { useServerName } from '@/hooks/use-server-name';
 
 const serverAlerts = [
     { id: 'cpu-spike', title: 'CPU Spike by 20%', severity: 'Error', time: 'Before 2 mins' },

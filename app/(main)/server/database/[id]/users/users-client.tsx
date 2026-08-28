@@ -7,11 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "#/com
 import { Database, User, ShieldCheck, Trash2, Key, Globe, LayoutGrid, ChevronLeft, Loader2 } from "lucide-react";
 import { Button } from "#/components/ui/button";
 import { Badge } from "#/components/ui/badge";
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { UserCreateForm } from "./user-create-form";
 import { deleteDatabaseUser, type DatabaseUser } from '@/services/database/database-runtime';
 import Link from 'next/link';
-import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/hooks/use-selected-server';
 
 interface UsersClientPageProps {
     serverId: string;

@@ -14,7 +14,7 @@ import type { Metadata } from 'next';
 import { Badge } from "#/components/ui/badge";
 import { checkDatabaseInstallation, listAllDatabases, type DatabaseInstallation, type DatabaseInstance } from '@/services/database/database-runtime';
 import { getServer } from '@/services/server/server-service';
-import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
+import { withSelectedServerQuery } from "@/helpers/navigation";
 
 export const metadata: Metadata = {
     title: 'Databases | Neup.Cloud',

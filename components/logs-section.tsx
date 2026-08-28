@@ -2,7 +2,7 @@
 'use client';
 
 import { Card } from "#/components/ui/card";
-import { cn } from "@/core/utils";
+import { cn } from "#/core/utils";
 import { FileText, Loader2, RefreshCw, Terminal } from "lucide-react";
 import { useState } from "react";
 import { Button } from "#/components/ui/button";

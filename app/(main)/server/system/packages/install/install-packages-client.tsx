@@ -11,8 +11,8 @@ import { Input } from '#/components/ui/input';
 import { Skeleton } from '#/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
 import { searchAvailablePackages } from '@/services/server/system-packages';
-import { cn } from '@/core/utils';
-import { useToast } from '@/core/hooks/useToast';
+import { cn } from '#/core/utils';
+import { useToast } from '#/core/hooks/useToast';
 import { useDebounce } from 'use-debounce';
 
 const COLORS = [

@@ -21,13 +21,13 @@ import {
   useProviderConnection,
   type PipelineProviderKey,
 } from '@/components/pipeline/provider-connections';
-import { Badge } from '@/component/ui/badge';
-import { Button } from '@/component/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/component/ui/card';
-import { Input } from '@/component/ui/input';
-import { Separator } from '@/component/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/ui/tabs';
-import { Textarea } from '@/component/ui/textarea';
+import { Badge } from '#/components/ui/badge';
+import { Button } from '#/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
+import { Input } from '#/components/ui/input';
+import { Separator } from '#/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '#/components/ui/tabs';
+import { Textarea } from '#/components/ui/textarea';
 
 type ProviderFieldDefinition = {
   id: string;

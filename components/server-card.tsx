@@ -6,11 +6,11 @@ import React, { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "#/components/ui/button";
-import { useToast } from '@/core/hooks/useToast';
-import { shouldPreserveSelectedServer, withSelectedServerQuery } from "@/inapp/helpers/navigation";
+import { useToast } from '#/core/hooks/useToast';
+import { shouldPreserveSelectedServer, withSelectedServerQuery } from "@/helpers/navigation";
 import { deleteServer } from '@/services/server/server-service';
 import type { Server } from '@/services/server/types';
-import { cn } from "@/core/utils";
+import { cn } from "#/core/utils";
 
 export type { Server } from '@/services/server/types';
 

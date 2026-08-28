@@ -1,5 +1,5 @@
-import { prisma } from '@/core/database/prisma';
-import { stringUuid } from '@/core/data/uuid';
+import { prisma } from '#/core/database/prisma';
+import { stringUuid } from '#/core/data/uuid';
 import type { EnvironmentVariable } from '@/services/environment-variables/environment-variables-service';
 
 function mapEnvironmentVariable(record: {

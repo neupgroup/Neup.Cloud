@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/com
 import { Button } from '#/components/ui/button';
 import { Input } from '#/components/ui/input';
 import { Label } from '#/components/ui/label';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { generateDefaultSSLCertificate, deployDefaultNginxConfig } from '@/services/webservices/nginx-default-service';
 import { Loader2, Shield, FileCode, Download, Upload, CheckCircle2, Server, AlertCircle } from 'lucide-react';
 import { Textarea } from '#/components/ui/textarea';

@@ -13,12 +13,12 @@ import { Card } from '#/components/ui/card';
 import { Checkbox } from '#/components/ui/checkbox';
 import { PageTitleBack } from '@/components/page-header';
 
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { createSavedCommand } from '@/services/server/commands/server-command-service';
 import { VARIABLE_REGEX } from '@/services/saved-commands/types';
 import { serializeCommandSetCommands } from '@/services/server/commands/serialize';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 type CreateMode = 'command' | 'set';
 

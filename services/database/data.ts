@@ -1,5 +1,5 @@
-import { prisma } from '@/core/database/prisma';
-import { stringUuid } from '@/core/data/uuid';
+import { prisma } from '#/core/database/prisma';
+import { stringUuid } from '#/core/data/uuid';
 import { getCurrentAccountId } from '@/services/account-profile';
 import type { ExternalDatabase } from '@/services/database/types';
 

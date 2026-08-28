@@ -1,8 +1,8 @@
 'use server';
 
 import { executeCommand } from '@/services/saved-commands/saved-commands-service';
-import logica from '@/logica';
-import { getCookie } from '@/core/helpers/cookie';
+import logica from '#/logica';
+import { getCookie } from '#/core/helpers/cookie';
 
 import { getApplication } from './crud';
 import { upsertApplicationServerStatus } from './server-map';

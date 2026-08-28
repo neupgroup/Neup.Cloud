@@ -5,10 +5,10 @@ import { CheckCircle2, XCircle, Clock, ChevronRight, ArrowUpRight } from 'lucide
 import { Card } from '#/components/ui/card';
 import { Skeleton } from '#/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '#/components/ui/accordion';
-import { cn } from '@/core/utils';
+import { cn } from '#/core/utils';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 function getCurrentProfileName(): string | null {
   if (typeof document === 'undefined') return null;

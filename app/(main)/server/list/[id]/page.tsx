@@ -7,7 +7,7 @@ import { ArrowLeft, Clock3, Loader2, ServerIcon, ShieldAlert, ShieldCheck } from
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "#/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "#/components/ui/card";
-import { useToast } from "@/core/hooks/useToast";
+import { useToast } from "#/core/hooks/useToast";
 import { getServer, updateServer, checkServerConnection } from "@/services/server/server-service";
 import type { Server } from "@/services/server/types";
 import { getServerExpiration, getServerSshAuthMethod, getServerSshPassphrase, parseServerMetadata, serializeServerMetadata } from "@/services/server/server-metadata";

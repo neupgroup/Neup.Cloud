@@ -17,7 +17,7 @@ of the list.
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Loader2, MessageSquareWarning } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import type { NotificationRecord } from '@/logica/notification';
+import type { NotificationRecord } from '#/logica/notification';
 import { loadMoreNotifications } from './actions';
 
 const TARGETS = [

@@ -11,8 +11,8 @@ Loads a page of account notifications from the Neup notification bridge.
 ::end
 */
 
-import logica from '@/logica';
-import type { NotificationRecord } from '@/logica/notification';
+import logica from '#/logica';
+import type { NotificationRecord } from '#/logica/notification';
 
 export const NOTIFICATIONS_PAGE_SIZE = 20;
 

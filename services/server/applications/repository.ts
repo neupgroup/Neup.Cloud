@@ -7,7 +7,7 @@ import path from 'path';
 import { promisify } from 'util';
 
 import * as Git from '@/services/core/github';
-import logica from '@/logica';
+import logica from '#/logica';
 import { executeCommand } from '@/services/saved-commands/saved-commands-service';
 
 import { getApplication } from './crud';

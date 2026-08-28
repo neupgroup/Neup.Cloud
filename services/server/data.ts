@@ -1,5 +1,5 @@
-import { prisma } from '@/core/database/prisma';
-import { stringUuid } from '@/core/data/uuid';
+import { prisma } from '#/core/database/prisma';
+import { stringUuid } from '#/core/data/uuid';
 import { stripSensitiveServerMetadata } from '@/services/server/server-metadata';
 
 function trimServerIdentifier(value: string | null | undefined) {

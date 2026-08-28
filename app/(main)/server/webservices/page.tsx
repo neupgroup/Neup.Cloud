@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getServer } from '@/services/server/server-service';
 import { Button } from '#/components/ui/button';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { Loader2, Globe, Wind, Server, ArrowRight, Settings, FileKey } from 'lucide-react';
 import Link from 'next/link';
 
@@ -17,8 +17,8 @@ import {
 } from '#/components/ui/card';
 import { Badge } from '#/components/ui/badge';
 import { PageTitle } from '@/components/page-header';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export default function WebServicesPage() {
     const router = useRouter();

@@ -13,8 +13,8 @@ import { Button } from "#/components/ui/button";
 import { PageTitleBack } from "@/components/page-header";
 import { Badge } from "#/components/ui/badge";
 import { Textarea } from "#/components/ui/textarea";
-import { useToast } from '@/core/hooks/useToast';
-import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
+import { useToast } from '#/core/hooks/useToast';
+import { useSelectedServerHref } from '@/hooks/use-selected-server';
 
 import { executeDatabaseQuery } from '@/services/database/database-runtime';
 

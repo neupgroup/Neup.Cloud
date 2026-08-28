@@ -7,11 +7,11 @@ import { Button } from '#/components/ui/button';
 import { Input } from '#/components/ui/input';
 import { Label } from '#/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { Loader2, UserPlus, ShieldCheck, Key, User, Database } from 'lucide-react';
 import { createDatabaseUser } from '@/services/database/database-runtime';
 import { Checkbox } from "#/components/ui/checkbox";
-import { useSelectedServerHref } from '@/inapp/hooks/use-selected-server';
+import { useSelectedServerHref } from '@/hooks/use-selected-server';
 
 interface UserCreateFormProps {
     serverId: string;

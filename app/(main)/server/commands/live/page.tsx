@@ -6,8 +6,8 @@ import { useSearchParams } from 'next/navigation';
 
 import { getServer } from '@/services/server/server-service';
 import { endLiveSession, executeLiveCommand, initLiveSession } from '@/services/server/live-command';
-import { useSelectedServerId } from '@/inapp/hooks/use-selected-server';
-import { useServerName } from '@/inapp/hooks/use-server-name';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { useServerName } from '@/hooks/use-server-name';
 import { getWildcardCertificateSession, verifyWildcardCertificateSession } from '@/services/webservices/nginx/service';
 
 interface HistoryItem {

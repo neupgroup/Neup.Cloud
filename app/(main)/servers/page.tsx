@@ -18,10 +18,10 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, Loader2, ServerIcon } from 'lucide-react';
 import { Button } from '#/components/ui/button';
 import { Card, CardContent } from '#/components/ui/card';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { getServers } from '@/services/server/server-service';
 import type { Server } from '@/services/server/types';
-import { selectServer } from '@/inapp/helpers/selection';
+import { selectServer } from '@/helpers/selection';
 
 export default function ServersPage() {
   const router = useRouter();

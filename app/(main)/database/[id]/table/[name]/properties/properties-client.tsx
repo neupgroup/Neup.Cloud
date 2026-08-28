@@ -26,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from '#/components/ui/table';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 
 type Props = {
   connectionId: string;

@@ -15,7 +15,7 @@ import { Card } from '#/components/ui/card';
 import { Button } from '#/components/ui/button';
 import NetworkClient from "./network-client";
 import { getServer } from "@/services/server/server-service";
-import { withSelectedServerQuery } from "@/inapp/helpers/navigation";
+import { withSelectedServerQuery } from "@/helpers/navigation";
 
 export const metadata: Metadata = {
     title: 'Network Rules | Firewall | Neup.Cloud',

@@ -1,9 +1,9 @@
 'use client';
 
-import { Badge } from '@/component/ui/badge';
-import { Input } from '@/component/ui/input';
-import { Textarea } from '@/component/ui/textarea';
-import { Switch } from '@/component/ui/switch';
+import { Badge } from '#/components/ui/badge';
+import { Input } from '#/components/ui/input';
+import { Textarea } from '#/components/ui/textarea';
+import { Switch } from '#/components/ui/switch';
 import {
   definePipelineNodeModule,
   type PipelineNodeInspectorArgs,

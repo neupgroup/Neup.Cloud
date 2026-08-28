@@ -12,7 +12,7 @@ requirement while preserving the active server selection.
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { cn } from "@/core/utils";
+import { cn } from "#/core/utils";
 
 import {
     Card,
@@ -28,7 +28,7 @@ import { startStatusTracking, stopStatusTracking, getStatus, type StatusData } f
 import { getProcesses, killProcess } from '@/services/processes/processes-service';
 import type { Process } from '@/services/processes/types';
 import { getNetworkConnections, type NetworkConnection } from '@/services/server/network';
-import { useToast } from '@/core/hooks/useToast';
+import { useToast } from '#/core/hooks/useToast';
 import { PageTitleWithComponent } from '@/components/page-header';
 import { Input } from '#/components/ui/input';
 import {
@@ -48,7 +48,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "#/components/ui/select";
-import { withSelectedServerQuery } from '@/inapp/helpers/navigation';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 const CustomTooltip = ({ active, payload, label, unit }: any) => {
     if (active && payload && payload.length) {
