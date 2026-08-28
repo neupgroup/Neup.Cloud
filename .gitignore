@@ -57,6 +57,7 @@ neup.logica
 component
 neup.component
 neup.react.component
+neup.react.components
 
 # neup.design components
 components/ui
