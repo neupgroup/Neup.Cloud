@@ -4,6 +4,7 @@
 import { Card } from "#/components/ui/card";
 import { useToast } from '#/core/hooks/useToast';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 import { cn } from "#/core/utils";
 import { FileText, UploadCloud, Key, Loader2 } from "lucide-react";
 import { useRouter } from 'next/navigation';
@@ -24,7 +25,7 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
 
     const openInline = (view: 'environments' | 'files') => {
         const route = view === 'environments' ? 'environment' : 'files';
-        router.push(`/server/applications/${applicationId}/${route}`);
+        router.push(withSelectedServerQuery(`/server/applications/${applicationId}/${route}`, selectedServerId));
     };
 
     const handleDeploy = async () => {
@@ -32,14 +33,24 @@ export function DeploymentActionsCard({ applicationId, onOpenEnvironments, onOpe
         try {
             await deployConfiguration(applicationId, selectedServerId);
             toast({
-                title: "Configuration Deployed",
+                actions: [
+                    ['Open app', 'success', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
+                    ['Dismiss', 'none', 'dismiss'],
+                ],
+                dismissesOn: 10,
+                title: "Deployed Configuration",
                 description: "Environment variables and config files have been updated on the server.",
             });
         } catch (error: any) {
             console.error(error);
             toast({
+                actions: [
+                    ['Open app', 'danger', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
+                    ['Dismiss', 'none', 'dismiss'],
+                ],
+                dismissesOn: 10,
                 variant: "destructive",
-                title: "Deployment Failed",
+                title: "Couldn't Deploy",
                 description: error.message || "Failed to deploy configuration.",
             });
         } finally {

@@ -46,14 +46,24 @@ export function ApplicationActions({ applicationId }: ApplicationActionsProps) {
         try {
             await deployConfiguration(applicationId, selectedServerId);
             toast({
-                title: "Configuration Deployed",
+                actions: [
+                    ['Open app', 'success', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
+                    ['Dismiss', 'none', 'dismiss'],
+                ],
+                dismissesOn: 10,
+                title: "Deployed Configuration",
                 description: "Environment variables and config files have been updated on the server.",
             });
         } catch (error) {
             console.error(error);
             toast({
+                actions: [
+                    ['Open app', 'danger', withSelectedServerQuery(`/server/applications/${applicationId}`, selectedServerId)],
+                    ['Dismiss', 'none', 'dismiss'],
+                ],
+                dismissesOn: 10,
                 variant: "destructive",
-                title: "Deployment Failed",
+                title: "Couldn't Deploy",
                 description: "Failed to deploy configuration.",
             });
         } finally {

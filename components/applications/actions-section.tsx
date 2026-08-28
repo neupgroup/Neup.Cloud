@@ -1,5 +1,6 @@
 import { useToast } from '#/core/hooks/useToast';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 import { useState } from "react";
 
 import { executeApplicationCommand } from "@/services/server/applications/service";
@@ -27,12 +28,22 @@ export function useActionsSection(application: any) {
         try {
             await executeApplicationCommand(application.id, command, selectedServerId, name);
             toast({
+                name: `application-action-${application.id}`,
+                actions: [
+                    ['Open app', 'success', withSelectedServerQuery(`/server/applications/${application.id}`, selectedServerId)],
+                    ['Dismiss', 'none', 'dismiss'],
+                ],
                 title: "Action Started",
                 description: `Running custom action ${name}...`,
             });
         } catch (error: any) {
             console.error(error);
             toast({
+                name: `application-action-${application.id}`,
+                actions: [
+                    ['Open app', 'danger', withSelectedServerQuery(`/server/applications/${application.id}`, selectedServerId)],
+                    ['Dismiss', 'none', 'dismiss'],
+                ],
                 variant: "destructive",
                 title: "Execution Failed",
                 description: error.message,

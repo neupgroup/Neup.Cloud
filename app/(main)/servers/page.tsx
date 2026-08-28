@@ -63,7 +63,7 @@ export default function ServersPage() {
         title: 'Server selected',
         description: server ? `You are now managing ${server.name}.` : 'The selected server is now active.',
         state: 'info',
-        autoDismiss: 10,
+        dismissesOn: 10,
       });
       router.push(selectServer('/server/home', id));
     } finally {

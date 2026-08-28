@@ -57,7 +57,7 @@ export function ServerCard({ server, onServerDeleted, onServerSelected, isSelect
         title: "Server Selected",
         description: `You are now managing \"${server.name}\".`,
         state: 'info',
-        autoDismiss: 10,
+        dismissesOn: 10,
       });
       onServerSelected(server.id);
       const currentUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Card } from "#/components/ui/card";
 import { useToast } from '#/core/hooks/useToast';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 import { cn } from "#/core/utils";
 import { executeApplicationCommand } from "@/services/server/applications/service";
 
@@ -75,12 +76,20 @@ export function LifecycleSection({ application, runningCommandName = null }: Lif
     try {
       await executeApplicationCommand(application.id, command, selectedServerId, name, displayCommand);
       toast({
+        actions: [
+          ['Open app', 'success', withSelectedServerQuery(`/server/applications/${application.id}`, selectedServerId)],
+          ['Dismiss', 'none', 'dismiss'],
+        ],
         title: "Command Started",
         description: `Executing ${name}...`,
       });
     } catch (error: any) {
       console.error(error);
       toast({
+        actions: [
+          ['Open app', 'danger', withSelectedServerQuery(`/server/applications/${application.id}`, selectedServerId)],
+          ['Dismiss', 'none', 'dismiss'],
+        ],
         variant: "destructive",
         title: "Execution Failed",
         description: error.message,

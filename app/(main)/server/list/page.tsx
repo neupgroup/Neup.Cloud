@@ -148,7 +148,7 @@ function ServerListContent() {
         title: "Server switched",
         description: `You are now managing ${server.name}.`,
         state: "info",
-        autoDismiss: 10,
+        dismissesOn: 10,
       });
       router.push(selectServer(redirectTo ?? "/server/home", server.id), { scroll: false });
     } catch (error) {
