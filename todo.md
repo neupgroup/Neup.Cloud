@@ -1,4 +1,5 @@
 # TODO
+- [x] Remove the local billing page and route the sidebar Billing item to Neup Account billing.
 - [x] Stop the CrossMark outline rotation when the shared icon reaches position 2.
 - [ ] Fix the logo image sizing warning by preserving its aspect ratio when CSS changes its dimensions.
 - [x] Disable repeated bulk WHOIS searches until domains are added, removed, or changed; check only newly added domains.

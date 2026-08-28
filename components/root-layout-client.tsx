@@ -39,7 +39,8 @@ import {
   Bot,
   Workflow,
   Mail,
-  Bell
+  Bell,
+  ExternalLink
 } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '#/core/utils';
@@ -70,7 +71,8 @@ function NavLink({
   currentPath,
   allPaths,
   selectedServerId,
-  onClick
+  onClick,
+  external,
 }: {
   href: string;
   children: React.ReactNode;
@@ -78,11 +80,14 @@ function NavLink({
   allPaths: string[];
   selectedServerId: string | null;
   onClick?: () => void;
+  external?: boolean;
 }) {
   // Find the longest matching path from all available paths
   const longestMatch = findLongestMatch(currentPath, allPaths);
   const isActive = longestMatch === href;
-  const nextHref = withSelectedServerQuery(href, selectedServerId);
+  const nextHref = /^https?:\/\//i.test(href)
+    ? href
+    : withSelectedServerQuery(href, selectedServerId);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (currentPath !== href) {
@@ -96,6 +101,8 @@ function NavLink({
   return (
     <Link
       href={nextHref}
+      target={external ? '_blank' : undefined}
+      rel={external ? 'noopener noreferrer' : undefined}
       onClick={handleClick}
       className={cn(
         'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold hover:bg-muted hover:text-primary',
@@ -145,7 +152,7 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, selectedSe
     { href: "/database", label: "Databases", icon: Database },
     { href: "/settings", label: "Settings", icon: Settings },
     { href: "/mail", label: "Mail", icon: Mail },
-    { href: "/billing", label: "Billing", icon: CreditCard },
+    { href: "https://neupgroup.com/account/billing", label: "Billing", icon: CreditCard, external: true },
   ]
 
   const maintenanceLinks = [
@@ -278,10 +285,11 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, selectedSe
         <div className="px-3 text-xs font-semibold uppercase text-muted-foreground pt-4">
           Account
         </div>
-        {accountLinks.map(({ href, label, icon: Icon }) => (
-          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} selectedServerId={selectedServerId} onClick={onLinkClick}>
+        {accountLinks.map(({ href, label, icon: Icon, external }) => (
+          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} selectedServerId={selectedServerId} onClick={onLinkClick} external={external}>
             <Icon className="h-4 w-4" />
             <span>{label}</span>
+            {external ? <ExternalLink className="h-3.5 w-3.5" aria-label="External link" /> : null}
           </NavLink>
         ))}
       </div>
