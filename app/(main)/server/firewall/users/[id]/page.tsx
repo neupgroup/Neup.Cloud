@@ -23,11 +23,14 @@ import {
     AlertDialogTrigger,
 } from "#/components/ui/alert-dialog";
 import { Separator } from "#/components/ui/separator";
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export default function UserDetailsPage({ params }: { params: { id: string } }) { // id is username
     const username = params.id;
     const { toast } = useToast();
     const router = useRouter();
+    const selectedServerFromUrl = useSelectedServerId();
 
     // Client-side fetching for simplicity or use 'use' hook if we were on cutting edge, 
     // but standard pattern here is simpler:
@@ -133,7 +136,7 @@ export default function UserDetailsPage({ params }: { params: { id: string } }) 
                 toast({ variant: 'destructive', title: 'Delete Failed', description: res.error });
             } else {
                 toast({ title: 'User Deleted', description: `User ${username} has been removed.` });
-                router.push('/server/firewall/users');
+                router.push(withSelectedServerQuery('/server/firewall/users', selectedServerFromUrl ?? serverId));
                 router.refresh();
             }
         } finally {
@@ -144,7 +147,7 @@ export default function UserDetailsPage({ params }: { params: { id: string } }) 
     if (isLoading) {
         return (
             <div className="space-y-6">
-                <PageTitleBack title="Loading..." backHref="/server/firewall/users" />
+                <PageTitleBack title="Loading..." backHref={withSelectedServerQuery('/server/firewall/users', selectedServerFromUrl ?? serverId)} />
                 <Card>
                     <CardContent className="p-8"><Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" /></CardContent>
                 </Card>
@@ -155,7 +158,7 @@ export default function UserDetailsPage({ params }: { params: { id: string } }) 
     if (error || !user) {
         return (
             <div className="space-y-6">
-                <PageTitleBack title="Error" backHref="/server/firewall/users" />
+                <PageTitleBack title="Error" backHref={withSelectedServerQuery('/server/firewall/users', selectedServerFromUrl ?? serverId)} />
                 <Card className="border-destructive/50">
                     <CardContent className="p-8 text-center text-destructive">
                         {error || "User not found"}
@@ -170,7 +173,7 @@ export default function UserDetailsPage({ params }: { params: { id: string } }) 
             <PageTitleBack
                 title={user.username}
                 description={`Manage settings for UID ${user.uid}`}
-                backHref="/server/firewall/users"
+                backHref={withSelectedServerQuery('/server/firewall/users', selectedServerFromUrl ?? serverId)}
             />
 
             <div className="grid gap-6 md:grid-cols-2">

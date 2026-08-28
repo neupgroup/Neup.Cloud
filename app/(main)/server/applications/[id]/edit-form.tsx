@@ -22,6 +22,8 @@ import { useRouter } from 'next/navigation';
 import React, { useRef, useState } from 'react';
 import { updateApplication } from '@/services/server/applications/service';
 import { normalizeApplicationNameInput } from '@/services/server/applications/name';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 type ApplicationLocationType = 'folder' | 'executable';
 
@@ -135,6 +137,7 @@ interface EditApplicationFormProps {
 export default function EditApplicationForm({ application, onCancel, onSaved }: EditApplicationFormProps) {
     const router = useRouter();
     const { toast } = useToast();
+    const selectedServerId = useSelectedServerId();
     const [isLoading, setIsLoading] = useState(false);
 
     // Application Basics
@@ -605,7 +608,7 @@ export default function EditApplicationForm({ application, onCancel, onSaved }: 
                         className="mr-4"
                         onClick={() => {
                             if (onCancel) return onCancel();
-                            router.back();
+                            router.push(withSelectedServerQuery(`/server/applications/${application.id}`, selectedServerId));
                         }}
                     >
                         Cancel

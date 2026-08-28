@@ -10,10 +10,13 @@ import { useState } from "react";
 import { createUser } from "@/services/server/firewall-users-service";
 import { useToast } from '#/core/hooks/useToast';
 import { useRouter } from "next/navigation";
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export default function CreateUserPage() {
     const { toast } = useToast();
     const router = useRouter();
+    const selectedServerId = useSelectedServerId();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
@@ -59,7 +62,7 @@ export default function CreateUserPage() {
                 toast({ variant: 'destructive', title: 'Failed to create user', description: result.error });
             } else {
                 toast({ title: 'Success', description: `User ${formData.username} created successfully.` });
-                router.push('/server/firewall/users');
+            router.push(withSelectedServerQuery('/server/firewall/users', selectedServerId));
                 router.refresh();
             }
         } catch (e: any) {
@@ -74,7 +77,7 @@ export default function CreateUserPage() {
             <PageTitleBack
                 title="Create User"
                 description="Add a new user account to this instance."
-                backHref="/server/firewall/users"
+                backHref={withSelectedServerQuery('/server/firewall/users', selectedServerId)}
             />
 
             <div className="max-w-2xl">

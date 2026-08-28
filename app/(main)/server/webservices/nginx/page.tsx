@@ -118,7 +118,7 @@ export default function NginxConfigurationsPage() {
                 <PageTitleBack
                     title="Nginx Configurations"
                     description="Manage your Nginx server configurations"
-                    backHref="/server/webservices"
+                    backHref={withSelectedServerQuery('/server/webservices', selectedServerId)}
                 />
 
                 {/* Actions Skeleton */}

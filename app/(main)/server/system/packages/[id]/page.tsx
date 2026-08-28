@@ -16,11 +16,13 @@ export const metadata: Metadata = {
 
 type Props = {
     params: Promise<{ id: string }>;
+    searchParams?: Promise<{ selectedServer?: string }>;
 };
 
-export default async function PackageDetailsPage({ params }: Props) {
+export default async function PackageDetailsPage({ params, searchParams }: Props) {
     const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+    const resolvedSearchParams = searchParams ? await searchParams : {};
+    const serverId = resolvedSearchParams.selectedServer?.trim() || cookieStore.get('selected_server')?.value;
     const serverName = cookieStore.get('selected_server_name')?.value;
 
     const { id } = await params;

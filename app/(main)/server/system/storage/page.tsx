@@ -7,6 +7,7 @@ import { PageTitleBack } from '@/components/page-header';
 import { Server } from 'lucide-react';
 import StorageClient from './storage-client';
 import { getServer } from '@/services/server/server-service';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export const metadata: Metadata = {
     title: 'Storage, Neup.Cloud',
@@ -27,7 +28,7 @@ export default async function StoragePage({
                 <PageTitleBack
                     title="Storage"
                     description="Monitor disk usage and storage allocation."
-                    backHref="/server/system"
+                    backHref={withSelectedServerQuery('/server/system', serverId)}
                 />
                 <Card className="text-center p-8">
                     <Server className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -49,7 +50,7 @@ export default async function StoragePage({
                 title="Storage"
                 description="Monitor disk usage and storage allocation on this server."
                 serverName={serverName}
-                backHref="/server/system"
+                backHref={withSelectedServerQuery('/server/system', serverId)}
             />
 
             <StorageClient

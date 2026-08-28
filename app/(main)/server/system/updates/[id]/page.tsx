@@ -17,11 +17,13 @@ export const metadata: Metadata = {
 // Next.js 15 App Router expects params to be a Promise
 type Props = {
     params: Promise<{ id: string }>;
+    searchParams?: Promise<{ selectedServer?: string }>;
 };
 
-export default async function UpdateDetailsPage({ params }: Props) {
+export default async function UpdateDetailsPage({ params, searchParams }: Props) {
     const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+    const resolvedSearchParams = searchParams ? await searchParams : {};
+    const serverId = resolvedSearchParams.selectedServer?.trim() || cookieStore.get('selected_server')?.value;
     const serverName = cookieStore.get('selected_server_name')?.value;
 
     // Resolve params promise

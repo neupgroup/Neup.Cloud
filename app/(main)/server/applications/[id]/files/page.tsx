@@ -5,11 +5,19 @@ import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert';
 import { getApplication } from '@/services/server/applications/service';
 import { PageTitleBack } from '@/components/page-header';
 import { FilesForm } from '../files-form';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export const metadata: Metadata = { title: 'Files, Neup.Cloud' };
 
-export default async function ApplicationFilesPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ApplicationFilesPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ selectedServer?: string }>;
+}) {
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   const application = await getApplication(id);
   if (!application) notFound();
 
@@ -18,7 +26,7 @@ export default async function ApplicationFilesPage({ params }: { params: Promise
       <PageTitleBack
         title="File Management"
         description={`Custom file overrides for ${application.name}`}
-        backHref={`/server/applications/${id}`}
+        backHref={withSelectedServerQuery(`/server/applications/${id}`, resolvedSearchParams.selectedServer)}
       />
       <Alert className="bg-muted/50">
         <FileText className="h-4 w-4" />

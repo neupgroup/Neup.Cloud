@@ -12,6 +12,7 @@ import { Skeleton } from '#/components/ui/skeleton';
 import { useToast } from '#/core/hooks/useToast';
 import { getPackageVersions, installPackage, type PackageVersionInfo } from '@/services/server/system-packages';
 import { cn } from '#/core/utils'; // Correct import path assuming this file is deep
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export function InstallPackageDetailsClient({ serverId, serverName, packageName }: { serverId: string, serverName: string, packageName: string }) {
     const { toast } = useToast();
@@ -116,7 +117,7 @@ export function InstallPackageDetailsClient({ serverId, serverName, packageName 
             <div className="space-y-6">
                 <PageTitleBackWithComponent
                     title="Package Error"
-                    backHref="/server/system/packages/install"
+                    backHref={withSelectedServerQuery('/server/system/packages/install', serverId)}
                     actionComponent={<div />}
                 />
                 <Alert variant="destructive">
@@ -134,7 +135,7 @@ export function InstallPackageDetailsClient({ serverId, serverName, packageName 
             <PageTitleBackWithComponent
                 title={packageName}
                 description="Install new package"
-                backHref="/server/system/packages/install"
+                backHref={withSelectedServerQuery('/server/system/packages/install', serverId)}
                 actionComponent={<div />}
             />
 

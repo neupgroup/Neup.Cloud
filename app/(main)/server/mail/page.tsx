@@ -13,11 +13,18 @@ This route reuses the shared mail editor but keeps navigation inside the server 
 
 import React from 'react';
 import MailConfigEditor from '@/components/mail/MailConfigEditor';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
-export default function ServerMailPage() {
+export default async function ServerMailPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ selectedServer?: string }>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+
   return (
     <React.Suspense fallback={null}>
-      <MailConfigEditor backHref="/server/home" />
+      <MailConfigEditor backHref={withSelectedServerQuery('/server/home', resolvedSearchParams.selectedServer)} />
     </React.Suspense>
   );
 }

@@ -48,9 +48,10 @@ function ProcessesList({ processes, onKill, killingPid }: { processes: Process[]
                                 <span className="font-medium">{process.memory}% RAM</span>
                             </div>
                             <Button
+                                type="text"
                                 onClick={() => onKill(process.pid)}
                                 disabled={killingPid === process.pid}
-                                className="flex items-center gap-1.5 shrink-0 text-red-500 hover:text-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center gap-1.5 shrink-0 text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {killingPid === process.pid ? (
                                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

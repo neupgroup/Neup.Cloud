@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
 import { getInstalledPackages, type PackageUpdate } from '@/services/server/system-updates';
 import { cn } from '#/core/utils';
 import { useToast } from '#/core/hooks/useToast';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 const COLORS = [
     'bg-red-500', 'bg-orange-500', 'bg-amber-500', 'bg-yellow-500', 'bg-lime-500',
@@ -79,7 +80,7 @@ export function PackagesClient({ serverId, serverName, showTitle = true }: { ser
     };
 
     const handleItemClick = (name: string) => {
-        router.push(`/server/system/packages/${name}`);
+        router.push(withSelectedServerQuery(`/server/system/packages/${name}`, serverId));
     };
 
     return (
@@ -136,7 +137,7 @@ export function PackagesClient({ serverId, serverName, showTitle = true }: { ser
                             {/* Install New Package Card */}
                             <div
                                 className="p-4 min-w-0 w-full transition-colors hover:bg-muted/50 cursor-pointer border-b border-border"
-                                onClick={() => router.push('/server/system/packages/install')}
+                                onClick={() => router.push(withSelectedServerQuery('/server/system/packages/install', serverId))}
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="h-9 w-9 rounded-md flex items-center justify-center bg-primary/10 text-primary shrink-0 font-bold shadow-sm">

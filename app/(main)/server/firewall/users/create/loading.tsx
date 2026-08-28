@@ -1,14 +1,20 @@
+'use client';
+
 import { PageTitleBack } from "@/components/page-header";
 import { Card, CardHeader, CardContent } from "#/components/ui/card";
 import { Skeleton } from "#/components/ui/skeleton";
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export default function Loading() {
+    const selectedServerId = useSelectedServerId();
+
     return (
         <div className="space-y-6">
             <PageTitleBack
                 title="Create User"
                 description="Add a new user account to this instance."
-                backHref="/server/firewall/users"
+                backHref={withSelectedServerQuery('/server/firewall/users', selectedServerId)}
             />
 
             <div className="max-w-2xl">

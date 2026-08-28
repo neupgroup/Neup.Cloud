@@ -13,10 +13,13 @@ import { useToast } from '#/core/hooks/useToast';
 import { useRouter } from "next/navigation";
 import { Separator } from "#/components/ui/separator";
 import { getRandomWord } from "#/core/dictionary";
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export default function CreateKeyPage() {
     const { toast } = useToast();
     const router = useRouter();
+    const selectedServerId = useSelectedServerId();
 
     const [keyName, setKeyName] = useState('');
     const [publicKey, setPublicKey] = useState('');
@@ -113,7 +116,7 @@ export default function CreateKeyPage() {
                 toast({ variant: 'destructive', title: 'Failed to add key', description: result.error });
             } else {
                 toast({ title: 'Success', description: 'SSH Key added successfully.' });
-                router.push('/server/firewall/keys');
+                router.push(withSelectedServerQuery('/server/firewall/keys', selectedServerId));
                 router.refresh();
             }
         } catch (e: any) {
@@ -128,7 +131,7 @@ export default function CreateKeyPage() {
             <PageTitleBack
                 title="Add SSH Key"
                 description="Authorize a new key for access."
-                backHref="/server/firewall/keys"
+                backHref={withSelectedServerQuery('/server/firewall/keys', selectedServerId)}
             />
 
             <div className="max-w-2xl">

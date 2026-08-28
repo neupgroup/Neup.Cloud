@@ -8,6 +8,7 @@ import { Loader2, Save, AlertTriangle, ArrowLeft, Shield, ShieldOff } from 'luci
 import { getFileContent, saveFileContent } from '@/services/server/viewer-service';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { useToast } from '#/core/hooks/useToast';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export default function ViewerClient() {
   const router = useRouter();
@@ -209,7 +210,10 @@ export default function ViewerClient() {
   };
 
   const parentPath = path.substring(0, path.lastIndexOf('/')) || '/';
-  const backHref = `/server/files?path=${encodeURIComponent(parentPath)}${rootMode ? '&rootMode=true' : ''}`;
+  const backHref = withSelectedServerQuery(
+    `/server/files?path=${encodeURIComponent(parentPath)}${rootMode ? '&rootMode=true' : ''}`,
+    serverId,
+  );
 
   return (
     <div className="space-y-6 pb-24">
@@ -233,7 +237,7 @@ export default function ViewerClient() {
             <Button
               type="plain"
               className="p-0 h-auto text-muted-foreground font-normal hover:text-primary"
-              onClick={() => router.push(`/server/files?path=/${rootMode ? '&rootMode=true' : ''}`)}
+            onClick={() => router.push(withSelectedServerQuery(`/server/files?path=/${rootMode ? '&rootMode=true' : ''}`, serverId))}
             >
               root
             </Button>
@@ -250,7 +254,7 @@ export default function ViewerClient() {
                     <Button
                       type="plain"
                       className="p-0 h-auto text-muted-foreground font-normal hover:text-primary max-w-[150px] truncate"
-                      onClick={() => router.push(`/server/files?path=${encodeURIComponent(segmentPath)}${rootMode ? '&rootMode=true' : ''}`)}
+                      onClick={() => router.push(withSelectedServerQuery(`/server/files?path=${encodeURIComponent(segmentPath)}${rootMode ? '&rootMode=true' : ''}`, serverId))}
                     >
                       {segment}
                     </Button>

@@ -1236,7 +1236,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                     title: 'Success',
                     description: 'Nginx configuration deployed and reloaded successfully.',
                 });
-                router.back();
+                router.push(withSelectedServerQuery('/server/webservices/nginx', selectedServerId));
             } else {
                 // Check for SSL certificate errors
                 const isSslError = result.error && (

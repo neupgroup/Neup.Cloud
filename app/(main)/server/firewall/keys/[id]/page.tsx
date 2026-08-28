@@ -7,13 +7,21 @@ import Link from 'next/link';
 import { getAuthorizedKeys } from "@/services/server/firewall-keys-service";
 import { cookies } from 'next/headers';
 import { notFound } from "next/navigation";
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
-export default async function ViewKeyPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ViewKeyPage({
+    params,
+    searchParams,
+}: {
+    params: Promise<{ id: string }>;
+    searchParams?: Promise<{ selectedServer?: string }>;
+}) {
     const { id } = await params;
+    const resolvedSearchParams = searchParams ? await searchParams : {};
     const keyIndex = parseInt(id, 10);
 
     const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+    const serverId = resolvedSearchParams.selectedServer?.trim() || cookieStore.get('selected_server')?.value;
 
     if (!serverId) {
         return (
@@ -34,7 +42,7 @@ export default async function ViewKeyPage({ params }: { params: Promise<{ id: st
                 <h3 className="font-semibold">Error Loading Keys</h3>
                 <p className="text-sm">{error || "Unknown error occurred."}</p>
                 <Button asChild type="outlined" className="mt-4">
-                    <Link href="/server/firewall/keys">Back to Keys</Link>
+                    <Link href={withSelectedServerQuery('/server/firewall/keys', serverId)}>Back to Keys</Link>
                 </Button>
             </div>
         );
@@ -56,7 +64,7 @@ export default async function ViewKeyPage({ params }: { params: Promise<{ id: st
                     className="w-fit -ml-2 text-muted-foreground hover:text-foreground"
                     asChild
                 >
-                    <Link href="/server/firewall/keys">
+                    <Link href={withSelectedServerQuery('/server/firewall/keys', serverId)}>
                         <ChevronLeft className="mr-1 h-4 w-4" /> Back to Firewall Keys
                     </Link>
                 </Button>

@@ -11,6 +11,7 @@ import { generateDefaultSSLCertificate, deployDefaultNginxConfig } from '@/servi
 import { Loader2, Shield, FileCode, Download, Upload, CheckCircle2, Server, AlertCircle } from 'lucide-react';
 import { Textarea } from '#/components/ui/textarea';
 import { Alert, AlertDescription } from '#/components/ui/alert';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 interface DefaultNginxConfigClientProps {
     serverId: string;
@@ -158,7 +159,7 @@ server {
             <PageTitleBack
                 title="Default Nginx Configuration"
                 description="Generate self-signed SSL certificates and default catch-all configuration"
-                backHref="/server/webservices/nginx"
+                backHref={withSelectedServerQuery('/server/webservices/nginx', serverId)}
             />
 
             {/* Server Info */}

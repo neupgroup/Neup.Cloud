@@ -19,6 +19,7 @@ import {
 } from '#/components/ui/alert-dialog';
 import { deleteSupervisorOnlyProcess, stopSupervisorOnlyProcess } from '@/services/server/applications/service';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 import { useToast } from '#/core/hooks/useToast';
 
 interface SupervisorOnlyActionsProps {
@@ -60,7 +61,7 @@ export function SupervisorOnlyActions({ processName }: SupervisorOnlyActionsProp
                 title: 'Removed from Supervisor',
                 description: `${processName} has been removed from Supervisor.`,
             });
-            router.push('/server/applications');
+            router.push(withSelectedServerQuery('/server/applications', selectedServerId));
             router.refresh();
         } catch (error: any) {
             toast({

@@ -11,6 +11,7 @@ import { Skeleton } from '#/components/ui/skeleton';
 import { useToast } from '#/core/hooks/useToast';
 import { AlertCircle, Package, ArrowUpCircle, CheckCircle2, Loader2, Play } from 'lucide-react';
 import { getPackageDetails, updatePackage } from '@/services/server/system-updates';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 interface PackageDetails {
     raw: string;
@@ -66,7 +67,7 @@ export function UpdateDetailsClient({ serverId, serverName, id }: { serverId: st
             // Usually stay to see output or updated state.
             // But since we just ran install, staying might show same details unless we refresh.
             // Let's redirect back.
-            router.push('/server/system/updates');
+            router.push(withSelectedServerQuery('/server/system/updates', serverId));
         }
         setIsUpdating(false);
     };
@@ -99,7 +100,7 @@ export function UpdateDetailsClient({ serverId, serverName, id }: { serverId: st
                 <PageTitleBack
                     title="Package Details"
                     serverName={serverName}
-                    backHref="/server/system/updates"
+                    backHref={withSelectedServerQuery('/server/system/updates', serverId)}
                 />
                 <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
@@ -116,7 +117,7 @@ export function UpdateDetailsClient({ serverId, serverName, id }: { serverId: st
                 title={packageName}
                 description={isSystemUpdate ? "System Update Available" : "Installed Package"}
                 serverName={serverName}
-                backHref="/server/system/updates"
+                backHref={withSelectedServerQuery('/server/system/updates', serverId)}
             />
 
             <Card>

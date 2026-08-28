@@ -22,6 +22,7 @@ import {
 } from "#/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
 import { useServerName } from '@/hooks/use-server-name';
+import { useSelectedServerHref } from '@/hooks/use-selected-server';
 import { useToast } from '#/core/hooks/useToast';
 
 import { createApplication } from '@/services/server/applications/service';
@@ -115,6 +116,7 @@ export function DeployApplicationPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const serverName = useServerName();
+  const withSelectedServer = useSelectedServerHref();
   const [appName, setAppName] = useState('');
   const [appIcon, setAppIcon] = useState('');
   const [appLocation, setAppLocation] = useState('');
@@ -267,7 +269,7 @@ export function DeployApplicationPage() {
         owner: 'system',
       });
 
-      router.push(`/server/applications/${appId}`);
+      router.push(withSelectedServer(`/server/applications/${appId}`));
       toast({ title: "Application Created", description: "Redirecting to application details..." });
     } catch (error) {
       console.error(error);
@@ -279,7 +281,7 @@ export function DeployApplicationPage() {
 
   return (
     <div className="container max-w-3xl py-8 space-y-8 animate-in fade-in duration-500">
-      <PageTitleBack title="Deploy New Application" backHref="/server/applications" serverName={serverName} />
+      <PageTitleBack title="Deploy New Application" backHref={withSelectedServer('/server/applications')} serverName={serverName} />
 
       <form onSubmit={onSubmit} className="space-y-8">
         <Card className="border-none shadow-md bg-card/50 backdrop-blur-sm">
@@ -502,7 +504,7 @@ export function DeployApplicationPage() {
         </Card>
 
         <div className="flex justify-end pt-4">
-          <Button htmlType="submit" size="lg" disabled={isLoading} className="w-full md:w-auto min-w-[200px]">
+          <Button htmlType="submit" type="solid" size="lg" disabled={isLoading} className="w-full md:w-auto min-w-[200px]">
             {isLoading ? 'Deploying...' : 'Deploy Application'}
           </Button>
         </div>

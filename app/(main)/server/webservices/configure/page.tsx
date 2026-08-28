@@ -14,6 +14,8 @@ import { Loader2, ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 
 import { PageTitleBack } from '@/components/page-header';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 const PROXY_OPTIONS = ['Nginx', 'Apache', 'Caddy', 'Traefik'];
 const LB_OPTIONS = ['Nginx', 'HAProxy', 'Traefik', 'AWS ELB', 'Google Cloud LB'];
@@ -21,6 +23,7 @@ const LB_OPTIONS = ['Nginx', 'HAProxy', 'Traefik', 'AWS ELB', 'Google Cloud LB']
 export default function ServerSettingsPage() {
     const router = useRouter();
     const { toast } = useToast();
+    const selectedServerFromUrl = useSelectedServerId();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [serverId, setServerId] = useState<string | null>(null);
@@ -136,7 +139,7 @@ export default function ServerSettingsPage() {
             <PageTitleBack
                 title="Server Settings"
                 description={`Configuration for ${serverName}`}
-                backHref="/server/webservices"
+                backHref={withSelectedServerQuery('/server/webservices', selectedServerFromUrl ?? serverId)}
             />
 
             <form onSubmit={handleSave}>

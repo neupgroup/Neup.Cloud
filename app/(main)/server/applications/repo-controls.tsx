@@ -26,15 +26,6 @@ export function RepoControls({ applicationId }: RepoControlsProps) {
       <Button
         type="outlined"
         size="sm"
-        onClick={() => handleAction('reset-main')}
-        disabled={!!loading}
-      >
-        <RotateCcw className="mr-2 h-4 w-4" />
-        {loading === 'reset-main' ? 'Resetting...' : 'Reset to Main'}
-      </Button>
-      <Button
-        type="outlined"
-        size="sm"
         onClick={() => handleAction('pull')}
         disabled={!!loading}
       >
@@ -42,7 +33,18 @@ export function RepoControls({ applicationId }: RepoControlsProps) {
         {loading === 'pull' ? 'Pulling...' : 'Pull'}
       </Button>
       <Button
+        type="outlined"
+        convey="warning"
+        size="sm"
+        onClick={() => handleAction('reset-main')}
+        disabled={!!loading}
+      >
+        <RotateCcw className="mr-2 h-4 w-4" />
+        {loading === 'reset-main' ? 'Resetting...' : 'Reset to Main'}
+      </Button>
+      <Button
         type="solid"
+        convey="danger"
         size="sm"
         onClick={() => handleAction('pull-force')}
         disabled={!!loading}

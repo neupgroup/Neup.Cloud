@@ -12,6 +12,7 @@ import { Skeleton } from '#/components/ui/skeleton';
 import { useToast } from '#/core/hooks/useToast';
 import { getPackageVersions, installPackage, uninstallPackage, reinstallPackage, type PackageVersionInfo } from '@/services/server/system-packages';
 import { cn } from '#/core/utils';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export function PackageDetailsClient({ serverId, serverName, packageName }: { serverId: string, serverName: string, packageName: string }) {
     const { toast } = useToast();
@@ -140,7 +141,7 @@ export function PackageDetailsClient({ serverId, serverName, packageName }: { se
                 <PageTitleBackWithComponent
                     title="Package Error"
                     serverName={serverName}
-                    backHref="/server/system/packages"
+                    backHref={withSelectedServerQuery('/server/system/packages', serverId)}
                     actionComponent={<div />}
                 />
                 <Alert variant="destructive">
@@ -159,7 +160,7 @@ export function PackageDetailsClient({ serverId, serverName, packageName }: { se
                 title={packageName}
                 description="Manage versions and installation"
                 serverName={serverName}
-                backHref="/server/system/packages"
+                backHref={withSelectedServerQuery('/server/system/packages', serverId)}
                 actionComponent={<div />}
             />
 

@@ -1,14 +1,20 @@
+'use client';
+
 import { Skeleton } from "#/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "#/components/ui/card";
 import { PageTitleBack } from "@/components/page-header";
 import { ChevronRight } from "lucide-react";
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export default function Loading() {
+    const selectedServerId = useSelectedServerId();
+
     return (
         <div className="grid gap-8 animate-in fade-in duration-500 pb-20">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <PageTitleBack
-                    backHref="/server/database"
+                    backHref={withSelectedServerQuery('/server/database', selectedServerId)}
                     title={
                         <span className="flex items-center gap-3">
                             <Skeleton className="h-10 w-10 rounded-xl" />

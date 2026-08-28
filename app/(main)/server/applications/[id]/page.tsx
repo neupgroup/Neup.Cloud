@@ -5,6 +5,7 @@ import { PageTitleBack } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
 import { Badge } from '#/components/ui/badge';
 import { getApplicationDetailPageData } from '@/services/server/applications/service';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 import { SupervisorOnlyActions } from './supervisor-only-actions';
 import { StatusDashboard } from './status-dashboard';
@@ -68,7 +69,7 @@ export default async function ApplicationDetailPage({
             title={<span className="flex items-center gap-3"><AppWindow className="h-8 w-8 text-primary" />{processName}</span>}
             description="Supervisor-only application"
             serverName={serverName}
-            backHref="/server/applications"
+            backHref={withSelectedServerQuery('/server/applications', resolvedSearchParams.selectedServer)}
           >
             <Badge variant="outline" className="text-sm py-1 px-3 border-primary/20 bg-primary/5">run.custom</Badge>
           </PageTitleBack>
@@ -124,7 +125,7 @@ export default async function ApplicationDetailPage({
           }
           description="Application details and management"
           serverName={serverName}
-          backHref="/server/applications"
+          backHref={withSelectedServerQuery('/server/applications', resolvedSearchParams.selectedServer)}
         >
           <Badge variant="outline" className="text-sm py-1 px-3 border-primary/20 bg-primary/5">{appLanguage}</Badge>
         </PageTitleBack>

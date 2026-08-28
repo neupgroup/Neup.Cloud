@@ -127,7 +127,7 @@ export function ApplicationActions({ applicationId }: ApplicationActionsProps) {
 
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button type="solid" size="sm" className="h-8 gap-1.5">
+                    <Button type="solid" convey="danger" size="sm" className="h-8 gap-1.5">
                         <Trash className="h-4 w-4" />
                         <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                             Delete

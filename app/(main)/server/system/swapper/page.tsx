@@ -8,6 +8,7 @@ import { getServer } from '@/services/server/server-service';
 import { Server } from 'lucide-react';
 import SwapperClient from './swapper-client';
 import { getRecurringSwapSize, listSwapFiles } from '@/services/server/system-swap';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export const metadata: Metadata = {
     title: 'Swapper, Neup.Cloud',
@@ -55,7 +56,7 @@ export default async function SwapperPage({
                 <PageTitleBack
                     title="Swapper"
                     description="Manage swap space for this server."
-                    backHref="/server/system"
+                    backHref={withSelectedServerQuery('/server/system', serverId)}
                 />
                 <Card className="text-center p-8">
                     <Server className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -84,7 +85,7 @@ export default async function SwapperPage({
                 title="Swapper"
                 description="Configure swap space for command execution and persistent system swap."
                 serverName={serverName}
-                backHref="/server/system"
+                backHref={withSelectedServerQuery('/server/system', serverId)}
             />
 
             <SwapperClient

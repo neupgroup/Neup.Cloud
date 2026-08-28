@@ -7,6 +7,8 @@ import { useToast } from '#/core/hooks/useToast';
 import { useRouter } from 'next/navigation';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { deleteApplication } from '@/services/server/applications/service';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
+import { withSelectedServerQuery } from '@/helpers/navigation';
 
 interface DeleteApplicationButtonProps {
     applicationId: string;
@@ -15,6 +17,7 @@ interface DeleteApplicationButtonProps {
 export function DeleteApplicationButton({ applicationId }: DeleteApplicationButtonProps) {
     const { toast } = useToast();
     const router = useRouter();
+    const selectedServerId = useSelectedServerId();
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDelete = async () => {
@@ -25,7 +28,7 @@ export function DeleteApplicationButton({ applicationId }: DeleteApplicationButt
                 title: "Application deleted",
                 description: "The application has been stopped and removed.",
             });
-            router.push('/server/applications');
+            router.push(withSelectedServerQuery('/server/applications', selectedServerId));
         } catch (error) {
             console.error(error);
             toast({
@@ -40,7 +43,7 @@ export function DeleteApplicationButton({ applicationId }: DeleteApplicationButt
     return (
         <ConfirmDialog
             trigger={
-                <Button type="solid" className="gap-2">
+                <Button type="solid" convey="danger" className="gap-2">
                     <Trash className="h-4 w-4" />
                     Delete Application
                 </Button>

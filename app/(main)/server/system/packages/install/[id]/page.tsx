@@ -4,12 +4,14 @@ import { notFound } from "next/navigation";
 
 type Props = {
     params: Promise<{ id: string }>
+    searchParams?: Promise<{ selectedServer?: string }>;
 }
 
-export default async function InstallPackageDetailsPage({ params }: Props) {
+export default async function InstallPackageDetailsPage({ params, searchParams }: Props) {
     const { id } = await params;
+    const resolvedSearchParams = searchParams ? await searchParams : {};
     const cookieStore = await cookies();
-    const serverId = cookieStore.get('selected_server')?.value;
+    const serverId = resolvedSearchParams.selectedServer?.trim() || cookieStore.get('selected_server')?.value;
     const serverName = cookieStore.get('selected_server_name')?.value || 'Server';
 
     if (!serverId) {
