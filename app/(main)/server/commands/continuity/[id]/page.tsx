@@ -24,7 +24,7 @@ The page validates the route session ID, polls pane output, and sends commands i
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState, useTransition, type KeyboardEvent } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Loader2, Server, SquareTerminal, XCircle } from 'lucide-react';
+import { ArrowLeft, FolderOpen, Loader2, Server, SquareTerminal, XCircle } from 'lucide-react';
 
 import { Button } from '#/components/ui/button';
 import { Card } from '#/components/ui/card';
@@ -82,6 +82,7 @@ export default function ContinuitySessionPage() {
   const pretypedCommand = searchParams.get('pretypecommand') ?? '';
 
   const [snapshot, setSnapshot] = useState<ContinuitySessionSnapshot | null>(null);
+  const [terminalDirectory, setTerminalDirectory] = useState('~');
   const [command, setCommand] = useState('');
   const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(false);
   const [pageError, setPageError] = useState<string | null>(null);
@@ -89,6 +90,7 @@ export default function ContinuitySessionPage() {
   const [isEndingSession, startEndingSession] = useTransition();
 
   const terminalScrollRef = useRef<HTMLDivElement>(null);
+  const commandInputRef = useRef<HTMLDivElement>(null);
 
   const selectedServerId = useMemo(() => selectedServerFromUrl ?? '', [selectedServerFromUrl]);
   const rawRequestedSessionId = typeof params?.id === 'string' ? params.id : '';
@@ -150,6 +152,9 @@ export default function ContinuitySessionPage() {
     }
 
     setCommand(pretypedCommand);
+    if (commandInputRef.current && commandInputRef.current.innerText !== pretypedCommand) {
+      commandInputRef.current.innerText = pretypedCommand;
+    }
   }, [pretypedCommand]);
 
   useEffect(() => {
@@ -172,6 +177,7 @@ export default function ContinuitySessionPage() {
         }
 
         setSnapshot(nextSnapshot);
+        setTerminalDirectory(nextSnapshot.cwd || '~');
         setPageError(null);
       } catch (error: any) {
         if (cancelled) {
@@ -217,12 +223,22 @@ export default function ContinuitySessionPage() {
           ? await sendContinuityCommand(selectedServerId, requestedSessionId, command)
           : await sendContinuityEnter(selectedServerId, requestedSessionId);
         setCommand('');
+        if (commandInputRef.current) {
+          commandInputRef.current.innerText = '';
+        }
         setSnapshot(nextSnapshot);
+        setTerminalDirectory(nextSnapshot.cwd || terminalDirectory);
       } catch (error: any) {
+        const message = error.message || 'Could not send the command to tmux.';
+        const isBlockedCommand = message.includes('Nano does not works on continuity terminal')
+          || message.includes('Clearing the continuity terminal is not allowed');
+
         toast({
-          title: 'Command failed',
-          description: error.message || 'Could not send the command to tmux.',
-          variant: 'destructive',
+          name: 'cloud.server.continuity',
+          title: isBlockedCommand ? 'Command not allowed' : 'Command failed',
+          description: message,
+          dismissesOn: 10,
+          ...(isBlockedCommand ? { state: 'warning' as const } : { variant: 'destructive' }),
         });
       }
     });
@@ -251,7 +267,7 @@ export default function ContinuitySessionPage() {
   const activeSessionExists = snapshot?.exists ?? false;
   const terminalContent = snapshot?.content?.replace(/\s+$/u, '') || 'Session is open. Waiting for tmux output...';
 
-  const handleTerminalKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  const handleCommandKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (!activeSessionExists || isSendingCommand) {
       return;
     }
@@ -262,21 +278,12 @@ export default function ContinuitySessionPage() {
       return;
     }
 
-    if (event.key === 'Backspace') {
-      event.preventDefault();
-      setCommand((currentCommand) => currentCommand.slice(0, -1));
-      return;
-    }
-
     if (event.key === 'Escape') {
       event.preventDefault();
       setCommand('');
-      return;
-    }
-
-    if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
-      event.preventDefault();
-      setCommand((currentCommand) => currentCommand + event.key);
+      if (commandInputRef.current) {
+        commandInputRef.current.innerText = '';
+      }
     }
   };
 
@@ -335,13 +342,7 @@ export default function ContinuitySessionPage() {
           <div className="flex h-full min-h-[72vh] flex-col text-foreground">
             <div
               ref={terminalScrollRef}
-              className="flex-1 overflow-auto px-4 py-4 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
-              tabIndex={0}
-              autoFocus
-              role="textbox"
-              aria-label="Continuity terminal"
-              onClick={() => terminalScrollRef.current?.focus()}
-              onKeyDown={handleTerminalKeyDown}
+              className="relative min-h-0 flex-1 overflow-auto px-4 py-4"
             >
               {isLoadingSnapshot && !snapshot ? (
                 <div className="space-y-2">
@@ -350,16 +351,33 @@ export default function ContinuitySessionPage() {
                   <Skeleton className="h-4 w-4/6" />
                 </div>
               ) : activeSessionExists ? (
-                <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-6 text-foreground">
-                  {terminalContent}
-                  {' '}
-                  {command}
-                  {isSendingCommand ? (
-                    <Loader2 className="ml-1 inline-block h-4 w-4 animate-spin align-[-0.15em]" aria-label="Processing command" />
-                  ) : (
-                    <span className="animate-pulse" aria-hidden="true">▌</span>
-                  )}
-                </pre>
+                <>
+                  <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-6 text-foreground">
+                    {terminalContent}
+                  </pre>
+                  <div className="flex items-start gap-2 font-mono text-sm leading-6">
+                    <span className="select-none text-muted-foreground" aria-hidden="true">
+                      {snapshot?.cwd ? `${snapshot.cwd} ❯` : '❯'}
+                    </span>
+                    <div
+                      ref={commandInputRef}
+                      contentEditable={!isSendingCommand}
+                      suppressContentEditableWarning
+                      role="textbox"
+                      aria-label="Continuity terminal command"
+                      aria-multiline="true"
+                      spellCheck={false}
+                      tabIndex={0}
+                      autoFocus
+                      onInput={(event) => setCommand(event.currentTarget.innerText)}
+                      onKeyDown={handleCommandKeyDown}
+                      className="inline-block min-h-6 w-fit max-w-full whitespace-pre-wrap break-words caret-primary outline-none"
+                    />
+                    {isSendingCommand ? (
+                      <Loader2 className="mt-1 h-4 w-4 shrink-0 animate-spin text-primary" aria-label="Processing command" />
+                    ) : null}
+                  </div>
+                </>
               ) : (
                 <div className="space-y-3 text-center">
                   <div className="text-lg font-medium">Session not found</div>
@@ -375,10 +393,31 @@ export default function ContinuitySessionPage() {
       </Card>
 
       {selectedServerId && requestedSessionId ? (
-        <div className="flex justify-start">
+        <div className="flex flex-wrap justify-start gap-3">
           <Button htmlType="button" type="solid" onClick={handleEndSession} disabled={isEndingSession}>
             {isEndingSession ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
             End Session
+          </Button>
+          <Button
+            htmlType="button"
+            type="outlined"
+            onClick={() => {
+              const filesUrl = withSelectedServerQuery(
+                `/server/files?path=${encodeURIComponent(terminalDirectory)}`,
+                selectedServerId,
+              );
+              const routeMarker = '/server/commands/continuity';
+              const currentPath = window.location.pathname;
+              const basePathIndex = currentPath.indexOf(routeMarker);
+              const basePath = basePathIndex >= 0 ? currentPath.slice(0, basePathIndex) : '';
+              const newTab = window.open(`${basePath}${filesUrl}`, '_blank', 'noopener,noreferrer');
+              if (newTab) {
+                newTab.opener = null;
+              }
+            }}
+          >
+            <FolderOpen className="mr-2 h-4 w-4" />
+            Browse Files
           </Button>
         </div>
       ) : null}

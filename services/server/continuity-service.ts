@@ -36,6 +36,8 @@ const CONTINUITY_PREFIX = 'continuity_';
 const SNAPSHOT_LINE_COUNT = 200;
 const CONTINUITY_SESSION_SEPARATOR = '__NEUP_CONTINUITY_FIELD__';
 const CONTINUITY_SESSION_ID_PATTERN = /^continuity_[A-Za-z0-9_.]+$/u;
+const CONTINUITY_NANO_ERROR = 'Please use file manager, Nano does not works on continuity terminal.';
+const CONTINUITY_CLEAR_ERROR = 'Clearing the continuity terminal is not allowed.';
 
 export type ContinuitySession = {
   id: string;
@@ -275,6 +277,17 @@ export async function sendContinuityCommand(serverId: string, sessionId: string,
   const trimmedCommand = command.replace(/\r?\n/g, '\n').trimEnd();
   if (!trimmedCommand.trim()) {
     return getContinuitySessionSnapshot(serverId, safeSessionId);
+  }
+
+  // Interactive terminal editors cannot be rendered or controlled reliably by
+  // the snapshot-based continuity terminal. Keep this policy server-side so
+  // every continuity client follows the same restriction.
+  if (/(?:^|[;&|]\s*)(?:sudo\s+)?nano(?:\s|$)/mu.test(trimmedCommand)) {
+    throw new Error(CONTINUITY_NANO_ERROR);
+  }
+
+  if (/(?:^|[;&|]\s*)(?:(?:sudo\s+)?(?:clear|reset)|(?:sudo\s+)?tput\s+clear)(?:\s|$)/mu.test(trimmedCommand)) {
+    throw new Error(CONTINUITY_CLEAR_ERROR);
   }
 
   const quotedSessionId = shellQuote(safeSessionId);
