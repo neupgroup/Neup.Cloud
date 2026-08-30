@@ -38,6 +38,7 @@ const CONTINUITY_SESSION_SEPARATOR = '__NEUP_CONTINUITY_FIELD__';
 const CONTINUITY_SESSION_ID_PATTERN = /^continuity_[A-Za-z0-9_.]+$/u;
 const CONTINUITY_NANO_ERROR = 'Please use file manager, Nano does not works on continuity terminal.';
 const CONTINUITY_CLEAR_ERROR = 'Clearing the continuity terminal is not allowed.';
+const CONTINUITY_EXIT_ERROR = 'Please use the End Session button to end the continuity terminal.';
 
 export type ContinuitySession = {
   id: string;
@@ -288,6 +289,10 @@ export async function sendContinuityCommand(serverId: string, sessionId: string,
 
   if (/(?:^|[;&|]\s*)(?:(?:sudo\s+)?(?:clear|reset)|(?:sudo\s+)?tput\s+clear)(?:\s|$)/mu.test(trimmedCommand)) {
     throw new Error(CONTINUITY_CLEAR_ERROR);
+  }
+
+  if (/(?:^|[;&|]\s*)(?:exit|logout)(?:\s|$)/mu.test(trimmedCommand)) {
+    throw new Error(CONTINUITY_EXIT_ERROR);
   }
 
   const quotedSessionId = shellQuote(safeSessionId);

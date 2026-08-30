@@ -231,7 +231,8 @@ export default function ContinuitySessionPage() {
       } catch (error: any) {
         const message = error.message || 'Could not send the command to tmux.';
         const isBlockedCommand = message.includes('Nano does not works on continuity terminal')
-          || message.includes('Clearing the continuity terminal is not allowed');
+          || message.includes('Clearing the continuity terminal is not allowed')
+          || message.includes('use the End Session button to end the continuity terminal');
 
         toast({
           name: 'cloud.server.continuity',
