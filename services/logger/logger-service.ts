@@ -10,7 +10,9 @@ import {
   getLoggerActivitiesByProject,
   findProjectForIngest,
   countRecentErrors,
+  createLoggerProject,
 } from '@/services/logger/data';
+import { redirect } from 'next/navigation';
 
 type LogRequestInput = {
   projectId?: string;
@@ -137,7 +139,27 @@ export async function getErrorLoggerActivities(): Promise<LoggerActivityRecord[]
 }
 
 export async function getLoggerProjectRecords() { return getLoggerProjects(); }
+
+export async function createLoggerProjectAction(formData: FormData) {
+  'use server';
+  const name = String(formData.get('name') ?? '').trim();
+  const slug = String(formData.get('slug') ?? '').trim().toLowerCase();
+  const ingestKey = String(formData.get('ingestKey') ?? '').trim();
+  if (!name || !slug || !ingestKey) throw new Error('Name, slug, and ingest key are required.');
+  await createLoggerProject({ name, slug, ingestKey, allowLocalhostErrors: formData.get('allowLocalhostErrors') === 'on', allowWithoutOrigin: formData.get('allowWithoutOrigin') === 'on', allowedErrorDomains: String(formData.get('allowedErrorDomains') ?? '').split(',').map((value) => value.trim().toLowerCase()).filter(Boolean), errorsPerMinute: Math.max(1, Number(formData.get('errorsPerMinute') ?? 60)), errorsPerTenMinutes: Math.max(1, Number(formData.get('errorsPerTenMinutes') ?? 300)) });
+  redirect('/logger');
+}
 export async function getProjectLoggerActivityRecords(projectId: string, page = 1, pageSize = 25) {
   const result = await getLoggerActivitiesByProject(projectId, page, pageSize);
   return { ...result, activities: result.activities.map(mapLoggerActivity) };
+}
+
+export async function getFilteredLoggerActivityRecords(type?: string, page = 1, pageSize = 25) {
+  if (type === 'error') {
+    const activities = await getErrorLoggerActivities();
+    const totalPages = Math.max(1, Math.ceil(activities.length / pageSize));
+    const currentPage = Math.min(Math.max(1, page), totalPages);
+    return { activities: activities.slice((currentPage - 1) * pageSize, currentPage * pageSize), currentPage, totalPages, total: activities.length };
+  }
+  return getPaginatedLoggerActivityRecords(page, pageSize);
 }

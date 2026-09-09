@@ -13,13 +13,10 @@ Displays the most recent logger activity stored from external applications.
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Activity, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { Activity, ChevronRight, Plus } from 'lucide-react';
 
 import { PageTitle } from '@/components/page-header';
-import { Badge } from '#/components/ui/badge';
-import { Button } from '#/components/ui/button';
-import { ScrollArea } from '#/components/ui/scroll-area';
+import { Card, CardContent } from '#/components/ui/card';
 import { getLoggerProjectRecords } from '@/services/logger/logger-service';
 
 export const metadata: Metadata = {
@@ -52,26 +49,29 @@ export default async function LoggerPage({
           </span>
         )}
         description="Incoming activity from external applications."
-      >
-        <Button type="outlined" asChild>
-          <Link href="/logger/errors">
-            <AlertTriangle className="mr-2 h-4 w-4" />
-            View Errors
-          </Link>
-        </Button>
-      </PageTitle>
+      />
 
-      {projects.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No logger projects have been recorded yet.</p>
-      ) : (
-        <div className="w-full overflow-hidden rounded-lg border divide-y">
-          {projects.map((project) => (
-            <Link key={project.id} href={`/logger/logs?project=${encodeURIComponent(project.id)}`} className="flex items-center justify-between p-4 hover:bg-muted/50">
-              <div><p className="font-semibold">{project.name}</p><p className="text-sm text-muted-foreground">{project.slug}</p></div><ChevronRight className="h-4 w-4" />
-            </Link>
-          ))}
-        </div>
-      )}
+      <div className="divide-y overflow-hidden rounded-lg border">
+        <Link href="/logger/new" className="block first:rounded-t-lg last:rounded-b-lg">
+          <Card className="rounded-none border-0 transition-colors hover:bg-muted/30">
+            <CardContent className="flex min-h-20 items-center justify-between p-4">
+              <div className="flex items-center gap-3"><Plus className="h-5 w-5 text-primary" /><div><p className="font-semibold">New project</p><p className="text-sm text-muted-foreground">Create a logger project and configure its validation rules.</p></div></div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </Link>
+        {projects.map((project) => (
+          <Link key={project.id} href={`/logger/logs?project=${encodeURIComponent(project.id)}`} className="block first:rounded-t-lg last:rounded-b-lg">
+            <Card className="rounded-none border-0 transition-colors hover:bg-muted/30">
+              <CardContent className="flex min-h-20 items-center justify-between p-4">
+                <div><p className="font-semibold">{project.name}</p><p className="text-sm text-muted-foreground">{project.slug}</p></div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+        {projects.length === 0 && <p className="bg-background p-4 text-sm text-muted-foreground">No logger projects have been recorded yet.</p>}
+      </div>
 
     </div>
   );

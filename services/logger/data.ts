@@ -15,6 +15,19 @@ type CreateLoggerActivityInput = {
   data: unknown;
 };
 
+export async function createLoggerProject(input: {
+  name: string; slug: string; ingestKey: string; allowLocalhostErrors: boolean;
+  allowWithoutOrigin: boolean; allowedErrorDomains: string[];
+  errorsPerMinute: number; errorsPerTenMinutes: number;
+}) {
+  return prisma.project.create({ data: { id: randomUUID(), createdOn: new Date(), ...input } });
+}
+
+export async function isLoggerSlugAvailable(slug: string) {
+  const project = await prisma.project.findUnique({ where: { slug } });
+  return !project;
+}
+
 export async function ensureLoggerProject(input: EnsureProjectInput) {
   const normalizedName = input.projectName.trim();
 
