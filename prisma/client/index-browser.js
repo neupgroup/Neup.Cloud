@@ -217,6 +217,13 @@ exports.Prisma.AppErrorScalarFieldEnum = {
 exports.Prisma.ProjectScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  slug: 'slug',
+  ingestKey: 'ingestKey',
+  allowLocalhostErrors: 'allowLocalhostErrors',
+  allowedErrorDomains: 'allowedErrorDomains',
+  allowWithoutOrigin: 'allowWithoutOrigin',
+  errorsPerMinute: 'errorsPerMinute',
+  errorsPerTenMinutes: 'errorsPerTenMinutes',
   createdOn: 'createdOn'
 };
 

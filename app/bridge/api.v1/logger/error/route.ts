@@ -13,7 +13,7 @@ Accepts error events from external applications and stores them as `error` logge
 
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logActivity } from '@/services/logger/logger-service';
+import { ingestError } from '@/services/logger/logger-service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -28,6 +28,8 @@ const RESPONSE_HEADERS = {
 type LoggerErrorRequestBody = {
   projectId?: unknown;
   projectName?: unknown;
+  slug?: unknown;
+  ingestKey?: unknown;
   data?: unknown;
 };
 
@@ -39,11 +41,14 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json() as LoggerErrorRequestBody;
 
-    const activity = await logActivity({
+    const activity = await ingestError({
       projectId: readOptionalString(body.projectId),
       projectName: readOptionalString(body.projectName),
       type: 'error',
       data: body.data ?? {},
+      slug: readOptionalString(body.slug),
+      ingestKey: readOptionalString(body.ingestKey),
+      origin: request.headers.get('origin'),
     });
 
     return NextResponse.json(
@@ -58,7 +63,7 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to store logger error activity.';
-    const status = message.includes('required') ? 400 : 500;
+    const status = message.includes('required') || message.includes('Invalid') || message.includes('allowed') || message.includes('rate limit') ? 400 : 500;
 
     return NextResponse.json(
       {

@@ -5,6 +5,8 @@ import { prisma } from '#/core/database/prisma';
 type EnsureProjectInput = {
   projectId?: string;
   projectName: string;
+  slug?: string;
+  ingestKey?: string;
 };
 
 type CreateLoggerActivityInput = {
@@ -20,6 +22,8 @@ export async function ensureLoggerProject(input: EnsureProjectInput) {
     throw new Error('Project name is required.');
   }
 
+  const slug = (input.slug?.trim() || normalizedName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `project-${randomUUID()}`).slice(0, 100);
+  const ingestKey = input.ingestKey?.trim() || `legacy-${input.projectId?.trim() || randomUUID()}`;
   if (input.projectId?.trim()) {
     const existingProject = await prisma.project.findUnique({
       where: { id: input.projectId.trim() },
@@ -29,7 +33,7 @@ export async function ensureLoggerProject(input: EnsureProjectInput) {
       if (existingProject.name !== normalizedName) {
         return prisma.project.update({
           where: { id: existingProject.id },
-          data: { name: normalizedName },
+          data: { name: normalizedName, slug, ingestKey },
         });
       }
 
@@ -41,19 +45,31 @@ export async function ensureLoggerProject(input: EnsureProjectInput) {
         id: input.projectId.trim(),
         name: normalizedName,
         createdOn: new Date(),
+        slug,
+        ingestKey,
       },
     });
   }
 
   return prisma.project.upsert({
-    where: { name: normalizedName },
+    where: { slug },
     update: {},
     create: {
       id: randomUUID(),
       name: normalizedName,
       createdOn: new Date(),
+      slug,
+      ingestKey,
     },
   });
+}
+
+export async function findProjectForIngest(ingestKey: string, slug: string) {
+  return prisma.project.findFirst({ where: { ingestKey, slug } });
+}
+
+export async function countRecentErrors(projectId: string, since: Date) {
+  return prisma.loggerActivity.count({ where: { projectId, type: 'error', loggedOn: { gte: since } } });
 }
 
 export async function createLoggerActivity(input: CreateLoggerActivityInput) {
@@ -120,4 +136,16 @@ export async function getLoggerActivitiesByType(type: string) {
       loggedOn: 'desc',
     },
   });
+}
+
+export async function getLoggerProjects() {
+  return prisma.project.findMany({ orderBy: { name: 'asc' } });
+}
+
+export async function getLoggerActivitiesByProject(projectId: string, page = 1, pageSize = 25) {
+  const total = await prisma.loggerActivity.count({ where: { projectId } });
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const currentPage = Math.min(Math.max(1, page), totalPages);
+  const activities = await prisma.loggerActivity.findMany({ where: { projectId }, include: { project: true }, orderBy: { loggedOn: 'desc' }, skip: (currentPage - 1) * pageSize, take: pageSize });
+  return { activities, currentPage, totalPages, total };
 }

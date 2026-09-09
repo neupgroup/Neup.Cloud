@@ -1,0 +1,20 @@
+Table: projects, Model: Project
+Fields:
+> id: text, primary key;
+> name: text, unique;
+> slug: text, unique;
+> ingestKey: text, unique;
+> allowLocalhostErrors: boolean, default false;
+> allowedErrorDomains: text[], default [];
+> allowWithoutOrigin: boolean, default false;
+> errorsPerMinute: int, default 60;
+> errorsPerTenMinutes: int, default 300;
+> createdOn: timestamp;
+
+Table: loggerActivity, Model: LoggerActivity
+Fields:
+> id: text, primary key;
+> projectId: text, references projects.id;
+> type: text, nullable;
+> data: json;
+> loggedOn: timestamp;

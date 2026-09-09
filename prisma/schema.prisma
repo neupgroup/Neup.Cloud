@@ -134,10 +134,17 @@ model AppError {
 }
 
 model Project {
-  id             String           @id @db.Text
-  name           String           @unique @db.Text
-  createdOn      DateTime         @map("createdOn") @db.Timestamp(6)
-  loggerActivity LoggerActivity[]
+  id                    String           @id @db.Text
+  name                  String           @unique @db.Text
+  slug                  String           @unique @db.Text
+  ingestKey             String           @unique @map("ingestKey") @db.Text
+  allowLocalhostErrors  Boolean          @default(false) @map("allowLocalhostErrors")
+  allowedErrorDomains   String[]         @default([]) @map("allowedErrorDomains")
+  allowWithoutOrigin    Boolean          @default(false) @map("allowWithoutOrigin")
+  errorsPerMinute       Int              @default(60) @map("errorsPerMinute")
+  errorsPerTenMinutes   Int              @default(300) @map("errorsPerTenMinutes")
+  createdOn             DateTime         @map("createdOn") @db.Timestamp(6)
+  loggerActivity        LoggerActivity[]
 
   @@map("projects")
 }

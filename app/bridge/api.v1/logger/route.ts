@@ -28,6 +28,8 @@ const RESPONSE_HEADERS = {
 type LoggerRequestBody = {
   projectId?: unknown;
   projectName?: unknown;
+  slug?: unknown;
+  ingestKey?: unknown;
   type?: unknown;
   data?: unknown;
 };
@@ -43,6 +45,8 @@ export async function POST(request: NextRequest) {
     const activity = await logActivity({
       projectId: readOptionalString(body.projectId),
       projectName: readOptionalString(body.projectName),
+      slug: readOptionalString(body.slug),
+      ingestKey: readOptionalString(body.ingestKey),
       type: readOptionalString(body.type),
       data: body.data ?? {},
     });

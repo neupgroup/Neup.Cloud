@@ -6,11 +6,17 @@ import {
   getLoggerActivities,
   getPaginatedLoggerActivities,
   getLoggerActivitiesByType,
+  getLoggerProjects,
+  getLoggerActivitiesByProject,
+  findProjectForIngest,
+  countRecentErrors,
 } from '@/services/logger/data';
 
 type LogRequestInput = {
   projectId?: string;
   projectName?: string;
+  slug?: string;
+  ingestKey?: string;
   type?: string;
   data?: unknown;
 };
@@ -63,6 +69,8 @@ export async function logActivity(input: LogRequestInput) {
   const project = await ensureLoggerProject({
     projectId: typeof input.projectId === 'string' ? input.projectId.trim() : undefined,
     projectName,
+    slug: input.slug,
+    ingestKey: input.ingestKey,
   });
 
   const activity = await createLoggerActivity({
@@ -72,6 +80,19 @@ export async function logActivity(input: LogRequestInput) {
   });
 
   return mapLoggerActivity(activity);
+}
+
+export async function ingestError(input: LogRequestInput & { origin?: string | null }) {
+  if (!input.slug || !input.ingestKey) throw new Error('project slug and ingestKey are required.');
+  const project = await findProjectForIngest(input.ingestKey, input.slug);
+  if (!project) throw new Error('Invalid logger project credentials.');
+  const origin = input.origin?.trim() || '';
+  const hostname = origin ? (() => { try { return new URL(origin).hostname.toLowerCase(); } catch { return ''; } })() : '';
+  const allowed = (!origin && project.allowWithoutOrigin) || (hostname === 'localhost' && project.allowLocalhostErrors) || project.allowedErrorDomains.some((domain) => hostname === domain.toLowerCase() || hostname.endsWith(`.${domain.toLowerCase()}`));
+  if (!allowed) throw new Error('Error origin is not allowed for this project.');
+  const now = Date.now();
+  if (await countRecentErrors(project.id, new Date(now - 60_000)) >= project.errorsPerMinute || await countRecentErrors(project.id, new Date(now - 600_000)) >= project.errorsPerTenMinutes) throw new Error('Logger error rate limit exceeded.');
+  return logActivity({ projectId: project.id, projectName: project.name, type: 'error', data: input.data });
 }
 
 export async function getAllLoggerActivities(): Promise<LoggerActivityRecord[]> {
@@ -113,4 +134,10 @@ export async function getErrorLoggerActivities(): Promise<LoggerActivityRecord[]
       createdOn: record.project.createdOn.toISOString(),
     },
   }));
+}
+
+export async function getLoggerProjectRecords() { return getLoggerProjects(); }
+export async function getProjectLoggerActivityRecords(projectId: string, page = 1, pageSize = 25) {
+  const result = await getLoggerActivitiesByProject(projectId, page, pageSize);
+  return { ...result, activities: result.activities.map(mapLoggerActivity) };
 }
