@@ -1669,7 +1669,7 @@ function PipelineEditorCanvas({
 
             <div className="flex flex-wrap items-center gap-2">
               {currentPipelineId ? (
-                <Button type="outlined" className="rounded-full border-slate-200 bg-white" asChild>
+                <Button variant="outlined" className="rounded-full border-slate-200 bg-white" asChild>
                   <Link
                     href={`/pipeline/instance/${currentPipelineId}/logs`}
                     target="_blank"
@@ -1680,12 +1680,12 @@ function PipelineEditorCanvas({
                   </Link>
                 </Button>
               ) : (
-                <Button type="outlined" className="rounded-full border-slate-200 bg-white" disabled>
+                <Button variant="outlined" className="rounded-full border-slate-200 bg-white" disabled>
                   <TerminalSquare className="mr-2 h-4 w-4" />
                   Logs
                 </Button>
               )}
-              <Button type="outlined" className="rounded-full border-slate-200 bg-white" onClick={handleSave}>
+              <Button variant="outlined" className="rounded-full border-slate-200 bg-white" onClick={handleSave}>
                 <Save className="mr-2 h-4 w-4" />
                 {saveState === 'saving' ? 'Saving...' : saveState === 'saved' ? 'Saved' : 'Save'}
               </Button>

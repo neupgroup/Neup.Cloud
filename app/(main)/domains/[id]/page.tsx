@@ -36,7 +36,7 @@ function CopyButton({ text }: { text: string }) {
 
     return (
         <Button
-            type="plain"
+            variant="plain"
             size="sm"
             onClick={handleCopy}
             className="h-8 w-8 p-0"
@@ -266,7 +266,7 @@ export default function DomainDetailsPage() {
                         </p>
                     </div>
                     <Button
-                        type="outlined"
+                        variant="outlined"
                         size="sm"
                         onClick={handleRefresh}
                         disabled={loading}
@@ -418,7 +418,7 @@ export default function DomainDetailsPage() {
                     <div className="p-6">
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button type="solid" className="w-full sm:w-auto" disabled={deleting}>
+                                <Button variant="solid" className="w-full sm:w-auto" disabled={deleting}>
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     {deleting ? "Deleting..." : "Delete Domain"}
                                 </Button>

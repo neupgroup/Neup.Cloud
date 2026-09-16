@@ -27,7 +27,7 @@ export default async function ViewKeyPage({
         return (
             <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
                 <p className="text-muted-foreground">No server selected.</p>
-                <Button asChild type="outlined">
+                <Button asChild variant="outlined">
                     <Link href="/servers">Select a Server</Link>
                 </Button>
             </div>
@@ -41,7 +41,7 @@ export default async function ViewKeyPage({
             <div className="p-8 text-center text-destructive space-y-2">
                 <h3 className="font-semibold">Error Loading Keys</h3>
                 <p className="text-sm">{error || "Unknown error occurred."}</p>
-                <Button asChild type="outlined" className="mt-4">
+                <Button asChild variant="outlined" className="mt-4">
                     <Link href={withSelectedServerQuery('/server/firewall/keys', serverId)}>Back to Keys</Link>
                 </Button>
             </div>
@@ -59,7 +59,7 @@ export default async function ViewKeyPage({
             {/* Responsive Header */}
             <div className="flex flex-col gap-4">
                 <Button
-                    type="plain"
+                    variant="plain"
                     size="sm"
                     className="w-fit -ml-2 text-muted-foreground hover:text-foreground"
                     asChild
@@ -76,7 +76,7 @@ export default async function ViewKeyPage({
                         </h1>
                         <p className="text-muted-foreground">View details of this authorized key.</p>
                     </div>
-                    <Button type="solid" size="sm" className="w-full sm:w-auto shrink-0">
+                    <Button variant="solid" size="sm" className="w-full sm:w-auto shrink-0">
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete Key
                     </Button>

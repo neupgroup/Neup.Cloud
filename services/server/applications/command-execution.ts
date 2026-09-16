@@ -2,6 +2,7 @@
 
 import { executeCommand } from '@/services/saved-commands/saved-commands-service';
 import logica from '@neup/logica';
+import { notification } from '@neup/logica/notification';
 import { getCookie } from '@neup/core/helpers/cookie';
 
 import { getApplication } from './crud';
@@ -20,7 +21,7 @@ async function createBuildNotification(
   accountId: string,
   success: boolean,
 ) {
-  const result = await logica.notification.data({
+  const result = await notification.data({
     accountId,
     action: `cloud.server.application.${applicationId}.build.${success ? 'success' : 'failed'}`,
     type: success ? 'success' : 'error',

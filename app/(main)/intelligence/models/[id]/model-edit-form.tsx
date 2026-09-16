@@ -122,7 +122,7 @@ export default function ModelEditForm({
                       <Button
                         key={option.value}
                         htmlType="button"
-                        type="outlined"
+                        variant="outlined"
                         size="sm"
                         className="rounded-full"
                         onClick={() => setProvider(option.value)}
@@ -182,7 +182,7 @@ export default function ModelEditForm({
                       <Button
                         key={option.code}
                         htmlType="button"
-                        type="outlined"
+                        variant="outlined"
                         size="sm"
                         className="rounded-full"
                         onClick={() => setCurrency(option.code)}
@@ -251,7 +251,7 @@ export default function ModelEditForm({
                 <Save className="mr-2 h-4 w-4" />
                 {isPending ? 'Saving...' : 'Save Changes'}
               </Button>
-              <Button type="outlined" asChild>
+              <Button variant="outlined" asChild>
                 <Link href="/intelligence/models">Back to Models</Link>
               </Button>
             </div>
@@ -269,11 +269,11 @@ export default function ModelEditForm({
         <CardContent>
           <form action={deleteIntelligenceModelAction} className="flex flex-col gap-3 sm:flex-row">
             <input type="hidden" name="model_id" value={String(modelId)} />
-            <Button htmlType="submit" type="solid">
+            <Button htmlType="submit" variant="solid">
               <Trash2 className="mr-2 h-4 w-4" />
               Delete Model
             </Button>
-            <Button type="outlined" asChild>
+            <Button variant="outlined" asChild>
               <Link href="/intelligence/models">Cancel</Link>
             </Button>
           </form>

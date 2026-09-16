@@ -147,7 +147,7 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
                             <div className="flex gap-2">
                                 <Button
                                     htmlType="button"
-                                    type="outlined"
+                                    variant="outlined"
                                     size="sm"
                                     onClick={() => handlePresetClick('read')}
                                     className="h-7 text-xs"
@@ -156,7 +156,7 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
                                 </Button>
                                 <Button
                                     htmlType="button"
-                                    type="outlined"
+                                    variant="outlined"
                                     size="sm"
                                     onClick={() => handlePresetClick('readWrite')}
                                     className="h-7 text-xs"
@@ -165,7 +165,7 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
                                 </Button>
                                 <Button
                                     htmlType="button"
-                                    type="outlined"
+                                    variant="outlined"
                                     size="sm"
                                     onClick={() => handlePresetClick('developer')}
                                     className="h-7 text-xs"
@@ -174,7 +174,7 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
                                 </Button>
                                 <Button
                                     htmlType="button"
-                                    type="outlined"
+                                    variant="outlined"
                                     size="sm"
                                     onClick={() => handlePresetClick('full')}
                                     className="h-7 text-xs"

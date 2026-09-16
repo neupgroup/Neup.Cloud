@@ -172,7 +172,7 @@ function ServerSearchContent() {
                   <FileSearch className="h-5 w-5 text-muted-foreground" />
                   Search
                 </span>
-                <Button type="outlined" onClick={handleRootModeToggle}>
+                <Button variant="outlined" onClick={handleRootModeToggle}>
                   {rootMode ? (
                     <>
                       <ShieldOff className="mr-2 h-4 w-4" /> Turn Root Off
@@ -240,7 +240,7 @@ function ServerSearchContent() {
                   </Button>
                   <Button
                     htmlType="button"
-                    type="outlined"
+                    variant="outlined"
                     className="w-full sm:w-auto"
                     onClick={() => {
                       setQuery('');
@@ -322,13 +322,13 @@ function ServerSearchContent() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
-                              <Button asChild type="outlined" size="sm">
+                              <Button asChild variant="outlined" size="sm">
                                 <Link href={viewerHref} onClick={(e) => e.stopPropagation()}>
                                   <ExternalLink className="mr-2 h-4 w-4" />
                                   Open
                                 </Link>
                               </Button>
-                              <Button asChild type="tinted" size="sm">
+                              <Button asChild variant="tinted" size="sm">
                                 <Link
                                   href={openFilesHref}
                                   target="_blank"

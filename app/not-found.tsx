@@ -40,7 +40,7 @@ export default function NotFound() {
               Go home
             </Link>
           </Button>
-          <Button type="outlined" asChild>
+          <Button variant="outlined" asChild>
             <Link href="/server/list">
               <ArrowLeft className="h-4 w-4" />
               View servers

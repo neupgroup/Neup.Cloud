@@ -77,7 +77,7 @@ function StartupList({ services, onDisable, onAddClick }: { services: StartupSer
                             </div>
                         </div>
                         <Button
-                            type="plain"
+                            variant="plain"
                             size="icon"
                             className="text-muted-foreground hover:text-destructive"
                             onClick={(e) => {

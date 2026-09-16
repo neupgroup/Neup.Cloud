@@ -152,7 +152,7 @@ export function StatusDashboard({ applicationId }: StatusDashboardProps) {
       <Card>
         <CardHeader className="pb-2 flex flex-row items-center justify-between">
           <CardTitle className="text-sm font-medium text-muted-foreground">Uptime</CardTitle>
-          <Button type="plain" size="sm" onClick={() => void fetchStatus()} disabled={isLoading}>
+          <Button variant="plain" size="sm" onClick={() => void fetchStatus()} disabled={isLoading}>
             Refresh
           </Button>
         </CardHeader>

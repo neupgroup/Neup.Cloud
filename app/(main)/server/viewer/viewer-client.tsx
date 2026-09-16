@@ -219,7 +219,7 @@ export default function ViewerClient() {
     <div className="space-y-6 pb-24">
       <div className="flex flex-col gap-4">
         <Button
-          type="plain"
+          variant="plain"
           size="sm"
           className="w-fit -ml-2 text-muted-foreground hover:text-foreground"
           onClick={() => router.push(backHref)}
@@ -235,7 +235,7 @@ export default function ViewerClient() {
           <div className="flex items-center gap-x-1 gap-y-1 text-sm text-muted-foreground flex-wrap">
             <span className="font-semibold text-foreground mr-1">Location:</span>
             <Button
-              type="plain"
+              variant="plain"
               className="p-0 h-auto text-muted-foreground font-normal hover:text-primary"
             onClick={() => router.push(withSelectedServerQuery(`/server/files?path=/${rootMode ? '&rootMode=true' : ''}`, serverId))}
             >
@@ -252,7 +252,7 @@ export default function ViewerClient() {
                     <span className="text-foreground break-all">{segment}</span>
                   ) : (
                     <Button
-                      type="plain"
+                      variant="plain"
                       className="p-0 h-auto text-muted-foreground font-normal hover:text-primary max-w-[150px] truncate"
                       onClick={() => router.push(withSelectedServerQuery(`/server/files?path=${encodeURIComponent(segmentPath)}${rootMode ? '&rootMode=true' : ''}`, serverId))}
                     >
@@ -281,7 +281,7 @@ export default function ViewerClient() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pb-8">
             <Button
               onClick={handleRootModeToggle}
-              type="outlined"
+              variant="outlined"
               size="lg"
               className="w-full sm:w-auto"
             >

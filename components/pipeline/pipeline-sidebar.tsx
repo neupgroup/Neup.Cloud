@@ -272,19 +272,19 @@ export function PipelineSidebar({
               <section className="space-y-3 px-1">
                 <h3 className="text-lg font-semibold text-slate-950">Quick actions</h3>
                 <div className="grid gap-2">
-                  <Button type="outlined" className="justify-start rounded-2xl border-slate-200 bg-slate-50" onClick={onDuplicate}>
+                  <Button variant="outlined" className="justify-start rounded-2xl border-slate-200 bg-slate-50" onClick={onDuplicate}>
                     <Copy className="mr-2 h-4 w-4" />
                     Duplicate node
                   </Button>
                   <Button
-                    type="outlined"
+                    variant="outlined"
                     className="justify-start rounded-2xl border-slate-200 bg-slate-50"
                     onClick={onAddChild}
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Add child node
                   </Button>
-                  <Button type="solid" className="justify-start rounded-2xl" onClick={onDelete}>
+                  <Button variant="solid" className="justify-start rounded-2xl" onClick={onDelete}>
                     <Trash2 className="mr-2 h-4 w-4" />
                     Remove node
                   </Button>

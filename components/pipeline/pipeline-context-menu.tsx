@@ -47,7 +47,7 @@ export function PipelineContextMenu({ x, y, items, className }: PipelineContextM
             <Button
               key={item.id}
               htmlType="button"
-              type="plain"
+              variant="plain"
               className="h-10 w-full justify-start rounded-xl px-3 text-slate-700 hover:bg-slate-100 hover:text-slate-950"
               onClick={item.onSelect}
               role="menuitem"

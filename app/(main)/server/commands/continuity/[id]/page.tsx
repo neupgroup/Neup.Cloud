@@ -292,7 +292,7 @@ export default function ContinuitySessionPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
-          <Button asChild type="plain" size="sm" className="px-0 text-muted-foreground hover:text-foreground">
+          <Button asChild variant="plain" size="sm" className="px-0 text-muted-foreground hover:text-foreground">
             <Link href={withSelectedServerQuery('/server/commands/continuity', selectedServerId)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
@@ -395,13 +395,13 @@ export default function ContinuitySessionPage() {
 
       {selectedServerId && requestedSessionId ? (
         <div className="flex flex-wrap justify-start gap-3">
-          <Button htmlType="button" type="solid" onClick={handleEndSession} disabled={isEndingSession}>
+          <Button htmlType="button" variant="solid" onClick={handleEndSession} disabled={isEndingSession}>
             {isEndingSession ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
             End Session
           </Button>
           <Button
             htmlType="button"
-            type="outlined"
+            variant="outlined"
             onClick={() => {
               const filesUrl = withSelectedServerQuery(
                 `/server/files?path=${encodeURIComponent(terminalDirectory)}`,

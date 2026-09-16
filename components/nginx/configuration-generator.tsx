@@ -128,7 +128,7 @@ export function NginxConfigGenerator({ defaultDomain = 'example.com' }: NginxCon
                 <div className="grid gap-4">
                     <div className="flex items-center justify-between">
                         <Label className="text-base">Proxy Paths & Locations</Label>
-                        <Button htmlType="button" type="outlined" size="sm" onClick={addLocation}>
+                        <Button htmlType="button" variant="outlined" size="sm" onClick={addLocation}>
                             <Plus className="h-4 w-4 mr-2" /> Add Path
                         </Button>
                     </div>
@@ -169,7 +169,7 @@ export function NginxConfigGenerator({ defaultDomain = 'example.com' }: NginxCon
                                     <Label htmlFor={`static-${index}`} className="text-sm cursor-pointer whitespace-nowrap">Serve Locally</Label>
                                 </div>
                             </div>
-                            <Button htmlType="button" type="plain" size="icon" onClick={() => removeLocation(index)} className="text-muted-foreground hover:text-destructive">
+                            <Button htmlType="button" variant="plain" size="icon" onClick={() => removeLocation(index)} className="text-muted-foreground hover:text-destructive">
                                 <Trash className="h-4 w-4" />
                             </Button>
                         </div>
@@ -184,7 +184,7 @@ export function NginxConfigGenerator({ defaultDomain = 'example.com' }: NginxCon
                     <div className="grid gap-2 animate-in fade-in slide-in-from-top-2">
                         <div className="flex items-center justify-between">
                             <Label>Generated Configuration</Label>
-                            <Button htmlType="button" type="plain" size="sm" onClick={copyToClipboard}>
+                            <Button htmlType="button" variant="plain" size="sm" onClick={copyToClipboard}>
                                 {copied ? <Check className="h-4 w-4 mr-2 text-green-500" /> : <Copy className="h-4 w-4 mr-2" />}
                                 {copied ? "Copied" : "Copy"}
                             </Button>

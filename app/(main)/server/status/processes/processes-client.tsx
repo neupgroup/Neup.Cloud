@@ -48,7 +48,7 @@ function ProcessesList({ processes, onKill, killingPid }: { processes: Process[]
                                 <span className="font-medium">{process.memory}% RAM</span>
                             </div>
                             <Button
-                                type="text"
+                                variant="text"
                                 onClick={() => onKill(process.pid)}
                                 disabled={killingPid === process.pid}
                                 className="flex items-center gap-1.5 shrink-0 text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -207,7 +207,7 @@ export default function ProcessesClient({
                             {showLoadMore && visibleProcesses.length < filteredProcesses.length && (
                                 <div className="text-center">
                                     <Button
-                                        type="outlined"
+                                        variant="outlined"
                                         onClick={() => setVisibleCount(prev => prev + 10)}
                                     >
                                         Load More ({filteredProcesses.length - visibleCount} remaining)

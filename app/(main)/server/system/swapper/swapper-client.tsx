@@ -380,7 +380,7 @@ function SwapFilesCard({
             <div className="flex items-center justify-between px-1">
                 <h3 className="text-xl font-semibold">Swap Files</h3>
                 <Button
-                    type="plain"
+                    variant="plain"
                     size="sm"
                     disabled={isRefreshing}
                     onClick={handleRefresh}

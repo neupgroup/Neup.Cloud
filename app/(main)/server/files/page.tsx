@@ -988,7 +988,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
             </div>
           </div>
           <DialogFooter>
-            <Button type="outlined" onClick={() => setRenameState(null)}>Cancel</Button>
+            <Button variant="outlined" onClick={() => setRenameState(null)}>Cancel</Button>
             <Button onClick={confirmRename}>Save</Button>
           </DialogFooter>
         </DialogContent>
@@ -1003,7 +1003,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button type="outlined" onClick={() => setDeleteState(null)}>Cancel</Button>
+            <Button variant="outlined" onClick={() => setDeleteState(null)}>Cancel</Button>
             <Button onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">Delete</Button>
           </DialogFooter>
         </DialogContent>
@@ -1262,7 +1262,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
             {!uploadType ? (
               <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl justify-center items-center h-full">
                 <Button
-                  type="outlined"
+                  variant="outlined"
                   className="h-40 w-40 flex flex-col gap-4 border-2 hover:border-primary/50 hover:bg-accent transition-all rounded-xl"
                   onClick={() => setUploadType('file')}
                 >
@@ -1271,7 +1271,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
                 </Button>
                 <div className="text-muted-foreground font-medium">- OR -</div>
                 <Button
-                  type="outlined"
+                  variant="outlined"
                   className="h-40 w-40 flex flex-col gap-4 border-2 hover:border-primary/50 hover:bg-accent transition-all rounded-xl"
                   onClick={() => setUploadType('folder')}
                 >
@@ -1303,7 +1303,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
                   <h3 className="text-2xl font-semibold">Drop {uploadType === 'file' ? 'files' : 'folder'} here</h3>
                   <p className="text-muted-foreground text-base">or click to open explorer</p>
                 </div>
-                <Button type="plain" size="sm" onClick={(e) => { e.stopPropagation(); setUploadType(null); }}>Back to selection</Button>
+                <Button variant="plain" size="sm" onClick={(e) => { e.stopPropagation(); setUploadType(null); }}>Back to selection</Button>
               </div>
             )}
           </div>

@@ -152,7 +152,7 @@ export default function CreateKeyPage() {
                                     disabled={!!privateKey} // Lock name if generated to ensure consistency with comment in key? Optional.
                                 />
                                 <Button
-                                    type="outlined"
+                                    variant="outlined"
                                     onClick={handleGenerate}
                                     disabled={isGenerating || !!privateKey}
                                     title="Generate a new RSA key pair"
@@ -173,7 +173,7 @@ export default function CreateKeyPage() {
                                         <KeyRound className="h-4 w-4 text-primary" />
                                         Private Key Generated
                                     </h4>
-                                    <Button size="sm" type="tinted" onClick={handleDownload}>
+                                    <Button size="sm" variant="tinted" onClick={handleDownload}>
                                         <Download className="h-4 w-4 mr-2" />
                                         {downloaded ? "Downloaded" : "Download Private Key"}
                                     </Button>

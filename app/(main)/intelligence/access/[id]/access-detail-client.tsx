@@ -453,7 +453,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                   </Button>
                   <Button 
                     htmlType="button"
-                    type="outlined"
+                    variant="outlined"
                     onClick={() => handleDownload(resetKeyState.generatedAccessKey!, access.id)}
                     className="flex-1"
                   >
@@ -514,7 +514,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                       </div>
                       <Button
                         htmlType="button"
-                        type="outlined"
+                        variant="outlined"
                         size="sm"
                         onClick={() => setEditModelBlocks([...editModelBlocks, { modelId: '', tokenId: '' }])}
                       >
@@ -534,7 +534,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                           {index > 0 && (
                             <Button
                               htmlType="button"
-                              type="plain"
+                              variant="plain"
                               size="sm"
                               onClick={() => setEditModelBlocks(editModelBlocks.filter((_, i) => i !== index))}
                             >
@@ -550,7 +550,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                             <input type="hidden" name={`model_${index}_id`} value={block.modelId} />
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button htmlType="button" type="outlined" className="justify-between">
+                                <Button htmlType="button" variant="outlined" className="justify-between">
                                   <span className="truncate">
                                     {block.modelId
                                       ? models.find((m) => m.id === Number(block.modelId))?.title || 'Select a model'
@@ -581,7 +581,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                               <input type="hidden" name={`token_${index}_id`} value={block.tokenId} />
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button htmlType="button" type="outlined" className="justify-between" disabled={!block.modelId}>
+                                  <Button htmlType="button" variant="outlined" className="justify-between" disabled={!block.modelId}>
                                     <span className="truncate">
                                       {block.tokenId
                                         ? tokens.find((t) => t.id === Number(block.tokenId))?.name || 'Select a token'
@@ -648,7 +648,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                   </Button>
                   <Button
                     htmlType="button"
-                    type="outlined"
+                    variant="outlined"
                     onClick={() => {
                       setIsEditing(false);
                       setAccessKeyForEdit('');
@@ -671,7 +671,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                   <input type="hidden" name="access_id" value={String(access.id)} />
                   <Button 
                     htmlType="submit"
-                    type="solid"
+                    variant="solid"
                     disabled={isResettingKey}
                   >
                     <KeyRound className="mr-2 h-4 w-4" />
@@ -736,7 +736,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
               </div>
               <Button
                 htmlType="button"
-                type="outlined"
+                variant="outlined"
                 size="sm"
                 onClick={() => handleCopy(generateCurlCommand())}
                 className="mt-2"
@@ -793,7 +793,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
                 </Button>
                 <Button
                   htmlType="button"
-                  type="outlined"
+                  variant="outlined"
                   onClick={() => {
                     setIsTesting(false);
                     setTestAccessKey('');
@@ -834,14 +834,14 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
       {!isEditing && (
         <div className="flex gap-3">
           {access.published && access.status !== 'unpublished' && access.type !== 'open' && (
-            <Button onClick={() => setIsTesting(true)} type="outlined" disabled={isTesting}>
+            <Button onClick={() => setIsTesting(true)} variant="outlined" disabled={isTesting}>
               <AlertCircle className="mr-2 h-4 w-4" />
               Test
             </Button>
           )}
           
           {access.published && access.status !== 'unpublished' && (
-            <Button onClick={() => setIsEditing(true)} type="outlined">
+            <Button onClick={() => setIsEditing(true)} variant="outlined">
               <Edit className="mr-2 h-4 w-4" />
               Edit
             </Button>
@@ -849,7 +849,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
           
           <form action={deleteIntelligenceAccessAction} className="inline">
             <input type="hidden" name="access_id" value={String(access.id)} />
-            <Button htmlType="submit" type="solid">
+            <Button htmlType="submit" variant="solid">
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </Button>

@@ -151,7 +151,7 @@ export default function AccessCreateForm({
               <Label>What type of access are you creating?</Label>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button htmlType="button" type="outlined" className="justify-between">
+                  <Button htmlType="button" variant="outlined" className="justify-between">
                     <span className="truncate">
                       {accessTypeOptions.find((option) => option.value === accessType)?.label || 'Select access type'}
                     </span>
@@ -177,7 +177,7 @@ export default function AccessCreateForm({
                     <p className="text-sm font-semibold text-foreground">Model blocks</p>
                     <p className="text-sm text-muted-foreground">Row 1 is primary. Row 2 and beyond are fallbacks.</p>
                   </div>
-                  <Button htmlType="button" type="outlined" onClick={addRow}>
+                  <Button htmlType="button" variant="outlined" onClick={addRow}>
                     <Plus className="mr-2 h-4 w-4" />
                     Add Model Block
                   </Button>
@@ -197,7 +197,7 @@ export default function AccessCreateForm({
                         </p>
                       </div>
                       {index > 0 && (
-                        <Button htmlType="button" type="plain" size="sm" onClick={() => removeRow(index)}>
+                        <Button htmlType="button" variant="plain" size="sm" onClick={() => removeRow(index)}>
                           <Trash2 className="mr-2 h-4 w-4" />
                           Remove
                         </Button>
@@ -212,7 +212,7 @@ export default function AccessCreateForm({
                             <Button
                               id={`model_input_${index}`}
                               htmlType="button"
-                              type="outlined"
+                              variant="outlined"
                               className="justify-between"
                             >
                               <span className="truncate">{getModelLabel(row.modelInput)}</span>
@@ -239,7 +239,7 @@ export default function AccessCreateForm({
                               <Button
                                 id={`token_input_${index}`}
                                 htmlType="button"
-                                type="outlined"
+                                variant="outlined"
                                 className="justify-between"
                                 disabled={!row.modelInput}
                               >
@@ -288,7 +288,7 @@ export default function AccessCreateForm({
               <Button htmlType="submit" disabled={isPending || !canSubmit}>
                 {isPending ? 'Saving...' : 'Create Access'}
               </Button>
-              <Button type="outlined" asChild>
+              <Button variant="outlined" asChild>
                 <Link href="/intelligence/access">View Access</Link>
               </Button>
             </div>

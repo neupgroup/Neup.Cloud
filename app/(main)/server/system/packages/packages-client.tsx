@@ -193,7 +193,7 @@ export function PackagesClient({ serverId, serverName, showTitle = true }: { ser
 
                                     {hasMore && (
                                         <div className="p-4 border-t flex justify-center">
-                                            <Button type="plain" onClick={handleLoadMore} className="w-full text-muted-foreground">
+                                            <Button variant="plain" onClick={handleLoadMore} className="w-full text-muted-foreground">
                                                 Load More ({allFiltered.length - displayedPackages.length} remaining)
                                             </Button>
                                         </div>

@@ -645,7 +645,7 @@ export function PipelineProviderConnectionPage({ provider }: { provider: Pipelin
                         {connection ? (
                           <Button
                             htmlType="button"
-                            type="outlined"
+                            variant="outlined"
                             className="rounded-2xl border-slate-200 bg-white"
                             onClick={handleUseSavedDraft}
                           >
@@ -655,7 +655,7 @@ export function PipelineProviderConnectionPage({ provider }: { provider: Pipelin
                         ) : null}
                         <Button
                           htmlType="button"
-                          type="outlined"
+                          variant="outlined"
                           className="rounded-2xl border-slate-200 bg-white"
                           onClick={handleLoadExample}
                         >
@@ -663,7 +663,7 @@ export function PipelineProviderConnectionPage({ provider }: { provider: Pipelin
                         </Button>
                         <Button
                           htmlType="button"
-                          type="outlined"
+                          variant="outlined"
                           className="rounded-2xl border-rose-200 bg-white text-rose-700 hover:bg-rose-50 hover:text-rose-700"
                           onClick={handleClear}
                         >
@@ -749,7 +749,7 @@ export function PipelineProviderConnectionPage({ provider }: { provider: Pipelin
                         <Button asChild className="rounded-2xl">
                           <Link href="/pipeline/editor">Open pipeline editor</Link>
                         </Button>
-                        <Button asChild type="outlined" className="rounded-2xl border-slate-200 bg-white">
+                        <Button asChild variant="outlined" className="rounded-2xl border-slate-200 bg-white">
                           <Link href="/pipeline">Back to pipeline</Link>
                         </Button>
                       </div>

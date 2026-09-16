@@ -287,7 +287,7 @@ export default function DomainsBulkPage() {
                       ) : null}
                       {!result && (
                         <Button
-                          type="outlined"
+                          variant="outlined"
                           size="sm"
                           disabled={isChecking}
                           onClick={(event) => {
@@ -338,7 +338,7 @@ export default function DomainsBulkPage() {
                     {result && (
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <Button type="outlined" asChild>
+                          <Button variant="outlined" asChild>
                             <Link
                               href={`/domain/whois/${encodeURIComponent(result.domain)}`}
                               onClick={(event) => event.stopPropagation()}

@@ -239,13 +239,13 @@ export function OpenFlowClient({ tokens, models, accountId }: OpenFlowClientProp
             </div>
 
             {!showFallback ? (
-              <Button htmlType="button" type="outlined" className="w-full" onClick={() => setShowFallback(true)}>
+              <Button htmlType="button" variant="outlined" className="w-full" onClick={() => setShowFallback(true)}>
                 Add fallback model
               </Button>
             ) : (
               <Collapsible open={showFallback} onOpenChange={setShowFallback}>
                 <CollapsibleTrigger asChild>
-                  <Button type="outlined" className="w-full justify-between">
+                  <Button variant="outlined" className="w-full justify-between">
                     <span>Fallback Configuration</span>
                     <ChevronDown className={`h-4 w-4 transition-transform ${showFallback ? 'rotate-180' : ''}`} />
                   </Button>

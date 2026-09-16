@@ -223,7 +223,7 @@ export function TableDataClient({
                         <>
                           <Button
                             htmlType="button"
-                            type="plain"
+                            variant="plain"
                             size="icon"
                             className="h-8 w-8"
                             disabled={isPending}
@@ -234,7 +234,7 @@ export function TableDataClient({
                           </Button>
                           <Button
                             htmlType="button"
-                            type="plain"
+                            variant="plain"
                             size="icon"
                             className="h-8 w-8 text-destructive hover:text-destructive"
                             disabled={isPending}
@@ -245,7 +245,7 @@ export function TableDataClient({
                           </Button>
                           <Button
                             htmlType="button"
-                            type="plain"
+                            variant="plain"
                             size="icon"
                             className="h-8 w-8"
                             disabled={isPending}
@@ -259,7 +259,7 @@ export function TableDataClient({
                         <>
                           <Button
                             htmlType="button"
-                            type="plain"
+                            variant="plain"
                             size="icon"
                             className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                             disabled={isPending}
@@ -270,7 +270,7 @@ export function TableDataClient({
                           </Button>
                           <Button
                             htmlType="button"
-                            type="plain"
+                            variant="plain"
                             size="icon"
                             className="h-8 w-8 text-destructive opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100 focus-visible:opacity-100"
                             disabled={isPending}

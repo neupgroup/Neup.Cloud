@@ -94,7 +94,7 @@ function DomainListResult({ results, isLoading, query }: { results: DomainStatus
                                         Add to Cart
                                     </Button>
                                 ) : (
-                                    <Button size="sm" type="outlined" className="ml-2 h-8" asChild>
+                                    <Button size="sm" variant="outlined" className="ml-2 h-8" asChild>
                                         <a href={`https://www.whois.com/whois/${domain.name}`} target="_blank" rel="noopener noreferrer">
                                             WHOIS
                                             <ExternalLink className="ml-2 h-3 w-3" />

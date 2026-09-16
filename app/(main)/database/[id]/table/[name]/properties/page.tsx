@@ -45,7 +45,7 @@ export default async function DatabaseTablePropertiesPage({ params }: Props) {
           }
           description={`Manage indexes, primary keys, columns, and destructive actions for ${connection.title}`}
         >
-          <Button type="outlined" asChild>
+          <Button variant="outlined" asChild>
             <Link href={`/database/${connection.id}/table/${encodeURIComponent(tableName)}`}>
               Browse data
             </Link>

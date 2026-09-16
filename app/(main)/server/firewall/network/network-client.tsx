@@ -96,7 +96,7 @@ function RulesList({ rules, firewallActive, onDelete }: { rules: FirewallRule[],
                             </div>
                         </div>
                         <Button
-                            type="plain"
+                            variant="plain"
                             size="icon"
                             className="text-muted-foreground hover:text-destructive"
                             onClick={() => onDelete(rule.id)}

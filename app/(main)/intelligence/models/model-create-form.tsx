@@ -97,7 +97,7 @@ export default function ModelCreateForm() {
                     <Button
                       key={option.value}
                       htmlType="button"
-                      type="outlined"
+                      variant="outlined"
                       size="sm"
                       className="rounded-full"
                       onClick={() => setProvider(option.value)}
@@ -158,7 +158,7 @@ export default function ModelCreateForm() {
                     <Button
                       key={option.code}
                       htmlType="button"
-                      type="outlined"
+                      variant="outlined"
                       size="sm"
                       className="rounded-full"
                       onClick={() => setCurrency(option.code)}
@@ -230,7 +230,7 @@ export default function ModelCreateForm() {
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <SubmitButton disabled={!canSubmit} />
-            <Button type="outlined" asChild>
+            <Button variant="outlined" asChild>
               <Link href="/intelligence/models">Back to Models</Link>
             </Button>
           </div>

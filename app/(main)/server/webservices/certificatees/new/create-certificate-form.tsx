@@ -315,10 +315,10 @@ export function CreateCertificateForm({
                                         </p>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Button type="button" variant="outline" size="sm" onClick={handleResumeSavedSession}>
+                                        <Button htmlType="button" variant="outline" size="sm" onClick={handleResumeSavedSession}>
                                             Resume
                                         </Button>
-                                        <Button type="button" variant="ghost" size="sm" onClick={handleDiscardSavedSession}>
+                                        <Button htmlType="button" variant="ghost" size="sm" onClick={handleDiscardSavedSession}>
                                             <Trash2 className="h-4 w-4 mr-1" />
                                             Clear
                                         </Button>
@@ -406,7 +406,7 @@ export function CreateCertificateForm({
                                             {dnsData.dnsRecord}
                                         </code>
                                         <Button
-                                            type="button"
+                                            htmlType="button"
                                             size="icon"
                                             variant="outline"
                                             className="h-8 w-8"
@@ -427,7 +427,7 @@ export function CreateCertificateForm({
                                             {dnsData.challenge}
                                         </code>
                                         <Button
-                                            type="button"
+                                            htmlType="button"
                                             size="icon"
                                             variant="outline"
                                             className="h-8 w-8"
@@ -443,12 +443,12 @@ export function CreateCertificateForm({
                             </div>
 
                             <div className="flex flex-wrap gap-2 pt-2">
-                                <Button type="button" variant="outline" onClick={openTerminal}>
+                                <Button htmlType="button" variant="outline" onClick={openTerminal}>
                                     <Terminal className="h-4 w-4 mr-2" />
                                     Open Terminal
                                 </Button>
                                 <Button
-                                    type="button"
+                                    htmlType="button"
                                     variant="ghost"
                                     onClick={() => {
                                         navigator.clipboard.writeText(terminalSession.sessionId);

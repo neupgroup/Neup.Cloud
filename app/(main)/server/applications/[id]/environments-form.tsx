@@ -145,7 +145,7 @@ export function EnvironmentsForm({ application }: { application: Application }) 
                                     </div>
                                     <Button
                                         htmlType="button"
-                                        type="plain"
+                                        variant="plain"
                                         size="icon"
                                         onClick={() => remove(index)}
                                         className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
@@ -158,7 +158,7 @@ export function EnvironmentsForm({ application }: { application: Application }) 
 
                         <Button
                             htmlType="button"
-                            type="outlined"
+                            variant="outlined"
                             onClick={() => append({ key: "", value: "" })}
                             className="w-full border-dashed"
                         >

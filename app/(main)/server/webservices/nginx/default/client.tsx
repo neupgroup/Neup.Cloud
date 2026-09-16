@@ -289,7 +289,7 @@ server {
 
                     <Button
                         onClick={handleGenerateConfig}
-                        type="outlined"
+                        variant="outlined"
                         className="w-full"
                     >
                         <Download className="mr-2 h-4 w-4" />

@@ -200,7 +200,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div className="space-y-1">
-                <Button type="plain" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
+                <Button variant="plain" className="pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground" asChild>
                     <Link href={withSelectedServer(`/server/database/${engine}-${dbName}/users`)}>
                         <ChevronLeft className="h-4 w-4 mr-1" /> Back to Users
                     </Link>
@@ -295,7 +295,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                                 <div className="flex gap-2">
                                     <Button
                                         htmlType="button"
-                                        type="outlined"
+                                        variant="outlined"
                                         size="sm"
                                         onClick={() => handlePresetClick('read')}
                                         className="h-7 text-xs"
@@ -304,7 +304,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                                     </Button>
                                     <Button
                                         htmlType="button"
-                                        type="outlined"
+                                        variant="outlined"
                                         size="sm"
                                         onClick={() => handlePresetClick('readWrite')}
                                         className="h-7 text-xs"
@@ -313,7 +313,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                                     </Button>
                                     <Button
                                         htmlType="button"
-                                        type="outlined"
+                                        variant="outlined"
                                         size="sm"
                                         onClick={() => handlePresetClick('developer')}
                                         className="h-7 text-xs"
@@ -322,7 +322,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                                     </Button>
                                     <Button
                                         htmlType="button"
-                                        type="outlined"
+                                        variant="outlined"
                                         size="sm"
                                         onClick={() => handlePresetClick('full')}
                                         className="h-7 text-xs"
@@ -377,7 +377,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                         <p className="text-sm text-muted-foreground leading-relaxed">
                             This removes database-level privileges for <span className="font-mono text-foreground">{username}</span> on <span className="font-mono text-foreground">{dbName}</span>. The user can still exist for other databases.
                         </p>
-                        <Button type="outlined" onClick={handleRevokeAccess} disabled={isLoading}>
+                        <Button variant="outlined" onClick={handleRevokeAccess} disabled={isLoading}>
                             {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShieldX className="h-4 w-4 mr-2" />}
                             Revoke Access
                         </Button>
@@ -439,7 +439,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                         <p className="text-sm text-muted-foreground leading-relaxed">
                             Deleting this user removes the account from the database engine. Any applications using these credentials will fail to connect.
                         </p>
-                        <Button type="solid" onClick={handleDelete} disabled={isLoading}>
+                        <Button variant="solid" onClick={handleDelete} disabled={isLoading}>
                             {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
                             Delete User Account
                         </Button>

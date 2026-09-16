@@ -247,10 +247,10 @@ function CreateCommandPageContent() {
       <div className="grid gap-3">
         <p className="text-sm font-medium text-muted-foreground">Select a command type:</p>
         <div className="flex gap-2">
-          <Button htmlType="button" type={mode === 'command' ? 'tinted' : 'outlined'} onClick={() => setMode('command')}>
+          <Button htmlType="button" variant={mode === 'command' ? 'tinted' : 'outlined'} onClick={() => setMode('command')}>
             Individual Command
           </Button>
-          <Button htmlType="button" type={mode === 'set' ? 'tinted' : 'outlined'} onClick={() => setMode('set')}>
+          <Button htmlType="button" variant={mode === 'set' ? 'tinted' : 'outlined'} onClick={() => setMode('set')}>
             Command Set
           </Button>
         </div>
@@ -332,7 +332,7 @@ function CreateCommandPageContent() {
                   <Button
                     htmlType="button"
                     size="icon"
-                    type="plain"
+                    variant="plain"
                     className="text-muted-foreground hover:text-destructive"
                     onClick={() => removeStep(step.id)}
                   >
@@ -456,7 +456,7 @@ function CreateCommandPageContent() {
       )}
 
       <div className="flex flex-wrap items-center justify-start gap-3">
-        <Button type="outlined" asChild disabled={isSaving}>
+        <Button variant="outlined" asChild disabled={isSaving}>
           <Link href={withSelectedServerQuery('/server/commands', selectedServerId)}>Cancel</Link>
         </Button>
         <Button

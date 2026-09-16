@@ -478,13 +478,13 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
                     {/* Date Navigator */}
                     <div className="flex items-center gap-1 bg-card p-1 rounded-md border shadow-sm w-full sm:w-auto justify-between sm:justify-start">
-                        <Button type="plain" size="icon" onClick={handlePreviousTime} className="h-8 w-8">
+                        <Button variant="plain" size="icon" onClick={handlePreviousTime} className="h-8 w-8">
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
                         <div className="px-2 text-xs sm:text-sm font-medium text-center truncate">
                             {format(startTime, "MMM d, h:mm a")} - {format(new Date(endTime), "MMM d, h:mm a")}
                         </div>
-                        <Button type="plain" size="icon" onClick={handleNextTime} disabled={isCurrentTime} className="h-8 w-8">
+                        <Button variant="plain" size="icon" onClick={handleNextTime} disabled={isCurrentTime} className="h-8 w-8">
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
@@ -1071,7 +1071,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                             </div>
                                         )}
                                         <div className="p-4 border-t border-border">
-                                            <Button asChild type="outlined" className="w-full">
+                                            <Button asChild variant="outlined" className="w-full">
                                                 <Link href={withSelectedServerQuery('/server/processes', serverId)}>View more</Link>
                                             </Button>
                                         </div>
@@ -1148,7 +1148,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                             </div>
                                         )}
                                         <div className="p-4 border-t border-border">
-                                            <Button asChild type="outlined" size="sm" className="w-auto">
+                                            <Button asChild variant="outlined" size="sm" className="w-auto">
                                                 <Link href={withSelectedServerQuery('/server/processes', serverId)}>View more</Link>
                                             </Button>
                                         </div>

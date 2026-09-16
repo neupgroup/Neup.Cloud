@@ -181,7 +181,7 @@ function ServerListContent() {
               <ArrowRight className="h-4 w-4" />
             </Button>
             <Button
-              type="tinted"
+              variant="tinted"
               className="w-full justify-between"
               onClick={() => router.push("/server/list/purchase")}
             >
@@ -301,7 +301,7 @@ function ServerListContent() {
                       </Button>
                     ) : null}
                     <Button
-                      type="outlined"
+                      variant="outlined"
                       size="icon"
                       onClick={() => router.push(`/server/list/${server.id}`)}
                       aria-label={`Edit ${server.name}`}

@@ -205,7 +205,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                                             </>
                                         )}
                                     </Button>
-                                    <Button type="outlined" htmlType="button" className="h-11 px-6 border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors">
+                                    <Button variant="outlined" htmlType="button" className="h-11 px-6 border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors">
                                         View Documentation
                                     </Button>
                                 </div>
@@ -308,7 +308,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                 </Button>
                 <Button
                     htmlType="button"
-                    type="plain"
+                    variant="plain"
                     onClick={() => router.push(withSelectedServerQuery('/server/database', serverId))}
                     disabled={isLoading}
                 >

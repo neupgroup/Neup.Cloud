@@ -262,10 +262,10 @@ export function ServerFormFields({
               className="hidden"
               onChange={handlePrivateKeyFileSelected}
             />
-            <Button htmlType="button" type="outlined" onClick={() => privateKeyFileInputRef.current?.click()}>
+            <Button htmlType="button" variant="outlined" onClick={() => privateKeyFileInputRef.current?.click()}>
               Import key file
             </Button>
-            <Button htmlType="button" type="outlined" onClick={() => setIsGenerateFlow(true)}>
+            <Button htmlType="button" variant="outlined" onClick={() => setIsGenerateFlow(true)}>
               Generate key
             </Button>
           </div>
@@ -306,7 +306,7 @@ export function ServerFormFields({
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button htmlType="button" type="outlined" onClick={() => setIsGenerateFlow(false)}>
+                <Button htmlType="button" variant="outlined" onClick={() => setIsGenerateFlow(false)}>
                   Cancel
                 </Button>
                 <Button htmlType="button" disabled={!canGenerate || isGeneratingKeys} onClick={handleGenerateKeys}>
@@ -386,7 +386,7 @@ export function ServerFormFields({
 
               {hasGeneratedKeys ? (
                 <div className="flex justify-start">
-                  <Button htmlType="button" type="outlined" onClick={handleDownloadGeneratedKeys}>
+                  <Button htmlType="button" variant="outlined" onClick={handleDownloadGeneratedKeys}>
                     Download key data
                   </Button>
                 </div>

@@ -60,7 +60,7 @@ export default async function IntelligenceBillingPage() {
           <Button asChild>
             <Link href="/intelligence">Back to Intelligence Home</Link>
           </Button>
-          <Button type="outlined" asChild>
+          <Button variant="outlined" asChild>
             <Link href="/intelligence/logs">Go to Logs</Link>
           </Button>
         </CardContent>

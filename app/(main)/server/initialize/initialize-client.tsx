@@ -286,7 +286,7 @@ export function InitializeClient({ serverId, serverName, mode }: InitializeClien
           </CardContent>
           <CardFooter className="flex flex-col gap-3 border-t px-6 py-4 sm:flex-row sm:justify-between">
             {portsCheckCompleted ? (
-              <Button htmlType="button" type="outlined" onClick={() => runCurrentStep('ports')} disabled={!serverId || isChecking}>
+              <Button htmlType="button" variant="outlined" onClick={() => runCurrentStep('ports')} disabled={!serverId || isChecking}>
                 <RefreshCcw className="mr-2 h-4 w-4" />
                 Reload
               </Button>
@@ -321,7 +321,7 @@ export function InitializeClient({ serverId, serverName, mode }: InitializeClien
                 {check.checked && !check.installed ? (
                   <Button
                     htmlType="button"
-                    type="outlined"
+                    variant="outlined"
                     onClick={() => handleInstall(key, 'launcher')}
                     disabled={!serverId || isInstalling}
                   >
@@ -334,7 +334,7 @@ export function InitializeClient({ serverId, serverName, mode }: InitializeClien
           </CardContent>
           <CardFooter className="flex flex-col gap-3 border-t px-6 py-4 sm:flex-row sm:justify-between">
             {launcherCheckCompleted ? (
-              <Button htmlType="button" type="outlined" onClick={() => runCurrentStep('launcher')} disabled={!serverId || isChecking || isInstalling}>
+              <Button htmlType="button" variant="outlined" onClick={() => runCurrentStep('launcher')} disabled={!serverId || isChecking || isInstalling}>
                 <RefreshCcw className="mr-2 h-4 w-4" />
                 Reload
               </Button>
@@ -367,7 +367,7 @@ export function InitializeClient({ serverId, serverName, mode }: InitializeClien
               {loggerCheck.checked && (isRepairMode || !loggerCheck.installed) ? (
                 <Button
                   htmlType="button"
-                  type="outlined"
+                  variant="outlined"
                   onClick={() => handleInstall('system-logger', 'logger')}
                   disabled={!serverId || isInstalling}
                 >
@@ -379,7 +379,7 @@ export function InitializeClient({ serverId, serverName, mode }: InitializeClien
           </CardContent>
           <CardFooter className="flex flex-col gap-3 border-t px-6 py-4 sm:flex-row sm:justify-between">
             {loggerCheck.checked ? (
-              <Button htmlType="button" type="outlined" onClick={() => runCurrentStep('logger')} disabled={!serverId || isChecking || isInstalling}>
+              <Button htmlType="button" variant="outlined" onClick={() => runCurrentStep('logger')} disabled={!serverId || isChecking || isInstalling}>
                 <RefreshCcw className="mr-2 h-4 w-4" />
                 Reload
               </Button>

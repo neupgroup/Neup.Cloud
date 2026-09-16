@@ -233,7 +233,7 @@ export default function AccessEditForm({
                 <Save className="mr-2 h-4 w-4" />
                 {isPending ? 'Saving...' : 'Save Changes'}
               </Button>
-              <Button type="outlined" asChild>
+              <Button variant="outlined" asChild>
                 <Link href="/intelligence/access">Back to Access</Link>
               </Button>
             </div>
@@ -251,11 +251,11 @@ export default function AccessEditForm({
         <CardContent>
           <form action={deleteIntelligenceAccessAction} className="flex flex-col gap-3 sm:flex-row">
             <input type="hidden" name="access_id" value={String(accessId)} />
-            <Button htmlType="submit" type="solid">
+            <Button htmlType="submit" variant="solid">
               <Trash2 className="mr-2 h-4 w-4" />
               Delete Access
             </Button>
-            <Button type="outlined" asChild>
+            <Button variant="outlined" asChild>
                 <Link href="/intelligence/access">Cancel</Link>
             </Button>
           </form>
