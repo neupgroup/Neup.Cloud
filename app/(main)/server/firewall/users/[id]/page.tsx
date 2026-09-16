@@ -1,15 +1,15 @@
 'use client';
 
 import { PageTitleBack } from "@/components/page-header";
-import { Button } from "#/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "#/components/ui/card";
-import { Input } from "#/components/ui/input";
-import { Label } from "#/components/ui/label";
-import { Switch } from "#/components/ui/switch";
+import { Button } from "@neup/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@neup/components/ui/card";
+import { Input } from "@neup/components/ui/input";
+import { Label } from "@neup/components/ui/label";
+import { Switch } from "@neup/components/ui/switch";
 import { Loader2, Save, Trash2, Key } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getUserDetails, updateUserPassword, toggleSudo, deleteUser, SystemUser } from "@/services/server/firewall-users-service";
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 import { useRouter } from "next/navigation";
 import {
     AlertDialog,
@@ -21,8 +21,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "#/components/ui/alert-dialog";
-import { Separator } from "#/components/ui/separator";
+} from "@neup/components/ui/alert-dialog";
+import { Separator } from "@neup/components/ui/separator";
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 

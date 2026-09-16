@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { KeyRound } from 'lucide-react';
-import { Button } from '#/components/ui/button';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
+import { Button } from '@neup/components/ui/button';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
 import { createLoggerProjectAction } from '@/services/logger/logger-service';
 
 function toSlug(value: string) {

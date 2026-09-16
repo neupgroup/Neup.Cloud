@@ -1,22 +1,22 @@
 'use client';
 
-import { Badge } from '#/components/ui/badge';
-import { Button } from '#/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
-import { Checkbox } from '#/components/ui/checkbox';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
+import { Badge } from '@neup/components/ui/badge';
+import { Button } from '@neup/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@neup/components/ui/card';
+import { Checkbox } from '@neup/components/ui/checkbox';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "#/components/ui/select";
-import { Separator } from '#/components/ui/separator';
-import { Switch } from '#/components/ui/switch';
-import { Textarea } from '#/components/ui/textarea';
-import { useToast } from '#/core/hooks/useToast';
+} from "@neup/components/ui/select";
+import { Separator } from '@neup/components/ui/separator';
+import { Switch } from '@neup/components/ui/switch';
+import { Textarea } from '@neup/components/ui/textarea';
+import { useToast } from '@neup/core/hooks/useToast';
 import { Plus, Trash, X, Upload, AppWindow, Github } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useRef, useState } from 'react';

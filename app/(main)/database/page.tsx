@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Database, Link2, ChevronRight, ShieldCheck } from 'lucide-react';
 import { PageTitle } from '@/components/page-header';
-import { Card } from '#/components/ui/card';
-import { Input } from '#/components/ui/input';
-import { Badge } from '#/components/ui/badge';
-import { cn } from '#/core/utils';
+import { Card } from '@neup/components/ui/card';
+import { Input } from '@neup/components/ui/input';
+import { Badge } from '@neup/components/ui/badge';
+import { cn } from '@neup/core/utils';
 import { getDatabases } from '@/services/database/database-service';
 import type { ExternalDatabase } from '@/services/database/types';
 

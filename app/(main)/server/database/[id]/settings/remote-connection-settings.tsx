@@ -7,15 +7,15 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "#/components/ui/card";
+} from "@neup/components/ui/card";
 import { Globe } from "lucide-react";
-import { Switch } from "#/components/ui/switch";
-import { Label } from "#/components/ui/label";
-import { Input } from "#/components/ui/input";
-import { Button } from "#/components/ui/button";
+import { Switch } from "@neup/components/ui/switch";
+import { Label } from "@neup/components/ui/label";
+import { Input } from "@neup/components/ui/input";
+import { Button } from "@neup/components/ui/button";
 import { saveDatabaseSettings, type DatabaseSettings } from '@/services/database/database-runtime';
 import { useRouter } from 'next/navigation';
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 
 type RemoteConnectionSettingsProps = {
     serverId: string;

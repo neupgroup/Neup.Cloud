@@ -3,15 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2, RefreshCcw, Download, Loader2 } from 'lucide-react';
-import { Button } from '#/components/ui/button';
+import { Button } from '@neup/components/ui/button';
 import { PageTitleBackWithComponent } from '@/components/page-header';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card';
-import { Badge } from '#/components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
-import { Skeleton } from '#/components/ui/skeleton';
-import { useToast } from '#/core/hooks/useToast';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@neup/components/ui/card';
+import { Badge } from '@neup/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from "@neup/components/ui/alert";
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { useToast } from '@neup/core/hooks/useToast';
 import { getPackageVersions, installPackage, uninstallPackage, reinstallPackage, type PackageVersionInfo } from '@/services/server/system-packages';
-import { cn } from '#/core/utils';
+import { cn } from '@neup/core/utils';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export function PackageDetailsClient({ serverId, serverName, packageName }: { serverId: string, serverName: string, packageName: string }) {

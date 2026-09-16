@@ -3,11 +3,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "#/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@neup/components/ui/card";
 import { Database, User, ShieldCheck, Trash2, Key, Globe, LayoutGrid, ChevronLeft, Loader2 } from "lucide-react";
-import { Button } from "#/components/ui/button";
-import { Badge } from "#/components/ui/badge";
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from "@neup/components/ui/button";
+import { Badge } from "@neup/components/ui/badge";
+import { useToast } from '@neup/core/hooks/useToast';
 import { UserCreateForm } from "./user-create-form";
 import { deleteDatabaseUser, type DatabaseUser } from '@/services/database/database-runtime';
 import Link from 'next/link';

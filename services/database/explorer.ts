@@ -358,7 +358,7 @@ function normalizeIndexColumns(value: unknown): string[] {
       return trimmed
         .slice(1, -1)
         .split(',')
-        .map((item) => item.trim().replace(/^"(.*)"$/, '$1'))
+        .map((item) => item.trim().replace(/^"(.*)"@base/, '$1'))
         .filter(Boolean);
     }
 

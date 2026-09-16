@@ -4,12 +4,12 @@ import * as LucideIcons from "lucide-react";
 import { Download, Hammer, Loader2, Play, PlayCircle, RefreshCw, StopCircle, Terminal } from "lucide-react";
 import { useState } from "react";
 
-import { Card } from "#/components/ui/card";
-import { useToast } from '#/core/hooks/useToast';
+import { Card } from "@neup/components/ui/card";
+import { useToast } from '@neup/core/hooks/useToast';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/helpers/navigation';
-import { cn } from "#/core/utils";
-import CodeRevolve from "#/components/animation/CodeRevolve";
+import { cn } from "@neup/core/utils";
+import CodeRevolve from "@neup/components/animation/CodeRevolve";
 import { executeApplicationCommand } from "@/services/server/applications/service";
 
 interface LifecycleSectionProps {

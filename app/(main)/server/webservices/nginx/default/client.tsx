@@ -2,15 +2,15 @@
 
 import { useState } from 'react';
 import { PageTitleBack } from '@/components/page-header';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
-import { Button } from '#/components/ui/button';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import { useToast } from '#/core/hooks/useToast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@neup/components/ui/card';
+import { Button } from '@neup/components/ui/button';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
+import { useToast } from '@neup/core/hooks/useToast';
 import { generateDefaultSSLCertificate, deployDefaultNginxConfig } from '@/services/webservices/nginx-default-service';
 import { Loader2, Shield, FileCode, Download, Upload, CheckCircle2, Server, AlertCircle } from 'lucide-react';
-import { Textarea } from '#/components/ui/textarea';
-import { Alert, AlertDescription } from '#/components/ui/alert';
+import { Textarea } from '@neup/components/ui/textarea';
+import { Alert, AlertDescription } from '@neup/components/ui/alert';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 
 interface DefaultNginxConfigClientProps {

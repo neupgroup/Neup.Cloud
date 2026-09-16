@@ -12,7 +12,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "#/components/ui/form";
+} from "@neup/components/ui/form";
 import {
   Card,
   CardContent,
@@ -20,22 +20,22 @@ import {
   CardHeader,
   CardTitle,
   CardFooter,
-} from "#/components/ui/card";
-import { Button } from "#/components/ui/button";
+} from "@neup/components/ui/card";
+import { Button } from "@neup/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "#/components/ui/select";
-import { Input } from "#/components/ui/input";
-import { Textarea } from "#/components/ui/textarea";
-import { getInfrastructureRecommendations } from "#/core/intelligence/flows/infrastructure-recommendations";
+} from "@neup/components/ui/select";
+import { Input } from "@neup/components/ui/input";
+import { Textarea } from "@neup/components/ui/textarea";
+import { getInfrastructureRecommendations } from "@neup/core/intelligence/flows/infrastructure-recommendations";
 import { Loader2, Zap } from "lucide-react";
-import type { InfrastructureRecommendationsOutput } from "#/core/intelligence/flows/infrastructure-recommendations";
+import type { InfrastructureRecommendationsOutput } from "@neup/core/intelligence/flows/infrastructure-recommendations";
 import Link from "next/link";
-import { Skeleton } from "#/components/ui/skeleton";
+import { Skeleton } from "@neup/components/ui/skeleton";
 
 const formSchema = z.object({
   appType: z.string().min(1, "Application type is required."),

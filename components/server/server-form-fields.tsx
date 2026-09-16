@@ -3,13 +3,13 @@
 import { type ChangeEvent, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
-import { Button } from "#/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card";
-import { Input } from "#/components/ui/input";
-import { Label } from "#/components/ui/label";
-import { Textarea } from "#/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
-import { useToast } from "#/core/hooks/useToast";
+import { Button } from "@neup/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@neup/components/ui/card";
+import { Input } from "@neup/components/ui/input";
+import { Label } from "@neup/components/ui/label";
+import { Textarea } from "@neup/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@neup/components/ui/select";
+import { useToast } from "@neup/core/hooks/useToast";
 import { generateSshKeyPair } from "@/services/server/server-service";
 
 export type ServerFormData = {

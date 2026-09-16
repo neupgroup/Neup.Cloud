@@ -43,12 +43,12 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { cn } from '#/core/utils';
-import { Button } from '#/components/ui/button';
+import { cn } from '@neup/core/utils';
+import { Button } from '@neup/components/ui/button';
 import { useState, useEffect, Suspense } from 'react';
-import { ScrollArea } from '#/components/ui/scroll-area';
+import { ScrollArea } from '@neup/components/ui/scroll-area';
 import { Logo } from '@/components/logo';
-import { Userbar } from '#/components/element/userbar';
+import { Userbar } from '@neup/components/element/userbar';
 import { ProgressBar } from '@/components/progress-bar';
 import NProgress from 'nprogress';
 

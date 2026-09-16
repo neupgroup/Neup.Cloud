@@ -12,13 +12,13 @@ actions bound to the selected server from the URL-backed server context.
 import { useParams } from 'next/navigation';
 import { requirements } from '@/services/server/requirement-list';
 import { PageTitleBack } from '@/components/page-header';
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 import { useState, useEffect } from 'react';
 import { checkRequirementStep, installRequirementStep, uninstallRequirementStep, updateRequirementStep } from '../runner';
 import * as Icons from 'lucide-react';
-import { cn } from '#/core/utils';
+import { cn } from '@neup/core/utils';
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import { Skeleton } from "#/components/ui/skeleton";
+import { Skeleton } from "@neup/components/ui/skeleton";
 import { useServerName } from '@/hooks/use-server-name';
 import { useSelectedServerHref, useSelectedServerId } from '@/hooks/use-selected-server';
 

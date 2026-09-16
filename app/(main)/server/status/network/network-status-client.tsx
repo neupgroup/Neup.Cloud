@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Activity, ArrowLeftRight, Globe, Hash, Loader2, Network, RefreshCw, Search, ServerCog } from 'lucide-react';
 
-import { Badge } from '#/components/ui/badge';
-import { Button } from '#/components/ui/button';
-import { Card } from '#/components/ui/card';
-import { Input } from '#/components/ui/input';
-import { Skeleton } from '#/components/ui/skeleton';
-import { cn } from '#/core/utils';
-import { useToast } from '#/core/hooks/useToast';
+import { Badge } from '@neup/components/ui/badge';
+import { Button } from '@neup/components/ui/button';
+import { Card } from '@neup/components/ui/card';
+import { Input } from '@neup/components/ui/input';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { cn } from '@neup/core/utils';
+import { useToast } from '@neup/core/hooks/useToast';
 import { getNetworkConnections, type NetworkConnection } from '@/services/server/network';
 
 type NetworkStatusClientProps = {

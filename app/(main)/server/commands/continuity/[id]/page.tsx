@@ -26,10 +26,10 @@ import { useEffect, useMemo, useRef, useState, useTransition, type KeyboardEvent
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, FolderOpen, Loader2, Server, SquareTerminal, XCircle } from 'lucide-react';
 
-import { Button } from '#/components/ui/button';
-import { Card } from '#/components/ui/card';
-import { Skeleton } from '#/components/ui/skeleton';
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from '@neup/components/ui/button';
+import { Card } from '@neup/components/ui/card';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { useToast } from '@neup/core/hooks/useToast';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { useServerName } from '@/hooks/use-server-name';

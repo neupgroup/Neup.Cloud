@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
-import { Button } from '#/components/ui/button';
-import { Checkbox } from '#/components/ui/checkbox';
+import { Button } from '@neup/components/ui/button';
+import { Checkbox } from '@neup/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -12,11 +12,11 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from '#/components/ui/dialog';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import { Textarea } from '#/components/ui/textarea';
-import { useToast } from '#/core/hooks/useToast';
+} from '@neup/components/ui/dialog';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
+import { Textarea } from '@neup/components/ui/textarea';
+import { useToast } from '@neup/core/hooks/useToast';
 import { ExternalLink, FileCode, Loader2, Plus, Shield, ShieldAlert, Terminal, Trash2 } from 'lucide-react';
 import { generateSslCertificate, getWildcardCertificateSession } from '@/services/webservices/nginx/service';
 

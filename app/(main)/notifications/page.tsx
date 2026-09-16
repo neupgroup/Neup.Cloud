@@ -13,11 +13,11 @@ Renders the account notifications center at `/notifications`.
 
 import { AlertCircle, CheckCheck } from 'lucide-react';
 import type { Metadata } from 'next';
-import { Card, CardContent } from '#/components/ui/card';
+import { Card, CardContent } from '@neup/components/ui/card';
 import { PageTitle } from '@/components/page-header';
-import logica from '#/logica';
-import { getCookie } from '#/core/helpers/cookie';
-import type { NotificationRecord } from '#/logica/notification';
+import logica from '@neup/logica';
+import { getCookie } from '@neup/core/helpers/cookie';
+import type { NotificationRecord } from '@neup/logica/notification';
 import { getAccountNotifications } from '@/services/notifications/notifications-service';
 import { NotificationsList } from './notifications-list';
 

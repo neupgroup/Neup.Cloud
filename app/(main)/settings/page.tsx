@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { PageTitle } from '@/components/page-header';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '#/components/ui/card';
-import { Label } from '#/components/ui/label';
-import { Input } from '#/components/ui/input';
-import { Button } from '#/components/ui/button';
-import { Separator } from '#/components/ui/separator';
-import { Switch } from '#/components/ui/switch';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@neup/components/ui/card';
+import { Label } from '@neup/components/ui/label';
+import { Input } from '@neup/components/ui/input';
+import { Button } from '@neup/components/ui/button';
+import { Separator } from '@neup/components/ui/separator';
+import { Switch } from '@neup/components/ui/switch';
 
 import {
     User,

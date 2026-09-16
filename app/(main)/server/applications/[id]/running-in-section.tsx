@@ -3,10 +3,10 @@
 import { useTransition } from 'react';
 import { CheckCircle2, Server, Loader2 } from 'lucide-react';
 
-import { Badge } from '#/components/ui/badge';
-import { Button } from '#/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
-import { useToast } from '#/core/hooks/useToast';
+import { Badge } from '@neup/components/ui/badge';
+import { Button } from '@neup/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@neup/components/ui/card';
+import { useToast } from '@neup/core/hooks/useToast';
 import { choosePrimaryApplicationServer } from '@/services/server/applications/service';
 import type { ApplicationRunningSection, ApplicationServerMapRow } from '@/services/server/applications/server-map';
 

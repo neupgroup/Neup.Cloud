@@ -3,12 +3,12 @@
 import { use, useEffect, useState } from 'react';
 import { AlertCircle, CheckCircle2, Clock, Play, Terminal, Trash2 } from 'lucide-react';
 import { PageTitleBack } from '@/components/page-header';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
-import { Button } from '#/components/ui/button';
-import { Badge } from '#/components/ui/badge';
-import { Textarea } from '#/components/ui/textarea';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '#/components/ui/table';
-import { useToast } from '#/core/hooks/useToast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@neup/components/ui/card';
+import { Button } from '@neup/components/ui/button';
+import { Badge } from '@neup/components/ui/badge';
+import { Textarea } from '@neup/components/ui/textarea';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@neup/components/ui/table';
+import { useToast } from '@neup/core/hooks/useToast';
 import { executeDatabaseShellQuery, getDatabaseShellMeta } from '@/services/database/management';
 import type { DatabaseConnectionType, DatabaseShellQueryResult } from '@/services/database/types';
 

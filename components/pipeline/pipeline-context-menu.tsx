@@ -2,8 +2,8 @@
 
 import { Play, Plus, Workflow } from 'lucide-react';
 
-import { Button } from '#/components/ui/button';
-import { cn } from '#/core/utils';
+import { Button } from '@neup/components/ui/button';
+import { cn } from '@neup/core/utils';
 
 type PipelineContextMenuItem = {
   id: string;

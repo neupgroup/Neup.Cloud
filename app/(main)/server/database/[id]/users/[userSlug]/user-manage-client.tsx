@@ -3,11 +3,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "#/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@neup/components/ui/card";
 import { ArrowRightLeft, ShieldCheck, ShieldX, Trash2, Key, ChevronLeft, Loader2, Save, Lock } from "lucide-react";
-import { Button } from "#/components/ui/button";
-import { Badge } from "#/components/ui/badge";
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from "@neup/components/ui/button";
+import { Badge } from "@neup/components/ui/badge";
+import { useToast } from '@neup/core/hooks/useToast';
 import {
     deleteDatabaseUser,
     reassignDatabaseUserOwnedObjects,
@@ -16,9 +16,9 @@ import {
     updateDatabaseUserPermissions
 } from '@/services/database/database-runtime';
 import Link from 'next/link';
-import { Input } from "#/components/ui/input";
-import { Label } from "#/components/ui/label";
-import { Checkbox } from "#/components/ui/checkbox";
+import { Input } from "@neup/components/ui/input";
+import { Label } from "@neup/components/ui/label";
+import { Checkbox } from "@neup/components/ui/checkbox";
 import { useSelectedServerHref } from '@/hooks/use-selected-server';
 
 interface UserManageClientProps {

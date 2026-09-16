@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Loader2, PlusCircle } from 'lucide-react';
-import { Card } from '#/components/ui/card';
+import { Card } from '@neup/components/ui/card';
 import { ApplicationCard, ApplicationCardSkeleton } from './card';
 import { useSelectedServerHref } from '@/hooks/use-selected-server';
 import { getAllApplicationItems, getApplicationItems } from '@/services/server/applications/queries';

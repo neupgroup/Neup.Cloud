@@ -4,16 +4,16 @@ import { BatteryCharging, Coins, WalletCards } from 'lucide-react';
 
 import { rechargeIntelligenceBalanceAction } from '@/services/intelligence/intelligence-service';
 import { PageTitleBack } from '@/components/page-header';
-import { Button } from '#/components/ui/button';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
+import { Button } from '@neup/components/ui/button';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '#/components/ui/card';
+} from '@neup/components/ui/card';
 import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
 import { getIntelligenceAccesses } from '@/services/intelligence/store';
 

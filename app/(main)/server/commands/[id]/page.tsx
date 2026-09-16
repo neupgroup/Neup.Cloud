@@ -7,9 +7,9 @@ import { useRouter } from 'next/navigation';
 import {
     Card,
     CardContent,
-} from '#/components/ui/card';
-import { Skeleton } from '#/components/ui/skeleton';
-import { Button } from '#/components/ui/button';
+} from '@neup/components/ui/card';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { Button } from '@neup/components/ui/button';
 import {
     Loader2,
     Trash2,
@@ -23,21 +23,21 @@ import {
     DialogHeader,
     DialogTitle,
     DialogClose,
-} from '#/components/ui/dialog';
+} from '@neup/components/ui/dialog';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from '#/components/ui/select';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
+} from '@neup/components/ui/select';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
 
 import { getServers } from '@/services/server/server-service';
 import { getSavedCommands, deleteSavedCommand, executeSavedCommand } from '@/services/server/commands/server-command-service';
 import type { SavedCommand } from '@/services/saved-commands/types';
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 import { PageTitleBack } from '@/components/page-header';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { resolveSelectedServerValue, withSelectedServerQuery } from '@/helpers/navigation';

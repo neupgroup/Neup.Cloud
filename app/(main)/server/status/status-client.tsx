@@ -12,7 +12,7 @@ requirement while preserving the active server selection.
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { cn } from "#/core/utils";
+import { cn } from "@neup/core/utils";
 
 import {
     Card,
@@ -20,17 +20,17 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "#/components/ui/card";
-import { Button } from "#/components/ui/button";
-import { Skeleton } from "#/components/ui/skeleton";
+} from "@neup/components/ui/card";
+import { Button } from "@neup/components/ui/button";
+import { Skeleton } from "@neup/components/ui/skeleton";
 import { Activity, HeartPulse, Server, Loader2, ChevronLeft, ChevronRight, Cpu, User, Hash, Search, XCircle, Globe, ArrowLeftRight } from "lucide-react";
 import { startStatusTracking, stopStatusTracking, getStatus, type StatusData } from '@/services/server/status';
 import { getProcesses, killProcess } from '@/services/processes/processes-service';
 import type { Process } from '@/services/processes/types';
 import { getNetworkConnections, type NetworkConnection } from '@/services/server/network';
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 import { PageTitleWithComponent } from '@/components/page-header';
-import { Input } from '#/components/ui/input';
+import { Input } from '@neup/components/ui/input';
 import {
     AreaChart,
     Area,
@@ -47,7 +47,7 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "#/components/ui/select";
+} from "@neup/components/ui/select";
 import { withSelectedServerQuery } from '@/helpers/navigation';
 
 const CustomTooltip = ({ active, payload, label, unit }: any) => {

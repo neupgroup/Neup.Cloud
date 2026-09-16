@@ -5,13 +5,13 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "#/components/ui/card";
+} from "@neup/components/ui/card";
 import { Database, Plus, Server, Settings, Activity, ShieldCheck, CheckCircle, AlertCircle, HardDrive, Trash2, ExternalLink, ChevronRight, Users } from "lucide-react";
 import Link from 'next/link';
-import { Button } from "#/components/ui/button";
+import { Button } from "@neup/components/ui/button";
 import { PageTitle } from "@/components/page-header";
 import type { Metadata } from 'next';
-import { Badge } from "#/components/ui/badge";
+import { Badge } from "@neup/components/ui/badge";
 import { checkDatabaseInstallation, listAllDatabases, type DatabaseInstallation, type DatabaseInstance } from '@/services/database/database-runtime';
 import { getServer } from '@/services/server/server-service';
 import { withSelectedServerQuery } from "@/helpers/navigation";

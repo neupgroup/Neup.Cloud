@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react';
 import { PageTitle } from '@/components/page-header';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@neup/components/ui/card';
 import NewProjectForm from './new-project-form';
 
 export default function NewLoggerProjectPage() {

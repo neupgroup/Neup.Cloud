@@ -1,5 +1,5 @@
-import { Prisma, prisma } from '#/core/database/prisma';
-import { stringUuid } from '#/core/data/uuid';
+import { Prisma, prisma } from '@neup/core/database/prisma';
+import { stringUuid } from '@neup/core/data/uuid';
 
 export interface StoredPipeline {
   id: string;

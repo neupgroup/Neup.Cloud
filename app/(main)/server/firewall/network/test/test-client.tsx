@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card } from '#/components/ui/card';
-import { Button } from '#/components/ui/button';
-import { Input } from '#/components/ui/input';
-import { Badge } from '#/components/ui/badge';
+import { Card } from '@neup/components/ui/card';
+import { Button } from '@neup/components/ui/button';
+import { Input } from '@neup/components/ui/input';
+import { Badge } from '@neup/components/ui/badge';
 import { Play, RotateCcw, AlertCircle, CheckCircle2, XCircle, Clock, ShieldAlert, Plus } from 'lucide-react';
 import { checkOutboundPortConnectivity, checkPortConnectivity } from '@/services/server/firewall/firewall-service';
-import { useToast } from '#/core/hooks/useToast';
-import { cn } from '#/core/utils';
+import { useToast } from '@neup/core/hooks/useToast';
+import { cn } from '@neup/core/utils';
 
 type TestDirection = 'inbound' | 'outbound';
 type PortTestItem = {

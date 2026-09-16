@@ -2,13 +2,13 @@
 
 import React, { useMemo, useState, useTransition } from 'react';
 import { PageTitleBack } from '@/components/page-header';
-import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card';
-import { Button } from '#/components/ui/button';
-import { Textarea } from '#/components/ui/textarea';
-import { Badge } from '#/components/ui/badge';
-import { Collapsible, CollapsibleContent } from '#/components/ui/collapsible';
-import { Icon } from '#/components/ui/icon';
-import { useToast } from '#/core/hooks/useToast';
+import { Card, CardContent, CardHeader, CardTitle } from '@neup/components/ui/card';
+import { Button } from '@neup/components/ui/button';
+import { Textarea } from '@neup/components/ui/textarea';
+import { Badge } from '@neup/components/ui/badge';
+import { Collapsible, CollapsibleContent } from '@neup/components/ui/collapsible';
+import { Icon } from '@neup/components/ui/icon';
+import { useToast } from '@neup/core/hooks/useToast';
 import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 

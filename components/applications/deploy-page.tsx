@@ -5,25 +5,25 @@ import { useRouter } from 'next/navigation';
 import { Plus, Trash, X, Upload, AppWindow, Github } from 'lucide-react';
 
 import { PageTitleBack } from '@/components/page-header';
-import { Button } from '#/components/ui/button';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import { Textarea } from '#/components/ui/textarea';
-import { Switch } from '#/components/ui/switch';
-import { Checkbox } from '#/components/ui/checkbox';
-import { Badge } from '#/components/ui/badge';
-import { Separator } from '#/components/ui/separator';
+import { Button } from '@neup/components/ui/button';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
+import { Textarea } from '@neup/components/ui/textarea';
+import { Switch } from '@neup/components/ui/switch';
+import { Checkbox } from '@neup/components/ui/checkbox';
+import { Badge } from '@neup/components/ui/badge';
+import { Separator } from '@neup/components/ui/separator';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "#/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
+} from "@neup/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@neup/components/ui/card';
 import { useServerName } from '@/hooks/use-server-name';
 import { useSelectedServerHref } from '@/hooks/use-selected-server';
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 
 import { createApplication } from '@/services/server/applications/service';
 import { normalizeApplicationNameInput } from '@/services/server/applications/name';

@@ -1,5 +1,5 @@
-import { Card } from "#/components/ui/card";
-import { cn } from "#/core/utils";
+import { Card } from "@neup/components/ui/card";
+import { cn } from "@neup/core/utils";
 import { Terminal } from "lucide-react";
 
 export interface CommandsSectionProps {

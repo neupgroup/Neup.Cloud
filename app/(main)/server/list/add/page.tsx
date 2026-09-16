@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
-import { Button } from "#/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "#/components/ui/card";
-import { useToast } from "#/core/hooks/useToast";
+import { Button } from "@neup/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@neup/components/ui/card";
+import { useToast } from "@neup/core/hooks/useToast";
 import { createServer, checkServerConnection } from "@/services/server/server-service";
 import { serializeServerMetadata } from "@/services/server/server-metadata";
 import { ServerFormFields, type ServerFormData } from "@/components/server/server-form-fields";

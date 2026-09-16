@@ -8,7 +8,7 @@ import { getServer } from '@/services/server/server-service';
 import { endLiveSession, executeLiveCommand, initLiveSession } from '@/services/server/live-command';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { useServerName } from '@/hooks/use-server-name';
-import { Button } from '#/components/ui/button';
+import { Button } from '@neup/components/ui/button';
 import { getWildcardCertificateSession, verifyWildcardCertificateSession } from '@/services/webservices/nginx/service';
 
 interface HistoryItem {

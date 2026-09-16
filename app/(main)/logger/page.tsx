@@ -16,7 +16,7 @@ import Link from 'next/link';
 import { Activity, ChevronRight, Plus } from 'lucide-react';
 
 import { PageTitle } from '@/components/page-header';
-import { Card, CardContent } from '#/components/ui/card';
+import { Card, CardContent } from '@neup/components/ui/card';
 import { getLoggerProjectRecords } from '@/services/logger/logger-service';
 
 export const metadata: Metadata = {

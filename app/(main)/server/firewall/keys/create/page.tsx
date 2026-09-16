@@ -1,18 +1,18 @@
 'use client';
 
 import { PageTitleBack } from "@/components/page-header";
-import { Button } from "#/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card";
-import { Input } from "#/components/ui/input";
-import { Label } from "#/components/ui/label";
-import { Textarea } from "#/components/ui/textarea";
+import { Button } from "@neup/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@neup/components/ui/card";
+import { Input } from "@neup/components/ui/input";
+import { Label } from "@neup/components/ui/label";
+import { Textarea } from "@neup/components/ui/textarea";
 import { Plus, Download, KeyRound, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { generateSSHKeyPair, addAuthorizedKey } from "@/services/server/firewall-keys-service";
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 import { useRouter } from "next/navigation";
-import { Separator } from "#/components/ui/separator";
-import { getRandomWord } from "#/core/dictionary";
+import { Separator } from "@neup/components/ui/separator";
+import { getRandomWord } from "@neup/core/dictionary";
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 

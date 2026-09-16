@@ -2,11 +2,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "#/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@neup/components/ui/card";
 import { Database, Download, FileCode, ShieldCheck, CheckCircle2, Loader2, ChevronLeft, AlertCircle, HardDrive } from "lucide-react";
-import { Button } from "#/components/ui/button";
-import { Badge } from "#/components/ui/badge";
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from "@neup/components/ui/button";
+import { Badge } from "@neup/components/ui/badge";
+import { useToast } from '@neup/core/hooks/useToast';
 import Link from 'next/link';
 import { useSelectedServerHref } from '@/hooks/use-selected-server';
 import { storeDatabaseBackup } from '@/services/database/database-runtime';

@@ -1,5 +1,5 @@
-import { Skeleton } from "#/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "#/components/ui/card";
+import { Skeleton } from "@neup/components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "@neup/components/ui/card";
 import { PageTitle } from "@/components/page-header";
 import { Database } from "lucide-react";
 

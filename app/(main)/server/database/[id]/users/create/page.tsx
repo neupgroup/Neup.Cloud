@@ -2,7 +2,7 @@
 import { notFound } from "next/navigation";
 import { getDatabaseDetails } from '@/services/database/database-runtime';
 import { UserCreateForm } from "../user-create-form";
-import { Button } from "#/components/ui/button";
+import { Button } from "@neup/components/ui/button";
 import { ChevronLeft, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { withSelectedServerQuery } from "@/helpers/navigation";

@@ -28,10 +28,10 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { AlertCircle, CheckCircle2, Loader2, RefreshCcw, Rocket, ShieldCheck, Signal, XCircle } from 'lucide-react';
 
 import { PageTitle } from '@/components/page-header';
-import { Button } from '#/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '#/components/ui/card';
-import { Progress } from '#/components/ui/progress';
-import { cn } from '#/core/utils';
+import { Button } from '@neup/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@neup/components/ui/card';
+import { Progress } from '@neup/components/ui/progress';
+import { cn } from '@neup/core/utils';
 import {
   checkInitializeApplicationLauncher,
   checkInitializePorts,

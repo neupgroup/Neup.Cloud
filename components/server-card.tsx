@@ -5,12 +5,12 @@ import { ChevronRight, ServerIcon, Check, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { Button } from "#/components/ui/button";
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from "@neup/components/ui/button";
+import { useToast } from '@neup/core/hooks/useToast';
 import { shouldPreserveSelectedServer, withSelectedServerQuery } from "@/helpers/navigation";
 import { deleteServer } from '@/services/server/server-service';
 import type { Server } from '@/services/server/types';
-import { cn } from "#/core/utils";
+import { cn } from "@neup/core/utils";
 
 export type { Server } from '@/services/server/types';
 

@@ -3,16 +3,16 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '#/components/ui/button';
+import { Button } from '@neup/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '#/components/ui/card';
+} from '@neup/components/ui/card';
 import { PageTitle } from '@/components/page-header';
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 import {
   Folder as FolderIcon,
   File as FileIcon,
@@ -56,7 +56,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '#/components/ui/dialog';
+} from '@neup/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,12 +66,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '#/components/ui/alert-dialog';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import { Progress } from '#/components/ui/progress';
-import { Skeleton } from '#/components/ui/skeleton';
-import { Icon } from '#/components/ui/icon';
+} from '@neup/components/ui/alert-dialog';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
+import { Progress } from '@neup/components/ui/progress';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { Icon } from '@neup/components/ui/icon';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { useServerName } from '@/hooks/use-server-name';
 import { withSelectedServerQuery } from '@/helpers/navigation';

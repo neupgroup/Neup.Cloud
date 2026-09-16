@@ -1,8 +1,8 @@
 'use client';
 
 import { PageTitleBack } from "@/components/page-header";
-import { Card, CardHeader, CardContent } from "#/components/ui/card";
-import { Skeleton } from "#/components/ui/skeleton";
+import { Card, CardHeader, CardContent } from "@neup/components/ui/card";
+import { Skeleton } from "@neup/components/ui/skeleton";
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 

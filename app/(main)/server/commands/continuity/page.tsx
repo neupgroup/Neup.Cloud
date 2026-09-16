@@ -25,11 +25,11 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Plus, Server, SquareTerminal } from 'lucide-react';
 
-import { Card } from '#/components/ui/card';
-import { Button } from '#/components/ui/button';
+import { Card } from '@neup/components/ui/card';
+import { Button } from '@neup/components/ui/button';
 import { PageTitle } from '@/components/page-header';
-import { Skeleton } from '#/components/ui/skeleton';
-import { useToast } from '#/core/hooks/useToast';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { useToast } from '@neup/core/hooks/useToast';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { createContinuitySession, listContinuitySessions, type ContinuitySession } from '@/services/server/continuity-service';

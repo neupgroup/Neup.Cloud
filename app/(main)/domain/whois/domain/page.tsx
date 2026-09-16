@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageTitleBack } from '@/components/page-header';
-import { Card, CardContent } from '#/components/ui/card';
-import { Input } from '#/components/ui/input';
-import { Button } from '#/components/ui/button';
+import { Card, CardContent } from '@neup/components/ui/card';
+import { Input } from '@neup/components/ui/input';
+import { Button } from '@neup/components/ui/button';
 
 function normalizeDomain(value: string): string {
   return value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');

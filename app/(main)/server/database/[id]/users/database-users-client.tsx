@@ -1,10 +1,10 @@
 'use client';
 
-import { Card } from "#/components/ui/card";
+import { Card } from "@neup/components/ui/card";
 import { User, Plus, Shield, ShieldCheck, ChevronRight } from "lucide-react";
 import Link from 'next/link';
-import { cn } from '#/core/utils';
-import { Badge } from "#/components/ui/badge";
+import { cn } from '@neup/core/utils';
+import { Badge } from "@neup/components/ui/badge";
 import type { DatabaseUser } from '@/services/database/database-runtime';
 import { useSelectedServerHref } from '@/hooks/use-selected-server';
 import { buildDatabaseUserRouteSlug } from "../../route-paths";

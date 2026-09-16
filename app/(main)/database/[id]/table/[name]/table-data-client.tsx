@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { deleteTableRowAction, updateTableRowAction } from '@/services/database/management';
-import { Button } from '#/components/ui/button';
+import { Button } from '@neup/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +14,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '#/components/ui/alert-dialog';
+} from '@neup/components/ui/alert-dialog';
 import {
   Table,
   TableBody,
@@ -22,8 +22,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '#/components/ui/table';
-import { useToast } from '#/core/hooks/useToast';
+} from '@neup/components/ui/table';
+import { useToast } from '@neup/core/hooks/useToast';
 
 type ConfirmState = {
   type: 'save' | 'delete';

@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { cn } from '#/core/utils';
+import { cn } from '@neup/core/utils';
 import { getSelectedServer, selectServer } from '@/helpers/selection';
 
 export function ServerNameLink({ name, className }: { name: string; className?: string }) {

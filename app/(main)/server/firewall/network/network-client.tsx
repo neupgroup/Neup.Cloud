@@ -13,14 +13,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Card,
-} from "#/components/ui/card";
+} from "@neup/components/ui/card";
 import { ShieldCheck, Network, Trash2, Plus, Info, Activity, ChevronRight } from "lucide-react";
 import { getFirewallStatus, allowPort, deleteRule, toggleFirewall, type FirewallRule } from '@/services/server/firewall/firewall-service';
 import { isSshAllowRule } from '@/services/server/firewall/firewall-rules';
-import { useToast } from '#/core/hooks/useToast';
-import { Skeleton } from '#/components/ui/skeleton';
-import { Button } from "#/components/ui/button";
-import { cn } from '#/core/utils';
+import { useToast } from '@neup/core/hooks/useToast';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { Button } from "@neup/components/ui/button";
+import { cn } from '@neup/core/utils';
 import {
     Dialog,
     DialogContent,
@@ -29,17 +29,17 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "#/components/ui/dialog";
-import { Input } from "#/components/ui/input";
-import { Label } from "#/components/ui/label";
+} from "@neup/components/ui/dialog";
+import { Input } from "@neup/components/ui/input";
+import { Label } from "@neup/components/ui/label";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "#/components/ui/select";
-import { Badge } from '#/components/ui/badge';
+} from "@neup/components/ui/select";
+import { Badge } from '@neup/components/ui/badge';
 import { useSelectedServerHref } from '@/hooks/use-selected-server';
 
 function RulesList({ rules, firewallActive, onDelete }: { rules: FirewallRule[], firewallActive: boolean, onDelete: (id: number) => void }) {

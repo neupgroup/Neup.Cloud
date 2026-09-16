@@ -7,13 +7,13 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "#/components/ui/card";
+} from "@neup/components/ui/card";
 import { Terminal, Play, Trash2, Clock, Database, AlertCircle, CheckCircle2 } from "lucide-react";
-import { Button } from "#/components/ui/button";
+import { Button } from "@neup/components/ui/button";
 import { PageTitleBack } from "@/components/page-header";
-import { Badge } from "#/components/ui/badge";
-import { Textarea } from "#/components/ui/textarea";
-import { useToast } from '#/core/hooks/useToast';
+import { Badge } from "@neup/components/ui/badge";
+import { Textarea } from "@neup/components/ui/textarea";
+import { useToast } from '@neup/core/hooks/useToast';
 import { useSelectedServerHref } from '@/hooks/use-selected-server';
 
 import { executeDatabaseQuery } from '@/services/database/database-runtime';

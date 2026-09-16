@@ -3,9 +3,9 @@ import {
     CardContent,
     CardHeader,
     CardTitle,
-} from "#/components/ui/card";
-import { Badge } from "#/components/ui/badge";
-import { Button } from "#/components/ui/button";
+} from "@neup/components/ui/card";
+import { Badge } from "@neup/components/ui/badge";
+import { Button } from "@neup/components/ui/button";
 import { PageTitle } from "@/components/page-header";
 import {
     Database,
@@ -32,7 +32,7 @@ import {
 import {
     resolveSelectedServerId
 } from "../route-helpers";
-import { cn } from "#/core/utils";
+import { cn } from "@neup/core/utils";
 
 export const metadata: Metadata = {
     title: "Database Users | Neup.Cloud",

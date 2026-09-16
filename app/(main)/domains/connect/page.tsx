@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
-import { Button } from '#/components/ui/button';
-import { Input } from '#/components/ui/input';
-import { useToast } from '#/core/hooks/useToast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@neup/components/ui/card';
+import { Button } from '@neup/components/ui/button';
+import { Input } from '@neup/components/ui/input';
+import { useToast } from '@neup/core/hooks/useToast';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { addDomain } from '@/services/domains/domains-service';
 import Link from 'next/link';

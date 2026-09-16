@@ -6,8 +6,8 @@ import {
   Card,
   CardContent,
   CardHeader,
-} from "#/components/ui/card";
-import { Skeleton } from "#/components/ui/skeleton";
+} from "@neup/components/ui/card";
+import { Skeleton } from "@neup/components/ui/skeleton";
 
 export function ApplicationCardSkeleton() {
   return (

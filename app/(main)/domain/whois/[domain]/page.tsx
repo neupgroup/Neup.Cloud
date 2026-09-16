@@ -3,9 +3,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { PageTitleBack } from '@/components/page-header';
-import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card';
-import { Badge } from '#/components/ui/badge';
-import { Button } from '#/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@neup/components/ui/card';
+import { Badge } from '@neup/components/ui/badge';
+import { Button } from '@neup/components/ui/button';
 import { ExternalLink, Loader2 } from 'lucide-react';
 
 type WhoisInfo = {

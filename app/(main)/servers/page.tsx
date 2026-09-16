@@ -16,9 +16,9 @@ Renders the `/servers` page with server quick actions and a server switcher.
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowRight, Loader2, ServerIcon } from 'lucide-react';
-import { Button } from '#/components/ui/button';
-import { Card, CardContent } from '#/components/ui/card';
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from '@neup/components/ui/button';
+import { Card, CardContent } from '@neup/components/ui/card';
+import { useToast } from '@neup/core/hooks/useToast';
 import { getServers } from '@/services/server/server-service';
 import type { Server } from '@/services/server/types';
 import { selectServer } from '@/helpers/selection';

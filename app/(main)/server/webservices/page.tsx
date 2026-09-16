@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getServer } from '@/services/server/server-service';
-import { Button } from '#/components/ui/button';
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from '@neup/components/ui/button';
+import { useToast } from '@neup/core/hooks/useToast';
 import { Loader2, Globe, Wind, Server, ArrowRight, Settings, FileKey } from 'lucide-react';
 import Link from 'next/link';
 
@@ -14,8 +14,8 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from '#/components/ui/card';
-import { Badge } from '#/components/ui/badge';
+} from '@neup/components/ui/card';
+import { Badge } from '@neup/components/ui/badge';
 import { PageTitle } from '@/components/page-header';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/helpers/navigation';

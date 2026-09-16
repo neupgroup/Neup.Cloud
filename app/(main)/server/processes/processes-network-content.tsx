@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Activity, ArrowLeftRight, Cpu, Globe, Hash, Network, Search, ServerCog, User, XCircle } from 'lucide-react';
-import { Card } from '#/components/ui/card';
-import { Button } from '#/components/ui/button';
-import { Input } from '#/components/ui/input';
-import { Skeleton } from '#/components/ui/skeleton';
-import { Badge } from '#/components/ui/badge';
-import { cn } from '#/core/utils';
-import { useToast } from '#/core/hooks/useToast';
+import { Card } from '@neup/components/ui/card';
+import { Button } from '@neup/components/ui/button';
+import { Input } from '@neup/components/ui/input';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { Badge } from '@neup/components/ui/badge';
+import { cn } from '@neup/core/utils';
+import { useToast } from '@neup/core/hooks/useToast';
 import { getProcesses, killProcess } from '@/services/processes/processes-service';
 import type { Process } from '@/services/processes/types';
 import { findNetworkConnectionPid, getNetworkConnections, type NetworkConnection } from '@/services/server/network';

@@ -8,8 +8,8 @@ import {
   type PipelineNodeInspectorArgs,
   type PipelineNodeRecord,
 } from '@/components/pipeline/node/interface';
-import { Input } from '#/components/ui/input';
-import { Textarea } from '#/components/ui/textarea';
+import { Input } from '@neup/components/ui/input';
+import { Textarea } from '@neup/components/ui/textarea';
 
 type GoogleNodeData = PipelineNodeRecord & {
   googleConnectionLabel?: string;

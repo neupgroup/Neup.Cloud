@@ -11,11 +11,11 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "#/components",
-    "utils": "#/core/utils",
-    "ui": "#/components/ui",
-    "lib": "#/core",
-    "hooks": "#/core/hooks"
+    "components": "@neup/components",
+    "utils": "@neup/core/utils",
+    "ui": "@neup/components/ui",
+    "lib": "@neup/core",
+    "hooks": "@neup/core/hooks"
   },
   "iconLibrary": "lucide"
 }

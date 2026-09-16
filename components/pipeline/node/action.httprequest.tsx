@@ -1,9 +1,9 @@
 'use client';
 
-import { Badge } from '#/components/ui/badge';
-import { Input } from '#/components/ui/input';
+import { Badge } from '@neup/components/ui/badge';
+import { Input } from '@neup/components/ui/input';
 import { KeyValueListEditor, definePipelineNodeModule, type PipelineNodeInspectorArgs, type PipelineNodeKeyValueEntry, type PipelineNodeRecord } from '@/components/pipeline/node/interface';
-import { Textarea } from '#/components/ui/textarea';
+import { Textarea } from '@neup/components/ui/textarea';
 import { Globe } from 'lucide-react';
 
 type HttpNodeData = PipelineNodeRecord & {

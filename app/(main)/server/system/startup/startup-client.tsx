@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Card,
-} from "#/components/ui/card";
+} from "@neup/components/ui/card";
 import { Search, Package, Trash2, Plus } from "lucide-react";
 import { getStartupServices, toggleService, createService, type StartupService } from '@/services/server/system-startup';
-import { useToast } from '#/core/hooks/useToast';
-import { Skeleton } from '#/components/ui/skeleton';
-import { Input } from "#/components/ui/input";
-import { Button } from "#/components/ui/button";
-import { cn } from '#/core/utils';
+import { useToast } from '@neup/core/hooks/useToast';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { Input } from "@neup/components/ui/input";
+import { Button } from "@neup/components/ui/button";
+import { cn } from '@neup/core/utils';
 import {
     Dialog,
     DialogContent,
@@ -19,15 +19,15 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "#/components/ui/dialog";
-import { Label } from "#/components/ui/label";
-import { Badge } from '#/components/ui/badge';
+} from "@neup/components/ui/dialog";
+import { Label } from "@neup/components/ui/label";
+import { Badge } from '@neup/components/ui/badge';
 import {
     Tabs,
     TabsContent,
     TabsList,
     TabsTrigger,
-} from "#/components/ui/tabs";
+} from "@neup/components/ui/tabs";
 
 function StartupList({ services, onDisable, onAddClick }: { services: StartupService[], onDisable: (name: string) => void, onAddClick: () => void }) {
     return (

@@ -10,14 +10,14 @@ import { addTablePrimaryKeyAction,
   dropTableColumnAction,
   dropTableIndexAction,
 } from '@/services/database/management';
-import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert';
-import { Badge } from '#/components/ui/badge';
-import { Button } from '#/components/ui/button';
-import { Card } from '#/components/ui/card';
-import { Checkbox } from '#/components/ui/checkbox';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import { Switch } from '#/components/ui/switch';
+import { Alert, AlertDescription, AlertTitle } from '@neup/components/ui/alert';
+import { Badge } from '@neup/components/ui/badge';
+import { Button } from '@neup/components/ui/button';
+import { Card } from '@neup/components/ui/card';
+import { Checkbox } from '@neup/components/ui/checkbox';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
+import { Switch } from '@neup/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -25,8 +25,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '#/components/ui/table';
-import { useToast } from '#/core/hooks/useToast';
+} from '@neup/components/ui/table';
+import { useToast } from '@neup/core/hooks/useToast';
 
 type Props = {
   connectionId: string;

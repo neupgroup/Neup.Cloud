@@ -5,15 +5,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, PlusCircle, Trash2, Variable } from 'lucide-react';
 
-import { Button } from '#/components/ui/button';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import { Textarea } from '#/components/ui/textarea';
-import { Card } from '#/components/ui/card';
-import { Checkbox } from '#/components/ui/checkbox';
+import { Button } from '@neup/components/ui/button';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
+import { Textarea } from '@neup/components/ui/textarea';
+import { Card } from '@neup/components/ui/card';
+import { Checkbox } from '@neup/components/ui/checkbox';
 import { PageTitleBack } from '@/components/page-header';
 
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 import { createSavedCommand } from '@/services/server/commands/server-command-service';
 import { VARIABLE_REGEX } from '@/services/saved-commands/types';
 import { serializeCommandSetCommands } from '@/services/server/commands/serialize';

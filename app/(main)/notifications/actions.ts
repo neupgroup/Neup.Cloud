@@ -13,8 +13,8 @@ Loads the next page of notifications for the authenticated account.
 ::end
 */
 
-import { getCookie } from '#/core/helpers/cookie';
-import logica from '#/logica';
+import { getCookie } from '@neup/core/helpers/cookie';
+import logica from '@neup/logica';
 import { getAccountNotifications, NOTIFICATIONS_PAGE_SIZE } from '@/services/notifications/notifications-service';
 
 export async function loadMoreNotifications(offset: number) {

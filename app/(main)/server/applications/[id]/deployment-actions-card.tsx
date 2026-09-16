@@ -1,12 +1,12 @@
 // This file has been removed as it is not UI-only or action logic.
 'use client';
 
-import { Card } from "#/components/ui/card";
-import { useToast } from '#/core/hooks/useToast';
+import { Card } from "@neup/components/ui/card";
+import { useToast } from '@neup/core/hooks/useToast';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/helpers/navigation';
-import { cn } from "#/core/utils";
-import Icon from "#/components/ui/icon";
+import { cn } from "@neup/core/utils";
+import Icon from "@neup/components/ui/icon";
 import { FileText, UploadCloud, Key } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from "react";

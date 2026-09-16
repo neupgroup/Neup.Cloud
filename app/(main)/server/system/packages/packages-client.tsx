@@ -3,16 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Package, Search, PackageCheck, PackagePlus } from 'lucide-react';
-import { Button } from '#/components/ui/button';
+import { Button } from '@neup/components/ui/button';
 import { PageTitleWithComponent } from '@/components/page-header';
-import { Card } from '#/components/ui/card';
-import { Badge } from '#/components/ui/badge';
-import { Input } from '#/components/ui/input';
-import { Skeleton } from '#/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
+import { Card } from '@neup/components/ui/card';
+import { Badge } from '@neup/components/ui/badge';
+import { Input } from '@neup/components/ui/input';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from "@neup/components/ui/alert";
 import { getInstalledPackages, type PackageUpdate } from '@/services/server/system-updates';
-import { cn } from '#/core/utils';
-import { useToast } from '#/core/hooks/useToast';
+import { cn } from '@neup/core/utils';
+import { useToast } from '@neup/core/hooks/useToast';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 
 const COLORS = [

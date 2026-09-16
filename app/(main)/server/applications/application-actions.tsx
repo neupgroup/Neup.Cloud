@@ -11,9 +11,9 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "#/components/ui/alert-dialog";
-import { Button } from "#/components/ui/button";
-import { useToast } from '#/core/hooks/useToast';
+} from "@neup/components/ui/alert-dialog";
+import { Button } from "@neup/components/ui/button";
+import { useToast } from '@neup/core/hooks/useToast';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 import { Edit, Trash, Key, UploadCloud, Loader2, FileText } from "lucide-react";

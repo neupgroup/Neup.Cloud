@@ -2,9 +2,9 @@
 'use client';
 
 import { executeApplicationCommand } from "@/services/server/applications/service";
-import { Card } from "#/components/ui/card";
-import { useToast } from '#/core/hooks/useToast';
-import { cn } from "#/core/utils";
+import { Card } from "@neup/components/ui/card";
+import { useToast } from '@neup/core/hooks/useToast';
+import { cn } from "@neup/core/utils";
 import { Check, Hammer, Loader2, Play, PlayCircle, RefreshCw, StopCircle, Terminal, Download } from "lucide-react";
 import { useState } from "react";
 import * as LucideIcons from "lucide-react";

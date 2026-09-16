@@ -3,24 +3,24 @@
 import { useState } from 'react';
 import { Loader2, Send, ChevronDown } from 'lucide-react';
 
-import { Button } from '#/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import { Textarea } from '#/components/ui/textarea';
+import { Button } from '@neup/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@neup/components/ui/card';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
+import { Textarea } from '@neup/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '#/components/ui/select';
-import { Checkbox } from '#/components/ui/checkbox';
+} from '@neup/components/ui/select';
+import { Checkbox } from '@neup/components/ui/checkbox';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '#/components/ui/collapsible';
+} from '@neup/components/ui/collapsible';
 import { invokeOpenFlowAction } from './openflow-actions';
 
 type ProviderValue = 'openai' | 'anthropic' | 'google' | 'nvidia';

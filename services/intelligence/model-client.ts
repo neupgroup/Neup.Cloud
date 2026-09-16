@@ -1,6 +1,6 @@
 'use server';
 
-import { getResponse } from '#/core/intelligence';
+import { getResponse } from '@neup/core/intelligence';
 
 export interface InvokeModelInput {
   provider: string | null;

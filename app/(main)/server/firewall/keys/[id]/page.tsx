@@ -1,7 +1,7 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card";
-import { Label } from "#/components/ui/label";
-import { Textarea } from "#/components/ui/textarea";
-import { Button } from "#/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@neup/components/ui/card";
+import { Label } from "@neup/components/ui/label";
+import { Textarea } from "@neup/components/ui/textarea";
+import { Button } from "@neup/components/ui/button";
 import { Trash2, ChevronLeft } from "lucide-react";
 import Link from 'next/link';
 import { getAuthorizedKeys } from "@/services/server/firewall-keys-service";

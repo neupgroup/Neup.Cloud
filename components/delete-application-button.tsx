@@ -1,9 +1,9 @@
 'use client';
 
-import { Button } from '#/components/ui/button';
+import { Button } from '@neup/components/ui/button';
 import { Trash } from 'lucide-react';
 import { useState } from 'react';
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 import { useRouter } from 'next/navigation';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { deleteApplication } from '@/services/server/applications/service';

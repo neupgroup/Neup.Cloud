@@ -5,9 +5,9 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '#/components/ui/accordion';
-import { Card, CardContent } from '#/components/ui/card';
-import { cn } from '#/core/utils';
+} from '@neup/components/ui/accordion';
+import { Card, CardContent } from '@neup/components/ui/card';
+import { cn } from '@neup/core/utils';
 
 interface LogViewModel {
   id: number;

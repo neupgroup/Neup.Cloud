@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { prisma } from '#/core/database/prisma';
+import { prisma } from '@neup/core/database/prisma';
 
 type EnsureProjectInput = {
   projectId?: string;

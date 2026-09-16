@@ -4,10 +4,10 @@ import { type ReactNode } from 'react';
 import { Plus, Trash2, type LucideIcon } from 'lucide-react';
 import { Handle, Position } from 'reactflow';
 
-import { Button } from '#/components/ui/button';
-import { Input } from '#/components/ui/input';
+import { Button } from '@neup/components/ui/button';
+import { Input } from '@neup/components/ui/input';
 import { type PipelineIntelligenceContext } from '@/components/pipeline/node/intelligence.shared';
-import { cn } from '#/core/utils';
+import { cn } from '@neup/core/utils';
 
 export type PipelineNodeKind =
   | 'manualStart'

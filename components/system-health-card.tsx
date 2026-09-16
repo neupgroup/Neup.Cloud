@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
-import { Button } from "#/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@neup/components/ui/card";
+import { Button } from "@neup/components/ui/button";
 import { Clock, Loader2 } from "lucide-react";
-import { cn } from "#/core/utils";
+import { cn } from "@neup/core/utils";
 
 interface SystemHealthCardProps {
     uptime: string | null;

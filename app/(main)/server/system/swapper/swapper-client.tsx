@@ -7,9 +7,9 @@ import { useRouter } from 'next/navigation';
 import { updateServer } from '@/services/server/server-service';
 import { createRecurringSwap, deleteRecurringSwap, deleteSwapFile, listSwapFiles } from '@/services/server/system-swap';
 import type { SwapFileEntry } from '@/services/server/system-swap';
-import { Button } from '#/components/ui/button';
-import { Input } from '#/components/ui/input';
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from '@neup/components/ui/button';
+import { Input } from '@neup/components/ui/input';
+import { useToast } from '@neup/core/hooks/useToast';
 import {
     Zap,
     RefreshCw,
@@ -20,7 +20,7 @@ import {
     Loader2,
     AlertTriangle,
 } from 'lucide-react';
-import { cn } from '#/core/utils';
+import { cn } from '@neup/core/utils';
 
 type Props = {
     serverId: string;

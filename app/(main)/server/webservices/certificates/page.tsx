@@ -1,10 +1,10 @@
 "use client";
 
 import { PageTitleBack } from '@/components/page-header';
-import { Button } from '#/components/ui/button';
-import { Card } from '#/components/ui/card';
-import { Skeleton } from '#/components/ui/skeleton';
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from '@neup/components/ui/button';
+import { Card } from '@neup/components/ui/card';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { useToast } from '@neup/core/hooks/useToast';
 import { AlertCircle, Calendar, CheckCircle2, FileKey, RefreshCw, Shield, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getCertificates } from '@/services/webservices/certificates-service';

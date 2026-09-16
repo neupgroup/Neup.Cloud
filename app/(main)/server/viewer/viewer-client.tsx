@@ -2,12 +2,12 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '#/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
+import { Button } from '@neup/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@neup/components/ui/card';
 import { Loader2, Save, AlertTriangle, ArrowLeft, Shield, ShieldOff } from 'lucide-react';
 import { getFileContent, saveFileContent } from '@/services/server/viewer-service';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export default function ViewerClient() {

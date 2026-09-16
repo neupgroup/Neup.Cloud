@@ -1,17 +1,17 @@
 'use client';
 
-import { Badge } from "#/components/ui/badge";
-import { Button } from "#/components/ui/button";
-import { Skeleton } from "#/components/ui/skeleton";
-import { Card } from "#/components/ui/card";
+import { Badge } from "@neup/components/ui/badge";
+import { Button } from "@neup/components/ui/button";
+import { Skeleton } from "@neup/components/ui/skeleton";
+import { Card } from "@neup/components/ui/card";
 import { Trash2, Copy, Check } from "lucide-react";
 import { useParams } from 'next/navigation';
-import { cn } from "#/core/utils";
+import { cn } from "@neup/core/utils";
 import { getDomain, getDomainDNSRecords, getDomainNameservers, verifyDomain, deleteDomain } from '@/services/domains/domains-service';
 import type { ManagedDomain, DNSRecord } from '@/services/domains/types';
 import { useEffect, useState } from "react";
 import { PageTitleBack } from "@/components/page-header";
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 import { useRouter } from "next/navigation";
 import {
     AlertDialog,
@@ -23,7 +23,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "#/components/ui/alert-dialog";
+} from "@neup/components/ui/alert-dialog";
 
 function CopyButton({ text }: { text: string }) {
     const [copied, setCopied] = useState(false);

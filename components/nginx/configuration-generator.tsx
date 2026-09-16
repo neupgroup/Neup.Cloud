@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { generateNginxConfig, NginxLocation } from '@/services/core/nginx';
 import { Plus, Trash, Copy, Check, FileCode } from 'lucide-react';
-import { Textarea } from '#/components/ui/textarea';
-import { Separator } from '#/components/ui/separator';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import { Button } from '#/components/ui/button';
+import { Textarea } from '@neup/components/ui/textarea';
+import { Separator } from '@neup/components/ui/separator';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
+import { Button } from '@neup/components/ui/button';
 import {
     Card,
     CardContent,
@@ -15,8 +15,8 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from '#/components/ui/card';
-import { useToast } from '#/core/hooks/useToast';
+} from '@neup/components/ui/card';
+import { useToast } from '@neup/core/hooks/useToast';
 
 interface NginxConfigGeneratorProps {
     defaultDomain?: string;

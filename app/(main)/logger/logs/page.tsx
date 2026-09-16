@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PageTitle } from '@/components/page-header';
-import { Button } from '#/components/ui/button';
+import { Button } from '@neup/components/ui/button';
 import { getFilteredLoggerActivityRecords, getProjectLoggerActivityRecords } from '@/services/logger/logger-service';
 
 export default async function LoggerProjectLogs({ searchParams }: { searchParams: Promise<{ project?: string; type?: string }> }) {

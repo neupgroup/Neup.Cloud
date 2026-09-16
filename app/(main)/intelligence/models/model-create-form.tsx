@@ -6,17 +6,17 @@ import Link from 'next/link';
 import { Bot, Calculator, Flag } from 'lucide-react';
 
 import { createIntelligenceModelAction } from '@/services/intelligence/intelligence-service';
-import { Button } from '#/components/ui/button';
+import { Button } from '@neup/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '#/components/ui/card';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import { Textarea } from '#/components/ui/textarea';
+} from '@neup/components/ui/card';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
+import { Textarea } from '@neup/components/ui/textarea';
 import { getCurrencySuggestions,
   getProviderSuggestions,
   normalizeCurrencyInput,

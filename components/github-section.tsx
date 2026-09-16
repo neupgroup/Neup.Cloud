@@ -2,10 +2,10 @@
 'use client';
 
 import { performGitOperation } from "@/services/server/applications/service";
-import { Button } from "#/components/ui/button";
-import { Card } from "#/components/ui/card";
-import { useToast } from '#/core/hooks/useToast';
-import { cn } from "#/core/utils";
+import { Button } from "@neup/components/ui/button";
+import { Card } from "@neup/components/ui/card";
+import { useToast } from '@neup/core/hooks/useToast';
+import { cn } from "@neup/core/utils";
 import { Download, ExternalLink, GitBranch, GitPullRequest, Loader2, RefreshCw, RotateCcw } from "lucide-react";
 import Link from 'next/link';
 import { useState } from "react";

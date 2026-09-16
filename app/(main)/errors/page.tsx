@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "#/components/ui/card";
+} from "@neup/components/ui/card";
 import {
   Table,
   TableBody,
@@ -15,11 +15,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "#/components/ui/table";
-import { Badge } from "#/components/ui/badge";
+} from "@neup/components/ui/table";
+import { Badge } from "@neup/components/ui/badge";
 import { ShieldAlert, AlertTriangle, Info } from "lucide-react";
 import { getErrors } from '@/services/errors/errors-service';
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 import { formatDistanceToNow } from 'date-fns';
 
 type AppError = {

@@ -3,19 +3,19 @@
 import { useState } from 'react';
 import { Copy, KeyRound, Loader2, WandSparkles } from 'lucide-react';
 
-import { Button } from '#/components/ui/button';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import { Textarea } from '#/components/ui/textarea';
-import { Switch } from '#/components/ui/switch';
+import { Button } from '@neup/components/ui/button';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
+import { Textarea } from '@neup/components/ui/textarea';
+import { Switch } from '@neup/components/ui/switch';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '#/components/ui/select';
-import { useToast } from '#/core/hooks/useToast';
+} from '@neup/components/ui/select';
+import { useToast } from '@neup/core/hooks/useToast';
 import { generateSshKeyPair } from '@/services/server/server-service';
 
 type SshKeypairGeneratorProps = {

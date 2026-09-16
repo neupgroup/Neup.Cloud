@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import {
     Card,
-} from "#/components/ui/card";
+} from "@neup/components/ui/card";
 import { Key, FolderOpen, Hash } from "lucide-react";
 import { getAuthorizedKeys, type SshKey } from '@/services/server/firewall-keys-service';
-import { useToast } from '#/core/hooks/useToast';
-import { Skeleton } from '#/components/ui/skeleton';
-import { cn } from '#/core/utils';
-import { Button } from '#/components/ui/button';
+import { useToast } from '@neup/core/hooks/useToast';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { cn } from '@neup/core/utils';
+import { Button } from '@neup/components/ui/button';
 
 import { Plus, ChevronRight } from "lucide-react";
 import Link from "next/link";

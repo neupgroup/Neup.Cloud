@@ -1,8 +1,8 @@
 // Merged into page.tsx and can be deleted.
 'use client';
 
-import { Button } from '#/components/ui/button';
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from '@neup/components/ui/button';
+import { useToast } from '@neup/core/hooks/useToast';
 import { checkDatabaseConnection } from '@/services/database/management';
 
 export function CheckConnectionButton({ connectionId }: { connectionId: string }) {

@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { FolderOpen, Network, ScrollText, AlertCircle } from "lucide-react";
 
-import { Card } from "#/components/ui/card";
+import { Card } from "@neup/components/ui/card";
 import { withSelectedServerQuery } from '@/helpers/navigation';
-import { cn } from "#/core/utils";
+import { cn } from "@neup/core/utils";
 import { useSystemSection, SystemSectionProps } from '@/components/applications/system-section';
 
 export function SystemSection({ application, selectedServerId }: SystemSectionProps) {

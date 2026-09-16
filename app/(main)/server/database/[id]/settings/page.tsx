@@ -5,17 +5,17 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "#/components/ui/card";
+} from "@neup/components/ui/card";
 import { Database, Settings, Terminal, Globe, Zap, Activity, Trash2 } from "lucide-react";
-import { Button } from "#/components/ui/button";
+import { Button } from "@neup/components/ui/button";
 import { PageTitleBack } from "@/components/page-header";
 import type { Metadata } from 'next';
-import { Badge } from "#/components/ui/badge";
+import { Badge } from "@neup/components/ui/badge";
 import { getDatabaseDetails, getDatabaseSettings } from '@/services/database/database-runtime';
 import { notFound } from "next/navigation";
-import { Switch } from "#/components/ui/switch";
-import { Label } from "#/components/ui/label";
-import { Input } from "#/components/ui/input";
+import { Switch } from "@neup/components/ui/switch";
+import { Label } from "@neup/components/ui/label";
+import { Input } from "@neup/components/ui/input";
 import { RemoteConnectionSettings } from "./remote-connection-settings";
 import { withSelectedServerQuery } from "@/helpers/navigation";
 import { parseDatabaseRouteId, resolveSelectedServerId } from "../../route-helpers";

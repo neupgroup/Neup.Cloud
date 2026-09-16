@@ -1,14 +1,14 @@
 'use client';
 
 import { PageTitleBack } from "@/components/page-header";
-import { Button } from "#/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card";
-import { Input } from "#/components/ui/input";
-import { Label } from "#/components/ui/label";
+import { Button } from "@neup/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@neup/components/ui/card";
+import { Input } from "@neup/components/ui/input";
+import { Label } from "@neup/components/ui/label";
 import { UserPlus, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { createUser } from "@/services/server/firewall-users-service";
-import { useToast } from '#/core/hooks/useToast';
+import { useToast } from '@neup/core/hooks/useToast';
 import { useRouter } from "next/navigation";
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/helpers/navigation';

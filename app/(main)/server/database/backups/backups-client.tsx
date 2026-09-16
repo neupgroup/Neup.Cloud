@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown, ChevronLeft, HardDrive, RotateCcw, Trash2 } from 'lucide-react';
-import { Badge } from '#/components/ui/badge';
-import { Button } from '#/components/ui/button';
-import { Card, CardContent } from '#/components/ui/card';
+import { Badge } from '@neup/components/ui/badge';
+import { Button } from '@neup/components/ui/button';
+import { Card, CardContent } from '@neup/components/ui/card';
 import { useSelectedServerHref } from '@/hooks/use-selected-server';
 import type { DatabaseBackupFile } from '@/services/database/engine-types';
 

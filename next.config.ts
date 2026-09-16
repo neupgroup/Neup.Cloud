@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   basePath: '/cloud',
+  allowedDevOrigins: ['dev.neupgroup.com'],
   turbopack: {
     root: __dirname,
   },

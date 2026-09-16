@@ -2,10 +2,10 @@
 
 import Link from 'next/link';
 import { CheckCircle2, XCircle, Clock, ChevronRight, ArrowUpRight } from 'lucide-react';
-import { Card } from '#/components/ui/card';
-import { Skeleton } from '#/components/ui/skeleton';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '#/components/ui/accordion';
-import { cn } from '#/core/utils';
+import { Card } from '@neup/components/ui/card';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@neup/components/ui/accordion';
+import { cn } from '@neup/core/utils';
 import { differenceInDays, differenceInHours, format, formatDistanceToNow } from 'date-fns';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/helpers/navigation';

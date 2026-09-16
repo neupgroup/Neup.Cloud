@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from "#/components/ui/button";
-import Icon from "#/components/ui/icon";
+import { Button } from "@neup/components/ui/button";
+import Icon from "@neup/components/ui/icon";
 import { Download, GitPullRequest, RotateCcw } from "lucide-react";
 
 import { useRepoControls } from '@/components/applications/repo-controls';

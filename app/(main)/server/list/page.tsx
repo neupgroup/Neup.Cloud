@@ -5,9 +5,9 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Check, ChevronRight, CirclePlus, Loader2, ServerIcon } from "lucide-react";
 
 import { PageTitle } from "@/components/page-header";
-import { Button } from "#/components/ui/button";
-import { Card, CardContent } from "#/components/ui/card";
-import { useToast } from "#/core/hooks/useToast";
+import { Button } from "@neup/components/ui/button";
+import { Card, CardContent } from "@neup/components/ui/card";
+import { useToast } from "@neup/core/hooks/useToast";
 import { useSelectedServerId } from "@/hooks/use-selected-server";
 import { selectServer } from "@/helpers/selection";
 import { getServersWithRunningApplications } from "@/services/server/server-service";

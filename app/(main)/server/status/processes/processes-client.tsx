@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { cn } from "#/core/utils";
+import { cn } from "@neup/core/utils";
 
 import {
     Card,
@@ -9,14 +9,14 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "#/components/ui/card";
-import { Button } from "#/components/ui/button";
-import { Skeleton } from "#/components/ui/skeleton";
+} from "@neup/components/ui/card";
+import { Button } from "@neup/components/ui/button";
+import { Skeleton } from "@neup/components/ui/skeleton";
 import { Loader2, Hash, User, Cpu, XCircle, Search } from "lucide-react";
 import { getProcesses, killProcess } from '@/services/processes/processes-service';
 import type { Process } from '@/services/processes/types';
-import { useToast } from '#/core/hooks/useToast';
-import { Input } from '#/components/ui/input';
+import { useToast } from '@neup/core/hooks/useToast';
+import { Input } from '@neup/components/ui/input';
 
 function ProcessesList({ processes, onKill, killingPid }: { processes: Process[], onKill: (pid: string) => void, killingPid: string | null }) {
     return (

@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, ScrollText } from 'lucide-react';
 
 import LogsAccordion from '@/app/(main)/intelligence/logs/logs-accordion';
 import { PageTitle } from '@/components/page-header';
-import { Button } from '#/components/ui/button';
+import { Button } from '@neup/components/ui/button';
 import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
 import { getPaginatedIntelligenceLogs } from '@/services/intelligence/store';
 

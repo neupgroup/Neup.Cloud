@@ -3,14 +3,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '#/components/ui/button';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from '@neup/components/ui/button';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@neup/components/ui/card';
+import { useToast } from '@neup/core/hooks/useToast';
 import { Loader2, UserPlus, ShieldCheck, Key, User, Database } from 'lucide-react';
 import { createDatabaseUser } from '@/services/database/database-runtime';
-import { Checkbox } from "#/components/ui/checkbox";
+import { Checkbox } from "@neup/components/ui/checkbox";
 import { useSelectedServerHref } from '@/hooks/use-selected-server';
 
 interface UserCreateFormProps {

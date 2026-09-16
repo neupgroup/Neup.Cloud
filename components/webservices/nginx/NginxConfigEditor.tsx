@@ -14,8 +14,8 @@ import {
 } from '@/services/webservices/nginx/service';
 import { getCertificates } from '@/services/webservices/certificates-service';
 import { getWebOrServerNginxConfig } from '@/services/webservices/service';
-import { Button } from '#/components/ui/button';
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from '@neup/components/ui/button';
+import { useToast } from '@neup/core/hooks/useToast';
 import {
     Loader2,
     Plus,
@@ -39,16 +39,16 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from '#/components/ui/select';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import { Badge } from '#/components/ui/badge';
-import { Textarea } from '#/components/ui/textarea';
+} from '@neup/components/ui/select';
+import { Input } from '@neup/components/ui/input';
+import { Label } from '@neup/components/ui/label';
+import { Badge } from '@neup/components/ui/badge';
+import { Textarea } from '@neup/components/ui/textarea';
 import { PageTitleBack } from '@/components/page-header';
-import { RadioGroup, RadioGroupItem } from '#/components/ui/radio-group';
-import { Skeleton } from '#/components/ui/skeleton';
-import { Switch } from '#/components/ui/switch';
-import { Card } from '#/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@neup/components/ui/radio-group';
+import { Skeleton } from '@neup/components/ui/skeleton';
+import { Switch } from '@neup/components/ui/switch';
+import { Card } from '@neup/components/ui/card';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
 import { withSelectedServerQuery } from '@/hooks/use-selected-server';
 

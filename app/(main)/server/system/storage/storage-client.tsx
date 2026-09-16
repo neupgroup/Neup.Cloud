@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { getStorageBreakdown, getStorageOverview } from '@/services/server/system-storage';
 import type { StorageInfo, StorageSection } from '@/services/server/system-storage';
-import { useToast } from '#/core/hooks/useToast';
-import { Button } from '#/components/ui/button';
-import { Skeleton } from '#/components/ui/skeleton';
+import { useToast } from '@neup/core/hooks/useToast';
+import { Button } from '@neup/components/ui/button';
+import { Skeleton } from '@neup/components/ui/skeleton';
 import {
     HardDrive,
     Users,
@@ -16,7 +16,7 @@ import {
     CheckCircle2,
     AlertTriangle,
 } from 'lucide-react';
-import { cn } from '#/core/utils';
+import { cn } from '@neup/core/utils';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

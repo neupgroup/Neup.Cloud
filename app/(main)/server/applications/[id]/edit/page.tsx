@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { getApplication } from '@/services/server/applications/service';
 import { withSelectedServerQuery } from '@/helpers/navigation';
 import { PageTitleBack } from '@/components/page-header';
-import { Badge } from '#/components/ui/badge';
+import { Badge } from '@neup/components/ui/badge';
 import EditApplicationForm from '../edit-form';
 
 export const metadata: Metadata = { title: 'Edit Application, Neup.Cloud' };

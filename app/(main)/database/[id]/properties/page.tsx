@@ -3,10 +3,10 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Database, ShieldCheck } from 'lucide-react';
-import { Card } from '#/components/ui/card';
+import { Card } from '@neup/components/ui/card';
 import { PageTitleBack } from '@/components/page-header';
-import { Button } from '#/components/ui/button';
-import { useToast } from '#/core/hooks/useToast';
+import { Button } from '@neup/components/ui/button';
+import { useToast } from '@neup/core/hooks/useToast';
 import {
   checkDatabaseConnection,
   deleteDatabaseConnection,

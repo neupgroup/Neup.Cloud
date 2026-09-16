@@ -4,8 +4,8 @@ import Link from 'next/link';
 
 import {
   Card,
-} from '#/components/ui/card';
-import { Button } from '#/components/ui/button';
+} from '@neup/components/ui/card';
+import { Button } from '@neup/components/ui/button';
 import { Server } from 'lucide-react';
 import StartupClient from './startup-client';
 import { PageTitle } from '@/components/page-header';

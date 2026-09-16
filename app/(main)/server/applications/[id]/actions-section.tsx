@@ -2,8 +2,8 @@
 
 'use client';
 
-import { Card } from "#/components/ui/card";
-import { cn } from "#/core/utils";
+import { Card } from "@neup/components/ui/card";
+import { cn } from "@neup/core/utils";
 import { Loader2, Terminal, Zap } from "lucide-react";
 import { useActionsSection, ActionsSectionProps } from "@/components/applications/actions-section";
 

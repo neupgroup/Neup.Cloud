@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from 'react';
 
-import { Button } from '#/components/ui/button';
-import { Label } from '#/components/ui/label';
-import { Textarea } from '#/components/ui/textarea';
+import { Button } from '@neup/components/ui/button';
+import { Label } from '@neup/components/ui/label';
+import { Textarea } from '@neup/components/ui/textarea';
 
 type AccessType = 'open' | 'hybrid' | 'closed';
 
