@@ -11,11 +11,15 @@ Renders the application-level 404 screen for unknown routes.
 ::end
 */
 
-import Link from 'next/link';
+'use client';
+
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, FileQuestion, Home } from 'lucide-react';
 import { Button } from '@neup/components/ui/button';
 
 export default function NotFound() {
+  const router = useRouter();
+
   return (
     <main className="flex min-h-[70vh] items-center justify-center px-4 py-16">
       <section className="w-full max-w-xl text-center">
@@ -34,17 +38,15 @@ export default function NotFound() {
         </p>
 
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Button asChild>
-            <Link href="/home">
-              <Home className="h-4 w-4" />
-              Go home
-            </Link>
+          <Button preIcon={<Home className="h-4 w-4" />} onClick={() => router.push('/home')}>
+            Go home
           </Button>
-          <Button variant="outlined" asChild>
-            <Link href="/server/list">
-              <ArrowLeft className="h-4 w-4" />
-              View servers
-            </Link>
+          <Button
+            variant="outlined"
+            preIcon={<ArrowLeft className="h-4 w-4" />}
+            onClick={() => router.push('/server/list')}
+          >
+            View servers
           </Button>
         </div>
       </section>
