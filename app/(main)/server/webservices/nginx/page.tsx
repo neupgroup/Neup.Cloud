@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { LinkButton } from '@neup/components/ui/link-button';
 import { getNginxConfigurations, type WebServiceConfig } from '@/services/webservices/service';
 import { Card } from '@neup/components/ui/card';
 import { Button } from '@neup/components/ui/button';
@@ -193,6 +193,8 @@ export default function NginxConfigurationsPage() {
         );
     }
 
+    const rowClassName = "h-auto min-h-20 w-full justify-start gap-4 whitespace-normal rounded-none border-0 p-4 text-left shadow-none focus-visible:ring-inset";
+
     return (
         <div className="mr-auto w-full max-w-4xl space-y-8 animate-in fade-in duration-500 pb-20">
             <PageTitleBack
@@ -208,54 +210,55 @@ export default function NginxConfigurationsPage() {
                     <p className="text-sm text-muted-foreground">Create, test, and restart Nginx configurations</p>
                 </div>
                 <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
-                    {/* Create New Row */}
-                    <Link href={withSelectedServerQuery('/server/webservices/nginx/new', selectedServerId)} className="block">
-                        <div className={cn(
-                            "p-4 min-w-0 w-full transition-colors hover:bg-muted/50 flex items-center gap-4 text-primary",
-                            "border-b border-border"
-                        )}>
-                            <div className="rounded-full bg-primary/10 p-2">
-                                <Plus className="h-5 w-5" />
-                            </div>
-                            <div>
-                                <p className="font-semibold">Create New Configuration</p>
-                                <p className="text-sm text-muted-foreground">Setup a new Nginx server block</p>
-                            </div>
-                        </div>
-                    </Link>
-
-                    {/* Test Configuration Row */}
-                    <Button
-                        onClick={handleTest}
-                        disabled={testing}
-                        className="w-full text-left block hover:bg-blue-500/5 transition-colors"
+                    <LinkButton
+                        href={withSelectedServerQuery('/server/webservices/nginx/new', selectedServerId)}
+                        variant="plain"
+                        alignment="left"
+                        className={cn(rowClassName, 'border-b border-border text-primary')}
                     >
-                        <div className="p-4 min-w-0 w-full flex items-center gap-4 text-blue-600 dark:text-blue-500 border-b border-border">
-                            <div className="rounded-full bg-blue-600/10 p-2">
-                                <CheckCircle className={cn("h-5 w-5", testing && "animate-pulse")} />
-                            </div>
-                            <div>
-                                <p className="font-semibold">{testing ? 'Testing Configuration...' : 'Test Configuration'}</p>
-                                <p className="text-sm text-muted-foreground">Verify configuration correctness before restarting</p>
-                            </div>
-                        </div>
+                        <span className="shrink-0 rounded-full bg-primary/10 p-2">
+                            <Plus className="h-5 w-5" />
+                        </span>
+                        <span className="min-w-0 space-y-1">
+                            <span className="block font-semibold">Create New Configuration</span>
+                            <span className="block text-sm font-normal text-muted-foreground">Set up a new Nginx server block</span>
+                        </span>
+                    </LinkButton>
+
+                    <Button
+                        htmlType="button"
+                        variant="plain"
+                        alignment="left"
+                        onClick={handleTest}
+                        disabled={testing || restarting}
+                        aria-busy={testing}
+                        className={cn(rowClassName, 'border-b border-border text-blue-600 hover:bg-blue-500/5 dark:text-blue-500')}
+                    >
+                        <span className="shrink-0 rounded-full bg-blue-600/10 p-2">
+                            <CheckCircle className={cn('h-5 w-5', testing && 'animate-pulse')} />
+                        </span>
+                        <span className="min-w-0 space-y-1">
+                            <span className="block font-semibold">{testing ? 'Testing Configuration...' : 'Test Configuration'}</span>
+                            <span className="block text-sm font-normal text-muted-foreground">Verify configuration correctness before restarting</span>
+                        </span>
                     </Button>
 
-                    {/* Restart Server Row */}
                     <Button
+                        htmlType="button"
+                        variant="plain"
+                        alignment="left"
                         onClick={handleRestart}
-                        disabled={restarting}
-                        className="w-full text-left block hover:bg-red-500/5 transition-colors"
+                        disabled={restarting || testing}
+                        aria-busy={restarting}
+                        className={cn(rowClassName, 'text-destructive hover:bg-red-500/5')}
                     >
-                        <div className="p-4 min-w-0 w-full flex items-center gap-4 text-destructive">
-                            <div className="rounded-full bg-destructive/10 p-2">
-                                <RefreshCw className={cn("h-5 w-5", restarting && "animate-spin")} />
-                            </div>
-                            <div>
-                                <p className="font-semibold">{restarting ? 'Restarting Server...' : 'Restart Nginx Server'}</p>
-                                <p className="text-sm text-muted-foreground">Apply changes by restarting the service</p>
-                            </div>
-                        </div>
+                        <span className="shrink-0 rounded-full bg-destructive/10 p-2">
+                            <RefreshCw className={cn('h-5 w-5', restarting && 'animate-spin')} />
+                        </span>
+                        <span className="min-w-0 space-y-1">
+                            <span className="block font-semibold">{restarting ? 'Restarting Server...' : 'Restart Nginx Server'}</span>
+                            <span className="block text-sm font-normal text-muted-foreground">Apply changes by restarting the service</span>
+                        </span>
                     </Button>
                 </Card>
             </div>
@@ -267,65 +270,63 @@ export default function NginxConfigurationsPage() {
                     <p className="text-sm text-muted-foreground">Manage default SSL and existing server configurations</p>
                 </div>
                 <Card className="min-w-0 w-full rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
-                    {/* Default SSL Configuration */}
-                    <Link href={withSelectedServerQuery('/server/webservices/nginx/default', selectedServerId)} className="block">
-                        <div className={cn(
-                            "p-4 min-w-0 w-full transition-colors hover:bg-muted/50 flex items-center gap-4 text-orange-600 dark:text-orange-500",
-                            configurations.length > 0 && "border-b border-border"
-                        )}>
-                            <div className="rounded-full bg-orange-600/10 p-2">
-                                <Shield className="h-5 w-5" />
-                            </div>
-                            <div>
-                                <p className="font-semibold">Default SSL Configuration</p>
-                                <p className="text-sm text-muted-foreground">Generate self-signed certificate and catch-all config</p>
-                            </div>
-                        </div>
-                    </Link>
+                    <LinkButton
+                        href={withSelectedServerQuery('/server/webservices/nginx/default', selectedServerId)}
+                        variant="plain"
+                        alignment="left"
+                        className={cn(rowClassName, 'text-orange-600 dark:text-orange-500', configurations.length > 0 && 'border-b border-border')}
+                    >
+                        <span className="shrink-0 rounded-full bg-orange-600/10 p-2">
+                            <Shield className="h-5 w-5" />
+                        </span>
+                        <span className="min-w-0 space-y-1">
+                            <span className="block font-semibold">Default SSL Configuration</span>
+                            <span className="block text-sm font-normal text-muted-foreground">Generate self-signed certificate and catch-all config</span>
+                        </span>
+                    </LinkButton>
 
-                    {/* Existing Configurations */}
                     {configurations.map((config, index) => (
-                        <Link key={config.id} href={withSelectedServerQuery(`/server/webservices/nginx/${config.id}`, selectedServerId)} className="block">
-                            <div className={cn(
-                                "p-4 min-w-0 w-full transition-colors hover:bg-muted/50",
-                                index < configurations.length - 1 && "border-b border-border"
-                            )}>
-                                <div className="min-w-0 flex-1">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <p className="text-sm font-medium text-foreground break-all font-mono leading-tight flex items-center gap-2">
-                                            <FileCode className="h-4 w-4 text-muted-foreground" />
-                                            {config.name || config.id || 'Unknown Configuration'}
-                                        </p>
-                                        <Badge variant="secondary" className="text-xs font-normal">
-                                            {config.type.toUpperCase()}
-                                        </Badge>
-                                    </div>
-
-                                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-                                        <div className="flex items-center gap-1.5 shrink-0">
-                                            <Server className="h-3.5 w-3.5" />
-                                            <span>{config.serverName || 'Unknown Server'}</span>
-                                        </div>
-                                        {config.isDraft && (
-                                            <>
-                                                <div className="flex items-center gap-1.5 shrink-0">
-                                                    <Calendar className="h-3.5 w-3.5" />
-                                                    <span>{formatDate(config.created_on)}</span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5 shrink-0">
-                                                    <Hash className="h-3.5 w-3.5" />
-                                                    <span>{config.value?.pathRules?.length || 0} rules</span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5 shrink-0">
-                                                    <User className="h-3.5 w-3.5" />
-                                                    <span>{config.created_by}</span>
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
+                        <LinkButton
+                            key={config.id}
+                            href={withSelectedServerQuery(`/server/webservices/nginx/${config.id}`, selectedServerId)}
+                            variant="plain"
+                            alignment="left"
+                            className={cn(rowClassName, index < configurations.length - 1 && 'border-b border-border')}
+                        >
+                            <span className="min-w-0 flex-1 space-y-2">
+                                <span className="flex flex-wrap items-center justify-between gap-2">
+                                    <span className="flex min-w-0 items-center gap-2 break-all font-mono text-sm font-medium leading-tight text-foreground">
+                                        <FileCode className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                        {config.name || config.id || 'Unknown Configuration'}
+                                    </span>
+                                    <Badge variant="secondary" className="shrink-0 text-xs font-normal">
+                                        {config.type.toUpperCase()}
+                                    </Badge>
+                                </span>
+                                <span className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-normal text-muted-foreground">
+                                    <span className="flex min-w-0 items-center gap-1.5">
+                                        <Server className="h-3.5 w-3.5 shrink-0" />
+                                        <span className="break-all">{config.serverName || 'Unknown Server'}</span>
+                                    </span>
+                                    {config.isDraft && (
+                                        <>
+                                            <span className="flex items-center gap-1.5">
+                                                <Calendar className="h-3.5 w-3.5" />
+                                                {formatDate(config.created_on)}
+                                            </span>
+                                            <span className="flex items-center gap-1.5">
+                                                <Hash className="h-3.5 w-3.5" />
+                                                {config.value?.pathRules?.length || 0} rules
+                                            </span>
+                                            <span className="flex min-w-0 items-center gap-1.5">
+                                                <User className="h-3.5 w-3.5 shrink-0" />
+                                                <span className="break-all">{config.created_by}</span>
+                                            </span>
+                                        </>
+                                    )}
+                                </span>
+                            </span>
+                        </LinkButton>
                     ))}
 
                     {configurations.length === 0 && (
