@@ -211,9 +211,9 @@ export default function DomainsBulkPage() {
             Detected domains: <span className="font-medium text-foreground">{parsedDomains.length}</span>
           </p>
           <Button onClick={() => runCheck()} disabled={isChecking || parsedDomains.length === 0 || !domainsHaveChanged}>
-            {isChecking ? <Icon type="animated" from="Search" size={20} label={null} /> : null}
+            {isChecking ? <Icon type="animated" from="Search" size={20} aria-hidden="true" /> : null}
             {!isChecking && !domainsHaveChanged && lastCheckedDomains.length > 0 ? (
-              <Icon type="animated" from="Search" to="Searched" position={2} size={20} label={null} />
+              <Icon type="animated" from="Search" to="Searched" position={2} size={20} aria-hidden="true" />
             ) : null}
             Check WHOIS
           </Button>
@@ -260,7 +260,7 @@ export default function DomainsBulkPage() {
                     <CardTitle className="flex items-center gap-2 text-xl">
                       {domain}
                       {isSearching ? (
-                        <Icon type="animated" from="Search" size={24} label="Searching" />
+                        <Icon type="animated" from="Search" size={24} role="img" aria-label="Searching" />
                       ) : result ? (
                         <Icon
                           type="animated"
@@ -268,7 +268,8 @@ export default function DomainsBulkPage() {
                           to={result.whoisExists ? 'CrossMark' : 'TickMark'}
                           position={animatingDomains.has(domain) ? 0 : 2}
                           size={24}
-                          label={result.whoisExists ? 'Unavailable' : 'Available'}
+                          role="img"
+                          aria-label={result.whoisExists ? 'Unavailable' : 'Available'}
                           onComplete={() => setAnimatingDomains((previous) => {
                             const next = new Set(previous);
                             next.delete(domain);
@@ -295,7 +296,7 @@ export default function DomainsBulkPage() {
                             runCheck([domain]);
                           }}
                         >
-                          {isSearching ? <Icon type="animated" from="Search" size={16} label={null} /> : null}
+                          {isSearching ? <Icon type="animated" from="Search" size={16} aria-hidden="true" /> : null}
                           {isSearching ? 'Searching...' : 'Search'}
                         </Button>
                       )}

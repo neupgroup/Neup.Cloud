@@ -2,7 +2,7 @@
 
 import { getServerForRunner } from '@/services/server/server-service';
 import { runCommandOnServer } from '@/services/server/ssh';
-import type { BackupResult } from '../_types';
+import type { BackupResult } from '@/services/database/engine-types';
 
 /**
  * Generate a backup of a MariaDB database

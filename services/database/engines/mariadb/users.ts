@@ -2,7 +2,7 @@
 
 import { getServerForRunner } from '@/services/server/server-service';
 import { runCommandOnServer } from '@/services/server/ssh';
-import type { DatabaseUser, OperationResult } from '../_types';
+import type { DatabaseUser, OperationResult } from '@/services/database/engine-types';
 
 /**
  * List all users for a MariaDB database

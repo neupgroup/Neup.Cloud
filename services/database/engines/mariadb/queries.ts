@@ -2,7 +2,7 @@
 
 import { getServerForRunner } from '@/services/server/server-service';
 import { runCommandOnServer } from '@/services/server/ssh';
-import type { QueryResult } from '../_types';
+import type { QueryResult } from '@/services/database/engine-types';
 
 /**
  * Execute a query on a MariaDB database

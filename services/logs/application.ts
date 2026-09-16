@@ -1,7 +1,7 @@
 import { sanitizeAppName } from '@/services/core/universal';
 import { executeQuickCommand } from '@/services/saved-commands/saved-commands-service';
 
-export async function getApplicationLogs(serverId: string, appName: string, lines: number = 50) {
+export async function getApplicationLogsForServer(serverId: string, appName: string, lines: number = 50) {
   const sanitizedName = sanitizeAppName(appName);
   const command = `pm2 logs "${sanitizedName}" --lines ${lines} --nostream --raw`;
   const result = await executeQuickCommand(serverId, command);

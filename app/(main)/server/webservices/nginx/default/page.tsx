@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers';
 import { getServer } from '@/services/server/server-service';
 import DefaultNginxConfigClient from './client';
-import { withSelectedServerQuery } from '@/helpers/navigation';
 
 export default async function DefaultNginxConfigPage({
     searchParams,
@@ -12,7 +11,6 @@ export default async function DefaultNginxConfigPage({
     const cookieStore = await cookies();
     const serverId = resolvedSearchParams.selectedServer?.trim() || cookieStore.get('selected_server')?.value;
     let serverName = 'No Server Selected';
-    const backHref = withSelectedServerQuery('/server/webservices/nginx', serverId);
 
     if (serverId) {
         const server = await getServer(serverId);
@@ -25,7 +23,6 @@ export default async function DefaultNginxConfigPage({
         <DefaultNginxConfigClient
             serverId={serverId || ''}
             serverName={serverName}
-            backHref={backHref}
         />
     );
 }

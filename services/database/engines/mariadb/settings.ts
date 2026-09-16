@@ -2,7 +2,7 @@
 
 import { getServerForRunner } from '@/services/server/server-service';
 import { runCommandOnServer } from '@/services/server/ssh';
-import { DatabaseSettings } from '../_types';
+import { DatabaseSettings } from '@/services/database/engine-types';
 
 export async function saveMariaDBSettings(
     serverId: string,

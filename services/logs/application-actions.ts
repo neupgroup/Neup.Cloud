@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers';
 
 import { getApplication } from '@/services/server/applications/_data';
-import { getApplicationLogs as getApplicationLogsForServer } from '@/services/logs/application';
+import { getApplicationLogsForServer } from '@/services/logs/application';
 
 export async function getApplicationLogs(applicationId: string, lines: number = 50) {
   const application = await getApplication(applicationId);

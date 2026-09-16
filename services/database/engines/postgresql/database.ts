@@ -2,7 +2,7 @@
 
 import { getServerForRunner } from '@/services/server/server-service';
 import { runCommandOnServer } from '@/services/server/ssh';
-import type { DatabaseDetails, OperationResult } from '../_types';
+import type { DatabaseDetails, OperationResult } from '@/services/database/engine-types';
 
 /**
  * Get detailed information about a PostgreSQL database

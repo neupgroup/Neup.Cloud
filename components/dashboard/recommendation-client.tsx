@@ -31,9 +31,9 @@ import {
 } from "@neup/components/ui/select";
 import { Input } from "@neup/components/ui/input";
 import { Textarea } from "@neup/components/ui/textarea";
-import { getInfrastructureRecommendations } from "@neup/core/intelligence/flows/infrastructure-recommendations";
+import { getInfrastructureRecommendations } from "@/services/intelligence/infrastructure-recommendations";
 import { Loader2, Zap } from "lucide-react";
-import type { InfrastructureRecommendationsOutput } from "@neup/core/intelligence/flows/infrastructure-recommendations";
+import type { InfrastructureRecommendationsOutput } from "@/services/intelligence/infrastructure-recommendations";
 import Link from "next/link";
 import { Skeleton } from "@neup/components/ui/skeleton";
 
