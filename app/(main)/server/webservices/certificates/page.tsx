@@ -71,7 +71,7 @@ export default function CertificatesPage() {
             >
                 <div className="flex gap-2">
                     <Button asChild>
-                        <Link href={withSelectedServerQuery('/server/webservices/certificates/new', selectedServerId)}>
+                        <Link href={withSelectedServerQuery('/server/webservices/certificatees/new', selectedServerId)}>
                             Create Certificate
                         </Link>
                     </Button>
@@ -99,10 +99,10 @@ export default function CertificatesPage() {
                     <Shield className="h-12 w-12 mb-6 opacity-20" />
                     <h3 className="font-semibold text-lg text-foreground mb-2">No Certificates Found</h3>
                     <p className="text-sm max-w-md mx-auto mb-6">
-                        No SSL certificates were found in /etc/nginx/ssl. Certificates generated via the Nginx Manager will appear here.
+                        No SSL certificates were found in /.neup/certificates/ssl. Create a certificate to get started.
                     </p>
                     <Button asChild>
-                        <a href="/server/webservices/nginx">Go to Nginx Manager</a>
+                        <Link href={withSelectedServerQuery('/server/webservices/certificatees/new', selectedServerId)}>Create Certificate</Link>
                     </Button>
                 </Card>
             ) : (

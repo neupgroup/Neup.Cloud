@@ -4,28 +4,16 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@neup/components/ui/button';
 import { Checkbox } from '@neup/components/ui/checkbox';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@neup/components/ui/dialog';
 import { Input } from '@neup/components/ui/input';
 import { Label } from '@neup/components/ui/label';
 import { Textarea } from '@neup/components/ui/textarea';
 import { useToast } from '@neup/core/hooks/useToast';
-import { ExternalLink, FileCode, Loader2, Plus, Shield, ShieldAlert, Terminal, Trash2 } from 'lucide-react';
+import { ExternalLink, FileCode, Loader2, Shield, ShieldAlert, Terminal, Trash2 } from 'lucide-react';
 import { generateSslCertificate, getWildcardCertificateSession } from '@/services/webservices/nginx/service';
 
-interface CreateCertificateDialogProps {
+interface CreateCertificateFormProps {
     serverId: string | null;
     onSuccess: () => void;
-    defaultOpen?: boolean;
-    hideTrigger?: boolean;
-    onOpenChange?: (open: boolean) => void;
 }
 
 interface WildcardTerminalSession {
@@ -58,15 +46,11 @@ function buildLiveTerminalHref(serverId: string, sessionId: string) {
     return `/server/commands/live?${params.toString()}`;
 }
 
-export function CreateCertificateDialog({
+export function CreateCertificateForm({
     serverId: serverIdFromProps,
     onSuccess,
-    defaultOpen = false,
-    hideTrigger = false,
-    onOpenChange,
-}: CreateCertificateDialogProps) {
+}: CreateCertificateFormProps) {
     const { toast } = useToast();
-    const [open, setOpen] = useState(defaultOpen);
     const [mainDomain, setMainDomain] = useState('');
     const [subdomains, setSubdomains] = useState('');
     const [includeWildcard, setIncludeWildcard] = useState(false);
@@ -90,10 +74,6 @@ export function CreateCertificateDialog({
             setFallbackServerId(parts.pop()?.split(';').shift() || null);
         }
     }, [serverIdFromProps]);
-
-    useEffect(() => {
-        setOpen(defaultOpen);
-    }, [defaultOpen]);
 
     const persistSession = (session: WildcardTerminalSession) => {
         if (!serverId) {
@@ -134,7 +114,7 @@ export function CreateCertificateDialog({
     };
 
     useEffect(() => {
-        if (!open || !serverId) {
+        if (!serverId) {
             return;
         }
 
@@ -160,7 +140,7 @@ export function CreateCertificateDialog({
             sessionStorage.removeItem(latestStorageKey);
             sessionStorage.removeItem(latestKey);
         }
-    }, [open, serverId]);
+    }, [serverId]);
 
     const resetForm = () => {
         setMainDomain('');
@@ -256,7 +236,6 @@ export function CreateCertificateDialog({
                 title: 'Success',
                 description: result.message,
             });
-            setOpen(false);
             resetForm();
             onSuccess();
         } catch (error: any) {
@@ -323,32 +302,7 @@ export function CreateCertificateDialog({
     };
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={(value) => {
-                setOpen(value);
-                onOpenChange?.(value);
-                if (!value) {
-                    resetForm();
-                }
-            }}
-        >
-            {!hideTrigger ? (
-                <DialogTrigger asChild>
-                    <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create Certificate
-                    </Button>
-                </DialogTrigger>
-            ) : null}
-            <DialogContent className="sm:max-w-xl">
-                <DialogHeader>
-                    <DialogTitle>Create SSL Certificate</DialogTitle>
-                    <DialogDescription>
-                        Generate a new Let's Encrypt SSL certificate.
-                    </DialogDescription>
-                </DialogHeader>
-
+        <section className="rounded-xl border bg-card p-6 sm:p-8" aria-label="Certificate details">
                 {step === 'input' && (
                     <div className="space-y-4 py-4">
                         {savedSession && (
@@ -509,7 +463,7 @@ export function CreateCertificateDialog({
                     </div>
                 )}
 
-                <DialogFooter>
+                <div className="flex justify-end border-t pt-6">
                     {step === 'input' ? (
                         <Button onClick={() => handleGenerate('init')} disabled={generating}>
                             {generating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -539,8 +493,7 @@ export function CreateCertificateDialog({
                             </Button>
                         </div>
                     )}
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                </div>
+        </section>
     );
 }

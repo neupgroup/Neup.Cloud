@@ -10,7 +10,6 @@ import {
     generateNginxConfigFromContext,
     deployNginxConfig,
     deleteNginxConfig,
-    generateSslCertificate,
 } from '@/services/webservices/nginx/service';
 import { getCertificates } from '@/services/webservices/certificates-service';
 import { getWebOrServerNginxConfig } from '@/services/webservices/service';
@@ -176,7 +175,6 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
     const [selectedDomainName, setSelectedDomainName] = useState<string>('');
     const [domainMode, setDomainMode] = useState<DomainMode>('domain');
     const [domainBlocks, setDomainBlocks] = useState<DomainBlock[]>([]);
-    const [generatingCert, setGeneratingCert] = useState<string | null>(null); // Stores blockId being generated
     const [domainRedirects, setDomainRedirects] = useState<DomainRedirect[]>([]);
     const [generatedConfig, setGeneratedConfig] = useState<string>('');
     const [showPreview, setShowPreview] = useState(false);
@@ -184,7 +182,6 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
     const [deploying, setDeploying] = useState(false);
     const [expandedRuleId, setExpandedRuleId] = useState<string | null>(null);
     const [expandedBlockId, setExpandedBlockId] = useState<string | null>(null);
-    const [dnsValidations, setDnsValidations] = useState<Record<string, { challenge: string, dnsRecord: string }>>({});
 
     // Certificate List State
     const [availableCertificates, setAvailableCertificates] = useState<any[]>([]);
@@ -1019,133 +1016,6 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
         }
     };
 
-    const handleGenerateCertificate = async (blockId: string) => {
-        const block = domainBlocks.find(b => b.id === blockId);
-        if (!selectedServerId || !block || !block.domainName) {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Please select a server and domain first.',
-            });
-            return;
-        }
-
-        if (!configName) {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Please enter a Configuration Name in Step 1 before generating a certificate.',
-            });
-            return;
-        }
-
-        if (isReservedConfigName) {
-            toast({
-                variant: 'destructive',
-                title: 'Invalid Name',
-                description: 'Configuration name "new" is reserved. Please choose a different name.',
-            });
-            return;
-        }
-
-        let domainsForCert: string[] = [];
-
-        if (block.subdomain === '@') {
-            // Root domain: include base and wildcard as per user preference
-            domainsForCert = [block.domainName, `*.${block.domainName}`];
-        } else if (block.subdomain === '#') {
-            // Catch-all wildcard
-            domainsForCert = [`*.${block.domainName}`];
-        } else if (block.subdomain) {
-            // Specific subdomain
-            domainsForCert = [`${block.subdomain}.${block.domainName}`];
-        } else {
-            // Fallback (should be root)
-            domainsForCert = [block.domainName];
-        }
-
-        const pendingValidation = dnsValidations[blockId];
-        const step = pendingValidation ? 'finalize-dns' : 'init';
-
-        setGeneratingCert(blockId);
-        try {
-            // TypeScript workaround if generateSslCertificate signature update isn't picked up immediately by IDE context
-            // @ts-ignore
-            const result = await generateSslCertificate(
-                selectedServerId,
-                domainsForCert,
-                configName,
-                step
-            );
-
-            if (result.success) {
-                if (result.actionRequired === 'dns-verification') {
-                    // DNS Step 1 Successful
-                    setDnsValidations(prev => ({
-                        ...prev,
-                        [blockId]: {
-                            challenge: result.challenge,
-                            dnsRecord: result.dnsRecord
-                        }
-                    }));
-                    toast({
-                        title: 'DNS Verification Required',
-                        description: result.message,
-                    });
-                    setExpandedBlockId(blockId);
-                } else {
-                    // Final Success
-                    toast({
-                        title: 'Certificate Success',
-                        description: result.message,
-                    });
-                    setDomainBlocks(prevBlocks => prevBlocks.map(currentBlock =>
-                        currentBlock.id === blockId
-                            ? {
-                                ...currentBlock,
-                                sslEnabled: true,
-                                httpsRedirection: true,
-                                sslCertificateFile: expectedCertificateFileName,
-                            }
-                            : currentBlock
-                    ));
-                    setGeneratedConfig('');
-                    setShowPreview(false);
-
-                    try {
-                        const certs = await getCertificates(selectedServerId);
-                        setAvailableCertificates(certs);
-                    } catch (error) {
-                        console.error("Failed to refresh certs", error);
-                    }
-
-                    // Clear pending validation
-                    if (pendingValidation) {
-                        setDnsValidations(prev => {
-                            const next = { ...prev };
-                            delete next[blockId];
-                            return next;
-                        });
-                    }
-                }
-            } else {
-                toast({
-                    variant: 'destructive',
-                    title: 'Certificate Error',
-                    description: result.error,
-                });
-            }
-        } catch (error: any) {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: error.message || 'Failed to generate certificate.',
-            });
-        } finally {
-            setGeneratingCert(null);
-        }
-    };
-
     const handleDelete = async () => {
         if (!confirm('Are you sure you want to delete this configuration? This action cannot be undone.')) {
             return;
@@ -1249,7 +1119,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                     variant: 'destructive',
                     title: 'Deployment Failed',
                     description: isSslError
-                        ? 'SSL Certificate missing! Please click the "Generate/Update SSL Certificate" button in Step 2 before deploying.'
+                        ? 'SSL certificate missing. Create it on the certificate creation page, then return here before deploying.'
                         : (result.error || 'Failed to deploy configuration.'),
                 });
             }
@@ -1694,7 +1564,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <Link href="/server/webservices/certificates" target="_blank">
+                                                            <Link href={withSelectedServerQuery(block.sslCertificateFile === expectedCertificateFileName ? "/server/webservices/certificates" : "/server/webservices/certificatees/new", selectedServerId)} target="_blank">
                                                                 <Button
                                                                     variant={block.sslCertificateFile === expectedCertificateFileName ? "outline" : "default"}
                                                                     size="sm"
