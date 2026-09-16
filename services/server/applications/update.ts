@@ -1,13 +1,13 @@
 import { prisma } from '@neup/core/database/prisma';
 
-import type { Application, UpdateApplicationData } from './_types';
+import type { Application, ApplicationInformation, UpdateApplicationData } from './_types';
 import { checkName, mapApplication, toJsonField } from './_utils';
 
 export async function updateApplication(id: string, data: UpdateApplicationData): Promise<Application> {
   const existing = await prisma.application.findUnique({ where: { id } });
   if (!existing) throw new Error('Application not found');
 
-  const mergedInformation =
+  const mergedInformation: ApplicationInformation | undefined =
     data.information === undefined
       ? undefined
       : {

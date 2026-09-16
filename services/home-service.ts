@@ -17,14 +17,7 @@ export async function getRecentActivity(serverId?: string): Promise<ActivityLog[
   try {
     const logs = await getRecentServerLogs(serverId);
 
-    return logs.map((log: {
-      id: string;
-      command: string;
-      commandName: string | null;
-      status: string;
-      runAt: Date;
-      serverId: string;
-    }) => ({
+    return logs.map((log) => ({
       id: log.id,
       command: log.command,
       commandName: log.commandName ?? undefined,

@@ -43,7 +43,7 @@ export async function saveWebServiceConfig(
   name?: string
 ): Promise<{ success: boolean; id?: string; message?: string }> {
   try {
-    const config = await createWebService({
+    return await createWebService({
       type,
       value,
       createdBy,
@@ -51,15 +51,6 @@ export async function saveWebServiceConfig(
       serverName,
       name,
     });
-
-    revalidatePath('/server/webservices');
-    revalidatePath('/server/webservices/nginx');
-
-    return {
-      success: true,
-      id: config.id,
-      message: 'Configuration saved successfully',
-    };
   } catch (error: any) {
     console.error('Error saving web service config:', error);
     return {

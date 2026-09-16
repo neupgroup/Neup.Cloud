@@ -10,7 +10,7 @@ export async function createWebService(data: {
   value: any;
   serverId?: string;
   serverName?: string;
-}) {
+}): Promise<never> {
   throw new Error(WEB_SERVICE_DB_REMOVED_ERROR);
 }
 

@@ -8,5 +8,7 @@ export type Server = {
   publicIp: string;
   privateIp: string;
   publicKey?: string | null;
+  proxyHandler?: string | null;
+  loadBalancer?: string | null;
   moreDetails?: string | null;
 };
