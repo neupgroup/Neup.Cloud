@@ -32,7 +32,6 @@ export const getCommands = (context: CommandContext): CommandDefinition[] => {
             status: 'published',
             type: 'normal',
             command: {
-                preCommand: null,
                 mainCommand: `cd ${context.appLocation} && 
                 if [ -f requirements.txt ]; then 
                     pip3 install -r requirements.txt; 

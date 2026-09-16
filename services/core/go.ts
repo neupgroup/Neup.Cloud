@@ -44,7 +44,6 @@ export const getCommands = (context: CommandContext): CommandDefinition[] => {
                     status: 'published' as const,
                     type: 'normal' as const,
                     command: {
-                        preCommand: null,
                         mainCommand: `cd ${context.appLocation} && 
                 go mod tidy && 
                 go build -o ${binaryName} ${entryFile}`
