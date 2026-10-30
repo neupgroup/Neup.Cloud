@@ -443,10 +443,11 @@ export default function RootLayout({
 
             <div className="mx-auto grid w-full max-w-[1440px] lg:grid-cols-[260px_minmax(0,1fr)]">
               <div className="hidden lg:block">
-                <SidebarProvider>
+                <SidebarProvider className="h-[calc(100vh-4rem)] min-h-0 w-full">
                   <Sidebar
                     collapsible="none"
-                    className="h-[calc(100vh-4rem)] w-[260px] border-r bg-primary-1000 lg:sticky lg:top-16"
+                    className="fixed top-16 z-20 h-[calc(100vh-4rem)] w-[260px] border-r bg-primary-1000"
+                    style={{ left: 'max(0px, calc((100vw - 1440px) / 2))' }}
                   >
                     <ScrollArea className="flex-1">
                       <div className="p-6">
