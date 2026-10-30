@@ -37,6 +37,11 @@ export default {
           900: 'rgb(from var(--primary-900) r g b / <alpha-value>)',
           950: 'rgb(from var(--primary-950) r g b / <alpha-value>)',
           1000: 'rgb(from var(--primary-1000) r g b / <alpha-value>)',
+          hover: 'var(--primary-hover)',
+          press: 'var(--primary-press)',
+          active: 'var(--primary-active)',
+          'active-hover': 'var(--primary-active-hover)',
+          'active-press': 'var(--primary-active-press)',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary) / <alpha-value>)',
@@ -49,6 +54,13 @@ export default {
         accent: {
           DEFAULT: 'rgb(from var(--accent) r g b / <alpha-value>)',
           foreground: 'rgb(from var(--accent-foreground) r g b / <alpha-value>)',
+        },
+        interaction: {
+          hover: 'var(--interaction-hover)',
+          press: 'var(--interaction-press)',
+          active: 'var(--interaction-active)',
+          'active-hover': 'var(--interaction-active-hover)',
+          'active-press': 'var(--interaction-active-press)',
         },
         destructive: {
           DEFAULT: 'rgb(from var(--destructive) r g b / <alpha-value>)',

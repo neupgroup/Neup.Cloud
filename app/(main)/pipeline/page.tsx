@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import {
   Activity,
   ArrowRight,
@@ -19,7 +18,7 @@ import {
 
 import { Logo } from '@/components/logo';
 import { Badge } from '@neup/components/ui/badge';
-import { Button } from '@neup/components/ui/button';
+import { LinkButton } from '@neup/components/ui/link-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@neup/components/ui/card';
 
 export const metadata: Metadata = {
@@ -115,15 +114,13 @@ export default function PipelinePage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button asChild variant="outlined" className="rounded-full border-slate-200 bg-white/90">
-              <Link href="/home">Dashboard</Link>
-            </Button>
-            <Button asChild className="rounded-full px-5">
-              <Link href="/pipeline/editor">
-                Open editor
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <LinkButton href="/home" variant="outlined" className="rounded-full border-slate-200 bg-white/90">
+              Dashboard
+            </LinkButton>
+            <LinkButton href="/pipeline/editor" className="rounded-full px-5">
+              Open editor
+              <ArrowRight className="h-4 w-4" />
+            </LinkButton>
           </div>
         </header>
 
@@ -144,15 +141,13 @@ export default function PipelinePage() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Button asChild size="lg" className="rounded-full px-6">
-                  <Link href="/pipeline/editor">
-                    Launch canvas
-                    <Play className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outlined" className="rounded-full border-slate-200 bg-white">
-                  <Link href="/home">Return home</Link>
-                </Button>
+                <LinkButton href="/pipeline/editor" size="lg" className="rounded-full px-6">
+                  Launch canvas
+                  <Play className="h-4 w-4" />
+                </LinkButton>
+                <LinkButton href="/home" size="lg" variant="outlined" className="rounded-full border-slate-200 bg-white">
+                  Return home
+                </LinkButton>
               </div>
 
               <div className="grid gap-3 md:grid-cols-3">
@@ -258,9 +253,9 @@ export default function PipelinePage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <Button asChild variant="outlined" className="w-full rounded-full border-slate-200 bg-white">
-                    <Link href="/pipeline/editor">Use inside editor</Link>
-                  </Button>
+                  <LinkButton href="/pipeline/editor" variant="outlined" className="w-full rounded-full border-slate-200 bg-white">
+                    Use inside editor
+                  </LinkButton>
                 </CardContent>
               </Card>
             );
@@ -293,9 +288,9 @@ export default function PipelinePage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <Button asChild variant="outlined" className="w-full rounded-full border-slate-200 bg-white">
-                      <Link href={connection.href}>Open setup page</Link>
-                    </Button>
+                    <LinkButton href={connection.href} variant="outlined" className="w-full rounded-full border-slate-200 bg-white">
+                      Open setup page
+                    </LinkButton>
                   </CardContent>
                 </Card>
               );
