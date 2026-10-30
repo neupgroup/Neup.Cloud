@@ -121,7 +121,7 @@ export function PipelineSidebar({
                 </div>
 
                 {libraryMode === 'child' ? (
-                  <div className="rounded-[1.4rem] border border-primary/15 bg-primary/5 px-4 py-3 text-sm text-slate-700">
+                  <div className="rounded-[1.4rem] border border-primary-950/15 bg-primary/5 px-4 py-3 text-sm text-slate-700">
                     Adding a child after <span className="font-semibold">{parentNodeLabel ?? 'selected node'}</span>.
                   </div>
                 ) : null}

@@ -96,7 +96,7 @@ export default function IntelligencePage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {intelligenceCards.map(({ title, description, icon: Icon, href }) => (
           <Link key={title} href={href} className="block h-full">
-            <Card className="h-full transition-colors hover:border-primary/40 hover:bg-primary/5">
+            <Card className="h-full transition-colors hover:border-primary-900/40 hover:bg-primary/5">
               <CardHeader>
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />

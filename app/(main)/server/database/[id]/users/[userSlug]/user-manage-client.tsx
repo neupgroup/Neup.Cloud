@@ -214,7 +214,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
 
             <div className="max-w-2xl space-y-6">
                 {/* Connection Info */}
-                <Card className="border-2 border-primary/5">
+                <Card className="border-2 border-primary-950/5">
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Key className="h-5 w-5 text-primary" />
@@ -237,7 +237,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                 </Card>
 
                 {/* Change Password */}
-                <Card className="border-2 border-primary/5">
+                <Card className="border-2 border-primary-950/5">
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Lock className="h-5 w-5 text-primary" />
@@ -280,7 +280,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                 </Card>
 
                 {/* Permissions */}
-                <Card className="border-2 border-primary/5">
+                <Card className="border-2 border-primary-950/5">
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
                             <ShieldCheck className="h-5 w-5 text-primary" />
@@ -365,7 +365,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                 </Card>
 
                 {/* Remove Database Access */}
-                <Card className="border-2 border-primary/5">
+                <Card className="border-2 border-primary-950/5">
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
                             <ShieldX className="h-5 w-5 text-primary" />
@@ -385,7 +385,7 @@ export function UserManageClient({ serverId, engine, dbName, username, host, ini
                 </Card>
 
                 {engine === 'postgres' && (
-                    <Card className="border-2 border-primary/5">
+                    <Card className="border-2 border-primary-950/5">
                         <CardHeader>
                             <CardTitle className="text-lg flex items-center gap-2">
                                 <ArrowRightLeft className="h-5 w-5 text-primary" />

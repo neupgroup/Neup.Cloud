@@ -122,7 +122,7 @@ export default function Home() {
           <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
             {filteredServers.map((server) => (
               <div key={server.id} onClick={() => openServer(server.id)}>
-                <Card className="cursor-pointer transition-all hover:border-primary">
+                <Card className="cursor-pointer transition-all hover:border-primary-900">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
                     <CardTitle className="truncate text-sm font-medium">{server.name}</CardTitle>
                     <Server className="h-4 w-4 text-muted-foreground" />
@@ -136,7 +136,7 @@ export default function Home() {
             ))}
             <Card
               onClick={() => router.push('/servers/add')}
-              className="flex cursor-pointer flex-col items-center justify-center border-dashed p-4 transition-all hover:border-primary"
+              className="flex cursor-pointer flex-col items-center justify-center border-dashed p-4 transition-all hover:border-primary-900"
             >
               <Plus className="mb-1 h-6 w-6 text-muted-foreground" />
               <span className="text-xs font-bold text-muted-foreground">Add New</span>

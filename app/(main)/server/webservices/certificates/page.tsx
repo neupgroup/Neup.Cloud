@@ -113,7 +113,7 @@ export default function CertificatesPage() {
 
                         return (
                             <Link href={withSelectedServerQuery(`/server/webservices/certificates/${encodeURIComponent(cert.fileName)}`, selectedServerId)} key={cert.fileName}>
-                                <Card className="overflow-hidden hover:border-primary/50 transition-colors cursor-pointer group">
+                                <Card className="overflow-hidden hover:border-primary-900/50 transition-colors cursor-pointer group">
                                     <div className="p-6 space-y-4">
                                         <div className="flex items-start justify-between">
                                             <div className="space-y-1">

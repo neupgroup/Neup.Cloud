@@ -44,7 +44,7 @@ export default async function IntelligenceBillingPage() {
         description="A placeholder area for billing-focused insights, summaries, and future financial intelligence."
       />
 
-      <Card className="border-primary/15 bg-gradient-to-br from-primary/5 via-background to-background">
+      <Card className="border-primary-950/15 bg-gradient-to-br from-primary/5 via-background to-background">
         <CardHeader className="space-y-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <ReceiptText className="h-6 w-6" />

@@ -1084,7 +1084,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
         ) : (
           <div className={viewMode === 'grid' ? 'grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-20' : 'grid grid-cols-1 gap-4 pb-20'}>
             {newItemState && (
-              <Card className="cursor-pointer transition-all hover:border-primary group relative border-primary/20 bg-accent/20">
+              <Card className="cursor-pointer transition-all hover:border-primary-900 group relative border-primary-950/20 bg-accent/20">
                 <CardContent className={viewMode === 'grid' ? 'p-4 flex flex-col items-start gap-3' : 'p-3 flex flex-row items-center gap-3'}>
                   {viewMode === 'grid' ? (
                     <>
@@ -1162,7 +1162,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
             )}
 
             {uploadQueue.map((item, index) => (
-              <Card key={`upload-${index}`} className="relative overflow-hidden border-primary/20 bg-accent/20">
+              <Card key={`upload-${index}`} className="relative overflow-hidden border-primary-950/20 bg-accent/20">
                 <CardContent className="p-4 flex flex-col gap-3">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-background rounded-md border shadow-sm">
@@ -1187,9 +1187,9 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
                   key={index}
                   onClick={(e) => !isDeleting && handleItemClick(e, item)}
                   onContextMenu={(e) => !isDeleting && onContextMenu(e, item)}
-                  className={`cursor-pointer transition-all hover:border-primary group relative
-                            ${item.type === 'directory' ? 'border-primary/20' : ''}
-                            ${isSelected ? 'ring-2 ring-primary border-transparent' : ''}
+                  className={`cursor-pointer transition-all hover:border-primary-900 group relative
+                            ${item.type === 'directory' ? 'border-primary-950/20' : ''}
+                            ${isSelected ? 'ring-2 ring-primary-950 border-transparent' : ''}
                             ${isDeleting ? 'opacity-60 bg-muted/20' : ''}
                         `}
                 >
@@ -1263,7 +1263,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
               <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl justify-center items-center h-full">
                 <Button
                   variant="outlined"
-                  className="h-40 w-40 flex flex-col gap-4 border-2 hover:border-primary/50 hover:bg-accent transition-all rounded-xl"
+                  className="h-40 w-40 flex flex-col gap-4 border-2 hover:border-primary-900/50 hover:bg-accent transition-all rounded-xl"
                   onClick={() => setUploadType('file')}
                 >
                   <FileIcon className="h-10 w-10 text-muted-foreground" />
@@ -1272,7 +1272,7 @@ function ServerFilesBrowser({ serverId }: { serverId: string }) {
                 <div className="text-muted-foreground font-medium">- OR -</div>
                 <Button
                   variant="outlined"
-                  className="h-40 w-40 flex flex-col gap-4 border-2 hover:border-primary/50 hover:bg-accent transition-all rounded-xl"
+                  className="h-40 w-40 flex flex-col gap-4 border-2 hover:border-primary-900/50 hover:bg-accent transition-all rounded-xl"
                   onClick={() => setUploadType('folder')}
                 >
                   <FolderUp className="h-10 w-10 text-muted-foreground" />

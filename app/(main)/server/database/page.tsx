@@ -72,7 +72,7 @@ export default async function DatabasePage({
                 <>
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <Card className="bg-primary/5 border-primary/10">
+                        <Card className="bg-primary/5 border-primary-950/10">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Databases</CardTitle>
                             </CardHeader>
@@ -136,7 +136,7 @@ export default async function DatabasePage({
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-bold text-lg">Create New Database</span>
-                                                    <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20">NEW</Badge>
+                                                    <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary-950/20">NEW</Badge>
                                                 </div>
                                                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
                                                     <span className="flex items-center gap-1.5 shrink-0">

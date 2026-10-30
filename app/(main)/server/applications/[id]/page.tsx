@@ -71,7 +71,7 @@ export default async function ApplicationDetailPage({
             serverName={serverName}
             backHref={withSelectedServerQuery('/server/applications', resolvedSearchParams.selectedServer)}
           >
-            <Badge variant="outline" className="text-sm py-1 px-3 border-primary/20 bg-primary/5">run.custom</Badge>
+            <Badge variant="outline" className="text-sm py-1 px-3 border-primary-950/20 bg-primary/5">run.custom</Badge>
           </PageTitleBack>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
@@ -127,7 +127,7 @@ export default async function ApplicationDetailPage({
           serverName={serverName}
           backHref={withSelectedServerQuery('/server/applications', resolvedSearchParams.selectedServer)}
         >
-          <Badge variant="outline" className="text-sm py-1 px-3 border-primary/20 bg-primary/5">{appLanguage}</Badge>
+          <Badge variant="outline" className="text-sm py-1 px-3 border-primary-950/20 bg-primary/5">{appLanguage}</Badge>
         </PageTitleBack>
         {!serverName && null}
       </div>

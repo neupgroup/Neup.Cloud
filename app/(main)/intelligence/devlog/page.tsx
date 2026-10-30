@@ -59,7 +59,7 @@ export default async function IntelligenceDevlogPage({
         description="Full request and error audit trail for intelligence requests when dev mode is enabled."
       />
 
-      <Card className="border-primary/15 bg-gradient-to-br from-primary/5 via-background to-background">
+      <Card className="border-primary-950/15 bg-gradient-to-br from-primary/5 via-background to-background">
         <CardHeader>
           <CardTitle className="font-headline">Audit feed</CardTitle>
           <CardDescription>
@@ -73,7 +73,7 @@ export default async function IntelligenceDevlogPage({
             <Accordion type="single" collapsible className="w-full space-y-4">
               {logs.map((log) => (
                 <AccordionItem key={log.id} value={String(log.id)} className="border-0">
-                  <Card className="overflow-hidden border border-border/70 bg-card py-2 transition-colors duration-200 hover:border-primary/30">
+                  <Card className="overflow-hidden border border-border/70 bg-card py-2 transition-colors duration-200 hover:border-primary-900/30">
                     <AccordionTrigger className="px-5 py-4 hover:no-underline">
                       <div className="grid w-full gap-3 text-left">
                         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">

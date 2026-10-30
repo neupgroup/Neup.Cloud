@@ -47,6 +47,11 @@ import { cn } from '@neup/core/utils';
 import { Button } from '@neup/components/ui/button';
 import { useState, useEffect, Suspense } from 'react';
 import { ScrollArea } from '@neup/components/ui/scroll-area';
+import { NavLink as SharedNavLink } from '@neup/components/ui/nav-link';
+import {
+  Sidebar,
+  SidebarProvider,
+} from '@neup/components/ui/sidebar';
 import { Logo } from '@/components/logo';
 import { Userbar } from '@neup/components/element/userbar';
 import { ProgressBar } from '@/components/progress-bar';
@@ -98,19 +103,20 @@ function NavLink({
     }
   };
 
+  const linkProps = {
+    href: nextHref,
+    target: external ? '_blank' : undefined,
+    rel: external ? 'noopener noreferrer' : undefined,
+    onClick: handleClick,
+  } as React.ComponentProps<typeof SharedNavLink>;
+
   return (
-    <Link
-      href={nextHref}
-      target={external ? '_blank' : undefined}
-      rel={external ? 'noopener noreferrer' : undefined}
-      onClick={handleClick}
-      className={cn(
-        'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold hover:bg-muted hover:text-primary',
-        isActive && 'bg-muted text-primary'
-      )}
-    >
-      {children}
-    </Link>
+    <SharedNavLink
+      {...linkProps}
+      active={isActive}
+      variant="plain"
+      className="h-auto min-h-9 w-full gap-2 rounded-md px-3 py-2 text-sm font-semibold"
+    >{children}</SharedNavLink>
   );
 }
 
@@ -311,7 +317,7 @@ function Header({
   const neupId = accountProfile.neupid?.replace(/^@/, '') ?? '';
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center border-b bg-background shadow-[0_16px_40px_rgba(15,23,42,0.10)]">
+    <header className="sticky top-0 z-40 flex h-16 items-center border-b bg-primary-1000 shadow-[0_16px_40px_rgba(15,23,42,0.10)]">
       <div className="mx-auto flex w-full max-w-[1440px] items-center px-4 sm:px-6 md:px-8">
         <div className="flex items-center gap-4 lg:hidden">
           <Button variant="plain" size="icon" onClick={toggleMobileMenu}>
@@ -327,7 +333,7 @@ function Header({
           </div>
         </div>
         <div className="ml-auto">
-          <Link href="/profile" className="block rounded-md px-2.5 hover:bg-muted">
+          <Link href="/profile" className="block">
             <Userbar
               displayName={displayName}
               displayImage={accountProfile.displayImage}
@@ -425,7 +431,7 @@ export default function RootLayout({
             />
 
             <div className={cn(
-              "fixed top-16 left-0 right-0 bottom-0 z-30 bg-background/95 backdrop-blur-sm transition-all duration-300 ease-in-out lg:hidden",
+              "fixed top-16 left-0 right-0 bottom-0 z-30 bg-primary-1000 backdrop-blur-sm transition-all duration-300 ease-in-out lg:hidden",
               isMobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
             )}>
               <ScrollArea className="h-full">
@@ -436,13 +442,20 @@ export default function RootLayout({
             </div>
 
             <div className="mx-auto grid w-full max-w-[1440px] lg:grid-cols-[260px_minmax(0,1fr)]">
-              <aside className="hidden h-[calc(100vh-4rem)] flex-col border-r bg-background lg:sticky lg:top-16 lg:flex">
-                <ScrollArea className="flex-1">
-                  <div className="p-6">
-                    <MainNavContent currentPath={pathname} isServerSelected={isServerSelected} selectedServerId={selectedServerId} />
-                  </div>
-                </ScrollArea>
-              </aside>
+              <div className="hidden lg:block">
+                <SidebarProvider>
+                  <Sidebar
+                    collapsible="none"
+                    className="h-[calc(100vh-4rem)] w-[260px] border-r bg-primary-1000 lg:sticky lg:top-16"
+                  >
+                    <ScrollArea className="flex-1">
+                      <div className="p-6">
+                        <MainNavContent currentPath={pathname} isServerSelected={isServerSelected} selectedServerId={selectedServerId} />
+                      </div>
+                    </ScrollArea>
+                  </Sidebar>
+                </SidebarProvider>
+              </div>
 
               <main className="min-h-[calc(100vh-4rem)] min-w-0 p-6 md:p-10">
                 <div className="min-w-0 w-full">{children}</div>

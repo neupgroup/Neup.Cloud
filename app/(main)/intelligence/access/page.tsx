@@ -35,7 +35,7 @@ export default async function IntelligenceAccessPage() {
         description="Manage access IDs, type configuration, and token balances for your signed-in account."
       />
 
-      <Card className="border-primary/15 bg-gradient-to-br from-primary/5 via-background to-background">
+      <Card className="border-primary-950/15 bg-gradient-to-br from-primary/5 via-background to-background">
         <CardHeader className="space-y-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <KeyRound className="h-6 w-6" />

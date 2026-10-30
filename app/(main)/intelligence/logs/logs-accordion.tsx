@@ -36,7 +36,7 @@ export default function LogsAccordion({ logs }: { logs: LogViewModel[] }) {
     <Accordion type="single" collapsible className="w-full space-y-4">
       {logs.map((log) => (
         <AccordionItem key={log.id} value={String(log.id)} className="border-0">
-          <Card className="overflow-hidden border border-border/70 bg-card py-2 transition-colors duration-200 hover:border-primary/30">
+          <Card className="overflow-hidden border border-border/70 bg-card py-2 transition-colors duration-200 hover:border-primary-900/30">
             <AccordionTrigger className="px-5 py-4 hover:no-underline">
               <div className="grid w-full gap-4 text-left">
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">

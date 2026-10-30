@@ -100,7 +100,7 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
     };
 
     return (
-        <Card className="border-2 border-primary/5">
+        <Card className="border-2 border-primary-950/5">
             <CardHeader className="bg-muted/10">
                 <CardTitle className="flex items-center gap-2 text-lg font-bold">
                     <UserPlus className="h-5 w-5 text-primary" />
@@ -209,7 +209,7 @@ export function UserCreateForm({ serverId, engine, dbName, onSuccess }: UserCrea
                         </div>
                     </div>
 
-                    <div className="p-3 bg-primary/5 rounded-lg border border-primary/10 flex items-start gap-2 text-xs text-muted-foreground">
+                    <div className="p-3 bg-primary/5 rounded-lg border border-primary-950/10 flex items-start gap-2 text-xs text-muted-foreground">
                         <ShieldCheck className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
                         <div>
                             <p className="font-semibold text-foreground mb-1">Security Best Practice</p>

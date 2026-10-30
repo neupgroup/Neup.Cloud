@@ -115,13 +115,13 @@ export function BackupClientPage({ serverId, engine, dbName, databaseSize }: Bac
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="border-2 border-primary/5 hover:border-primary/10 transition-all overflow-hidden">
+                <Card className="border-2 border-primary-950/5 hover:border-primary-900/10 transition-all overflow-hidden">
                     <CardHeader className="bg-primary/5">
                         <div className="flex items-center justify-between mb-2">
                             <div className="p-2 bg-primary/10 rounded-lg">
                                 <Database className="h-6 w-6 text-primary" />
                             </div>
-                            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">SQL DUMP</Badge>
+                            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary-950/20">SQL DUMP</Badge>
                         </div>
                         <CardTitle className="text-xl">Full Database Export</CardTitle>
                         <CardDescription>Includes all tables, schemas, and data rows.</CardDescription>
@@ -165,7 +165,7 @@ export function BackupClientPage({ serverId, engine, dbName, databaseSize }: Bac
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-primary/5 hover:border-primary/10 transition-all overflow-hidden">
+                <Card className="border-2 border-primary-950/5 hover:border-primary-900/10 transition-all overflow-hidden">
                     <CardHeader className="bg-muted/30">
                         <div className="flex items-center justify-between mb-2">
                             <div className="p-2 bg-muted rounded-lg text-muted-foreground">
@@ -227,7 +227,7 @@ export function BackupClientPage({ serverId, engine, dbName, databaseSize }: Bac
                 </div>
 
                 <div className="space-y-4">
-                    <Card className="border-2 border-primary/5 bg-primary/5">
+                    <Card className="border-2 border-primary-950/5 bg-primary/5">
                         <CardContent className="pt-6 flex gap-4">
                             <div className="p-3 bg-primary/10 rounded-full h-fit">
                                 <ShieldCheck className="h-6 w-6 text-primary" />

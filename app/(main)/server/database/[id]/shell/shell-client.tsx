@@ -122,7 +122,7 @@ export function ShellClient({ id, dbName, engine, serverId }: ShellClientProps) 
                         <div className="flex flex-col">
                             <div className="flex items-center gap-2">
                                 <span className="font-bold tracking-tight">SQL Shell</span>
-                                <Badge variant="outline" className="text-[10px] uppercase bg-primary/5 text-primary border-primary/20">
+                                <Badge variant="outline" className="text-[10px] uppercase bg-primary/5 text-primary border-primary-950/20">
                                     {engine}
                                 </Badge>
                             </div>

@@ -102,7 +102,7 @@ export default async function PipelineInstancePage({
             const stats = getFlowStats(pipeline.flowJson);
 
             return (
-              <Card key={pipeline.id} className="transition-colors hover:border-primary/40 hover:bg-primary/5">
+              <Card key={pipeline.id} className="transition-colors hover:border-primary-900/40 hover:bg-primary/5">
                 <CardContent className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0 flex-1 space-y-2">
                       <div className="flex items-start justify-between gap-4">

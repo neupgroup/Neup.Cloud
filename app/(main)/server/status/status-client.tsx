@@ -531,21 +531,21 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                         <CardContent className="h-[250px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={loadingChartData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                                     <Tooltip content={<CustomTooltip unit="%" />} />
                                     <Area
                                         type="monotone"
                                         dataKey="usage"
                                         name="CPU"
                                         strokeWidth={2}
-                                        stroke="hsl(var(--muted-foreground))"
+                                        stroke="var(--muted-foreground)"
                                         strokeDasharray="4 4"
-                                        fill="hsl(var(--muted))"
+                                        fill="var(--muted)"
                                         fillOpacity={0.15}
                                     />
                                     <XAxis
                                         dataKey="timestamp"
-                                        stroke="hsl(var(--muted-foreground))"
+                                        stroke="var(--muted-foreground)"
                                         fontSize={12}
                                         tickLine={false}
                                         axisLine={false}
@@ -557,7 +557,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                         interval="preserveStartEnd"
                                         minTickGap={30}
                                     />
-                                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
+                                    <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
                                 </AreaChart>
                             </ResponsiveContainer>
                         </CardContent>
@@ -573,21 +573,21 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                         <CardContent className="h-[250px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={loadingChartData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                                     <Tooltip content={<CustomTooltip unit="MB" />} />
                                     <Area
                                         type="monotone"
                                         dataKey="used"
                                         name="Used RAM"
                                         strokeWidth={2}
-                                        stroke="hsl(var(--muted-foreground))"
+                                        stroke="var(--muted-foreground)"
                                         strokeDasharray="4 4"
-                                        fill="hsl(var(--muted))"
+                                        fill="var(--muted)"
                                         fillOpacity={0.15}
                                     />
                                     <XAxis
                                         dataKey="timestamp"
-                                        stroke="hsl(var(--muted-foreground))"
+                                        stroke="var(--muted-foreground)"
                                         fontSize={12}
                                         tickLine={false}
                                         axisLine={false}
@@ -599,7 +599,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                         interval="preserveStartEnd"
                                         minTickGap={30}
                                     />
-                                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}MB`} />
+                                    <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}MB`} />
                                 </AreaChart>
                             </ResponsiveContainer>
                         </CardContent>
@@ -616,21 +616,21 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                             <CardContent className="h-[250px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={loadingChartData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                                         <Tooltip content={<CustomTooltip unit="°C" />} />
                                         <Area
                                             type="monotone"
                                             dataKey="celsius"
                                             name="Temperature"
                                             strokeWidth={2}
-                                            stroke="hsl(var(--muted-foreground))"
+                                            stroke="var(--muted-foreground)"
                                             strokeDasharray="4 4"
-                                            fill="hsl(var(--muted))"
+                                            fill="var(--muted)"
                                             fillOpacity={0.15}
                                         />
                                         <XAxis
                                             dataKey="timestamp"
-                                            stroke="hsl(var(--muted-foreground))"
+                                            stroke="var(--muted-foreground)"
                                             fontSize={12}
                                             tickLine={false}
                                             axisLine={false}
@@ -642,7 +642,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                             interval="preserveStartEnd"
                                             minTickGap={30}
                                         />
-                                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}°C`} />
+                                        <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}°C`} />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </CardContent>
@@ -652,7 +652,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
             ) : (
                 <div className="grid gap-6">
                     {!statusData?.isTracking ? (
-                        <Card className="border-primary/20 bg-primary/5 py-8">
+                        <Card className="border-primary-950/20 bg-primary/5 py-8">
                             <CardHeader className="flex flex-col items-center text-center space-y-4">
                                 <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                                     <Activity className="h-8 w-8 text-primary animate-pulse" />
@@ -695,7 +695,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                         <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                                                     </linearGradient>
                                                 </defs>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                                                 <Tooltip content={<CustomTooltip unit="%" />} />
                                                 <Area
                                                     type="monotone"
@@ -712,7 +712,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                 />
                                                 <XAxis
                                                     dataKey="timestamp"
-                                                    stroke="hsl(var(--muted-foreground))"
+                                                    stroke="var(--muted-foreground)"
                                                     fontSize={12}
                                                     tickLine={false}
                                                     axisLine={false}
@@ -724,27 +724,27 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                     interval="preserveStartEnd"
                                                     minTickGap={30}
                                                 />
-                                                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
+                                                <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
                                             </AreaChart>
                                         </ResponsiveContainer>
                                     ) : (
                                         <ResponsiveContainer width="100%" height="100%">
                                             <AreaChart data={baselineFallbackData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                                                 <Tooltip content={<CustomTooltip unit="%" />} />
                                                 <Area
                                                     type="monotone"
                                                     dataKey="usage"
                                                     name="CPU"
                                                     strokeWidth={2}
-                                                    stroke="hsl(var(--muted-foreground))"
+                                                    stroke="var(--muted-foreground)"
                                                     strokeDasharray="4 4"
-                                                    fill="hsl(var(--muted))"
+                                                    fill="var(--muted)"
                                                     fillOpacity={0.15}
                                                 />
                                                 <XAxis
                                                     dataKey="timestamp"
-                                                    stroke="hsl(var(--muted-foreground))"
+                                                    stroke="var(--muted-foreground)"
                                                     fontSize={12}
                                                     tickLine={false}
                                                     axisLine={false}
@@ -756,7 +756,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                     interval="preserveStartEnd"
                                                     minTickGap={30}
                                                 />
-                                                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
+                                                <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
                                             </AreaChart>
                                         </ResponsiveContainer>
                                     )}
@@ -784,7 +784,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                         <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                                                     </linearGradient>
                                                 </defs>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                                                 <Tooltip content={<CustomTooltip unit="MB" />} />
                                                 <Area
                                                     type="monotone"
@@ -801,7 +801,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                 />
                                                 <XAxis
                                                     dataKey="timestamp"
-                                                    stroke="hsl(var(--muted-foreground))"
+                                                    stroke="var(--muted-foreground)"
                                                     fontSize={12}
                                                     tickLine={false}
                                                     axisLine={false}
@@ -814,7 +814,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                     minTickGap={30}
                                                 />
                                                 <YAxis
-                                                    stroke="hsl(var(--muted-foreground))"
+                                                    stroke="var(--muted-foreground)"
                                                     fontSize={12}
                                                     tickLine={false}
                                                     axisLine={false}
@@ -826,21 +826,21 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                     ) : (
                                         <ResponsiveContainer width="100%" height="100%">
                                             <AreaChart data={baselineFallbackData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                                                 <Tooltip content={<CustomTooltip unit="MB" />} />
                                                 <Area
                                                     type="monotone"
                                                     dataKey="used"
                                                     name="Used RAM"
                                                     strokeWidth={2}
-                                                    stroke="hsl(var(--muted-foreground))"
+                                                    stroke="var(--muted-foreground)"
                                                     strokeDasharray="4 4"
-                                                    fill="hsl(var(--muted))"
+                                                    fill="var(--muted)"
                                                     fillOpacity={0.15}
                                                 />
                                                 <XAxis
                                                     dataKey="timestamp"
-                                                    stroke="hsl(var(--muted-foreground))"
+                                                    stroke="var(--muted-foreground)"
                                                     fontSize={12}
                                                     tickLine={false}
                                                     axisLine={false}
@@ -852,7 +852,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                     interval="preserveStartEnd"
                                                     minTickGap={30}
                                                 />
-                                                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}MB`} />
+                                                <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}MB`} />
                                             </AreaChart>
                                         </ResponsiveContainer>
                                     )}
@@ -882,7 +882,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
 	                                                    <stop offset="95%" stopColor="hsl(var(--chart-4))" stopOpacity={0} />
 	                                                </linearGradient>
 	                                            </defs>
-	                                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+	                                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
 	                                            <Tooltip content={<CustomTooltip unit="°C" />} />
 	                                            <Area
 	                                                type="monotone"
@@ -890,8 +890,8 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
 	                                                name="Temperature"
                                                     baseValue={0}
 	                                                strokeWidth={2}
-	                                                stroke={temperatureHasValues ? "hsl(var(--chart-4))" : "hsl(var(--muted-foreground))"}
-	                                                fill={temperatureHasValues ? "url(#colorTemp)" : "hsl(var(--muted))"}
+	                                                stroke={temperatureHasValues ? "hsl(var(--chart-4))" : "var(--muted-foreground)"}
+	                                                fill={temperatureHasValues ? "url(#colorTemp)" : "var(--muted)"}
                                                     fillOpacity={temperatureHasValues ? undefined : 0.15}
                                                     strokeDasharray={temperatureHasValues ? undefined : "4 4"}
 	                                                connectNulls={false}
@@ -902,7 +902,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
 	                                            />
 	                                            <XAxis
 	                                                dataKey="timestamp"
-	                                                stroke="hsl(var(--muted-foreground))"
+	                                                stroke="var(--muted-foreground)"
 	                                                fontSize={12}
 	                                                tickLine={false}
 	                                                axisLine={false}
@@ -914,7 +914,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
 	                                                interval="preserveStartEnd"
 	                                                minTickGap={30}
 	                                            />
-	                                            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}°C`} />
+	                                            <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}°C`} />
 	                                        </AreaChart>
 	                                    </ResponsiveContainer>
 
@@ -946,7 +946,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                         <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
                                                     </linearGradient>
                                                 </defs>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                                                 <Tooltip content={<CustomTooltip unit="MB" />} />
                                                 <Area
                                                     type="monotone"
@@ -976,7 +976,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                 />
                                                 <XAxis
                                                     dataKey="timestamp"
-                                                    stroke="hsl(var(--muted-foreground))"
+                                                    stroke="var(--muted-foreground)"
                                                     fontSize={12}
                                                     tickLine={false}
                                                     axisLine={false}
@@ -988,7 +988,7 @@ export default function StatusClient({ serverId, serverName }: { serverId?: stri
                                                     interval="preserveStartEnd"
                                                     minTickGap={30}
                                                 />
-                                                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}MB`} />
+                                                <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}MB`} />
                                             </AreaChart>
                                         </ResponsiveContainer>
                                     ) : (

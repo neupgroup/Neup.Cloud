@@ -65,7 +65,7 @@ export function UsersClientPage({ serverId, engine, dbName, initialUsers }: User
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-6">
-                    <Card className="border-2 border-primary/5">
+                    <Card className="border-2 border-primary-950/5">
                         <CardHeader className="bg-muted/10">
                             <CardTitle className="flex items-center gap-2">
                                 <User className="h-5 w-5 text-primary" />
@@ -85,7 +85,7 @@ export function UsersClientPage({ serverId, engine, dbName, initialUsers }: User
                                                 <div>
                                                     <div className="flex items-center gap-2">
                                                         <span className="font-bold text-lg">{user.username}</span>
-                                                        <Badge variant="outline" className="text-[10px] uppercase border-primary/20 text-primary">
+                                                        <Badge variant="outline" className="text-[10px] uppercase border-primary-950/20 text-primary">
                                                             {user.host || 'Remote Access'}
                                                         </Badge>
                                                     </div>
@@ -135,7 +135,7 @@ export function UsersClientPage({ serverId, engine, dbName, initialUsers }: User
                         </CardContent>
                     </Card>
 
-                    <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-start gap-3">
+                    <div className="p-4 bg-primary/5 border border-primary-950/20 rounded-xl flex items-start gap-3">
                         <div className="mt-0.5 p-1 bg-primary/10 rounded-full">
                             <ShieldCheck className="h-4 w-4 text-primary" />
                         </div>

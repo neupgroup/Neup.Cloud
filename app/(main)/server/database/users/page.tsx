@@ -118,7 +118,7 @@ export default async function ServerDatabaseUsersPage({ searchParams }: Props) {
             ) : (
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <Card className="bg-primary/5 border-primary/10">
+                        <Card className="bg-primary/5 border-primary-950/10">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm font-medium text-muted-foreground">User Assignments</CardTitle>
                             </CardHeader>
@@ -198,7 +198,7 @@ export default async function ServerDatabaseUsersPage({ searchParams }: Props) {
                                                                     href={withSelectedServerQuery(`/server/database/${dbId}/users/${userSlug}`, serverId)}
                                                                     className={cn(
                                                                         "group/database inline-flex min-h-9 max-w-full items-center gap-2 rounded-md border bg-muted/30 px-3 py-2 text-xs transition-colors hover:bg-muted",
-                                                                        assignment.permissions === "full" && "border-primary/20 bg-primary/5"
+                                                                        assignment.permissions === "full" && "border-primary-950/20 bg-primary/5"
                                                                     )}
                                                                 >
                                                                     <Database className="h-3.5 w-3.5 shrink-0 text-muted-foreground group-hover/database:text-foreground" />

@@ -33,7 +33,7 @@ export default async function IntelligenceModelsPage() {
         description="Manage the saved provider models that intelligence prompt records can use."
       />
 
-      <Card className="border-primary/15 bg-gradient-to-br from-primary/5 via-background to-background">
+      <Card className="border-primary-950/15 bg-gradient-to-br from-primary/5 via-background to-background">
         <CardHeader className="space-y-3">
           <CardTitle className="text-2xl font-headline">
             Central model registry

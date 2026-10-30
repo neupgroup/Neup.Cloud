@@ -1326,7 +1326,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                             className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl"
                         >
                             <div
-                                className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all ${domainMode === 'domain' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:bg-muted'}`}
+                                className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all ${domainMode === 'domain' ? 'border-primary-950 bg-primary/5 ring-1 ring-primary-950' : 'hover:bg-muted'}`}
                                 onClick={() => setDomainMode('domain')}
                             >
                                 <RadioGroupItem value="domain" id="mode-domain" className="mt-1" />
@@ -1337,7 +1337,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                             </div>
 
                             <div
-                                className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all ${domainMode === 'none' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:bg-muted'}`}
+                                className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all ${domainMode === 'none' ? 'border-primary-950 bg-primary/5 ring-1 ring-primary-950' : 'hover:bg-muted'}`}
                                 onClick={() => {
                                     setDomainMode('none');
                                     setSelectedDomainId(null);
@@ -1435,7 +1435,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                                     updateDomainBlock(block.id, 'subdomain', val);
                                                 }}
                                                 placeholder={domainMode === 'domain' ? '@' : 'default'}
-                                                className="h-7 w-auto min-w-[32px] max-w-[200px] bg-transparent border-b border-dashed border-muted-foreground/50 rounded-none shadow-none focus-visible:ring-0 focus-visible:border-primary p-0 font-bold text-sm text-center"
+                                                className="h-7 w-auto min-w-[32px] max-w-[200px] bg-transparent border-b border-dashed border-muted-foreground/50 rounded-none shadow-none focus-visible:ring-0 focus-visible:border-primary-950 p-0 font-bold text-sm text-center"
                                             />
                                             {domainMode === 'domain' && (
                                                 <span className="text-xs text-muted-foreground font-medium opacity-70">
@@ -1587,7 +1587,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                         <div key={rule.id} className="relative group">
                                             <div
                                                 onClick={() => setExpandedRuleId(expandedRuleId === rule.id ? null : rule.id)}
-                                                className={`flex items-center justify-between bg-background border rounded-lg px-4 py-3 cursor-pointer transition-all hover:border-primary/50 ${expandedRuleId === rule.id ? 'border-primary shadow-sm' : 'border-border'}`}
+                                                className={`flex items-center justify-between bg-background border rounded-lg px-4 py-3 cursor-pointer transition-all hover:border-primary-900/50 ${expandedRuleId === rule.id ? 'border-primary-950 shadow-sm' : 'border-border'}`}
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <div className="flex items-center gap-2">
@@ -1890,7 +1890,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                                         onClick={() => addPathRule(block.id)}
                                         variant="ghost"
                                         size="sm"
-                                        className="w-full mt-2 h-9 border border-dashed border-border/50 text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all rounded-lg"
+                                        className="w-full mt-2 h-9 border border-dashed border-border/50 text-muted-foreground hover:text-primary hover:border-primary-900/50 hover:bg-primary/5 transition-all rounded-lg"
                                     >
                                         <Plus className="h-4 w-4 mr-2" />
                                         Add Path Rule
@@ -1903,7 +1903,7 @@ export default function NginxConfigEditor({ configId }: NginxConfigEditorProps) 
                             onClick={() => addDomainBlock()}
                             variant="outline"
                             size="default"
-                            className="w-full h-11 border-2 border-dashed border-border/50 text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all rounded-lg font-semibold"
+                            className="w-full h-11 border-2 border-dashed border-border/50 text-muted-foreground hover:text-primary hover:border-primary-900/50 hover:bg-primary/5 transition-all rounded-lg font-semibold"
                         >
                             <Plus className="h-4 w-4 mr-2" />
                             Add {domainMode === 'domain' ? 'Subdomain' : 'Server'} Block

@@ -84,7 +84,7 @@ export default function AccessEditForm({
         </div>
       )}
 
-      <Card className="border-primary/15 bg-gradient-to-br from-primary/5 via-background to-background">
+      <Card className="border-primary-950/15 bg-gradient-to-br from-primary/5 via-background to-background">
         <CardHeader className="space-y-3">
           <CardTitle className="text-2xl font-headline">
             {accessType === 'open' ? (

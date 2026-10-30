@@ -348,7 +348,7 @@ export function ServerFormFields({
                   await importPrivateKeyFile(file);
                 }}
                 placeholder={mode === "add" ? "-----BEGIN OPENSSH PRIVATE KEY-----" : "Leave blank to keep the existing key"}
-                className={`min-h-40 font-mono text-xs ${isPrivateKeyDragActive ? "ring-2 ring-primary ring-offset-2" : ""}`}
+                className={`min-h-40 font-mono text-xs ${isPrivateKeyDragActive ? "ring-2 ring-primary-950 ring-offset-2" : ""}`}
               />
 
               {mode === "edit" ? (

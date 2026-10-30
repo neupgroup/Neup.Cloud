@@ -573,7 +573,7 @@ function createEdge(source: string, target: string): Edge {
     target,
     animated: false,
     markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18 },
-    style: { stroke: 'hsl(var(--foreground) / 0.26)', strokeWidth: 2 },
+    style: { stroke: 'color-mix(in srgb, var(--foreground) 26%, transparent)', strokeWidth: 2 },
   };
 }
 
@@ -636,7 +636,7 @@ function getNodeTone(kind: PipelineNodeKind) {
     default:
       return {
         header: 'from-primary to-primary/80',
-        soft: 'bg-primary/10 text-primary border-primary/20',
+        soft: 'bg-primary/10 text-primary border-primary-950/20',
       };
   }
 }
@@ -1727,7 +1727,7 @@ function PipelineEditorCanvas({
               defaultEdgeOptions={{
                 animated: false,
                 markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18 },
-                style: { stroke: 'hsl(var(--foreground) / 0.26)', strokeWidth: 2 },
+                style: { stroke: 'color-mix(in srgb, var(--foreground) 26%, transparent)', strokeWidth: 2 },
               }}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
@@ -1797,7 +1797,7 @@ function PipelineEditorCanvas({
               className="pipeline-editor-flow bg-transparent"
               proOptions={{ hideAttribution: true }}
             >
-              <Background gap={22} size={1.1} color="hsl(var(--border))" />
+              <Background gap={22} size={1.1} color="var(--border)" />
               <Controls className="!rounded-2xl !border !border-white/70 !bg-white/95 !shadow-xl" position="bottom-right" />
             </ReactFlow>
           </main>

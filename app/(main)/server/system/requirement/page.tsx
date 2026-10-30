@@ -64,7 +64,7 @@ export default function RequirementsPage() {
             <div className="grid gap-6 md:grid-cols-3">
                 {requirements.map((req) => (
                     <Link key={req.id} href={withSelectedServer(`/server/system/requirement/${req.id}`)} className="group">
-                        <Card className="h-full transition-all hover:shadow-md hover:border-primary/50">
+                        <Card className="h-full transition-all hover:shadow-md hover:border-primary-900/50">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <div className="p-2 rounded-lg bg-muted group-hover:bg-background transition-colors text-blue-500">

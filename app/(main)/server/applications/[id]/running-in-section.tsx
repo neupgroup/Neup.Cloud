@@ -92,7 +92,7 @@ export function RunningInSection({ applicationId, maps, runningSection }: Runnin
                   </Badge>
                 </div>
                 {server.isPrimary ? (
-                  <Badge variant="outline" className="text-xs gap-1 border-primary/20 bg-primary/10 text-primary">
+                  <Badge variant="outline" className="text-xs gap-1 border-primary-950/20 bg-primary/10 text-primary">
                     <CheckCircle2 className="h-3 w-3" /> Primary
                   </Badge>
                 ) : (

@@ -223,7 +223,7 @@ function ServerListContent() {
           const appMaps = server.applicationServerMaps ?? [];
 
           return (
-            <Card key={server.id} className={isSelected ? "border-primary" : undefined}>
+            <Card key={server.id} className={isSelected ? "border-primary-950" : undefined}>
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">

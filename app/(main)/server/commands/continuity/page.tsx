@@ -197,7 +197,7 @@ export default function ContinuityPage() {
                 key={session.id}
                 htmlType="button"
                 onClick={() => handleOpenSession(session.id)}
-                className="w-full rounded-lg border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40"
+                className="w-full rounded-lg border bg-card p-4 text-left transition hover:border-primary-900/40 hover:bg-muted/40"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">

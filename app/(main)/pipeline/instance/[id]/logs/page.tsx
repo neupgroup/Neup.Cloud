@@ -58,7 +58,7 @@ export default async function PipelineInstanceLogsPage({
             </div>
           ) : (
             logs.map((log: StoredPipelineLog) => (
-              <Card key={log.id} className="transition-colors hover:border-primary/30">
+              <Card key={log.id} className="transition-colors hover:border-primary-900/30">
                 <CardContent className="flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex flex-wrap items-center gap-2">

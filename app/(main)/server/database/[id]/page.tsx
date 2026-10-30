@@ -58,7 +58,7 @@ export default async function DatabaseDetailsPage({ params, searchParams }: Prop
                             <div className="flex flex-col">
                                 <div className="flex items-center gap-2">
                                     <span className="font-bold tracking-tight">{details.name}</span>
-                                    <Badge variant="outline" className="text-[10px] uppercase bg-primary/5 text-primary border-primary/20">
+                                    <Badge variant="outline" className="text-[10px] uppercase bg-primary/5 text-primary border-primary-950/20">
                                         {details.engine}
                                     </Badge>
                                 </div>
@@ -77,7 +77,7 @@ export default async function DatabaseDetailsPage({ params, searchParams }: Prop
 
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
-                <Card className="bg-primary/5 border-primary/10">
+                <Card className="bg-primary/5 border-primary-950/10">
                     <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                         <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Size on Disk</CardTitle>
                         <HardDrive className="h-4 w-4 text-primary opacity-70" />

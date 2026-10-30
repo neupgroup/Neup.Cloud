@@ -100,7 +100,7 @@ function StepShell({
   children: React.ReactNode;
 }) {
   return (
-    <Card className={cn('overflow-hidden', active ? 'border-primary/60 shadow-sm' : 'opacity-75')}>
+    <Card className={cn('overflow-hidden', active ? 'border-primary-950/60 shadow-sm' : 'opacity-75')}>
       <CardHeader className="border-b bg-muted/20">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">

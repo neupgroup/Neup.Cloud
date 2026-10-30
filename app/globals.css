@@ -3,160 +3,275 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 1.25rem;
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 224 71.4% 4.1%;
-    --sidebar-primary: 222.2 47.4% 11.2%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 210 40% 96.1%;
-    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
-    --sidebar-border: 214.3 31.8% 91.4%;
-    --sidebar-ring: 222.2 84% 4.9%;
+  :root {
+    --primary: 60 100% 10%;
+    --secondary: var(--primary);
+    --tertiary: var(--primary);
+    --success: #16834a;
+    --informatic: #2472c8;
+    --warning: #bd7200;
+    --danger: #cf3344;
+    --success-foreground: white;
+    --success-hover: color-mix(in srgb, var(--success) 90%, black);
+    --success-press: color-mix(in srgb, var(--success) 78%, black);
+    --informatic-foreground: white;
+    --informatic-hover: color-mix(in srgb, var(--informatic) 90%, black);
+    --informatic-press: color-mix(in srgb, var(--informatic) 78%, black);
+    --warning-foreground: white;
+    --warning-hover: color-mix(in srgb, var(--warning) 90%, black);
+    --warning-press: color-mix(in srgb, var(--warning) 78%, black);
+    --danger-foreground: white;
+    --danger-hover: color-mix(in srgb, var(--danger) 90%, black);
+    --danger-press: color-mix(in srgb, var(--danger) 78%, black);
   }
 
-  .dark {
-    --background: 222 47.4% 11.2%;
-    --foreground: 210 40% 98%;
-    --card: 222 47.4% 11.2%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47.4% 11.2%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 70% 50%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 180 60% 40%;
-    --accent-foreground: 180 100% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 210 70% 50%;
-
+  :root,
+  [data-theme="light"] {
+    --primary-0: #000000;
+    --primary-10: color-mix(in srgb, hsl(var(--primary)) 1%, white);
+    --primary-20: color-mix(in srgb, hsl(var(--primary)) 2%, white);
+    --primary-30: color-mix(in srgb, hsl(var(--primary)) 3%, white);
+    --primary-40: color-mix(in srgb, hsl(var(--primary)) 4%, white);
+    --primary-960: color-mix(in srgb, hsl(var(--primary)) 96%, white);
+    --primary-970: color-mix(in srgb, hsl(var(--primary)) 97%, white);
+    --primary-980: color-mix(in srgb, hsl(var(--primary)) 98%, white);
+    --primary-990: color-mix(in srgb, hsl(var(--primary)) 99%, white);
+    --primary-1000: #ffffff;
+    --primary-50: color-mix(in srgb, hsl(var(--primary)) 5%, white);
+    --primary-100: color-mix(in srgb, hsl(var(--primary)) 10%, white);
+    --primary-200: color-mix(in srgb, hsl(var(--primary)) 20%, white);
+    --primary-300: color-mix(in srgb, hsl(var(--primary)) 30%, white);
+    --primary-400: color-mix(in srgb, hsl(var(--primary)) 40%, white);
+    --primary-500: color-mix(in srgb, hsl(var(--primary)) 50%, white);
+    --primary-600: color-mix(in srgb, hsl(var(--primary)) 60%, white);
+    --primary-700: color-mix(in srgb, hsl(var(--primary)) 70%, white);
+    --primary-800: color-mix(in srgb, hsl(var(--primary)) 80%, white);
+    --primary-900: color-mix(in srgb, hsl(var(--primary)) 90%, white);
+    --primary-950: color-mix(in srgb, hsl(var(--primary)) 95%, white);
+    --secondary-0: #000000;
+    --secondary-10: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 1%, white);
+    --secondary-20: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 2%, white);
+    --secondary-30: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 3%, white);
+    --secondary-40: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 4%, white);
+    --secondary-960: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 96%, white);
+    --secondary-970: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 97%, white);
+    --secondary-980: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 98%, white);
+    --secondary-990: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 99%, white);
+    --secondary-1000: #ffffff;
+    --secondary-50: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 5%, white);
+    --secondary-100: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 10%, white);
+    --secondary-200: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 20%, white);
+    --secondary-300: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 30%, white);
+    --secondary-400: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 40%, white);
+    --secondary-500: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 50%, white);
+    --secondary-600: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 60%, white);
+    --secondary-700: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 70%, white);
+    --secondary-800: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 80%, white);
+    --secondary-900: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 90%, white);
+    --secondary-950: color-mix(in srgb, hsl(var(--secondary, var(--primary))) 95%, white);
+    --tertiary-0: #000000;
+    --tertiary-10: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 1%, white);
+    --tertiary-20: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 2%, white);
+    --tertiary-30: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 3%, white);
+    --tertiary-40: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 4%, white);
+    --tertiary-960: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 96%, white);
+    --tertiary-970: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 97%, white);
+    --tertiary-980: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 98%, white);
+    --tertiary-990: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 99%, white);
+    --tertiary-1000: #ffffff;
+    --tertiary-50: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 5%, white);
+    --tertiary-100: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 10%, white);
+    --tertiary-200: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 20%, white);
+    --tertiary-300: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 30%, white);
+    --tertiary-400: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 40%, white);
+    --tertiary-500: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 50%, white);
+    --tertiary-600: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 60%, white);
+    --tertiary-700: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 70%, white);
+    --tertiary-800: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 80%, white);
+    --tertiary-900: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 90%, white);
+    --tertiary-950: color-mix(in srgb, hsl(var(--tertiary, var(--primary))) 95%, white);
+    --success-0: #000000;
+    --success-10: color-mix(in srgb, var(--success) 1%, white);
+    --success-20: color-mix(in srgb, var(--success) 2%, white);
+    --success-30: color-mix(in srgb, var(--success) 3%, white);
+    --success-40: color-mix(in srgb, var(--success) 4%, white);
+    --success-960: color-mix(in srgb, var(--success) 96%, white);
+    --success-970: color-mix(in srgb, var(--success) 97%, white);
+    --success-980: color-mix(in srgb, var(--success) 98%, white);
+    --success-990: color-mix(in srgb, var(--success) 99%, white);
+    --success-1000: #ffffff;
+    --success-50: color-mix(in srgb, var(--success) 5%, white);
+    --success-100: color-mix(in srgb, var(--success) 10%, white);
+    --success-200: color-mix(in srgb, var(--success) 20%, white);
+    --success-300: color-mix(in srgb, var(--success) 30%, white);
+    --success-400: color-mix(in srgb, var(--success) 40%, white);
+    --success-500: color-mix(in srgb, var(--success) 50%, white);
+    --success-600: color-mix(in srgb, var(--success) 60%, white);
+    --success-700: color-mix(in srgb, var(--success) 70%, white);
+    --success-800: color-mix(in srgb, var(--success) 80%, white);
+    --success-900: color-mix(in srgb, var(--success) 90%, white);
+    --success-950: color-mix(in srgb, var(--success) 95%, white);
+    --informatic-0: #000000;
+    --informatic-10: color-mix(in srgb, var(--informatic) 1%, white);
+    --informatic-20: color-mix(in srgb, var(--informatic) 2%, white);
+    --informatic-30: color-mix(in srgb, var(--informatic) 3%, white);
+    --informatic-40: color-mix(in srgb, var(--informatic) 4%, white);
+    --informatic-960: color-mix(in srgb, var(--informatic) 96%, white);
+    --informatic-970: color-mix(in srgb, var(--informatic) 97%, white);
+    --informatic-980: color-mix(in srgb, var(--informatic) 98%, white);
+    --informatic-990: color-mix(in srgb, var(--informatic) 99%, white);
+    --informatic-1000: #ffffff;
+    --informatic-50: color-mix(in srgb, var(--informatic) 5%, white);
+    --informatic-100: color-mix(in srgb, var(--informatic) 10%, white);
+    --informatic-200: color-mix(in srgb, var(--informatic) 20%, white);
+    --informatic-300: color-mix(in srgb, var(--informatic) 30%, white);
+    --informatic-400: color-mix(in srgb, var(--informatic) 40%, white);
+    --informatic-500: color-mix(in srgb, var(--informatic) 50%, white);
+    --informatic-600: color-mix(in srgb, var(--informatic) 60%, white);
+    --informatic-700: color-mix(in srgb, var(--informatic) 70%, white);
+    --informatic-800: color-mix(in srgb, var(--informatic) 80%, white);
+    --informatic-900: color-mix(in srgb, var(--informatic) 90%, white);
+    --informatic-950: color-mix(in srgb, var(--informatic) 95%, white);
+    --warning-0: #000000;
+    --warning-10: color-mix(in srgb, var(--warning) 1%, white);
+    --warning-20: color-mix(in srgb, var(--warning) 2%, white);
+    --warning-30: color-mix(in srgb, var(--warning) 3%, white);
+    --warning-40: color-mix(in srgb, var(--warning) 4%, white);
+    --warning-960: color-mix(in srgb, var(--warning) 96%, white);
+    --warning-970: color-mix(in srgb, var(--warning) 97%, white);
+    --warning-980: color-mix(in srgb, var(--warning) 98%, white);
+    --warning-990: color-mix(in srgb, var(--warning) 99%, white);
+    --warning-1000: #ffffff;
+    --warning-50: color-mix(in srgb, var(--warning) 5%, white);
+    --warning-100: color-mix(in srgb, var(--warning) 10%, white);
+    --warning-200: color-mix(in srgb, var(--warning) 20%, white);
+    --warning-300: color-mix(in srgb, var(--warning) 30%, white);
+    --warning-400: color-mix(in srgb, var(--warning) 40%, white);
+    --warning-500: color-mix(in srgb, var(--warning) 50%, white);
+    --warning-600: color-mix(in srgb, var(--warning) 60%, white);
+    --warning-700: color-mix(in srgb, var(--warning) 70%, white);
+    --warning-800: color-mix(in srgb, var(--warning) 80%, white);
+    --warning-900: color-mix(in srgb, var(--warning) 90%, white);
+    --warning-950: color-mix(in srgb, var(--warning) 95%, white);
+    --danger-0: #000000;
+    --danger-10: color-mix(in srgb, var(--danger) 1%, white);
+    --danger-20: color-mix(in srgb, var(--danger) 2%, white);
+    --danger-30: color-mix(in srgb, var(--danger) 3%, white);
+    --danger-40: color-mix(in srgb, var(--danger) 4%, white);
+    --danger-960: color-mix(in srgb, var(--danger) 96%, white);
+    --danger-970: color-mix(in srgb, var(--danger) 97%, white);
+    --danger-980: color-mix(in srgb, var(--danger) 98%, white);
+    --danger-990: color-mix(in srgb, var(--danger) 99%, white);
+    --danger-1000: #ffffff;
+    --danger-50: color-mix(in srgb, var(--danger) 5%, white);
+    --danger-100: color-mix(in srgb, var(--danger) 10%, white);
+    --danger-200: color-mix(in srgb, var(--danger) 20%, white);
+    --danger-300: color-mix(in srgb, var(--danger) 30%, white);
+    --danger-400: color-mix(in srgb, var(--danger) 40%, white);
+    --danger-500: color-mix(in srgb, var(--danger) 50%, white);
+    --danger-600: color-mix(in srgb, var(--danger) 60%, white);
+    --danger-700: color-mix(in srgb, var(--danger) 70%, white);
+    --danger-800: color-mix(in srgb, var(--danger) 80%, white);
+    --danger-900: color-mix(in srgb, var(--danger) 90%, white);
+    --danger-950: color-mix(in srgb, var(--danger) 95%, white);
+    --background: var(--primary-50);
+    --foreground: var(--primary-950);
+    --card: white;
+    --card-foreground: var(--foreground);
+    --popover: white;
+    --popover-foreground: var(--foreground);
+    --primary-foreground: white;
+    --danger-foreground: white;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-
-    --sidebar-background: 222 47.4% 11.2%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 210 70% 50%;
-    --sidebar-primary-foreground: 210 20% 98%;
-    --sidebar-accent: 217.2 32.6% 17.5%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217.2 32.6% 17.5%;
-    --sidebar-ring: 210 70% 50%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-/* nprogress */
-#nprogress {
-  pointer-events: none;
-}
-
-#nprogress .bar {
-  background: hsl(var(--primary));
-  position: fixed;
-  z-index: 1031;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-}
-
-#nprogress .peg {
-  display: block;
-  position: absolute;
-  right: 0px;
-  width: 100px;
-  height: 100%;
-  box-shadow: 0 0 10px hsl(var(--primary)), 0 0 5px hsl(var(--primary));
-  opacity: 1;
-  -webkit-transform: rotate(3deg) translate(0px, -4px);
-  -ms-transform: rotate(3deg) translate(0px, -4px);
-  transform: rotate(3deg) translate(0px, -4px);
-}
-
-#nprogress .spinner {
-  display: block;
-  position: fixed;
-  z-index: 1031;
-  top: 15px;
-  right: 15px;
-}
-
-#nprogress .spinner-icon {
-  width: 18px;
-  height: 18px;
-  box-sizing: border-box;
-  border: solid 2px transparent;
-  border-top-color: hsl(var(--primary));
-  border-left-color: hsl(var(--primary));
-  border-radius: 50%;
-  -webkit-animation: nprogress-spinner 400ms linear infinite;
-  animation: nprogress-spinner 400ms linear infinite;
-}
-
-.nprogress-custom-parent {
-  overflow: hidden;
-  position: relative;
-}
-
-.nprogress-custom-parent #nprogress .spinner,
-.nprogress-custom-parent #nprogress .bar {
-  position: absolute;
-}
-
-@-webkit-keyframes nprogress-spinner {
-  0% {
-    -webkit-transform: rotate(0deg);
+    --primary-hover: color-mix(in srgb, hsl(var(--primary)) 90%, black);
+    --primary-press: color-mix(in srgb, hsl(var(--primary)) 78%, black);
+    --primary-active: color-mix(in srgb, hsl(var(--primary)) 86%, black);
+    --primary-active-hover: color-mix(in srgb, hsl(var(--primary)) 72%, black);
+    --primary-active-press: color-mix(in srgb, hsl(var(--primary)) 60%, black);
+    --interaction-hover: color-mix(in srgb, var(--foreground) 6%, transparent);
+    --interaction-press: color-mix(in srgb, var(--foreground) 10%, transparent);
+    --interaction-active: color-mix(in srgb, var(--foreground) 12%, transparent);
+    --interaction-active-hover: color-mix(in srgb, var(--foreground) 17%, transparent);
+    --interaction-active-press: color-mix(in srgb, var(--foreground) 24%, transparent);
+    --secondary-color: var(--secondary-100);
+    --secondary-foreground: var(--foreground);
+    --muted: var(--primary-100);
+    --muted-foreground: var(--primary-700);
+    --accent: var(--tertiary-100);
+    --accent-foreground: var(--foreground);
+    --destructive: var(--danger);
+    --destructive-foreground: white;
+    --border: var(--primary-200);
+    --input: var(--primary-200);
+    --ring: var(--primary-500);
+    --radius: 1.25rem;
+    --sidebar-background: var(--background);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: hsl(var(--primary));
+    --sidebar-primary-foreground: white;
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
   }
 
-  100% {
-    -webkit-transform: rotate(360deg);
+  [data-theme="dark"],
+  .dark {
+    --success-hover: color-mix(in srgb, var(--success) 88%, white);
+    --success-press: color-mix(in srgb, var(--success) 76%, white);
+    --informatic-hover: color-mix(in srgb, var(--informatic) 88%, white);
+    --informatic-press: color-mix(in srgb, var(--informatic) 76%, white);
+    --warning-hover: color-mix(in srgb, var(--warning) 88%, white);
+    --warning-press: color-mix(in srgb, var(--warning) 76%, white);
+    --danger-hover: color-mix(in srgb, var(--danger) 88%, white);
+    --danger-press: color-mix(in srgb, var(--danger) 76%, white);
+    --background: var(--primary-950);
+    --foreground: var(--primary-50);
+    --card: var(--primary-900);
+    --card-foreground: var(--foreground);
+    --popover: var(--primary-900);
+    --popover-foreground: var(--foreground);
+    --primary-foreground: white;
+    --danger-foreground: white;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --primary-hover: color-mix(in srgb, hsl(var(--primary)) 88%, white);
+    --primary-press: color-mix(in srgb, hsl(var(--primary)) 78%, white);
+    --primary-active: color-mix(in srgb, hsl(var(--primary)) 84%, white);
+    --primary-active-hover: color-mix(in srgb, hsl(var(--primary)) 74%, white);
+    --primary-active-press: color-mix(in srgb, hsl(var(--primary)) 64%, white);
+    --interaction-hover: color-mix(in srgb, var(--foreground) 8%, transparent);
+    --interaction-press: color-mix(in srgb, var(--foreground) 13%, transparent);
+    --interaction-active: color-mix(in srgb, var(--foreground) 12%, transparent);
+    --interaction-active-hover: color-mix(in srgb, var(--foreground) 18%, transparent);
+    --interaction-active-press: color-mix(in srgb, var(--foreground) 25%, transparent);
+    --secondary-color: var(--secondary-900);
+    --secondary-foreground: var(--foreground);
+    --muted: var(--primary-900);
+    --muted-foreground: var(--primary-300);
+    --accent: var(--tertiary-900);
+    --accent-foreground: var(--foreground);
+    --destructive: var(--danger);
+    --destructive-foreground: white;
+    --border: var(--primary-800);
+    --input: var(--primary-800);
+    --ring: var(--primary-400);
+    --sidebar-background: var(--background);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: hsl(var(--primary));
+    --sidebar-primary-foreground: white;
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
   }
-}
 
-@keyframes nprogress-spinner {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
 }

@@ -684,7 +684,7 @@ export default function AccessDetailClient({ accountId, access, tokens, models }
       )}
 
       {!access.published && access.status === 'unpublished' && (
-        <Card className="border-primary/30">
+        <Card className="border-primary-950/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-headline">
               <Lock className="h-5 w-5 text-primary" />

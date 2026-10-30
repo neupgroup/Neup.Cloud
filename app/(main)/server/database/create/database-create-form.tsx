@@ -121,7 +121,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6 pb-20">
-            <Card className="overflow-hidden border-2 border-primary/5">
+            <Card className="overflow-hidden border-2 border-primary-950/5">
                 <CardHeader className="bg-muted/30">
                     <CardTitle className="flex items-center gap-2">
                         <Database className="h-5 w-5 text-primary" />
@@ -139,7 +139,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                             <RadioGroupItem value="mariadb" id="mariadb" className="peer sr-only" />
                             <Label
                                 htmlFor="mariadb"
-                                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary transition-all cursor-pointer"
+                                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary-950 [&:has([data-state=checked])]:border-primary-950 transition-all cursor-pointer"
                             >
                                 <div className="flex items-center gap-3 mb-2">
                                     <div className="p-2 bg-blue-500/10 rounded-full">
@@ -156,7 +156,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                             <RadioGroupItem value="postgres" id="postgres" className="peer sr-only" />
                             <Label
                                 htmlFor="postgres"
-                                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary transition-all cursor-pointer"
+                                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary-950 [&:has([data-state=checked])]:border-primary-950 transition-all cursor-pointer"
                             >
                                 <div className="flex items-center gap-3 mb-2">
                                     <div className="p-2 bg-indigo-500/10 rounded-full">
@@ -175,7 +175,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
 
             {/* Installation Panel */}
             {!isEngineInstalled ? (
-                <Card className="border-2 border-primary/20 bg-primary/5 overflow-hidden animate-in zoom-in-95 duration-300">
+                <Card className="border-2 border-primary-950/20 bg-primary/5 overflow-hidden animate-in zoom-in-95 duration-300">
                     <CardContent className="pt-6">
                         <div className="flex flex-col md:flex-row items-center gap-6">
                             <div className="p-4 bg-primary/10 rounded-full">
@@ -205,7 +205,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                                             </>
                                         )}
                                     </Button>
-                                    <Button variant="outlined" htmlType="button" className="h-11 px-6 border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors">
+                                    <Button variant="outlined" htmlType="button" className="h-11 px-6 border-primary-950/20 hover:bg-primary/5 hover:text-primary transition-colors">
                                         View Documentation
                                     </Button>
                                 </div>
@@ -214,7 +214,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                     </CardContent>
                 </Card>
             ) : (
-                <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary-950/20 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="p-1.5 bg-primary/10 rounded-full">
                         <CheckCircle className="h-4 w-4 text-primary" />
                     </div>
@@ -222,14 +222,14 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                         <span className="text-sm font-medium text-primary uppercase">
                             {engine} engine is ready
                         </span>
-                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[10px]">
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary-950/20 text-[10px]">
                             VERIFIED
                         </Badge>
                     </div>
                 </div>
             )}
 
-            <Card className={!isEngineInstalled ? "opacity-50 pointer-events-none grayscale transition-all" : "border-2 border-primary/5 transition-all"}>
+            <Card className={!isEngineInstalled ? "opacity-50 pointer-events-none grayscale transition-all" : "border-2 border-primary-950/5 transition-all"}>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <ShieldCheck className="h-5 w-5 text-primary" />
@@ -288,7 +288,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                 </CardContent>
             </Card>
 
-            <div className={!isEngineInstalled ? "opacity-50 grayscale flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/10" : "flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/10"}>
+            <div className={!isEngineInstalled ? "opacity-50 grayscale flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary-950/10" : "flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary-950/10"}>
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-full">
                         <ShieldCheck className="h-5 w-5 text-primary" />
@@ -298,7 +298,7 @@ export function DatabaseCreateForm({ serverId, initialInstallation }: DatabaseCr
                         <p className="text-xs text-muted-foreground">This will create a new database and a user with full privileges to it.</p>
                     </div>
                 </div>
-                <Badge variant="outline" className="text-primary border-primary/20">Automatic ACL</Badge>
+                <Badge variant="outline" className="text-primary border-primary-950/20">Automatic ACL</Badge>
             </div>
 
             <div className="flex gap-4 pt-4">

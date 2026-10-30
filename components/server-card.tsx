@@ -79,7 +79,7 @@ export function ServerCard({ server, onServerDeleted, onServerSelected, isSelect
     <div
       className={cn(
         "flex items-center gap-4 p-4 cursor-pointer hover:bg-muted/50 transition-colors",
-        isSelected ? "bg-primary/10 border-l-4 border-primary" : "",
+        isSelected ? "bg-primary/10 border-l-4 border-primary-950" : "",
         className
       )}
       onClick={handleSelect}
