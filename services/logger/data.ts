@@ -2,13 +2,6 @@ import { randomUUID } from 'node:crypto';
 
 import { prisma } from '@neup/core/database/prisma';
 
-type EnsureProjectInput = {
-  projectId?: string;
-  projectName: string;
-  slug?: string;
-  ingestKey?: string;
-};
-
 type CreateLoggerActivityInput = {
   projectId: string;
   type?: string;
@@ -16,69 +9,21 @@ type CreateLoggerActivityInput = {
 };
 
 export async function createLoggerProject(input: {
-  name: string; slug: string; ingestKey: string; allowLocalhostErrors: boolean;
+  name: string; ingestKey: string; allowLocalhostErrors: boolean;
   allowWithoutOrigin: boolean; allowedErrorDomains: string[];
   errorsPerMinute: number; errorsPerTenMinutes: number;
 }) {
   return prisma.project.create({ data: { id: randomUUID(), createdOn: new Date(), ...input } });
 }
 
-export async function isLoggerSlugAvailable(slug: string) {
-  const project = await prisma.project.findUnique({ where: { slug } });
-  return !project;
+// Finds one logger project by its stable ID for its management page.
+export async function getLoggerProjectById(projectId: string) {
+  return prisma.project.findUnique({ where: { id: projectId } });
 }
 
-export async function ensureLoggerProject(input: EnsureProjectInput) {
-  const normalizedName = input.projectName.trim();
-
-  if (!normalizedName) {
-    throw new Error('Project name is required.');
-  }
-
-  const slug = (input.slug?.trim() || normalizedName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `project-${randomUUID()}`).slice(0, 100);
-  const ingestKey = input.ingestKey?.trim() || `legacy-${input.projectId?.trim() || randomUUID()}`;
-  if (input.projectId?.trim()) {
-    const existingProject = await prisma.project.findUnique({
-      where: { id: input.projectId.trim() },
-    });
-
-    if (existingProject) {
-      if (existingProject.name !== normalizedName) {
-        return prisma.project.update({
-          where: { id: existingProject.id },
-          data: { name: normalizedName, slug, ingestKey },
-        });
-      }
-
-      return existingProject;
-    }
-
-    return prisma.project.create({
-      data: {
-        id: input.projectId.trim(),
-        name: normalizedName,
-        createdOn: new Date(),
-        slug,
-        ingestKey,
-      },
-    });
-  }
-
-  return prisma.project.upsert({
-    where: { slug },
-    update: {},
-    create: {
-      id: randomUUID(),
-      name: normalizedName,
-      createdOn: new Date(),
-      slug,
-      ingestKey,
-    },
-  });
-}
-
-export async function findProjectForIngest(ingestKey: string, slug: string) {
-  return prisma.project.findFirst({ where: { ingestKey, slug } });
+// Rotates the project ingest key, immediately invalidating the previous key.
+export async function rotateLoggerProjectIngestKey(projectId: string, ingestKey: string) {
+  return prisma.project.update({ where: { id: projectId }, data: { ingestKey } });
 }
 
 export async function countRecentErrors(projectId: string, since: Date) {

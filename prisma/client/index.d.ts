@@ -11934,7 +11934,6 @@ export namespace Prisma {
   export type ProjectMinAggregateOutputType = {
     id: string | null
     name: string | null
-    slug: string | null
     ingestKey: string | null
     allowLocalhostErrors: boolean | null
     allowWithoutOrigin: boolean | null
@@ -11946,7 +11945,6 @@ export namespace Prisma {
   export type ProjectMaxAggregateOutputType = {
     id: string | null
     name: string | null
-    slug: string | null
     ingestKey: string | null
     allowLocalhostErrors: boolean | null
     allowWithoutOrigin: boolean | null
@@ -11958,7 +11956,6 @@ export namespace Prisma {
   export type ProjectCountAggregateOutputType = {
     id: number
     name: number
-    slug: number
     ingestKey: number
     allowLocalhostErrors: number
     allowedErrorDomains: number
@@ -11983,7 +11980,6 @@ export namespace Prisma {
   export type ProjectMinAggregateInputType = {
     id?: true
     name?: true
-    slug?: true
     ingestKey?: true
     allowLocalhostErrors?: true
     allowWithoutOrigin?: true
@@ -11995,7 +11991,6 @@ export namespace Prisma {
   export type ProjectMaxAggregateInputType = {
     id?: true
     name?: true
-    slug?: true
     ingestKey?: true
     allowLocalhostErrors?: true
     allowWithoutOrigin?: true
@@ -12007,7 +12002,6 @@ export namespace Prisma {
   export type ProjectCountAggregateInputType = {
     id?: true
     name?: true
-    slug?: true
     ingestKey?: true
     allowLocalhostErrors?: true
     allowedErrorDomains?: true
@@ -12107,7 +12101,6 @@ export namespace Prisma {
   export type ProjectGroupByOutputType = {
     id: string
     name: string
-    slug: string
     ingestKey: string
     allowLocalhostErrors: boolean
     allowedErrorDomains: string[]
@@ -12139,7 +12132,6 @@ export namespace Prisma {
   export type ProjectSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
-    slug?: boolean
     ingestKey?: boolean
     allowLocalhostErrors?: boolean
     allowedErrorDomains?: boolean
@@ -12154,7 +12146,6 @@ export namespace Prisma {
   export type ProjectSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
-    slug?: boolean
     ingestKey?: boolean
     allowLocalhostErrors?: boolean
     allowedErrorDomains?: boolean
@@ -12167,7 +12158,6 @@ export namespace Prisma {
   export type ProjectSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
-    slug?: boolean
     ingestKey?: boolean
     allowLocalhostErrors?: boolean
     allowedErrorDomains?: boolean
@@ -12180,7 +12170,6 @@ export namespace Prisma {
   export type ProjectSelectScalar = {
     id?: boolean
     name?: boolean
-    slug?: boolean
     ingestKey?: boolean
     allowLocalhostErrors?: boolean
     allowedErrorDomains?: boolean
@@ -12190,7 +12179,7 @@ export namespace Prisma {
     createdOn?: boolean
   }
 
-  export type ProjectOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "ingestKey" | "allowLocalhostErrors" | "allowedErrorDomains" | "allowWithoutOrigin" | "errorsPerMinute" | "errorsPerTenMinutes" | "createdOn", ExtArgs["result"]["project"]>
+  export type ProjectOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "ingestKey" | "allowLocalhostErrors" | "allowedErrorDomains" | "allowWithoutOrigin" | "errorsPerMinute" | "errorsPerTenMinutes" | "createdOn", ExtArgs["result"]["project"]>
   export type ProjectInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     loggerActivity?: boolean | Project$loggerActivityArgs<ExtArgs>
     _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
@@ -12206,7 +12195,6 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
-      slug: string
       ingestKey: string
       allowLocalhostErrors: boolean
       allowedErrorDomains: string[]
@@ -12640,7 +12628,6 @@ export namespace Prisma {
   interface ProjectFieldRefs {
     readonly id: FieldRef<"Project", 'String'>
     readonly name: FieldRef<"Project", 'String'>
-    readonly slug: FieldRef<"Project", 'String'>
     readonly ingestKey: FieldRef<"Project", 'String'>
     readonly allowLocalhostErrors: FieldRef<"Project", 'Boolean'>
     readonly allowedErrorDomains: FieldRef<"Project", 'String[]'>
@@ -30266,7 +30253,6 @@ export namespace Prisma {
   export const ProjectScalarFieldEnum: {
     id: 'id',
     name: 'name',
-    slug: 'slug',
     ingestKey: 'ingestKey',
     allowLocalhostErrors: 'allowLocalhostErrors',
     allowedErrorDomains: 'allowedErrorDomains',
@@ -31224,7 +31210,6 @@ export namespace Prisma {
     NOT?: ProjectWhereInput | ProjectWhereInput[]
     id?: StringFilter<"Project"> | string
     name?: StringFilter<"Project"> | string
-    slug?: StringFilter<"Project"> | string
     ingestKey?: StringFilter<"Project"> | string
     allowLocalhostErrors?: BoolFilter<"Project"> | boolean
     allowedErrorDomains?: StringNullableListFilter<"Project">
@@ -31238,7 +31223,6 @@ export namespace Prisma {
   export type ProjectOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
-    slug?: SortOrder
     ingestKey?: SortOrder
     allowLocalhostErrors?: SortOrder
     allowedErrorDomains?: SortOrder
@@ -31252,7 +31236,6 @@ export namespace Prisma {
   export type ProjectWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     name?: string
-    slug?: string
     ingestKey?: string
     AND?: ProjectWhereInput | ProjectWhereInput[]
     OR?: ProjectWhereInput[]
@@ -31264,12 +31247,11 @@ export namespace Prisma {
     errorsPerTenMinutes?: IntFilter<"Project"> | number
     createdOn?: DateTimeFilter<"Project"> | Date | string
     loggerActivity?: LoggerActivityListRelationFilter
-  }, "id" | "name" | "slug" | "ingestKey">
+  }, "id" | "name" | "ingestKey">
 
   export type ProjectOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
-    slug?: SortOrder
     ingestKey?: SortOrder
     allowLocalhostErrors?: SortOrder
     allowedErrorDomains?: SortOrder
@@ -31290,7 +31272,6 @@ export namespace Prisma {
     NOT?: ProjectScalarWhereWithAggregatesInput | ProjectScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Project"> | string
     name?: StringWithAggregatesFilter<"Project"> | string
-    slug?: StringWithAggregatesFilter<"Project"> | string
     ingestKey?: StringWithAggregatesFilter<"Project"> | string
     allowLocalhostErrors?: BoolWithAggregatesFilter<"Project"> | boolean
     allowedErrorDomains?: StringNullableListFilter<"Project">
@@ -32950,7 +32931,6 @@ export namespace Prisma {
   export type ProjectCreateInput = {
     id: string
     name: string
-    slug: string
     ingestKey: string
     allowLocalhostErrors?: boolean
     allowedErrorDomains?: ProjectCreateallowedErrorDomainsInput | string[]
@@ -32964,7 +32944,6 @@ export namespace Prisma {
   export type ProjectUncheckedCreateInput = {
     id: string
     name: string
-    slug: string
     ingestKey: string
     allowLocalhostErrors?: boolean
     allowedErrorDomains?: ProjectCreateallowedErrorDomainsInput | string[]
@@ -32978,7 +32957,6 @@ export namespace Prisma {
   export type ProjectUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    slug?: StringFieldUpdateOperationsInput | string
     ingestKey?: StringFieldUpdateOperationsInput | string
     allowLocalhostErrors?: BoolFieldUpdateOperationsInput | boolean
     allowedErrorDomains?: ProjectUpdateallowedErrorDomainsInput | string[]
@@ -32992,7 +32970,6 @@ export namespace Prisma {
   export type ProjectUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    slug?: StringFieldUpdateOperationsInput | string
     ingestKey?: StringFieldUpdateOperationsInput | string
     allowLocalhostErrors?: BoolFieldUpdateOperationsInput | boolean
     allowedErrorDomains?: ProjectUpdateallowedErrorDomainsInput | string[]
@@ -33006,7 +32983,6 @@ export namespace Prisma {
   export type ProjectCreateManyInput = {
     id: string
     name: string
-    slug: string
     ingestKey: string
     allowLocalhostErrors?: boolean
     allowedErrorDomains?: ProjectCreateallowedErrorDomainsInput | string[]
@@ -33019,7 +32995,6 @@ export namespace Prisma {
   export type ProjectUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    slug?: StringFieldUpdateOperationsInput | string
     ingestKey?: StringFieldUpdateOperationsInput | string
     allowLocalhostErrors?: BoolFieldUpdateOperationsInput | boolean
     allowedErrorDomains?: ProjectUpdateallowedErrorDomainsInput | string[]
@@ -33032,7 +33007,6 @@ export namespace Prisma {
   export type ProjectUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    slug?: StringFieldUpdateOperationsInput | string
     ingestKey?: StringFieldUpdateOperationsInput | string
     allowLocalhostErrors?: BoolFieldUpdateOperationsInput | boolean
     allowedErrorDomains?: ProjectUpdateallowedErrorDomainsInput | string[]
@@ -34599,7 +34573,6 @@ export namespace Prisma {
   export type ProjectCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
-    slug?: SortOrder
     ingestKey?: SortOrder
     allowLocalhostErrors?: SortOrder
     allowedErrorDomains?: SortOrder
@@ -34617,7 +34590,6 @@ export namespace Prisma {
   export type ProjectMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
-    slug?: SortOrder
     ingestKey?: SortOrder
     allowLocalhostErrors?: SortOrder
     allowWithoutOrigin?: SortOrder
@@ -34629,7 +34601,6 @@ export namespace Prisma {
   export type ProjectMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
-    slug?: SortOrder
     ingestKey?: SortOrder
     allowLocalhostErrors?: SortOrder
     allowWithoutOrigin?: SortOrder
@@ -36673,7 +36644,6 @@ export namespace Prisma {
   export type ProjectCreateWithoutLoggerActivityInput = {
     id: string
     name: string
-    slug: string
     ingestKey: string
     allowLocalhostErrors?: boolean
     allowedErrorDomains?: ProjectCreateallowedErrorDomainsInput | string[]
@@ -36686,7 +36656,6 @@ export namespace Prisma {
   export type ProjectUncheckedCreateWithoutLoggerActivityInput = {
     id: string
     name: string
-    slug: string
     ingestKey: string
     allowLocalhostErrors?: boolean
     allowedErrorDomains?: ProjectCreateallowedErrorDomainsInput | string[]
@@ -36715,7 +36684,6 @@ export namespace Prisma {
   export type ProjectUpdateWithoutLoggerActivityInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    slug?: StringFieldUpdateOperationsInput | string
     ingestKey?: StringFieldUpdateOperationsInput | string
     allowLocalhostErrors?: BoolFieldUpdateOperationsInput | boolean
     allowedErrorDomains?: ProjectUpdateallowedErrorDomainsInput | string[]
@@ -36728,7 +36696,6 @@ export namespace Prisma {
   export type ProjectUncheckedUpdateWithoutLoggerActivityInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    slug?: StringFieldUpdateOperationsInput | string
     ingestKey?: StringFieldUpdateOperationsInput | string
     allowLocalhostErrors?: BoolFieldUpdateOperationsInput | boolean
     allowedErrorDomains?: ProjectUpdateallowedErrorDomainsInput | string[]

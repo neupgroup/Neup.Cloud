@@ -136,7 +136,6 @@ model AppError {
 model Project {
   id                   String           @id @db.Text
   name                 String           @unique @db.Text
-  slug                 String           @unique @db.Text
   ingestKey            String           @unique @map("ingestKey") @db.Text
   allowLocalhostErrors Boolean          @default(false) @map("allowLocalhostErrors")
   allowedErrorDomains  String[]         @default([]) @map("allowedErrorDomains")

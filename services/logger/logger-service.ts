@@ -2,22 +2,22 @@
 
 import {
   createLoggerActivity,
-  ensureLoggerProject,
   getLoggerActivities,
   getPaginatedLoggerActivities,
   getLoggerActivitiesByType,
   getLoggerProjects,
   getLoggerActivitiesByProject,
-  findProjectForIngest,
   countRecentErrors,
   createLoggerProject,
+  getLoggerProjectById,
+  rotateLoggerProjectIngestKey,
 } from '@/services/logger/data';
 import { redirect } from 'next/navigation';
+import { randomBytes } from 'node:crypto';
+import { revalidatePath } from 'next/cache';
 
 type LogRequestInput = {
   projectId?: string;
-  projectName?: string;
-  slug?: string;
   ingestKey?: string;
   type?: string;
   data?: unknown;
@@ -35,18 +35,6 @@ export type LoggerActivityRecord = {
   };
 };
 
-function normalizeProjectName(input: LogRequestInput) {
-  if (typeof input.projectName === 'string' && input.projectName.trim()) {
-    return input.projectName.trim();
-  }
-
-  if (typeof input.projectId === 'string' && input.projectId.trim()) {
-    return input.projectId.trim();
-  }
-
-  return '';
-}
-
 function mapLoggerActivity(record: Awaited<ReturnType<typeof createLoggerActivity>>): LoggerActivityRecord {
   return {
     id: record.id,
@@ -62,18 +50,14 @@ function mapLoggerActivity(record: Awaited<ReturnType<typeof createLoggerActivit
 }
 
 export async function logActivity(input: LogRequestInput) {
-  const projectName = normalizeProjectName(input);
-
-  if (!projectName) {
-    throw new Error('projectName or projectId is required.');
+  if (!input.projectId || !input.ingestKey) {
+    throw new Error('projectId and ingestKey are required.');
   }
 
-  const project = await ensureLoggerProject({
-    projectId: typeof input.projectId === 'string' ? input.projectId.trim() : undefined,
-    projectName,
-    slug: input.slug,
-    ingestKey: input.ingestKey,
-  });
+  const project = await getLoggerProjectById(input.projectId);
+  if (!project || project.ingestKey !== input.ingestKey) {
+    throw new Error('Invalid logger project credentials.');
+  }
 
   const activity = await createLoggerActivity({
     projectId: project.id,
@@ -85,16 +69,16 @@ export async function logActivity(input: LogRequestInput) {
 }
 
 export async function ingestError(input: LogRequestInput & { origin?: string | null }) {
-  if (!input.slug || !input.ingestKey) throw new Error('project slug and ingestKey are required.');
-  const project = await findProjectForIngest(input.ingestKey, input.slug);
-  if (!project) throw new Error('Invalid logger project credentials.');
+  if (!input.projectId || !input.ingestKey) throw new Error('projectId and ingestKey are required.');
+  const project = await getLoggerProjectById(input.projectId);
+  if (!project || project.ingestKey !== input.ingestKey) throw new Error('Invalid logger project credentials.');
   const origin = input.origin?.trim() || '';
   const hostname = origin ? (() => { try { return new URL(origin).hostname.toLowerCase(); } catch { return ''; } })() : '';
   const allowed = (!origin && project.allowWithoutOrigin) || (hostname === 'localhost' && project.allowLocalhostErrors) || project.allowedErrorDomains.some((domain) => hostname === domain.toLowerCase() || hostname.endsWith(`.${domain.toLowerCase()}`));
   if (!allowed) throw new Error('Error origin is not allowed for this project.');
   const now = Date.now();
   if (await countRecentErrors(project.id, new Date(now - 60_000)) >= project.errorsPerMinute || await countRecentErrors(project.id, new Date(now - 600_000)) >= project.errorsPerTenMinutes) throw new Error('Logger error rate limit exceeded.');
-  return logActivity({ projectId: project.id, projectName: project.name, type: 'error', data: input.data });
+  return logActivity({ projectId: project.id, ingestKey: input.ingestKey, type: 'error', data: input.data });
 }
 
 export async function getAllLoggerActivities(): Promise<LoggerActivityRecord[]> {
@@ -140,13 +124,26 @@ export async function getErrorLoggerActivities(): Promise<LoggerActivityRecord[]
 
 export async function getLoggerProjectRecords() { return getLoggerProjects(); }
 
+// Loads a logger project for the management page.
+export async function getLoggerProjectRecord(projectId: string) {
+  return getLoggerProjectById(projectId);
+}
+
+// Replaces the active ingest key and refreshes the project management page.
+export async function rotateLoggerProjectIngestKeyAction(projectId: string) {
+  'use server';
+  const nextIngestKey = `nlk_${randomBytes(32).toString('hex')}`;
+  await rotateLoggerProjectIngestKey(projectId, nextIngestKey);
+  revalidatePath(`/logger/${encodeURIComponent(projectId)}`);
+  redirect(`/logger/${encodeURIComponent(projectId)}?keyRotated=1`);
+}
+
 export async function createLoggerProjectAction(formData: FormData) {
   'use server';
   const name = String(formData.get('name') ?? '').trim();
-  const slug = String(formData.get('slug') ?? '').trim().toLowerCase();
   const ingestKey = String(formData.get('ingestKey') ?? '').trim();
-  if (!name || !slug || !ingestKey) throw new Error('Name, slug, and ingest key are required.');
-  await createLoggerProject({ name, slug, ingestKey, allowLocalhostErrors: formData.get('allowLocalhostErrors') === 'on', allowWithoutOrigin: formData.get('allowWithoutOrigin') === 'on', allowedErrorDomains: String(formData.get('allowedErrorDomains') ?? '').split(',').map((value) => value.trim().toLowerCase()).filter(Boolean), errorsPerMinute: Math.max(1, Number(formData.get('errorsPerMinute') ?? 60)), errorsPerTenMinutes: Math.max(1, Number(formData.get('errorsPerTenMinutes') ?? 300)) });
+  if (!name || !ingestKey) throw new Error('Name and ingest key are required.');
+  await createLoggerProject({ name, ingestKey, allowLocalhostErrors: formData.get('allowLocalhostErrors') === 'on', allowWithoutOrigin: formData.get('allowWithoutOrigin') === 'on', allowedErrorDomains: String(formData.get('allowedErrorDomains') ?? '').split(',').map((value) => value.trim().toLowerCase()).filter(Boolean), errorsPerMinute: Math.max(1, Number(formData.get('errorsPerMinute') ?? 60)), errorsPerTenMinutes: Math.max(1, Number(formData.get('errorsPerTenMinutes') ?? 300)) });
   redirect('/logger');
 }
 export async function getProjectLoggerActivityRecords(projectId: string, page = 1, pageSize = 25) {
