@@ -3,15 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "setup": "chmod +x ./setup.sh && ./setup.sh",
-    "prebuild": "npm run setup",
-    "predev": "npm run setup",
+    "neup.cloner": "test -d ./@neup/setup || (mkdir -p ./@neup && cd ./@neup && git clone --depth 1 --single-branch --branch main https://github.com/neupgroup/nextjs.setup.git nextjs.setup && mv nextjs.setup setup)",
+    "setup": "npm run neup.cloner && cd ./@neup && chmod +x ./setup/index.sh && ./setup/index.sh",
 
-    "dev": "next dev --turbopack --experimental-https --port 25683",
-    "build": "npx prisma generate && npx next build",
+    "preinstall": "npm run setup -- --mode preinstall",
+    "postinstall": "npm run setup -- --mode postinstall",
+    "prebuild": "npm run setup -- --mode prebuild",
+    "postbuild": "npm run setup -- --mode postbuild",
+    "predev": "npm run setup -- --mode predev",
+
+    "dev": "next dev --experimental-https --hostname dev.neupgroup.com --port 25683",
+    "build": "prisma generate && next build",
     "start": "next start --port 25683",
-    "postinstall": "patch-package",
-    "lint": "next lint",
+    
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
 
     "gen.key": "mkdir keys && cd keys && mkdir communication && cd communication && mkdir github && cd github && openssl genpkey -algorithm RSA -out ./private.pem -pkeyopt rsa_keygen_bits:4096 && openssl pkey -in ./private.pem -pubout -out ./public.pem"
