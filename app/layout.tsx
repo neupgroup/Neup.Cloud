@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import RootLayoutClient from '@/components/root-layout-client';
 import { ensureAccountProfile, getCurrentAccountId } from '@/services/account-profile';
 import BaseLayout from '@neup/components/layout/RootLayout';
-import application from '@/base/application.json';
+import application from '@base/application.json';
 import './globals.css';
 
 type CurrentAccountProfile = {

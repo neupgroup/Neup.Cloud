@@ -5,7 +5,7 @@ import { cn } from "@neup/core/utils";
 import Link from "next/link";
 import NProgress from 'nprogress';
 import { usePathname } from 'next/navigation';
-import application from '@/base/application.json';
+import application from '@base/application.json';
 
 export function Logo({ className }: { className?: string }) {
   const pathname = usePathname();
