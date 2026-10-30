@@ -435,7 +435,7 @@ export default function RootLayout({
               </ScrollArea>
             </div>
 
-            <div className="mx-auto grid w-full max-w-[1440px] lg:grid-cols-[260px_1fr]">
+            <div className="mx-auto grid w-full max-w-[1440px] lg:grid-cols-[260px_minmax(0,1fr)]">
               <aside className="hidden h-[calc(100vh-4rem)] flex-col border-r bg-background lg:sticky lg:top-16 lg:flex">
                 <ScrollArea className="flex-1">
                   <div className="p-6">
@@ -444,8 +444,8 @@ export default function RootLayout({
                 </ScrollArea>
               </aside>
 
-              <main className="min-h-[calc(100vh-4rem)] p-6 md:p-10">
-                <div className="w-full">{children}</div>
+              <main className="min-h-[calc(100vh-4rem)] min-w-0 p-6 md:p-10">
+                <div className="min-w-0 w-full">{children}</div>
               </main>
             </div>
           </div>

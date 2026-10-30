@@ -3,7 +3,8 @@ import type { Config } from 'tailwindcss';
 export default {
   darkMode: ['class'],
   content: [
-    './.neup/**/*.{js,ts,jsx,tsx,mdx}',
+    './@neup/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './@neup/core/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './hooks/**/*.{js,ts,jsx,tsx,mdx}',
@@ -49,6 +50,12 @@ export default {
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
+        },
+        danger: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+          hover: 'color-mix(in srgb, hsl(var(--destructive)) 90%, black)',
+          press: 'color-mix(in srgb, hsl(var(--destructive)) 78%, black)',
         },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

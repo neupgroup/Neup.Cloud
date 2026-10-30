@@ -27,8 +27,6 @@ const RESPONSE_HEADERS = {
 
 type LoggerRequestBody = {
   projectId?: unknown;
-  projectName?: unknown;
-  slug?: unknown;
   ingestKey?: unknown;
   type?: unknown;
   data?: unknown;
@@ -44,8 +42,6 @@ export async function POST(request: NextRequest) {
 
     const activity = await logActivity({
       projectId: readOptionalString(body.projectId),
-      projectName: readOptionalString(body.projectName),
-      slug: readOptionalString(body.slug),
       ingestKey: readOptionalString(body.ingestKey),
       type: readOptionalString(body.type),
       data: body.data ?? {},
@@ -63,7 +59,11 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to store logger activity.';
-    const status = message.includes('required') ? 400 : 500;
+    const status = message.includes('Invalid logger project credentials.')
+      ? 401
+      : message.includes('required')
+        ? 400
+        : 500;
 
     return NextResponse.json(
       {

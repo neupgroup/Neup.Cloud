@@ -27,8 +27,6 @@ const RESPONSE_HEADERS = {
 
 type LoggerErrorRequestBody = {
   projectId?: unknown;
-  projectName?: unknown;
-  slug?: unknown;
   ingestKey?: unknown;
   data?: unknown;
 };
@@ -43,10 +41,8 @@ export async function POST(request: NextRequest) {
 
     const activity = await ingestError({
       projectId: readOptionalString(body.projectId),
-      projectName: readOptionalString(body.projectName),
       type: 'error',
       data: body.data ?? {},
-      slug: readOptionalString(body.slug),
       ingestKey: readOptionalString(body.ingestKey),
       origin: request.headers.get('origin'),
     });

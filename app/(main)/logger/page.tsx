@@ -61,10 +61,10 @@ export default async function LoggerPage({
           </Card>
         </Link>
         {projects.map((project) => (
-          <Link key={project.id} href={`/logger/logs?project=${encodeURIComponent(project.id)}`} className="block first:rounded-t-lg last:rounded-b-lg">
+          <Link key={project.id} href={`/logger/${encodeURIComponent(project.id)}`} className="block first:rounded-t-lg last:rounded-b-lg">
             <Card className="rounded-none border-0 transition-colors hover:bg-muted/30">
               <CardContent className="flex min-h-20 items-center justify-between p-4">
-                <div><p className="font-semibold">{project.name}</p><p className="text-sm text-muted-foreground">{project.slug}</p></div>
+                <div><p className="font-semibold">{project.name}</p><p className="break-all text-sm text-muted-foreground">{project.id}</p></div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </CardContent>
             </Card>
