@@ -39,10 +39,6 @@ import {
   savePipelineFlowAction,
 } from '@/services/pipelines/pipelines-service';
 import {
-  executeAiAgentNodeAction,
-  getAiAgentValidationError,
-} from '@/components/pipeline/node/intelligence.aiagent';
-import {
   buildSharedNodeReferenceValue,
   createNodeReferenceId,
   getNodeType,
@@ -65,12 +61,6 @@ import {
   pipelineNodeCategories,
   pipelineNodeModuleMap,
 } from '@/components/pipeline/node/registry';
-import {
-  createPipelineIntelligenceContext,
-  type PipelineIntelligenceModel,
-  type PipelineIntelligencePrompt,
-  type PipelineIntelligenceToken,
-} from '@/components/pipeline/node/intelligence.shared';
 import { cn } from '@neup/core/utils';
 import { PipelineContextMenu } from '@/components/pipeline/pipeline-context-menu';
 
@@ -93,20 +83,6 @@ type PipelineNodeData = PipelineSharedNodeData & {
   httpLastResponseStatus?: number | null;
   httpLastResponseHeaders?: PipelineNodeKeyValueEntry[];
   httpLastResponseBody?: string;
-  intelligencePromptMode?: 'existing' | 'new';
-  intelligencePromptId?: string;
-  intelligencePrimaryModelId?: number | null;
-  intelligenceFallbackModelId?: number | null;
-  intelligencePrimaryAccessKey?: number | null;
-  intelligenceFallbackAccessKey?: number | null;
-  intelligenceMaxTokens?: number | null;
-  intelligenceMasterPrompt?: string;
-  intelligencePrompt?: string;
-  intelligenceContext?: string;
-  intelligenceLastResponse?: string;
-  intelligenceLastModel?: string;
-  intelligenceLastRenderedPrompt?: string;
-  intelligenceWarning?: string;
   whatsappConnectionLabel?: string;
   whatsappPhoneNumberId?: string;
   whatsappBusinessAccountId?: string;
@@ -168,9 +144,6 @@ type PipelineContextMenuState =
     };
 
 type PipelineEditorProps = {
-  intelligenceModels: PipelineIntelligenceModel[];
-  intelligencePrompts: PipelineIntelligencePrompt[];
-  intelligenceTokens: PipelineIntelligenceToken[];
   initialPipeline?: {
     id: string;
     title: string;
@@ -452,36 +425,6 @@ const initialNodes: PipelineFlowNode[] = [
     },
   },
   {
-    id: 'score-ai',
-    type: 'pipelineNode',
-    position: { x: 760, y: 180 },
-    data: {
-      referenceId: 'scorewithai_1203',
-      label: 'Score with AI',
-      kind: 'aiAgent',
-      nodeType: 'intelligence',
-      category: 'Intelligence',
-      description: 'Classify urgency, estimate fit, and draft a response outline.',
-      summary: 'AI turns raw lead info into something the team can act on quickly.',
-      subtitle: 'Reasoning step',
-      status: 'idle',
-      activity: 'Prepared to analyze incoming context.',
-      intelligencePromptMode: 'existing',
-      intelligencePromptId: '',
-      intelligencePrimaryModelId: null,
-      intelligenceFallbackModelId: null,
-      intelligencePrimaryAccessKey: null,
-      intelligenceFallbackAccessKey: null,
-      intelligenceMaxTokens: 500,
-      intelligenceMasterPrompt: 'Score the lead, explain the reasoning, and return a concise structured summary.',
-      intelligencePrompt: 'Review this lead and decide whether we should schedule a follow-up.',
-      intelligenceContext: '{\n  "lead": {\n    "name": "Acme Corp",\n    "intent": "High",\n    "budget": "Enterprise"\n  }\n}',
-      intelligenceLastResponse: '',
-      intelligenceLastModel: '',
-      intelligenceLastRenderedPrompt: '',
-    },
-  },
-  {
     id: 'calendar-follow-up',
     type: 'pipelineNode',
     position: { x: 1090, y: 180 },
@@ -502,8 +445,7 @@ const initialNodes: PipelineFlowNode[] = [
 
 const initialEdges: Edge[] = [
   createEdge('manual-start', 'http-fetch'),
-  createEdge('http-fetch', 'score-ai'),
-  createEdge('score-ai', 'calendar-follow-up'),
+  createEdge('http-fetch', 'calendar-follow-up'),
 ];
 
 const emptyInitialFlow: { nodes: PipelineFlowNode[]; edges: Edge[] } = {
@@ -595,11 +537,6 @@ function getNodeTone(kind: PipelineNodeKind) {
       return {
         header: 'from-sky-500 to-blue-600',
         soft: 'bg-sky-500/10 text-sky-700 border-sky-200',
-      };
-    case 'aiAgent':
-      return {
-        header: 'from-indigo-500 to-violet-600',
-        soft: 'bg-indigo-500/10 text-indigo-700 border-indigo-200',
       };
     case 'transform':
     case 'condition':
@@ -763,9 +700,6 @@ function getPointerPosition(event: MouseEvent | TouchEvent) {
 }
 
 function PipelineEditorCanvas({
-  intelligenceModels,
-  intelligencePrompts,
-  intelligenceTokens,
   initialPipeline,
 }: PipelineEditorProps) {
   const router = useRouter();
@@ -846,16 +780,6 @@ function PipelineEditorCanvas({
     () => nodes.find((node) => node.id === selectedId && !node.data.pending) ?? null,
     [nodes, selectedId]
   );
-  const intelligence = useMemo(
-    () =>
-      createPipelineIntelligenceContext({
-        models: intelligenceModels,
-        prompts: intelligencePrompts,
-        tokens: intelligenceTokens,
-      }),
-    [intelligenceModels, intelligencePrompts, intelligenceTokens]
-  );
-
   const filteredTemplatesByCategory = useMemo(() => {
     const normalized = search.trim().toLowerCase();
 
@@ -928,7 +852,6 @@ function PipelineEditorCanvas({
                   ...node.data,
                   status: 'error',
                   activity: activity ?? warning,
-                  intelligenceWarning: warning,
                 },
               }
             : node
@@ -947,7 +870,6 @@ function PipelineEditorCanvas({
                 ...node,
                 data: {
                   ...node.data,
-                  intelligenceWarning: '',
                 },
               }
             : node
@@ -1402,104 +1324,8 @@ function PipelineEditorCanvas({
     [selectedId, setNodes]
   );
 
-  const executeAiAgentNode = useCallback(
-    async (node: PipelineFlowNode) => {
-      if (node.data.kind !== 'aiAgent') {
-        return false;
-      }
-
-      const validationError = getAiAgentValidationError(
-        node.data as PipelineNodeRecord,
-        intelligence
-      );
-
-      if (validationError) {
-        setNodeWarning(node.id, validationError);
-        appendConsole(`AI Agent "${node.data.label}" needs configuration: ${validationError}`);
-        return false;
-      }
-
-      const actionInput = {
-        promptMode: node.data.intelligencePromptMode ?? 'new',
-        promptId: node.data.intelligencePromptId?.trim() || null,
-        primaryModelId: node.data.intelligencePrimaryModelId ?? null,
-        fallbackModelId: node.data.intelligenceFallbackModelId ?? null,
-        primaryAccessKey: node.data.intelligencePrimaryAccessKey ?? null,
-        fallbackAccessKey: node.data.intelligenceFallbackAccessKey ?? null,
-        maxTokens: node.data.intelligenceMaxTokens ?? null,
-        masterPrompt: resolveNodeTemplate(node.data.intelligenceMasterPrompt?.trim() || '', nodes).trim() || null,
-        prompt: resolveNodeTemplate(node.data.intelligencePrompt?.trim() || '', nodes).trim(),
-        context: resolveNodeTemplate(node.data.intelligenceContext?.trim() || '', nodes).trim() || null,
-      };
-
-      setNodes((currentNodes) =>
-        currentNodes.map((currentNode) =>
-          currentNode.id === node.id
-            ? {
-                ...currentNode,
-                data: {
-                  ...currentNode.data,
-                  status: 'running',
-                  activity: 'Generating intelligence response...',
-                  intelligenceWarning: '',
-                },
-              }
-            : currentNode
-        )
-      );
-
-      appendConsole(`AI Agent "${node.data.label}" is preparing a prompt record.`);
-
-      try {
-        const result = await executeAiAgentNodeAction(actionInput);
-        const compactResponse =
-          result.responseText.length > 220
-            ? `${result.responseText.slice(0, 220).trim()}...`
-            : result.responseText;
-
-        setNodes((currentNodes) =>
-          currentNodes.map((currentNode) =>
-            currentNode.id === node.id
-              ? {
-                  ...currentNode,
-                  data: {
-                    ...currentNode.data,
-                    status: 'success',
-                    activity: `Response generated via ${result.usedModel}.`,
-                    intelligencePromptId: result.promptId,
-                    intelligenceLastResponse: result.responseText,
-                    intelligenceLastModel: result.usedModel,
-                    intelligenceLastRenderedPrompt: result.renderedPrompt,
-                    intelligenceWarning: '',
-                    summary: compactResponse || currentNode.data.summary,
-                  },
-                }
-              : currentNode
-          )
-        );
-
-        appendConsole(
-          `${result.createdPrompt ? 'Created' : 'Updated'} prompt ${result.promptId} and generated a response with ${result.usedModel}.`
-        );
-
-        return true;
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to generate AI response';
-        setNodeWarning(node.id, message);
-
-        appendConsole(`AI Agent "${node.data.label}" failed: ${message}`);
-        return false;
-      }
-    },
-    [appendConsole, intelligence, nodes, setNodeWarning, setNodes]
-  );
-
   const executeCanvasNode = useCallback(
     async (node: PipelineFlowNode) => {
-      if (node.data.kind === 'aiAgent') {
-        return executeAiAgentNode(node);
-      }
-
       setNodes((currentNodes) =>
         currentNodes.map((currentNode) =>
           currentNode.id === node.id
@@ -1536,7 +1362,7 @@ function PipelineEditorCanvas({
 
       return true;
     },
-    [appendConsole, executeAiAgentNode, setNodes]
+    [appendConsole, setNodes]
   );
 
   const handleRunNodeFromCanvas = useCallback(
@@ -1623,22 +1449,17 @@ function PipelineEditorCanvas({
               clearNodeWarning(selectedNode.id);
             },
             executeNode: async () => {
-              if (selectedNode.data.kind === 'aiAgent') {
-                await executeAiAgentNode(selectedNode);
-              }
+              return;
             },
             normalizeKeyValueEntries: normalizePipelineKeyValueEntries,
             addCollectionEntry: addSelectedCollectionEntry,
             updateCollectionEntry: updateSelectedCollectionEntry,
             removeCollectionEntry: removeSelectedCollectionEntry,
-            intelligence,
           }
         : null,
     [
       addSelectedCollectionEntry,
       clearNodeWarning,
-      executeAiAgentNode,
-      intelligence,
       removeSelectedCollectionEntry,
       selectedNode,
       updateSelectedCollectionEntry,

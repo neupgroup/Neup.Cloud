@@ -6,7 +6,6 @@ import { Handle, Position } from 'reactflow';
 
 import { Button } from '@neup/components/ui/button';
 import { Input } from '@neup/components/ui/input';
-import { type PipelineIntelligenceContext } from '@/components/pipeline/node/intelligence.shared';
 import { cn } from '@neup/core/utils';
 
 export type PipelineNodeKind =
@@ -18,7 +17,6 @@ export type PipelineNodeKind =
   | 'browser'
   | 'whatsappSend'
   | 'whatsappReact'
-  | 'aiAgent'
   | 'transform'
   | 'condition'
   | 'delay'
@@ -35,9 +33,7 @@ export type PipelineNodeType =
   | 'triggers'
   | 'actions'
   | 'logic'
-  | 'integration'
-  | 'intelligence';
-
+  | 'integration';
 export type PipelineNodeKeyValueEntry = {
   id: string;
   key: string;
@@ -87,7 +83,6 @@ export type PipelineNodeInspectorArgs<TData extends PipelineNodeRecord = Pipelin
   addCollectionEntry: (field: string) => void;
   updateCollectionEntry: (field: string, entryId: string, patch: Partial<PipelineNodeKeyValueEntry>) => void;
   removeCollectionEntry: (field: string, entryId: string) => void;
-  intelligence: PipelineIntelligenceContext;
 };
 
 export type PipelineNodeModule<TData extends PipelineNodeRecord = PipelineNodeRecord> = {
@@ -183,8 +178,6 @@ export function getNodeTypeLabel(kind: PipelineNodeKind) {
       return 'WhatsApp Send';
     case 'whatsappReact':
       return 'WhatsApp React';
-    case 'aiAgent':
-      return 'AI Agent';
     case 'transform':
       return 'Transform';
     case 'condition':
@@ -231,8 +224,6 @@ export function getNodeType(kind: PipelineNodeKind): PipelineNodeType {
     case 'linkedin':
     case 'googleCalendar':
       return 'integration';
-    case 'aiAgent':
-      return 'intelligence';
     default:
       return 'actions';
   }

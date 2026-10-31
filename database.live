@@ -1,13 +1,107 @@
+Table: servers, Model: Server
+Fields:
+> id: text, primary key;
+> name: text;
+> username: text;
+> type: text;
+> provider: text;
+> moreDetails: text, nullable;
+> publicIp: text;
+> privateIp: text, nullable;
+> privateKey: text, nullable;
+> publicKey: text, nullable;
+> proxyHandler: text, nullable;
+> loadBalancer: text, nullable;
+> createdAt: timestamp;
+> updatedAt: timestamp;
+
+Table: server_logs, Model: ServerLog
+Fields:
+> id: text, primary key;
+> serverId: text;
+> command: text;
+> commandName: text, nullable;
+> output: text, nullable;
+> status: text;
+> runAt: timestamp;
+> source: text, nullable;
+> accountId: text, nullable;
+
+Table: saved_commands, Model: SavedCommand
+Fields:
+> id: text, primary key;
+> name: text;
+> command: text;
+> description: text, nullable;
+> nextCommands: text[], default: [];
+> variables: json, nullable;
+> createdAt: timestamp;
+> updatedAt: timestamp;
+
+Table: applications, Model: Application
+Fields:
+> id: text, primary key;
+> name: text;
+> appIcon: text, nullable;
+> location: text;
+> language: text;
+> repository: text, nullable;
+> networkAccess: text[], default: [];
+> commands: json, nullable;
+> information: json, nullable;
+> owner: text;
+> createdAt: timestamp;
+> updatedAt: timestamp;
+> environments: json, nullable;
+> files: json, nullable;
+
+Table: application_server_map, Model: ApplicationServerMap
+Fields:
+> id: text, primary key;
+> serverId: text, references servers.id;
+> applicationId: text, references applications.id;
+> status: enum(stopped, started, inactive), default: started;
+> isPrimary: boolean, default: false;
+
+Table: domains, Model: Domain
+Fields:
+> id: text, primary key;
+> name: text, unique;
+> status: text;
+> addedAt: timestamp;
+> verificationCode: text, nullable;
+> verified: boolean;
+
+Table: environment_variables, Model: EnvironmentVariable
+Fields:
+> id: text, primary key;
+> key: text;
+> value: text;
+> targetType: text;
+> selectedTargets: text[], default: [];
+> isConfidential: boolean;
+> protectValue: boolean;
+> createdAt: timestamp;
+
+Table: errors, Model: AppError
+Fields:
+> id: text, primary key;
+> message: text;
+> level: text;
+> source: text;
+> timestamp: timestamp;
+> stack: text, nullable;
+
 Table: projects, Model: Project
 Fields:
 > id: text, primary key;
 > name: text, unique;
 > ingestKey: text, unique;
-> allowLocalhostErrors: boolean, default false;
-> allowedErrorDomains: text[], default [];
-> allowWithoutOrigin: boolean, default false;
-> errorsPerMinute: int, default 60;
-> errorsPerTenMinutes: int, default 300;
+> allowLocalhostErrors: boolean, default: false;
+> allowedErrorDomains: text[], default: [];
+> allowWithoutOrigin: boolean, default: false;
+> errorsPerMinute: int, default: 60;
+> errorsPerTenMinutes: int, default: 300;
 > createdOn: timestamp;
 
 Table: loggerActivity, Model: LoggerActivity
@@ -17,3 +111,91 @@ Fields:
 > type: text, nullable;
 > data: json;
 > loggedOn: timestamp;
+
+Table: live_sessions, Model: LiveSession
+Fields:
+> id: text, primary key;
+> createdAt: timestamp;
+> cwd: text;
+> status: text;
+> history: json;
+> serverLogId: text, nullable;
+> serverId: text, nullable;
+
+Table: pipelines, Model: Pipeline
+Fields:
+> id: text, primary key;
+> accountId: text;
+> title: text;
+> description: text, nullable;
+> flowJson: json;
+
+Table: pipeline_logs, Model: PipelineLog
+Fields:
+> id: text, primary key;
+> pipelineId: text;
+> timestamp: timestamp;
+> logBy: text;
+> details: text;
+
+Table: databases, Model: Database
+Fields:
+> id: text, primary key;
+> title: text;
+> description: text;
+> connectionType: text;
+> connectionStatus: text, default: "connected";
+> credentails: text;
+> authConfig: json;
+> lastValidatedAt: timestamp, nullable;
+> createdAt: timestamp, default: now;
+> updatedAt: timestamp;
+
+Table: accounts, Model: Account
+Fields:
+> id: text, primary key;
+> displayName: text, nullable;
+> displayImage: text, nullable;
+> neupid: text, nullable;
+
+Table: permit, Model: Permit
+Fields:
+> id: text, primary key;
+> accountId: text, references accounts.id;
+> portfolioId: text, nullable;
+> assetType: text;
+> assetId: text;
+> role: text;
+
+Table: authz_role, Model: AuthzRole
+Fields:
+> id: text, primary key, default: uuid();
+> name: text;
+> description: text, nullable;
+> scope: text, nullable;
+
+Table: authz_capability, Model: AuthzCapability
+Fields:
+> id: text, primary key, default: uuid();
+> name: text;
+> description: text, nullable;
+> scope: text, nullable;
+
+Table: authz_role_capability, Model: AuthzRoleCapability
+Fields:
+> id: text, primary key, default: uuid();
+> roleId: text;
+> capabilityId: text;
+> scope: text, nullable;
+> denormalizedCapability: json, nullable;
+> roleName: text, nullable;
+
+Table: authz_access, Model: AuthzAccess
+Fields:
+> id: text, primary key, default: uuid();
+> toAccountId: text;
+> forServerId: text, nullable, references servers.id;
+> databaseId: text, nullable, references databases.id;
+> roleId: text, references authz_role.id;
+> status: text;
+> moreDetails: json;

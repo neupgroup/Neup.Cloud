@@ -1,0 +1,7 @@
+{
+    "name": "Neup.Cloud",
+    "description": "The Neup.Cloud is a cloud-based platform that provides a suite of tools and services for developers, businesses, and individuals to build, deploy, and manage applications and services in the cloud. It offers a range of features including scalable infrastructure, data storage, security, and collaboration tools.",
+    "version": "1.0.0.01",
+    "poweredBy": "neup.sites",
+    "id": "neup.sites"
+}

@@ -7,7 +7,7 @@ import { PageTitle } from '@/components/page-header';
 import { Badge } from '@neup/components/ui/badge';
 import { Button } from '@neup/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@neup/components/ui/card';
-import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
+import { getCurrentAccountId } from '@/services/account-profile';
 import {
   getPipelineById,
   getPipelineLogsByPipelineId,
@@ -29,8 +29,8 @@ export default async function PipelineInstanceLogsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const accountId = await getCurrentIntelligenceAccountId();
-  const pipeline = await getPipelineById(id, accountId);
+  const accountId = await getCurrentAccountId();
+  const pipeline = await getPipelineById(id, accountId ?? undefined);
 
   if (!pipeline) {
     notFound();

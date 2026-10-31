@@ -244,58 +244,6 @@ exports.Prisma.LiveSessionScalarFieldEnum = {
   serverId: 'serverId'
 };
 
-exports.Prisma.AccessTokenScalarFieldEnum = {
-  id: 'id',
-  accountId: 'accountId',
-  name: 'name',
-  key: 'key'
-};
-
-exports.Prisma.IntelligenceModelScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  provider: 'provider',
-  model: 'model',
-  description: 'description',
-  currency: 'currency',
-  inputPrice: 'inputPrice',
-  outputPrice: 'outputPrice'
-};
-
-exports.Prisma.IntelligenceAccessScalarFieldEnum = {
-  id: 'id',
-  accountId: 'accountId',
-  keyHash: 'keyHash',
-  type: 'type',
-  availableTo: 'availableTo',
-  details: 'details',
-  maxTokens: 'maxTokens',
-  tokenBalance: 'tokenBalance',
-  status: 'status',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.IntelligenceLogScalarFieldEnum = {
-  id: 'id',
-  accessId: 'accessId',
-  details: 'details',
-  from: 'from',
-  type: 'type',
-  balance: 'balance',
-  devDetails: 'devDetails',
-  loggedOn: 'loggedOn'
-};
-
-exports.Prisma.OpenFlowUsageLogScalarFieldEnum = {
-  id: 'id',
-  accountId: 'accountId',
-  tokenLast4: 'tokenLast4',
-  modelUsed: 'modelUsed',
-  provider: 'provider',
-  usedAt: 'usedAt'
-};
-
 exports.Prisma.PipelineScalarFieldEnum = {
   id: 'id',
   accountId: 'accountId',
@@ -421,11 +369,6 @@ exports.Prisma.ModelName = {
   Project: 'Project',
   LoggerActivity: 'LoggerActivity',
   LiveSession: 'LiveSession',
-  AccessToken: 'AccessToken',
-  IntelligenceModel: 'IntelligenceModel',
-  IntelligenceAccess: 'IntelligenceAccess',
-  IntelligenceLog: 'IntelligenceLog',
-  OpenFlowUsageLog: 'OpenFlowUsageLog',
   Pipeline: 'Pipeline',
   PipelineLog: 'PipelineLog',
   Database: 'Database',

@@ -1,0 +1,18 @@
+[
+    {
+        "name": "neup.notifications",
+        "isRequired": true,
+        "methods": [
+            "push",
+            "mail",
+            "toast"
+        ],
+        "projectId": "0a40228e-a331-4c83-8ef4-6a443a84a8db"
+    },
+    {
+        "name": "neup.account",
+        "isRequired": true,
+        "accountSystem": "neupId.remote",
+        "projectId": "0a40228e-a331-4c83-8ef4-6a443a84a8db"
+    }
+]

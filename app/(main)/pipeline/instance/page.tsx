@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@neup/components/ui/card';
-import { getCurrentIntelligenceAccountId } from '@/services/intelligence/account';
+import { getCurrentAccountId } from '@/services/account-profile';
 import { getPipelinesByAccountId } from '@/services/pipelines/data';
 
 export const metadata: Metadata = {
@@ -49,7 +49,7 @@ export default async function PipelineInstancePage({
   searchParams?: Promise<{ page?: string | string[] }>;
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const pipelines = await getPipelinesByAccountId(await getCurrentIntelligenceAccountId());
+  const pipelines = await getPipelinesByAccountId((await getCurrentAccountId()) ?? '');
   const page = normalizePage(resolvedSearchParams.page);
   const pageSize = 10;
   const totalPages = Math.max(1, Math.ceil(pipelines.length / pageSize));

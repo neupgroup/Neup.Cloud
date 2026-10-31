@@ -6,7 +6,6 @@ import {
   Menu,
   X,
   Server,
-  Lightbulb,
   CreditCard,
   HeartPulse,
   HardDrive,
@@ -25,8 +24,6 @@ import {
   ArrowUpCircle,
   Package,
   Users,
-  Key,
-  KeyRound,
   FileKey,
   LayoutGrid,
   ListChecks,
@@ -36,7 +33,6 @@ import {
   Activity,
   Rocket,
   Play,
-  Bot,
   Workflow,
   Mail,
   Bell,
@@ -127,15 +123,6 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, selectedSe
     { href: "/notifications", label: "Notifications", icon: Bell },
   ];
 
-  const intelligenceLinks = [
-    { href: "/intelligence", label: "Home", icon: Lightbulb },
-    { href: "/intelligence/access", label: "Access", icon: KeyRound },
-    { href: "/intelligence/models", label: "Models", icon: Bot },
-    { href: "/intelligence/tokens", label: "Tokens", icon: Key },
-    { href: "/intelligence/logs", label: "Logs", icon: ScrollText },
-    { href: "/intelligence/billing", label: "Billing", icon: CreditCard },
-  ];
-
   const pipelineLinks = [
     { href: "/pipeline", label: "Home", icon: Workflow },
     { href: "/pipeline/editor", label: "Editor", icon: Play },
@@ -190,7 +177,6 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, selectedSe
   // Collect all paths for longest match calculation
   const allPaths = [
     ...navLinks.map(l => l.href),
-    ...intelligenceLinks.map(l => l.href),
     ...pipelineLinks.map(l => l.href),
     ...domainLinks.map(l => l.href),
     ...securityLinks.map(l => l.href),
@@ -226,18 +212,6 @@ function MainNavContent({ currentPath, onLinkClick, isServerSelected, selectedSe
           ))}
         </div>
       )}
-
-      <div className="space-y-2">
-        <div className="px-3 text-xs font-semibold uppercase text-muted-foreground pt-4">
-          Intelligence
-        </div>
-        {intelligenceLinks.map(({ href, label, icon: Icon }) => (
-          <NavLink key={label} href={href} currentPath={currentPath} allPaths={allPaths} selectedServerId={selectedServerId} onClick={onLinkClick}>
-            <Icon className="h-4 w-4" />
-            <span>{label}</span>
-          </NavLink>
-        ))}
-      </div>
 
       <div className="space-y-2">
         <div className="px-3 text-xs font-semibold uppercase text-muted-foreground pt-4">

@@ -2,7 +2,7 @@
  * prisma/seed.ts
  *
  * Seeds the authz tables with the `cloud.individual.default` role and its
- * full set of capabilities across domains, pipelines, intelligence, and servers.
+ * full set of capabilities across domains, pipelines, and servers.
  *
  * Run with: npx prisma db seed
  */
@@ -38,14 +38,6 @@ const CAPABILITIES = [
   { id: 'cloud:pipelines:update',  name: 'cloud:pipelines:update',  description: 'Edit pipelines',         scope: 'cloud' },
   { id: 'cloud:pipelines:delete',  name: 'cloud:pipelines:delete',  description: 'Delete pipelines',       scope: 'cloud' },
   { id: 'cloud:pipelines:execute', name: 'cloud:pipelines:execute', description: 'Run pipeline executions',scope: 'cloud' },
-
-  // Intelligence
-  { id: 'cloud:intelligence:read',    name: 'cloud:intelligence:read',    description: 'View intelligence resources',      scope: 'cloud' },
-  { id: 'cloud:intelligence:create',  name: 'cloud:intelligence:create',  description: 'Create intelligence access keys',  scope: 'cloud' },
-  { id: 'cloud:intelligence:update',  name: 'cloud:intelligence:update',  description: 'Update intelligence configuration',scope: 'cloud' },
-  { id: 'cloud:intelligence:delete',  name: 'cloud:intelligence:delete',  description: 'Delete intelligence resources',    scope: 'cloud' },
-  { id: 'cloud:intelligence:query',   name: 'cloud:intelligence:query',   description: 'Send queries to intelligence API', scope: 'cloud' },
-  { id: 'cloud:intelligence:billing', name: 'cloud:intelligence:billing', description: 'View intelligence billing & logs', scope: 'cloud' },
 
   // Servers
   { id: 'cloud:servers:read',    name: 'cloud:servers:read',    description: 'View servers',              scope: 'cloud' },

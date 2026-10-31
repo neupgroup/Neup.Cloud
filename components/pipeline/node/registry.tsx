@@ -1,11 +1,10 @@
 'use client';
 
-import { Bot, Calendar, GitBranch, Play, PlugZap, Zap, type LucideIcon } from 'lucide-react';
+import { Calendar, GitBranch, Play, PlugZap, Zap, type LucideIcon } from 'lucide-react';
 
 import { browserNodeModule } from '@/components/pipeline/node/action.browser';
 import { databaseNodeModule } from '@/components/pipeline/node/action.database';
 import { httpRequestNodeModule } from '@/components/pipeline/node/action.httprequest';
-import { aiAgentNodeModule } from '@/components/pipeline/node/intelligence.aiagent';
 import { githubNodeModule } from '@/components/pipeline/node/integration.github';
 import { googleNodeModule } from '@/components/pipeline/node/integration.google';
 import { googleCalendarNodeModule } from '@/components/pipeline/node/integration.googlecalendar';
@@ -56,12 +55,6 @@ export const pipelineNodeCategories: PipelineNodeCategoryDefinition[] = [
     description: 'Connect the flow to concrete tools and provider-specific entry points.',
     icon: PlugZap,
   },
-  {
-    id: 'intelligence',
-    label: 'Intelligence',
-    description: 'Reasoning, prompting, and model-powered workflow steps.',
-    icon: Bot,
-  },
 ];
 
 export const pipelineNodeModules: PipelineNodeModule[] = [
@@ -73,7 +66,6 @@ export const pipelineNodeModules: PipelineNodeModule[] = [
   browserNodeModule,
   whatsappSendNodeModule,
   whatsappReactNodeModule,
-  aiAgentNodeModule,
   databaseNodeModule,
   transformNodeModule,
   conditionNodeModule,
