@@ -4,7 +4,7 @@
 
 ::public
 
-Protects application page routes by verifying the `auth_account` JWT locally
+Protects application page routes by verifying the `auth` JWT locally
 and redirecting unauthenticated, invalid, or guest sessions to NeupID
 authorization.
 
@@ -25,6 +25,7 @@ import type { NextRequest } from 'next/server';
 import { buildPublicAppUrl } from '@neup/core/helpers/link/url';
 import logica from '@neup/logica';
 import { ensureAccountProfile, type AccountProfile } from '@/services/account-profile';
+import { authenticateToken } from '@/services/auth/authentication';
 
 type JwtPayload = {
   aid?: string;
@@ -107,8 +108,11 @@ export default async function proxy(request: NextRequest) {
     return pass();
   }
 
-  const rawToken = request.cookies.get('auth_account')?.value.trim();
-  const payload = rawToken ? await verifyJwt(rawToken) : null;
+  const rawToken = request.cookies.get('auth')?.value.trim();
+  const authenticatedAccount = await authenticateToken(rawToken);
+  const payload = authenticatedAccount
+    ? { aid: authenticatedAccount.accountId, nid: authenticatedAccount.neupid }
+    : null;
 
   if (payload?.aid) {
     requestHeaders.set('x-account-id', payload.aid);

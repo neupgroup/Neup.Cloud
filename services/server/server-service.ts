@@ -168,8 +168,8 @@ export async function selectServer(serverId: string, serverName: string) {
   return { success: true, serverId, serverName };
 }
 
-export async function getServers(): Promise<Server[]> {
-  const accountId = await getCurrentAccountId();
+export async function getServers(accountIdOverride?: string): Promise<Server[]> {
+  const accountId = accountIdOverride ?? await getCurrentAccountId();
   if (!accountId) return [];
 
   const servers = await getServersData(accountId);

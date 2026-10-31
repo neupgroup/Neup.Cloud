@@ -30,7 +30,7 @@ export default async function NotificationsPage() {
   let loadError: string | null = null;
 
   try {
-    const authAccountToken = await getCookie('auth_account');
+    const authAccountToken = await getCookie('auth');
 
     if (!authAccountToken) {
       throw new Error('No authenticated account was found.');

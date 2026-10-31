@@ -5,6 +5,59 @@ import { getSupervisorProcesses } from './processes';
 import { findBestSupervisorProcessForApplication } from './_utils';
 import { upsertApplicationServerStatus } from './server-map';
 import { executeQuickCommand } from '@/services/saved-commands/saved-commands-service';
+import { getServerByIdentifier } from '@/services/server/data';
+import { getCurrentAccountId } from '@/services/account-profile';
+import { getApplications } from './_data';
+
+export type ApplicationStatusSummary = {
+  applicationId: string;
+  name: string;
+  status: 'running' | 'stopped' | 'crashed' | 'not_running' | 'unknown';
+  processName?: string;
+  processState?: string;
+  uptime?: string | null;
+};
+
+// List account applications with their live Supervisor status on an authorized server.
+export async function getApplicationsWithServerStatus(serverIdentifier: string, accountIdOverride?: string): Promise<ApplicationStatusSummary[]> {
+  const accountId = accountIdOverride ?? await getCurrentAccountId();
+  if (!accountId) throw new Error('Authentication required.');
+
+  const server = await getServerByIdentifier(serverIdentifier, accountId);
+  if (!server) throw new Error('Server not found or not accessible to this account.');
+
+  const [applications, processes] = await Promise.all([
+    getApplications(),
+    getSupervisorProcesses(server.id),
+  ]);
+
+  return applications.map((application) => {
+    const process = findBestSupervisorProcessForApplication(
+      application.id,
+      processes,
+      application.information?.supervisorServiceName
+    );
+    const state = process?.state?.toUpperCase();
+    const status: ApplicationStatusSummary['status'] = !process
+      ? 'not_running'
+      : state === 'RUNNING'
+        ? 'running'
+        : ['FATAL', 'BACKOFF', 'ERRORED'].includes(state ?? '')
+          ? 'crashed'
+          : ['STOPPED', 'EXITED'].includes(state ?? '')
+            ? 'stopped'
+            : ['STARTING'].includes(state ?? '')
+              ? 'unknown'
+              : 'unknown';
+
+    return {
+      applicationId: application.id,
+      name: application.name,
+      status,
+      ...(process ? { processName: process.name, processState: process.state, uptime: process.uptime } : {}),
+    };
+  });
+}
 
 export type AppStatusResult = {
   processStatus: 'running' | 'stopped' | 'error' | 'not_running' | 'unknown';

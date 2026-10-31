@@ -14,7 +14,7 @@ profile-bar refreshes.
 
 ::private
 
-The account identity is derived from the signed `auth_account` cookie by the
+The account identity is derived from the signed `auth` cookie by the
 account profile service. The route never accepts an account id from the client.
 
 ::private end

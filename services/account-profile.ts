@@ -24,6 +24,7 @@ environment hooks, and returns the database-backed row.
 import { prisma } from '@neup/core/database/prisma';
 import logica from '@neup/logica';
 import { getCookie } from '@neup/core/helpers/cookie';
+import { authenticateCurrentCookie } from '@/services/auth/authentication';
 
 export type AccountProfile = {
   id: string;
@@ -90,15 +91,8 @@ export async function getAccountDisplayName(accountId: string): Promise<string |
 
 export async function getCurrentAccountId(): Promise<string | null> {
   try {
-    const authAccountToken = await getCookie('auth_account');
-    if (authAccountToken) {
-      try {
-        const accountId = await logica.account.current.id.get(authAccountToken);
-        if (accountId?.trim()) return accountId.trim();
-      } catch {
-        // Fall through to local token and account-context cookie lookup.
-      }
-    }
+    const authenticatedAccount = await authenticateCurrentCookie();
+    if (authenticatedAccount) return authenticatedAccount.accountId;
 
     const authentication = await logica.account.self.isAuthenticated('local');
     if (authentication.authenticated && 'payload' in authentication) {

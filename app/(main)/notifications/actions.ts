@@ -13,17 +13,14 @@ Loads the next page of notifications for the authenticated account.
 ::end
 */
 
-import { getCookie } from '@neup/core/helpers/cookie';
-import logica from '@neup/logica';
 import { getAccountNotifications, NOTIFICATIONS_PAGE_SIZE } from '@/services/notifications/notifications-service';
+import { authenticateCurrentCookie } from '@/services/auth/authentication';
 
 export async function loadMoreNotifications(offset: number) {
   try {
-    const authAccountToken = await getCookie('auth_account');
-    if (!authAccountToken) throw new Error('No authenticated account was found.');
-    const authentication = await logica.account.auth.verify(authAccountToken);
-    const accountId = authentication.valid && typeof authentication.payload.aid === 'string' ? authentication.payload.aid.trim() : '';
-    if (!accountId) throw new Error('The authenticated cookie does not contain an account id.');
+    const authentication = await authenticateCurrentCookie();
+    if (!authentication) throw new Error('No authenticated account was found.');
+    const accountId = authentication.accountId;
     const notifications = await getAccountNotifications(accountId, offset, NOTIFICATIONS_PAGE_SIZE);
     return { notifications, hasMore: notifications.length === NOTIFICATIONS_PAGE_SIZE, error: null };
   } catch (error) {

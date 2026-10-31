@@ -1,9 +1,8 @@
 'use server';
 
 import { executeCommand } from '@/services/saved-commands/saved-commands-service';
-import logica from '@neup/logica';
 import { notification } from '@neup/logica/notification';
-import { getCookie } from '@neup/core/helpers/cookie';
+import { authenticateCurrentCookie } from '@/services/auth/authentication';
 
 import { getApplication } from './crud';
 import { upsertApplicationServerStatus } from './server-map';
@@ -37,15 +36,8 @@ async function createBuildNotification(
 }
 
 async function resolveNotificationAccountId(fallbackAccountId: string) {
-  const authAccountToken = await getCookie('auth_account');
-  if (!authAccountToken) return fallbackAccountId;
-
-  const authentication = await logica.account.auth.verify(authAccountToken);
-  if (authentication.valid && typeof authentication.payload.aid === 'string' && authentication.payload.aid.trim()) {
-    return authentication.payload.aid.trim();
-  }
-
-  return fallbackAccountId;
+  const authentication = await authenticateCurrentCookie();
+  return authentication?.accountId ?? fallbackAccountId;
 }
 
 export async function executeApplicationCommand(
