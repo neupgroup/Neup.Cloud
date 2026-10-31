@@ -157,6 +157,7 @@ Fields:
 > displayName: text, nullable;
 > displayImage: text, nullable;
 > neupid: text, nullable;
+> selectedServer: text, nullable;
 
 Table: permit, Model: Permit
 Fields:

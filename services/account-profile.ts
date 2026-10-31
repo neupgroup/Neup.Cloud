@@ -73,6 +73,21 @@ export async function getStoredAccountProfile(accountId: string): Promise<Accoun
   return rows[0] ? normalizeProfileRow(rows[0]) : null;
 }
 
+// Returns the account's saved server selection for initial app navigation.
+export async function getStoredSelectedServer(accountId: string): Promise<string | null> {
+  const normalizedAccountId = accountId.trim();
+  if (!normalizedAccountId) return null;
+
+  const rows = await prisma.$queryRaw<Array<{ selectedServer: string | null }>>`
+    SELECT "selectedServer"
+    FROM "accounts"
+    WHERE id = ${normalizedAccountId}
+    LIMIT 1
+  `;
+
+  return rows[0]?.selectedServer?.trim() || null;
+}
+
 export async function getAccountDisplayName(accountId: string): Promise<string | null> {
   const normalizedAccountId = accountId.trim();
   if (!normalizedAccountId) return null;

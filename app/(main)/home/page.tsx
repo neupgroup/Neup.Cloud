@@ -22,7 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@neup/components/ui/ca
 import { Button } from '@neup/components/ui/button';
 import { Input } from '@neup/components/ui/input';
 import { Skeleton } from '@neup/components/ui/skeleton';
-import { getServers } from '@/services/server/server-service';
+import { getServers, selectServer as saveSelectedServer } from '@/services/server/server-service';
 import { getServerExpiration, isServerDisabled } from '@/services/server/server-metadata';
 import { selectServer } from '@/helpers/selection';
 
@@ -85,7 +85,9 @@ export default function Home() {
     return !query || server.name.toLowerCase().includes(query) || server.publicIp.includes(query);
   });
 
-  const openServer = (id: string) => {
+  const openServer = async (id: string) => {
+    const server = allServers.find((item) => item.id === id);
+    if (server) await saveSelectedServer(server.id, server.name);
     router.push(selectServer('/server/home', id));
   };
 

@@ -215,10 +215,11 @@ model Database {
 }
 
 model Account {
-  id           String  @id @db.Text
-  displayName  String? @map("displayName") @db.Text
-  displayImage String? @map("displayImage") @db.Text
-  neupid       String? @db.Text
+  id             String  @id @db.Text
+  displayName    String? @map("displayName") @db.Text
+  displayImage   String? @map("displayImage") @db.Text
+  neupid         String? @db.Text
+  selectedServer String? @map("selectedServer") @db.Text
 
   permits       Permit[]
   authzAccesses AuthzAccess[] @relation("AuthzAccessToAccount")

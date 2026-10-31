@@ -153,6 +153,12 @@ export async function selectServer(serverId: string, serverName: string) {
     throw new Error('This server is expired and cannot be selected.');
   }
 
+  const { prisma } = await import('@neup/core/database/prisma');
+  await prisma.account.update({
+    where: { id: accountId as string },
+    data: { selectedServer: serverId },
+  });
+
   const cookieStore = await cookies();
   cookieStore.set('selected_server', serverId, {
     path: '/',

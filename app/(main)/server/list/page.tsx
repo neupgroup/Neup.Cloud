@@ -10,7 +10,7 @@ import { Card, CardContent } from "@neup/components/ui/card";
 import { useToast } from "@neup/core/hooks/useToast";
 import { useSelectedServerId } from "@/hooks/use-selected-server";
 import { selectServer } from "@/helpers/selection";
-import { getServersWithRunningApplications } from "@/services/server/server-service";
+import { getServersWithRunningApplications, selectServer as saveSelectedServer } from "@/services/server/server-service";
 import { getServerExpiration } from "@/services/server/server-metadata";
 import type { Server } from "@/services/server/types";
 function sanitizeRedirect(value: string | null) {
@@ -150,6 +150,7 @@ function ServerListContent() {
         state: "info",
         dismissesOn: 10,
       });
+      await saveSelectedServer(server.id, server.name);
       router.push(selectServer(redirectTo ?? "/server/home", server.id), { scroll: false });
     } catch (error) {
       console.error(error);

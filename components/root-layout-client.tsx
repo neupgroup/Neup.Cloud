@@ -38,7 +38,7 @@ import {
   Bell,
   ExternalLink
 } from 'lucide-react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@neup/core/utils';
 import { Button } from '@neup/components/ui/button';
 import { useState, useEffect, Suspense } from 'react';
@@ -59,6 +59,7 @@ import {
   withSelectedServerQuery,
 } from '@/helpers/navigation';
 import { getSelectedServer } from '@/helpers/selection';
+import { selectServer as addSelectedServerToUrl } from '@/helpers/selection';
 
 type CurrentAccountProfile = {
   displayName: string | null;
@@ -323,10 +324,13 @@ function Header({
 export default function RootLayout({
   children,
   initialProfile,
+  initialSelectedServerId,
 }: {
   children: React.ReactNode;
   initialProfile: CurrentAccountProfile;
+  initialSelectedServerId: string | null;
 }) {
+  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [accountProfile, setAccountProfile] = useState(initialProfile);
@@ -358,9 +362,18 @@ export default function RootLayout({
   }, []);
 
   useEffect(() => {
-    const nextSelectedServerId = shouldPreserveSelectedServer(pathname)
-      ? getSelectedServer(searchParams)
-      : null;
+    const canSelectServerOnRoute = shouldPreserveSelectedServer(pathname);
+    const urlSelectedServerId = canSelectServerOnRoute ? getSelectedServer(searchParams) : null;
+
+    if (canSelectServerOnRoute && !urlSelectedServerId && initialSelectedServerId) {
+      const currentUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+      router.replace(addSelectedServerToUrl(currentUrl, initialSelectedServerId), { scroll: false });
+      setSelectedServerId(initialSelectedServerId);
+      setIsServerSelected(true);
+      return;
+    }
+
+    const nextSelectedServerId = urlSelectedServerId;
 
     if (!shouldPreserveSelectedServer(pathname)) {
       setSelectedServerId(null);
@@ -370,7 +383,7 @@ export default function RootLayout({
 
     setSelectedServerId(nextSelectedServerId);
     setIsServerSelected(Boolean(nextSelectedServerId));
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, initialSelectedServerId, router]);
 
   useEffect(() => {
     if (isMobileMenuOpen) {

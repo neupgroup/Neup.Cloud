@@ -19,7 +19,7 @@ import { ArrowRight, Loader2, ServerIcon } from 'lucide-react';
 import { Button } from '@neup/components/ui/button';
 import { Card, CardContent } from '@neup/components/ui/card';
 import { useToast } from '@neup/core/hooks/useToast';
-import { getServers } from '@/services/server/server-service';
+import { getServers, selectServer as saveSelectedServer } from '@/services/server/server-service';
 import type { Server } from '@/services/server/types';
 import { selectServer } from '@/helpers/selection';
 import { useSelectedServerId } from '@/hooks/use-selected-server';
@@ -60,6 +60,7 @@ export default function ServersPage() {
     setSwitchingId(id);
     try {
       const server = servers.find((item) => item.id === id);
+      if (server) await saveSelectedServer(server.id, server.name);
       toast({
         name: 'cloud.server.selected',
         title: 'Server selected',

@@ -8,7 +8,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@neup/components/ui/button";
 import { useToast } from '@neup/core/hooks/useToast';
 import { shouldPreserveSelectedServer, withSelectedServerQuery } from "@/helpers/navigation";
-import { deleteServer } from '@/services/server/server-service';
+import { deleteServer, selectServer as saveSelectedServer } from '@/services/server/server-service';
 import type { Server } from '@/services/server/types';
 import { cn } from "@neup/core/utils";
 
@@ -52,6 +52,7 @@ export function ServerCard({ server, onServerDeleted, onServerSelected, isSelect
     if (isSelected || isSwitching) return;
     setIsSwitching(true);
     try {
+      await saveSelectedServer(server.id, server.name);
       toast({
         name: 'cloud.server.selected',
         title: "Server Selected",

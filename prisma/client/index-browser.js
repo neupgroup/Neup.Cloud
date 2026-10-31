@@ -277,7 +277,8 @@ exports.Prisma.AccountScalarFieldEnum = {
   id: 'id',
   displayName: 'displayName',
   displayImage: 'displayImage',
-  neupid: 'neupid'
+  neupid: 'neupid',
+  selectedServer: 'selectedServer'
 };
 
 exports.Prisma.PermitScalarFieldEnum = {

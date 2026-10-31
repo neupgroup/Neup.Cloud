@@ -17812,6 +17812,7 @@ export namespace Prisma {
     displayName: string | null
     displayImage: string | null
     neupid: string | null
+    selectedServer: string | null
   }
 
   export type AccountMaxAggregateOutputType = {
@@ -17819,6 +17820,7 @@ export namespace Prisma {
     displayName: string | null
     displayImage: string | null
     neupid: string | null
+    selectedServer: string | null
   }
 
   export type AccountCountAggregateOutputType = {
@@ -17826,6 +17828,7 @@ export namespace Prisma {
     displayName: number
     displayImage: number
     neupid: number
+    selectedServer: number
     _all: number
   }
 
@@ -17835,6 +17838,7 @@ export namespace Prisma {
     displayName?: true
     displayImage?: true
     neupid?: true
+    selectedServer?: true
   }
 
   export type AccountMaxAggregateInputType = {
@@ -17842,6 +17846,7 @@ export namespace Prisma {
     displayName?: true
     displayImage?: true
     neupid?: true
+    selectedServer?: true
   }
 
   export type AccountCountAggregateInputType = {
@@ -17849,6 +17854,7 @@ export namespace Prisma {
     displayName?: true
     displayImage?: true
     neupid?: true
+    selectedServer?: true
     _all?: true
   }
 
@@ -17929,6 +17935,7 @@ export namespace Prisma {
     displayName: string | null
     displayImage: string | null
     neupid: string | null
+    selectedServer: string | null
     _count: AccountCountAggregateOutputType | null
     _min: AccountMinAggregateOutputType | null
     _max: AccountMaxAggregateOutputType | null
@@ -17953,6 +17960,7 @@ export namespace Prisma {
     displayName?: boolean
     displayImage?: boolean
     neupid?: boolean
+    selectedServer?: boolean
     permits?: boolean | Account$permitsArgs<ExtArgs>
     authzAccesses?: boolean | Account$authzAccessesArgs<ExtArgs>
     _count?: boolean | AccountCountOutputTypeDefaultArgs<ExtArgs>
@@ -17963,6 +17971,7 @@ export namespace Prisma {
     displayName?: boolean
     displayImage?: boolean
     neupid?: boolean
+    selectedServer?: boolean
   }, ExtArgs["result"]["account"]>
 
   export type AccountSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -17970,6 +17979,7 @@ export namespace Prisma {
     displayName?: boolean
     displayImage?: boolean
     neupid?: boolean
+    selectedServer?: boolean
   }, ExtArgs["result"]["account"]>
 
   export type AccountSelectScalar = {
@@ -17977,9 +17987,10 @@ export namespace Prisma {
     displayName?: boolean
     displayImage?: boolean
     neupid?: boolean
+    selectedServer?: boolean
   }
 
-  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "displayName" | "displayImage" | "neupid", ExtArgs["result"]["account"]>
+  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "displayName" | "displayImage" | "neupid" | "selectedServer", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     permits?: boolean | Account$permitsArgs<ExtArgs>
     authzAccesses?: boolean | Account$authzAccessesArgs<ExtArgs>
@@ -17999,6 +18010,7 @@ export namespace Prisma {
       displayName: string | null
       displayImage: string | null
       neupid: string | null
+      selectedServer: string | null
     }, ExtArgs["result"]["account"]>
     composites: {}
   }
@@ -18428,6 +18440,7 @@ export namespace Prisma {
     readonly displayName: FieldRef<"Account", 'String'>
     readonly displayImage: FieldRef<"Account", 'String'>
     readonly neupid: FieldRef<"Account", 'String'>
+    readonly selectedServer: FieldRef<"Account", 'String'>
   }
     
 
@@ -24381,7 +24394,8 @@ export namespace Prisma {
     id: 'id',
     displayName: 'displayName',
     displayImage: 'displayImage',
-    neupid: 'neupid'
+    neupid: 'neupid',
+    selectedServer: 'selectedServer'
   };
 
   export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
@@ -25559,6 +25573,7 @@ export namespace Prisma {
     displayName?: StringNullableFilter<"Account"> | string | null
     displayImage?: StringNullableFilter<"Account"> | string | null
     neupid?: StringNullableFilter<"Account"> | string | null
+    selectedServer?: StringNullableFilter<"Account"> | string | null
     permits?: PermitListRelationFilter
     authzAccesses?: AuthzAccessListRelationFilter
   }
@@ -25568,6 +25583,7 @@ export namespace Prisma {
     displayName?: SortOrderInput | SortOrder
     displayImage?: SortOrderInput | SortOrder
     neupid?: SortOrderInput | SortOrder
+    selectedServer?: SortOrderInput | SortOrder
     permits?: PermitOrderByRelationAggregateInput
     authzAccesses?: AuthzAccessOrderByRelationAggregateInput
   }
@@ -25580,6 +25596,7 @@ export namespace Prisma {
     displayName?: StringNullableFilter<"Account"> | string | null
     displayImage?: StringNullableFilter<"Account"> | string | null
     neupid?: StringNullableFilter<"Account"> | string | null
+    selectedServer?: StringNullableFilter<"Account"> | string | null
     permits?: PermitListRelationFilter
     authzAccesses?: AuthzAccessListRelationFilter
   }, "id">
@@ -25589,6 +25606,7 @@ export namespace Prisma {
     displayName?: SortOrderInput | SortOrder
     displayImage?: SortOrderInput | SortOrder
     neupid?: SortOrderInput | SortOrder
+    selectedServer?: SortOrderInput | SortOrder
     _count?: AccountCountOrderByAggregateInput
     _max?: AccountMaxOrderByAggregateInput
     _min?: AccountMinOrderByAggregateInput
@@ -25602,6 +25620,7 @@ export namespace Prisma {
     displayName?: StringNullableWithAggregatesFilter<"Account"> | string | null
     displayImage?: StringNullableWithAggregatesFilter<"Account"> | string | null
     neupid?: StringNullableWithAggregatesFilter<"Account"> | string | null
+    selectedServer?: StringNullableWithAggregatesFilter<"Account"> | string | null
   }
 
   export type PermitWhereInput = {
@@ -26985,6 +27004,7 @@ export namespace Prisma {
     displayName?: string | null
     displayImage?: string | null
     neupid?: string | null
+    selectedServer?: string | null
     permits?: PermitCreateNestedManyWithoutAccountInput
     authzAccesses?: AuthzAccessCreateNestedManyWithoutToAccountInput
   }
@@ -26994,6 +27014,7 @@ export namespace Prisma {
     displayName?: string | null
     displayImage?: string | null
     neupid?: string | null
+    selectedServer?: string | null
     permits?: PermitUncheckedCreateNestedManyWithoutAccountInput
     authzAccesses?: AuthzAccessUncheckedCreateNestedManyWithoutToAccountInput
   }
@@ -27003,6 +27024,7 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     displayImage?: NullableStringFieldUpdateOperationsInput | string | null
     neupid?: NullableStringFieldUpdateOperationsInput | string | null
+    selectedServer?: NullableStringFieldUpdateOperationsInput | string | null
     permits?: PermitUpdateManyWithoutAccountNestedInput
     authzAccesses?: AuthzAccessUpdateManyWithoutToAccountNestedInput
   }
@@ -27012,6 +27034,7 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     displayImage?: NullableStringFieldUpdateOperationsInput | string | null
     neupid?: NullableStringFieldUpdateOperationsInput | string | null
+    selectedServer?: NullableStringFieldUpdateOperationsInput | string | null
     permits?: PermitUncheckedUpdateManyWithoutAccountNestedInput
     authzAccesses?: AuthzAccessUncheckedUpdateManyWithoutToAccountNestedInput
   }
@@ -27021,6 +27044,7 @@ export namespace Prisma {
     displayName?: string | null
     displayImage?: string | null
     neupid?: string | null
+    selectedServer?: string | null
   }
 
   export type AccountUpdateManyMutationInput = {
@@ -27028,6 +27052,7 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     displayImage?: NullableStringFieldUpdateOperationsInput | string | null
     neupid?: NullableStringFieldUpdateOperationsInput | string | null
+    selectedServer?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AccountUncheckedUpdateManyInput = {
@@ -27035,6 +27060,7 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     displayImage?: NullableStringFieldUpdateOperationsInput | string | null
     neupid?: NullableStringFieldUpdateOperationsInput | string | null
+    selectedServer?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type PermitCreateInput = {
@@ -28122,6 +28148,7 @@ export namespace Prisma {
     displayName?: SortOrder
     displayImage?: SortOrder
     neupid?: SortOrder
+    selectedServer?: SortOrder
   }
 
   export type AccountMaxOrderByAggregateInput = {
@@ -28129,6 +28156,7 @@ export namespace Prisma {
     displayName?: SortOrder
     displayImage?: SortOrder
     neupid?: SortOrder
+    selectedServer?: SortOrder
   }
 
   export type AccountMinOrderByAggregateInput = {
@@ -28136,6 +28164,7 @@ export namespace Prisma {
     displayName?: SortOrder
     displayImage?: SortOrder
     neupid?: SortOrder
+    selectedServer?: SortOrder
   }
 
   export type AccountScalarRelationFilter = {
@@ -29619,6 +29648,7 @@ export namespace Prisma {
     displayName?: string | null
     displayImage?: string | null
     neupid?: string | null
+    selectedServer?: string | null
     authzAccesses?: AuthzAccessCreateNestedManyWithoutToAccountInput
   }
 
@@ -29627,6 +29657,7 @@ export namespace Prisma {
     displayName?: string | null
     displayImage?: string | null
     neupid?: string | null
+    selectedServer?: string | null
     authzAccesses?: AuthzAccessUncheckedCreateNestedManyWithoutToAccountInput
   }
 
@@ -29651,6 +29682,7 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     displayImage?: NullableStringFieldUpdateOperationsInput | string | null
     neupid?: NullableStringFieldUpdateOperationsInput | string | null
+    selectedServer?: NullableStringFieldUpdateOperationsInput | string | null
     authzAccesses?: AuthzAccessUpdateManyWithoutToAccountNestedInput
   }
 
@@ -29659,6 +29691,7 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     displayImage?: NullableStringFieldUpdateOperationsInput | string | null
     neupid?: NullableStringFieldUpdateOperationsInput | string | null
+    selectedServer?: NullableStringFieldUpdateOperationsInput | string | null
     authzAccesses?: AuthzAccessUncheckedUpdateManyWithoutToAccountNestedInput
   }
 
@@ -29711,6 +29744,7 @@ export namespace Prisma {
     displayName?: string | null
     displayImage?: string | null
     neupid?: string | null
+    selectedServer?: string | null
     permits?: PermitCreateNestedManyWithoutAccountInput
   }
 
@@ -29719,6 +29753,7 @@ export namespace Prisma {
     displayName?: string | null
     displayImage?: string | null
     neupid?: string | null
+    selectedServer?: string | null
     permits?: PermitUncheckedCreateNestedManyWithoutAccountInput
   }
 
@@ -29834,6 +29869,7 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     displayImage?: NullableStringFieldUpdateOperationsInput | string | null
     neupid?: NullableStringFieldUpdateOperationsInput | string | null
+    selectedServer?: NullableStringFieldUpdateOperationsInput | string | null
     permits?: PermitUpdateManyWithoutAccountNestedInput
   }
 
@@ -29842,6 +29878,7 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     displayImage?: NullableStringFieldUpdateOperationsInput | string | null
     neupid?: NullableStringFieldUpdateOperationsInput | string | null
+    selectedServer?: NullableStringFieldUpdateOperationsInput | string | null
     permits?: PermitUncheckedUpdateManyWithoutAccountNestedInput
   }
 
