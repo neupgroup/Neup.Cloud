@@ -22,9 +22,11 @@ import { useToast } from '@neup/core/hooks/useToast';
 import { getServers } from '@/services/server/server-service';
 import type { Server } from '@/services/server/types';
 import { selectServer } from '@/helpers/selection';
+import { useSelectedServerId } from '@/hooks/use-selected-server';
 
 export default function ServersPage() {
   const router = useRouter();
+  const selectedServerId = useSelectedServerId();
   const { toast } = useToast();
   const [servers, setServers] = useState<Server[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -107,7 +109,7 @@ export default function ServersPage() {
                 <Button
                   key={server.id}
                   variant="plain"
-                  className="flex items-center justify-between"
+                  className={`flex items-center justify-between ${selectedServerId === server.id ? 'border border-primary' : 'border border-transparent'}`}
                   disabled={Boolean(switchingId)}
                   onClick={() => handleSwitch(server.id)}
                 >
