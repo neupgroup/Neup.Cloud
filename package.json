@@ -6,7 +6,7 @@
     "neup.cloner": "test -f ./@neup/setup/index.sh || (rm -rf ./@neup/setup ./@neup/nextjs.setup && mkdir -p ./@neup && cd ./@neup && git clone --depth 1 --single-branch --branch main https://github.com/neupgroup/nextjs.setup.git setup)",
     "setup": "npm run neup.cloner && chmod +x ./@neup/setup/index.sh && ./@neup/setup/index.sh",
     "preinstall": "npm run setup -- --mode preinstall",
-    "postinstall": "npm run setup -- --mode postinstall",
+    "postinstall": "cd @neup && git clone --depth 1 --single-branch --branch main https://github.com/neupgroup/nextjs.setup.git && mv nextjs.setup setup && chmod +x ./index.sh && ./index.sh --lang nextsj",
     "prebuild": "npm run setup -- --mode prebuild",
     "postbuild": "npm run setup -- --mode postbuild",
     "predev": "npm run setup -- --mode predev",

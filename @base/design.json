@@ -56,5 +56,11 @@
             "secondary": "Arial, sans-serif"
         },
         "customStyles": {}
+    },
+    "breakpoints": {
+        "small": "640px",
+        "medium": "768px",
+        "large": "1024px",
+        "extraLarge": "1280px"
     }
 }
