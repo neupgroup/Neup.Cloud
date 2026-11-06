@@ -37,7 +37,7 @@ import {
   Terminal,
   Workflow,
 } from 'lucide-react';
-import HeaderSidebarLayout, { type SidebarLink, type SidebarLinkGroup } from '@neup/components/layout/header-sidebar-layout';
+import HeaderSidebarLayout, { type SidebarLink, type SidebarLinkGroup } from '@neup/components/layout/headerSidebar.v1';
 import { Logo } from '@/components/logo';
 import { ProgressBar } from '@/components/progress-bar';
 import { shouldPreserveSelectedServer, withSelectedServerQuery } from '@/helpers/navigation';

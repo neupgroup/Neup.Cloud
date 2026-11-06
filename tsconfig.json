@@ -38,6 +38,7 @@
   "exclude": [
     "node_modules",
     "Neup.Bridge",
+    "@neup/components/layout/headersidebar.v1.tsx",
     ".next/dev/types"
   ]
 }
